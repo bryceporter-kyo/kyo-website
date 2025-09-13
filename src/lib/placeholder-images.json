@@ -1,3 +1,94 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-concert",
+      "description": "A youth orchestra performing on a grand stage.",
+      "imageUrl": "https://picsum.photos/seed/100/1200/800",
+      "imageHint": "youth orchestra"
+    },
+    {
+      "id": "program-orchestra",
+      "description": "Close-up of violinists in an orchestra.",
+      "imageUrl": "https://picsum.photos/seed/101/600/400",
+      "imageHint": "orchestra violins"
+    },
+    {
+      "id": "program-upbeat",
+      "description": "Young children laughing and playing with small percussion instruments.",
+      "imageUrl": "https://picsum.photos/seed/102/600/400",
+      "imageHint": "children music"
+    },
+    {
+      "id": "program-lessons",
+      "description": "A teacher guiding a student playing the piano.",
+      "imageUrl": "https://picsum.photos/seed/103/600/400",
+      "imageHint": "music lesson"
+    },
+    {
+      "id": "support-volunteer",
+      "description": "A group of smiling volunteers at an event.",
+      "imageUrl": "https://picsum.photos/seed/104/600/400",
+      "imageHint": "smiling volunteers"
+    },
+    {
+      "id": "instructor-1",
+      "description": "Professional headshot of instructor Kenji Tanaka.",
+      "imageUrl": "https://picsum.photos/seed/105/200/200",
+      "imageHint": "male musician"
+    },
+    {
+      "id": "instructor-2",
+      "description": "Professional headshot of instructor Maria Rossi.",
+      "imageUrl": "https://picsum.photos/seed/106/200/200",
+      "imageHint": "female conductor"
+    },
+    {
+      "id": "instructor-3",
+      "description": "Professional headshot of instructor David Chen.",
+      "imageUrl": "https://picsum.photos/seed/107/200/200",
+      "imageHint": "male teacher"
+    },
+     {
+      "id": "page-header-orchestras",
+      "description": "Wide shot of an orchestra from behind the conductor.",
+      "imageUrl": "https://picsum.photos/seed/108/1200/400",
+      "imageHint": "orchestra stage"
+    },
+    {
+      "id": "page-header-upbeat",
+      "description": "Colorful abstract image representing sound and joy.",
+      "imageUrl": "https://picsum.photos/seed/109/1200/400",
+      "imageHint": "colorful abstract"
+    },
+    {
+      "id": "page-header-lessons",
+      "description": "Close up on sheet music on a stand.",
+      "imageUrl": "https://picsum.photos/seed/110/1200/400",
+      "imageHint": "sheet music"
+    },
+     {
+      "id": "page-header-donate",
+      "description": "A person placing money into a donation jar.",
+      "imageUrl": "https://picsum.photos/seed/111/1200/400",
+      "imageHint": "donation jar"
+    },
+    {
+      "id": "page-header-support",
+      "description": "Hands of different people coming together.",
+      "imageUrl": "https://picsum.photos/seed/112/1200/400",
+      "imageHint": "hands together"
+    },
+    {
+      "id": "page-header-register",
+      "description": "A person filling out a form with a pen.",
+      "imageUrl": "https://picsum.photos/seed/113/1200/400",
+      "imageHint": "writing form"
+    },
+    {
+      "id": "page-header-calendar",
+      "description": "A stylish wall calendar with dates circled.",
+      "imageUrl": "https://picsum.photos/seed/114/1200/400",
+      "imageHint": "wall calendar"
+    }
+  ]
 }
