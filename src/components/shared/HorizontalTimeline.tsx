@@ -113,7 +113,7 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
   }
 
   return (
-    <div ref={containerRef} className="relative w-full" style={{ height: `${events.length * 150}vh` }}>
+    <div ref={containerRef} className="relative w-full" style={{ height: `${events.length * 200}vh` }}>
       <div ref={textWrapperRef} className="sticky top-0 flex flex-col h-screen overflow-hidden">
         <div className="text-center pt-12 md:pt-24 lg:pt-32">
             <h2 className="text-3xl font-headline font-bold">Our Journey</h2>
