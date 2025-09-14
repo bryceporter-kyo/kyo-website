@@ -29,64 +29,57 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
     const { top } = container.getBoundingClientRect();
     const scrollableHeight = container.offsetHeight - window.innerHeight;
     
-    // The portion of scroll at the beginning and end that is "dead space"
     const scrollBuffer = 0.05; 
-    // The portion of the scroll for each "sticky" section
-    const stickyThreshold = (1 - scrollBuffer * 2) / events.length; 
-
+    
     if (top <= 0 && top >= -scrollableHeight) {
-      const rawScrollProgress = Math.max(0, Math.min(1, -top / scrollableHeight));
-      
-      let newActiveIndex = 0;
-      let targetScrollLeft = 0;
-      
-      if (rawScrollProgress < scrollBuffer) {
-        newActiveIndex = 0;
-        targetScrollLeft = 0;
-      } else if (rawScrollProgress >= 1 - scrollBuffer) {
-        newActiveIndex = events.length - 1;
-        targetScrollLeft = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
-      } else {
-        const progressInContent = (rawScrollProgress - scrollBuffer) / (1 - scrollBuffer * 2);
+        const rawScrollProgress = Math.max(0, Math.min(1, -top / scrollableHeight));
         
-        newActiveIndex = Math.floor(progressInContent * events.length);
-        
-        const progressWithinCard = (progressInContent % (1 / events.length)) * events.length;
-        
+        let newActiveIndex = 0;
+        let targetScrollLeft = 0;
         const cardWidth = scrollWrapper.scrollWidth / events.length;
-        
-        // Adjust the range for stickiness, e.g., sticky between 20% and 80% of the card's scroll section
-        const stickyStart = 0.2;
-        const stickyEnd = 0.8;
 
-        if (progressWithinCard > stickyStart && progressWithinCard < stickyEnd) {
-           // Inside the sticky part of the card's scroll section
-           targetScrollLeft = newActiveIndex * cardWidth;
+        if (rawScrollProgress < scrollBuffer) {
+            newActiveIndex = 0;
+            targetScrollLeft = 0;
+        } else if (rawScrollProgress >= 1 - scrollBuffer) {
+            newActiveIndex = events.length - 1;
+            targetScrollLeft = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
         } else {
-           // In the transition part (entering or exiting a card)
-           const transitionDuration = stickyStart; // a portion for entry, a portion for exit
-           
-           const isExiting = progressWithinCard >= stickyEnd;
+            const progressInContent = (rawScrollProgress - scrollBuffer) / (1 - scrollBuffer * 2);
+            
+            const eventScrollSpace = 1 / events.length;
+            newActiveIndex = Math.floor(progressInContent / eventScrollSpace);
+            
+            const progressWithinEvent = (progressInContent % eventScrollSpace) / eventScrollSpace;
 
-           const transitionProgress = isExiting
-            ? (progressWithinCard - stickyEnd) / (1 - stickyEnd) // maps exit range [stickyEnd, 1.0] to [0, 1]
-            : progressWithinCard / stickyStart; // maps entry range [0, stickyStart] to [0, 1]
+            const stickyStart = 0.25;
+            const stickyEnd = 0.75;
+            
+            let currentCardScroll = newActiveIndex * cardWidth;
 
-           const prevCardIndex = isExiting ? newActiveIndex : Math.max(0, newActiveIndex - 1);
-           const nextCardIndex = isExiting ? Math.min(events.length - 1, newActiveIndex + 1) : newActiveIndex;
+            if (progressWithinEvent > stickyStart && progressWithinEvent < stickyEnd) {
+                // In the sticky part
+                targetScrollLeft = currentCardScroll;
+            } else {
+                // In the transition part (either entering or exiting)
+                const isExiting = progressWithinEvent >= stickyEnd;
+                const transitionProgress = isExiting
+                    ? (progressWithinEvent - stickyEnd) / (1 - stickyEnd)
+                    : progressWithinEvent / stickyStart;
+                
+                const nextCardIndex = Math.min(events.length - 1, newActiveIndex + 1);
+                const nextCardScroll = nextCardIndex * cardWidth;
 
-           const prevCardScroll = prevCardIndex * cardWidth;
-           const nextCardScroll = Math.min(scrollWrapper.scrollWidth - scrollWrapper.clientWidth, nextCardIndex * cardWidth);
-
-           targetScrollLeft = prevCardScroll + (nextCardScroll - prevCardScroll) * transitionProgress;
+                targetScrollLeft = currentCardScroll + (nextCardScroll - currentCardScroll) * transitionProgress;
+            }
         }
-      }
 
-      if (newActiveIndex !== activeIndex) {
-        setActiveIndex(newActiveIndex);
-      }
-      
-      scrollWrapper.scrollLeft = targetScrollLeft;
+        if (newActiveIndex !== activeIndex) {
+            setActiveIndex(newActiveIndex);
+        }
+        
+        // Clamp the final scroll position to prevent overscrolling
+        scrollWrapper.scrollLeft = Math.min(targetScrollLeft, scrollWrapper.scrollWidth - scrollWrapper.clientWidth);
 
     } else if (top > 0) {
         scrollWrapper.scrollLeft = 0;
@@ -109,7 +102,9 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
     
     const scrollableHeight = container.offsetHeight - window.innerHeight;
 
-    const contentScrollPercent = (index + 0.5) / events.length;
+    const eventScrollSpace = 1 / events.length;
+    const contentScrollPercent = (index * eventScrollSpace) + (eventScrollSpace / 2);
+
     const scrollBuffer = 0.05;
     const contentScrollRange = 1 - scrollBuffer * 2;
     const targetRawProgress = scrollBuffer + (contentScrollPercent * contentScrollRange);
@@ -123,7 +118,7 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
   }
 
   return (
-    <div ref={containerRef} className="relative w-full" style={{ height: `${events.length * 300}vh` }}>
+    <div ref={containerRef} className="relative w-full" style={{ height: `${events.length * 200}vh` }}>
       <div ref={textWrapperRef} className="sticky top-0 flex flex-col h-screen overflow-hidden">
         <div className="text-center pt-12 md:pt-24 lg:pt-32">
             <h2 className="text-3xl font-headline font-bold">Our Journey</h2>
