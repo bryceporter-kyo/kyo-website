@@ -47,13 +47,8 @@ export default function HorizontalTimeline() {
       const containerHeight = container.offsetHeight;
       const viewportHeight = window.innerHeight;
       
-      // Calculate the start of the scrollable area.
-      const scrollableAreaStart = containerTop - (viewportHeight / 2) + 200; // 200 is half card height
-      
-      // Calculate how far we are into the scrollable area of the container
+      const scrollableAreaStart = containerTop - viewportHeight / 2 + 200;
       const scrollProgress = scrollY - scrollableAreaStart;
-
-      // Calculate how much scroll space each item gets.
       const itemScrollSpace = (containerHeight - viewportHeight) / timelineData.length;
 
       let newIndex = Math.floor(scrollProgress / itemScrollSpace);
@@ -63,52 +58,50 @@ export default function HorizontalTimeline() {
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // Initial check
+    handleScroll();
 
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
-     <div className="container mx-auto">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl font-headline font-bold">Our Journey</h2>
-        <p className="mx-auto max-w-2xl text-muted-foreground md:text-xl mt-4">
-          Tracing our history of growth, innovation, and musical achievement.
-        </p>
-      </div>
-      <div ref={containerRef} className="relative w-full" style={{ height: `${timelineData.length * 100}vh` }}>
-        <div className="sticky top-1/2 -translate-y-1/2 flex h-screen w-full items-center justify-center overflow-hidden" style={{ height: '400px' }}>
-          <div className="relative w-full max-w-3xl h-full">
-            {timelineData.map((event, index) => {
-              const isActive = activeIndex === index;
-              const yearParts = event.year.split('-');
+    <div ref={containerRef} className="relative w-full" style={{ height: `${timelineData.length * 100}vh` }}>
+      <div className="sticky top-0 h-screen w-full flex flex-col items-center justify-center overflow-hidden">
+        <div className="text-center mb-12">
+            <h2 className="text-3xl font-headline font-bold">Our Journey</h2>
+            <p className="mx-auto max-w-2xl text-muted-foreground md:text-xl mt-4">
+                Tracing our history of growth, innovation, and musical achievement.
+            </p>
+        </div>
+        <div className="relative w-full max-w-3xl" style={{ height: '400px' }}>
+          {timelineData.map((event, index) => {
+            const isActive = activeIndex === index;
+            const yearParts = event.year.split('-');
 
-              return (
-                <div
-                  key={event.title}
-                  className={cn(
-                      "absolute inset-0 w-full h-full p-4 transition-opacity duration-500 ease-in-out",
-                      isActive ? "opacity-100" : "opacity-0 pointer-events-none",
-                  )}
-                >
-                  <Card className="w-full h-full flex flex-col justify-center">
-                    <CardHeader>
+            return (
+              <div
+                key={event.title}
+                className={cn(
+                    "absolute inset-0 w-full h-full p-4 transition-opacity duration-500 ease-in-out",
+                    isActive ? "opacity-100" : "opacity-0 pointer-events-none",
+                )}
+              >
+                <Card className="w-full h-full flex flex-col justify-center">
+                  <CardHeader>
                       <div className="flex items-start gap-4">
-                        <div>
-                          <p className="text-2xl font-bold text-primary/80 leading-tight">{yearParts[0]}-</p>
-                          <p className="text-2xl font-bold text-primary/80 leading-tight">{yearParts[1]}</p>
-                        </div>
-                        <CardTitle className="font-headline text-4xl md:text-5xl">{event.title}</CardTitle>
+                          <div className="text-left">
+                              <p className="text-2xl font-bold text-primary/80 leading-tight">{yearParts[0]}-</p>
+                              {yearParts[1] && <p className="text-2xl font-bold text-primary/80 leading-tight">{yearParts[1]}</p>}
+                          </div>
+                          <CardTitle className="font-headline text-4xl md:text-5xl">{event.title}</CardTitle>
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-muted-foreground leading-relaxed text-lg md:text-xl">{event.content}</p>
-                    </CardContent>
-                  </Card>
-                </div>
-              );
-            })}
-          </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground leading-relaxed text-lg md:text-xl">{event.content}</p>
+                  </CardContent>
+                </Card>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
