@@ -29,40 +29,35 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
     const { top } = container.getBoundingClientRect();
     const scrollableHeight = container.offsetHeight - window.innerHeight;
     
-    // Add a buffer at the start and end of the scroll to create "stickiness"
-    const scrollBuffer = 0.1; // 10% buffer at start and end
+    const scrollBuffer = 0.1;
 
     if (top <= 0 && top >= -scrollableHeight) {
-      // Calculate raw scroll progress (0 to 1)
       const rawScrollProgress = Math.max(0, Math.min(1, -top / scrollableHeight));
-      
-      // Map the raw progress to a new progress value that includes the buffers
-      // The actual scrolling of cards will happen between 10% and 90% of the vertical scroll
       const mappedScrollProgress = Math.max(0, Math.min(1, (rawScrollProgress - scrollBuffer) / (1 - scrollBuffer * 2)));
 
-      // Calculate how much the inner container should scroll
       const scrollAmount = mappedScrollProgress * (scrollWrapper.scrollWidth - scrollWrapper.clientWidth);
       scrollWrapper.scrollLeft = scrollAmount;
 
-      // Update active index based on mapped scroll position
-      const cardElements = Array.from(scrollWrapper.children);
-      const totalWidth = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
-      
-      let cumulativeWidth = 0;
-      let newActiveIndex = events.length - 1;
+      const cardElements = Array.from(scrollWrapper.children) as HTMLElement[];
+      const scrollLeft = scrollWrapper.scrollLeft;
+      const wrapperWidth = scrollWrapper.clientWidth;
 
-      for (let i = 0; i < cardElements.length; i++) {
-        const cardWidth = (cardElements[i] as HTMLElement).offsetWidth;
-        const cardScrollPoint = (cumulativeWidth + cardWidth / 2) / totalWidth;
-        
-        if (mappedScrollProgress < cardScrollPoint) {
-            newActiveIndex = i;
-            break;
+      let newActiveIndex = -1;
+      let minDistance = Infinity;
+
+      cardElements.forEach((card, index) => {
+        const cardLeft = card.offsetLeft;
+        const cardWidth = card.offsetWidth;
+        const cardCenter = cardLeft + cardWidth / 2;
+        const wrapperCenter = scrollLeft + wrapperWidth / 2;
+        const distance = Math.abs(cardCenter - wrapperCenter);
+
+        if (distance < minDistance) {
+          minDistance = distance;
+          newActiveIndex = index;
         }
-        cumulativeWidth += cardWidth;
-      }
-
-      // If we are in the buffers, force the active index to start or end
+      });
+      
       if (rawScrollProgress < scrollBuffer) {
         newActiveIndex = 0;
       } else if (rawScrollProgress > 1 - scrollBuffer) {
@@ -73,11 +68,9 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
         setActiveIndex(newActiveIndex);
       }
     } else if (top > 0) {
-        // Before the component is pinned
         scrollWrapper.scrollLeft = 0;
         if (activeIndex !== 0) setActiveIndex(0);
     } else {
-        // After the component is unpinned
         scrollWrapper.scrollLeft = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
         if (activeIndex !== events.length - 1) setActiveIndex(events.length - 1);
     }
@@ -95,12 +88,10 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
     const scrollBuffer = 0.1;
     const scrollableHeight = container.offsetHeight - window.innerHeight;
 
-    // Calculate the percentage scroll needed to center the clicked item, accounting for buffer
     const contentScrollRange = 1 - scrollBuffer * 2;
     const targetCardProgress = index / (events.length - 1);
     const targetRawProgress = scrollBuffer + (targetCardProgress * contentScrollRange);
     
-    // Calculate the target scrollTop position relative to the document
     const targetScrollTop = container.offsetTop + (targetRawProgress * scrollableHeight);
 
     window.scrollTo({
