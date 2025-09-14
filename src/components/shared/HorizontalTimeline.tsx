@@ -79,7 +79,7 @@ export default function HorizontalTimeline() {
 
               return (
                 <div
-                  key={`${event.year}-${event.title}`}
+                  key={event.title}
                   className="absolute inset-0 w-full h-full"
                 >
                   <Card className={cn(
