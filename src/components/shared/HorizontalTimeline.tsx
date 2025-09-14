@@ -114,21 +114,23 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
         <div className="flex-grow flex items-center">
             <div ref={scrollWrapperRef} className="flex w-full overflow-x-auto p-8 no-scrollbar">
                 {events.map((event, index) => (
-                <div key={index} className="flex-shrink-0 w-full md:w-1/2 lg:w-1/3 xl:w-1/4 p-4">
-                    <Card className={cn(
-                        "transition-all duration-300 h-full",
-                        activeIndex === index ? "transform scale-105 shadow-2xl border-primary" : "opacity-60 scale-95"
-                    )}>
-                    <CardHeader>
-                        <div className="flex items-baseline gap-4">
-                            <p className="text-4xl font-bold text-primary">{event.year}</p>
-                            <CardTitle className="font-headline text-2xl">{event.title}</CardTitle>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-muted-foreground">{event.content}</p>
-                    </CardContent>
-                    </Card>
+                <div key={index} className="flex-shrink-0 w-full flex justify-center">
+                    <div className="w-full md:w-1/2 lg:w-1/3 xl:w-1/4 p-4">
+                        <Card className={cn(
+                            "transition-all duration-300 h-full",
+                            activeIndex === index ? "transform scale-105 shadow-2xl border-primary" : "opacity-60 scale-95"
+                        )}>
+                        <CardHeader>
+                            <div className="flex items-baseline gap-4">
+                                <p className="text-4xl font-bold text-primary">{event.year}</p>
+                                <CardTitle className="font-headline text-2xl">{event.title}</CardTitle>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-muted-foreground">{event.content}</p>
+                        </CardContent>
+                        </Card>
+                    </div>
                 </div>
                 ))}
             </div>
