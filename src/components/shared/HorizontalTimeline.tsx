@@ -60,13 +60,22 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
            targetScrollLeft = newActiveIndex * cardWidth;
         } else {
            // Smoothly transition between cards
-           const nextCardIndex = (progressWithinCard <= 0.1) ? newActiveIndex : Math.min(events.length - 1, newActiveIndex + 1);
+           const nextCardIndex = (progressWithinCard <= 0.1) 
+                ? newActiveIndex 
+                : Math.min(events.length - 1, newActiveIndex + 1);
+
            const transitionProgress = (progressWithinCard <= 0.1) 
-                ? (progressWithinCard + 0.1) / 0.2  // Map 0.9-1.0 to 0.5-1.0, and 0.0-0.1 to 0-0.5
-                : (progressWithinCard - 0.9) / 0.2;
-           
+                // Map 0.0-0.1 to 0.5-1.0 (reversed for entry)
+                ? 1 - (progressWithinCard / 0.1) * 0.5
+                // Map 0.9-1.0 to 0.0-0.5 (for exit)
+                : ((progressWithinCard - 0.9) / 0.1) * 0.5;
+
            const prevCardScroll = newActiveIndex * cardWidth;
            const nextCardScroll = Math.min(scrollWrapper.scrollWidth - scrollWrapper.clientWidth, nextCardIndex * cardWidth);
+
+           const cardToStickTo = progressWithinCard <= 0.1 ? nextCardIndex : newActiveIndex;
+           
+           const currentCardScroll = cardToStickTo * cardWidth;
 
            targetScrollLeft = prevCardScroll + (nextCardScroll - prevCardScroll) * Math.max(0, Math.min(1, transitionProgress));
         }
@@ -113,7 +122,7 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
   }
 
   return (
-    <div ref={containerRef} className="relative w-full" style={{ height: `${events.length * 200}vh` }}>
+    <div ref={containerRef} className="relative w-full" style={{ height: `${events.length * 300}vh` }}>
       <div ref={textWrapperRef} className="sticky top-0 flex flex-col h-screen overflow-hidden">
         <div className="text-center pt-12 md:pt-24 lg:pt-32">
             <h2 className="text-3xl font-headline font-bold">Our Journey</h2>
