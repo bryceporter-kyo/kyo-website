@@ -28,15 +28,34 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
 
     const { top } = container.getBoundingClientRect();
     const scrollableHeight = container.offsetHeight - window.innerHeight;
-    const scrollProgress = -top / scrollableHeight;
-
+    
+    // Ensure we are within the scrollable area
     if (top <= 0 && top >= -scrollableHeight) {
+      // Calculate scroll progress (0 to 1)
+      const scrollProgress = Math.max(0, Math.min(1, -top / scrollableHeight));
+      
+      // Calculate how much the inner container should scroll
       const scrollAmount = scrollProgress * (scrollWrapper.scrollWidth - scrollWrapper.clientWidth);
       scrollWrapper.scrollLeft = scrollAmount;
 
-      // Update active index
-      const cardWidth = scrollWrapper.scrollWidth / events.length;
-      const newActiveIndex = Math.floor((scrollAmount + cardWidth / 2) / cardWidth);
+      // Update active index based on scroll position
+      const cardElements = Array.from(scrollWrapper.children);
+      const totalWidth = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
+      
+      let cumulativeWidth = 0;
+      let newActiveIndex = events.length - 1;
+
+      for (let i = 0; i < cardElements.length; i++) {
+        const cardWidth = (cardElements[i] as HTMLElement).offsetWidth;
+        const cardScrollPoint = (cumulativeWidth + cardWidth / 2) / totalWidth;
+        
+        if (scrollProgress < cardScrollPoint) {
+            newActiveIndex = i;
+            break;
+        }
+        cumulativeWidth += cardWidth;
+      }
+
       if (newActiveIndex !== activeIndex) {
         setActiveIndex(newActiveIndex);
       }
@@ -50,24 +69,26 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
   
   const handleDotClick = (index: number) => {
     const { current: container } = containerRef;
-    const { current: scrollWrapper } = scrollWrapperRef;
-    if (!container || !scrollWrapper) return;
+    if (!container) return;
 
+    // Calculate the percentage scroll needed to center the clicked item
     const scrollableHeight = container.offsetHeight - window.innerHeight;
     const targetScrollProgress = index / (events.length - 1);
-    const targetScrollTop = -targetScrollProgress * scrollableHeight;
+    
+    // Calculate the target scrollTop position relative to the document
+    const targetScrollTop = container.offsetTop + (targetScrollProgress * scrollableHeight);
 
     window.scrollTo({
-      top: container.offsetTop + targetScrollTop,
+      top: targetScrollTop,
       behavior: 'smooth'
     });
   }
 
 
   return (
-    <div ref={containerRef} className="relative w-full" style={{ height: `${events.length * 50}vh` }}>
+    <div ref={containerRef} className="relative w-full" style={{ height: `${events.length * 75}vh` }}>
       <div ref={textWrapperRef} className="sticky top-0 flex flex-col h-screen overflow-hidden">
-        <div className="text-center mb-12 pt-12 md:pt-24 lg:pt-32">
+        <div className="text-center pt-12 md:pt-24 lg:pt-32">
             <h2 className="text-3xl font-headline font-bold">Our Journey</h2>
             <p className="mx-auto max-w-2xl text-muted-foreground md:text-xl mt-4">
                 Tracing our history of growth, innovation, and musical achievement.
@@ -75,12 +96,12 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
         </div>
         
         <div className="flex-grow flex items-center">
-            <div ref={scrollWrapperRef} className="flex w-full overflow-x-visible p-8">
+            <div ref={scrollWrapperRef} className="flex w-full overflow-x-auto p-8 no-scrollbar">
                 {events.map((event, index) => (
-                <div key={index} className="flex-shrink-0 w-full md:w-1/2 lg:w-1/3 p-4">
+                <div key={index} className="flex-shrink-0 w-full md:w-1/2 lg:w-1/3 xl:w-1/4 p-4">
                     <Card className={cn(
-                        "transition-all duration-300",
-                        activeIndex === index ? "transform scale-105 shadow-2xl border-primary" : "opacity-50"
+                        "transition-all duration-300 h-full",
+                        activeIndex === index ? "transform scale-105 shadow-2xl border-primary" : "opacity-60 scale-95"
                     )}>
                     <CardHeader>
                         <div className="flex items-baseline gap-4">
@@ -89,7 +110,7 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-muted-foreground h-32">{event.content}</p>
+                        <p className="text-muted-foreground">{event.content}</p>
                     </CardContent>
                     </Card>
                 </div>
@@ -97,22 +118,28 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
             </div>
         </div>
 
-        <div className="flex justify-center gap-2 pb-8 overflow-x-auto">
+        <div className="flex justify-center items-center gap-4 pb-8">
             {events.map((event, index) => (
             <button
                 key={index}
                 onClick={() => handleDotClick(index)}
-                className="group flex-shrink-0 text-center"
-            >
-                <div className={cn("mx-auto h-3 w-3 rounded-full transition-all duration-300", 
-                activeIndex === index ? 'bg-primary scale-125' : 'bg-muted group-hover:bg-primary/50'
-                )}></div>
-                <p className={cn("mt-2 text-sm transition-all duration-300",
-                activeIndex === index ? 'font-bold text-primary' : 'text-muted-foreground group-hover:text-foreground'
-                )}>{event.year}</p>
-            </button>
+                className={cn("h-3 w-3 rounded-full transition-all duration-300", 
+                  activeIndex === index ? 'bg-primary scale-125' : 'bg-muted hover:bg-primary/50'
+                )}
+                aria-label={`Go to year ${event.year}`}
+            />
             ))}
         </div>
+
+        <style jsx global>{`
+          .no-scrollbar::-webkit-scrollbar {
+            display: none;
+          }
+          .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+          }
+        `}</style>
       </div>
     </div>
   )
