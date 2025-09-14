@@ -41,6 +41,8 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
       let newActiveIndex = 0;
       let targetScrollLeft = 0;
 
+      const progressPastBuffer = (rawScrollProgress - scrollBuffer) / (1 - scrollBuffer * 2);
+
       if (rawScrollProgress < scrollBuffer) {
         // We are in the top buffer zone
         newActiveIndex = 0;
@@ -77,17 +79,8 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
           const nextCardIndex = Math.min(events.length - 1, newActiveIndex + 1);
           const nextCardScroll = nextCardIndex * cardWidth;
 
-          // The card we are transitioning from
-          const fromCardScroll = currentCardScroll;
-          // The card we are transitioning to. If exiting, it's the next card. If entering, it's the current card.
-          const toCardScroll = isExiting ? nextCardScroll : currentCardScroll;
-          
-          // For the entering transition, we are actually coming from the previous card's end position
-          const effectiveFromScroll = isExiting ? fromCardScroll : (newActiveIndex > 0 ? (newActiveIndex -1) * cardWidth : 0)
-
-          targetScrollLeft = isExiting
-            ? fromCardScroll + (toCardScroll - fromCardScroll) * transitionProgress
-            : effectiveFromScroll + (toCardScroll - effectiveFromScroll) * transitionProgress;
+          // Smoothly interpolate between the current card and the next card's scroll position
+          targetScrollLeft = currentCardScroll + (nextCardScroll - currentCardScroll) * transitionProgress;
         }
       }
 
@@ -96,7 +89,7 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
       }
       
       // Clamp the final scroll position to prevent overscrolling
-      scrollWrapper.scrollLeft = Math.min(targetScrollLeft, scrollWrapper.scrollWidth - scrollWrapper.clientWidth);
+      scrollWrapper.scrollLeft = Math.max(0, Math.min(targetScrollLeft, scrollWrapper.scrollWidth - scrollWrapper.clientWidth));
 
     } else if (top > 0) {
         // Scrolled above the container
