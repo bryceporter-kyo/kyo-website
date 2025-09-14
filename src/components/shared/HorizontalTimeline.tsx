@@ -47,11 +47,17 @@ export default function HorizontalTimeline() {
       const containerHeight = container.offsetHeight;
       const viewportHeight = window.innerHeight;
       
-      const scrollableHeight = containerHeight - viewportHeight;
-      const scrollProgress = Math.max(0, Math.min(1, (scrollY - containerTop) / scrollableHeight));
+      // Calculate the start of the scrollable area.
+      const scrollableAreaStart = containerTop - (viewportHeight / 2) + 200; // 200 is half card height
       
-      let newIndex = Math.floor(scrollProgress * timelineData.length);
-      newIndex = Math.min(newIndex, timelineData.length - 1);
+      // Calculate how far we are into the scrollable area of the container
+      const scrollProgress = scrollY - scrollableAreaStart;
+
+      // Calculate how much scroll space each item gets.
+      const itemScrollSpace = (containerHeight - viewportHeight) / timelineData.length;
+
+      let newIndex = Math.floor(scrollProgress / itemScrollSpace);
+      newIndex = Math.max(0, Math.min(newIndex, timelineData.length - 1));
       
       setActiveIndex(newIndex);
     };
@@ -80,15 +86,15 @@ export default function HorizontalTimeline() {
               return (
                 <div
                   key={event.title}
-                  className="absolute inset-0 w-full h-full"
+                  className={cn(
+                      "absolute inset-0 w-full h-full p-4 transition-opacity duration-500 ease-in-out",
+                      isActive ? "opacity-100" : "opacity-0 pointer-events-none",
+                  )}
                 >
-                  <Card className={cn(
-                      "absolute inset-0 w-full h-full flex flex-col justify-center transition-all duration-500 ease-in-out p-6",
-                      isActive ? "opacity-100" : "opacity-0",
-                  )}>
+                  <Card className="w-full h-full flex flex-col justify-center">
                     <CardHeader>
                       <div className="flex items-start gap-4">
-                        <div className="text-right">
+                        <div>
                           <p className="text-2xl font-bold text-primary/80 leading-tight">{yearParts[0]}-</p>
                           <p className="text-2xl font-bold text-primary/80 leading-tight">{yearParts[1]}</p>
                         </div>
