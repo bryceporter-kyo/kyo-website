@@ -23,7 +23,7 @@ const timelineData = [
   {
       year: "2020-2021",
       title: "Adaptation and New Programs",
-      content: "Inspired by El Sistema, the board launched UPBEAT!, an after-school music program for social change. In response to the pandemic, KYO went virtual with e-orchestras, virtual concerts, and livestreams. The 'Farm Team' program also expanded to include all orchestral instrument groups. JKYO Conductor Marilyn Chalk became Acting Conductor of The Orchestras.",
+      content: "Inspired by El Sistema, the board launched UPBEAT!, an after-school music program for social change, in 2020. In response to the pandemic, KYO went virtual with e-orchestras, virtual concerts, and livestreams. The 'Farm Team' program also expanded to include all orchestral instrument groups. JKYO Conductor Marilyn Chalk became Acting Conductor of The Orchestras.",
   },
   {
       year: "2022-Present",
@@ -63,14 +63,11 @@ export default function HorizontalTimeline() {
     const totalItems = timelineData.length;
     if (totalItems === 0) return;
 
-    // Each item gets equal scroll space with sticky behavior
     const itemScrollSpace = 1 / totalItems;
     
-    // Find which item section we're in
     const currentSection = Math.min(Math.floor(scrollProgress / itemScrollSpace), totalItems - 1);
     const progressInSection = (scrollProgress % itemScrollSpace) / itemScrollSpace;
     
-    // Define sticky zones - each item is "sticky" for 60% of its scroll space
     const stickyZoneStart = 0.2;
     const stickyZoneEnd = 0.8;
     
@@ -78,31 +75,29 @@ export default function HorizontalTimeline() {
     let horizontalProgress = 0;
     
     if (progressInSection >= stickyZoneStart && progressInSection <= stickyZoneEnd) {
-      // In sticky zone - stay on current item
       newActiveIndex = currentSection;
       horizontalProgress = currentSection / (totalItems - 1);
     } else if (progressInSection < stickyZoneStart) {
-      // Transitioning from previous item
       const transitionProgress = progressInSection / stickyZoneStart;
-      const prevIndex = Math.max(0, currentSection - 1);
       newActiveIndex = currentSection;
-      horizontalProgress = (prevIndex + transitionProgress * (currentSection - prevIndex)) / (totalItems - 1);
+      const prevSectionProgress = Math.max(0, currentSection - 1) / (totalItems - 1);
+      const currentSectionProgress = currentSection / (totalItems - 1);
+      horizontalProgress = prevSectionProgress + transitionProgress * (currentSectionProgress - prevSectionProgress);
     } else {
-      // Transitioning to next item
       const transitionProgress = (progressInSection - stickyZoneEnd) / (1 - stickyZoneEnd);
-      const nextIndex = Math.min(totalItems - 1, currentSection + 1);
-      newActiveIndex = nextIndex;
-      horizontalProgress = (currentSection + transitionProgress * (nextIndex - currentSection)) / (totalItems - 1);
+      newActiveIndex = currentSection + 1;
+      const currentSectionProgress = currentSection / (totalItems - 1);
+      const nextSectionProgress = Math.min(totalItems - 1, currentSection + 1) / (totalItems - 1);
+      horizontalProgress = currentSectionProgress + transitionProgress * (nextSectionProgress - currentSectionProgress);
     }
 
-    // Apply horizontal scroll
     const maxHorizontalScroll = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
     const targetScrollLeft = horizontalProgress * maxHorizontalScroll;
     scrollWrapper.scrollLeft = targetScrollLeft;
 
-    // Update active index
-    if (newActiveIndex !== activeIndex) {
-      setActiveIndex(newActiveIndex);
+    const finalActiveIndex = Math.round(horizontalProgress * (totalItems - 1));
+    if (finalActiveIndex !== activeIndex) {
+      setActiveIndex(finalActiveIndex);
     }
   }, [activeIndex]);
 
@@ -122,7 +117,6 @@ export default function HorizontalTimeline() {
     const containerHeight = container.offsetHeight;
     const scrollableHeight = containerHeight - viewportHeight;
     
-    // Target the middle of the sticky zone for the clicked item
     const itemScrollSpace = 1 / timelineData.length;
     const targetProgress = (index * itemScrollSpace) + (itemScrollSpace * 0.5);
     const targetScrollTop = container.offsetTop + (targetProgress * scrollableHeight);
@@ -145,7 +139,7 @@ export default function HorizontalTimeline() {
     <div 
       ref={containerRef} 
       className="relative w-full" 
-      style={{ height: `${timelineData.length * 120 + 50}vh` }}
+      style={{ height: `${timelineData.length * 150}vh` }}
     >
       <div className="sticky top-0 flex flex-col h-screen overflow-hidden">
         <div className="text-center pt-12 md:pt-24 lg:pt-32">
@@ -165,7 +159,7 @@ export default function HorizontalTimeline() {
           >
             {timelineData.map((event, index) => (
               <div 
-                key={`timeline-${index}-${event.year}-${event.title.slice(0, 10)}`} 
+                key={`timeline-${index}-${event.year}-${event.title.slice(0,10)}`} 
                 className="flex-shrink-0 w-full flex justify-center"
               >
                 <div className="w-full md:w-3/4 lg:w-1/2 p-4">
