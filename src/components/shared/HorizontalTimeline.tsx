@@ -29,28 +29,53 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
     const { top } = container.getBoundingClientRect();
     const scrollableHeight = container.offsetHeight - window.innerHeight;
     
-    const scrollBuffer = 0.1; // The portion of scroll at the beginning and end that is "dead space"
+    // The portion of scroll at the beginning and end that is "dead space"
+    const scrollBuffer = 0.1; 
+    // The portion of the scroll for each "sticky" section
+    const stickyThreshold = (1 - scrollBuffer * 2) / events.length; 
 
     if (top <= 0 && top >= -scrollableHeight) {
       const rawScrollProgress = Math.max(0, Math.min(1, -top / scrollableHeight));
       
       let newActiveIndex = 0;
+      let targetScrollLeft = 0;
+      
       if (rawScrollProgress < scrollBuffer) {
         newActiveIndex = 0;
+        targetScrollLeft = 0;
       } else if (rawScrollProgress >= 1 - scrollBuffer) {
         newActiveIndex = events.length - 1;
+        targetScrollLeft = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
       } else {
-        const contentScrollRange = 1 - scrollBuffer * 2;
-        const progressInContent = (rawScrollProgress - scrollBuffer) / contentScrollRange;
+        const progressInContent = (rawScrollProgress - scrollBuffer) / (1 - scrollBuffer * 2);
+        
         newActiveIndex = Math.floor(progressInContent * events.length);
+        
+        const progressWithinCard = (progressInContent % (1 / events.length)) * events.length;
+        
+        const cardWidth = scrollWrapper.scrollWidth / events.length;
+        
+        // Make it sticky in the middle of the card's scroll section
+        if (progressWithinCard > 0.1 && progressWithinCard < 0.9) {
+           targetScrollLeft = newActiveIndex * cardWidth;
+        } else {
+           // Smoothly transition between cards
+           const nextCardIndex = (progressWithinCard <= 0.1) ? newActiveIndex : Math.min(events.length - 1, newActiveIndex + 1);
+           const transitionProgress = (progressWithinCard <= 0.1) 
+                ? (progressWithinCard + 0.1) / 0.2  // Map 0.9-1.0 to 0.5-1.0, and 0.0-0.1 to 0-0.5
+                : (progressWithinCard - 0.9) / 0.2;
+           
+           const prevCardScroll = newActiveIndex * cardWidth;
+           const nextCardScroll = Math.min(scrollWrapper.scrollWidth - scrollWrapper.clientWidth, nextCardIndex * cardWidth);
+
+           targetScrollLeft = prevCardScroll + (nextCardScroll - prevCardScroll) * Math.max(0, Math.min(1, transitionProgress));
+        }
       }
 
       if (newActiveIndex !== activeIndex) {
         setActiveIndex(newActiveIndex);
       }
       
-      const cardWidth = scrollWrapper.scrollWidth / events.length;
-      const targetScrollLeft = newActiveIndex * cardWidth;
       scrollWrapper.scrollLeft = targetScrollLeft;
 
     } else if (top > 0) {
@@ -98,9 +123,9 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
         </div>
         
         <div className="flex-grow flex items-center">
-            <div ref={scrollWrapperRef} className="flex w-full overflow-x-hidden p-8 no-scrollbar snap-x snap-mandatory">
+            <div ref={scrollWrapperRef} className="flex w-full overflow-x-hidden p-8 no-scrollbar">
                 {events.map((event, index) => (
-                <div key={index} className="flex-shrink-0 w-full flex justify-center snap-center">
+                <div key={index} className="flex-shrink-0 w-full flex justify-center">
                     <div className="w-full md:w-3/4 lg:w-1/2 p-4">
                         <Card className={cn(
                             "transition-all duration-500 h-full",
