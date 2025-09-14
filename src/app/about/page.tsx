@@ -23,34 +23,29 @@ const communityRoles = [
 
 const timelineData = [
   {
-    year: "2007",
+    year: "2007-2012",
     title: "Origins of KYO",
-    content: "KYO founders Karen Lauder, Ben Bell, and Steven Brown began gathering highly skilled young musicians in the Peterborough area to form an ensemble. Michael Newnham, the new conductor of the Peterborough Symphony Orchestra (PSO), was brought on to conduct the newly formed youth orchestra.",
+    content: "KYO was founded by Karen Lauder, Ben Bell, and Steven Brown, who gathered skilled young musicians in the Peterborough area. Michael Newnham, the new conductor of the Peterborough Symphony Orchestra (PSO), was brought on to conduct. Membership grew to around 30 players, but declined to 11 by 2011 due to members aging out and reduced local music programs.",
   },
   {
     year: "2013-2016",
     title: "Outreach and Recruitment",
-    content: "A strategic plan focusing on recruitment was developed. Ann Millen was hired for a recruitment project, establishing bursaries to lower financial barriers and creating an instrument library through public donations. Outreach events and school concerts helped attract new musicians, including from the home-schooling community.",
+    content: "Following a new strategic plan, Ann Millen was hired for a recruitment project. She established bursaries to lower financial barriers and created an instrument library through public donations. Outreach events and school concerts helped attract new musicians, including from the home-schooling community.",
   },
   {
-      year: "2017",
-      title: "Launch of UPBEAT!",
-      content: "Inspired by the El Sistema program, the KYO board launched UPBEAT!, an after-school music program for social change in downtown Peterborough. A pilot project in 2018, funded by an Ontario Trillium Foundation (OTF) seed grant, led to a 3-year development grant, officially launching the program.",
-  },
-  {
-      year: "2019",
+      year: "2017-2019",
       title: "Expanding Ensembles",
-      content: "To cater to varying skill levels, the Junior Kawartha Youth Orchestra (JKYO) was launched for new players, led by Marilyn Chalk. As players progressed, the Intermediate Kawartha Youth Orchestra (IKYO) was formed under her leadership, with John Fautley taking over JKYO.",
+      content: "To cater to varying skill levels, the Junior Kawartha Youth Orchestra (JKYO) was launched for new players, led by Marilyn Chalk. As players progressed, the Intermediate Kawartha Youth Orchestra (IKYO) was formed under her leadership, with John Fautley taking over JKYO. The Community Foundation of Greater Peterborough (CFGP) provided solid support, managing dedicated funds for KYO.",
   },
   {
-      year: "2020",
-      title: "Adapting to Challenges",
-      content: "KYO went virtual with an e-orchestras training program in response to the COVID-19 pandemic. This included virtual broadcast concerts and livestreamed events. The organization also expanded its 'Farm Team' program for all orchestral instrument groups.",
+      year: "2020-2021",
+      title: "Adaptation and New Programs",
+      content: "Inspired by El Sistema, the board launched UPBEAT!, an after-school music program for social change. In response to the pandemic, KYO went virtual with e-orchestras, virtual concerts, and livestreams. The 'Farm Team' program also expanded to include all orchestral instrument groups. JKYO Conductor Marilyn Chalk became Acting Conductor of The Orchestras.",
   },
   {
       year: "2022-Present",
       title: "Growth and New Leadership",
-      content: "KYO continued to grow, welcoming new conductors and instructors across its programs. Maziar Heidari, and later Murray Lefebvre, took the helm of the Senior KYO. The organization solidified its status as a comprehensive centre for music education in the Kawarthas.",
+      content: "KYO continued to grow, welcoming new artistic leadership including Dr. Alexander Cannon, Maziar Heidari, and currently Murray Lefebvre at the helm of the Senior KYO. The organization solidified its status as a comprehensive centre for music education in the Kawarthas with expanded faculty and programs, including a Jazz Ensemble.",
   },
 ];
 
