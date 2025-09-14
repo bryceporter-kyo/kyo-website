@@ -87,7 +87,7 @@ export default function HorizontalTimeline() {
                       isActive ? "opacity-100" : "opacity-0",
                   )}>
                     <CardHeader>
-                       <div className="flex items-start gap-4">
+                      <div className="flex items-start gap-4">
                         <div className="text-right">
                           <p className="text-2xl font-bold text-primary/80 leading-tight">{yearParts[0]}-</p>
                           <p className="text-2xl font-bold text-primary/80 leading-tight">{yearParts[1]}</p>
