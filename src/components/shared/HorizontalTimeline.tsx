@@ -29,49 +29,36 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
     const { top } = container.getBoundingClientRect();
     const scrollableHeight = container.offsetHeight - window.innerHeight;
     
-    const scrollBuffer = 0.1;
+    const scrollBuffer = 0.1; // The portion of scroll at the beginning and end that is "dead space"
 
     if (top <= 0 && top >= -scrollableHeight) {
       const rawScrollProgress = Math.max(0, Math.min(1, -top / scrollableHeight));
-      const mappedScrollProgress = Math.max(0, Math.min(1, (rawScrollProgress - scrollBuffer) / (1 - scrollBuffer * 2)));
-
-      const scrollAmount = mappedScrollProgress * (scrollWrapper.scrollWidth - scrollWrapper.clientWidth);
-      scrollWrapper.scrollLeft = scrollAmount;
-
-      const cardElements = Array.from(scrollWrapper.children) as HTMLElement[];
-      const scrollLeft = scrollWrapper.scrollLeft;
-      const wrapperWidth = scrollWrapper.clientWidth;
-
-      let newActiveIndex = -1;
-      let minDistance = Infinity;
-
-      cardElements.forEach((card, index) => {
-        const cardLeft = card.offsetLeft;
-        const cardWidth = card.offsetWidth;
-        const cardCenter = cardLeft + cardWidth / 2;
-        const wrapperCenter = scrollLeft + wrapperWidth / 2;
-        const distance = Math.abs(cardCenter - wrapperCenter);
-
-        if (distance < minDistance) {
-          minDistance = distance;
-          newActiveIndex = index;
-        }
-      });
       
+      let newActiveIndex = 0;
       if (rawScrollProgress < scrollBuffer) {
         newActiveIndex = 0;
-      } else if (rawScrollProgress > 1 - scrollBuffer) {
+      } else if (rawScrollProgress >= 1 - scrollBuffer) {
         newActiveIndex = events.length - 1;
+      } else {
+        const contentScrollRange = 1 - scrollBuffer * 2;
+        const progressInContent = (rawScrollProgress - scrollBuffer) / contentScrollRange;
+        newActiveIndex = Math.floor(progressInContent * events.length);
       }
 
       if (newActiveIndex !== activeIndex) {
         setActiveIndex(newActiveIndex);
       }
+      
+      const cardWidth = scrollWrapper.scrollWidth / events.length;
+      const targetScrollLeft = newActiveIndex * cardWidth;
+      scrollWrapper.scrollLeft = targetScrollLeft;
+
     } else if (top > 0) {
         scrollWrapper.scrollLeft = 0;
         if (activeIndex !== 0) setActiveIndex(0);
     } else {
-        scrollWrapper.scrollLeft = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
+        const targetScrollLeft = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
+        scrollWrapper.scrollLeft = targetScrollLeft;
         if (activeIndex !== events.length - 1) setActiveIndex(events.length - 1);
     }
   }, [activeIndex, events.length]);
@@ -85,12 +72,12 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
     const { current: container } = containerRef;
     if (!container) return;
     
-    const scrollBuffer = 0.1;
     const scrollableHeight = container.offsetHeight - window.innerHeight;
 
+    const contentScrollPercent = (index + 0.5) / events.length;
+    const scrollBuffer = 0.1;
     const contentScrollRange = 1 - scrollBuffer * 2;
-    const targetCardProgress = index / (events.length - 1);
-    const targetRawProgress = scrollBuffer + (targetCardProgress * contentScrollRange);
+    const targetRawProgress = scrollBuffer + (contentScrollPercent * contentScrollRange);
     
     const targetScrollTop = container.offsetTop + (targetRawProgress * scrollableHeight);
 
@@ -100,9 +87,8 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
     });
   }
 
-
   return (
-    <div ref={containerRef} className="relative w-full" style={{ height: `${events.length * 75}vh` }}>
+    <div ref={containerRef} className="relative w-full" style={{ height: `${events.length * 150}vh` }}>
       <div ref={textWrapperRef} className="sticky top-0 flex flex-col h-screen overflow-hidden">
         <div className="text-center pt-12 md:pt-24 lg:pt-32">
             <h2 className="text-3xl font-headline font-bold">Our Journey</h2>
@@ -112,13 +98,13 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
         </div>
         
         <div className="flex-grow flex items-center">
-            <div ref={scrollWrapperRef} className="flex w-full overflow-x-auto p-8 no-scrollbar">
+            <div ref={scrollWrapperRef} className="flex w-full overflow-x-hidden p-8 no-scrollbar snap-x snap-mandatory">
                 {events.map((event, index) => (
-                <div key={index} className="flex-shrink-0 w-full flex justify-center">
-                    <div className="w-full md:w-1/2 lg:w-1/3 xl:w-1/4 p-4">
+                <div key={index} className="flex-shrink-0 w-full flex justify-center snap-center">
+                    <div className="w-full md:w-3/4 lg:w-1/2 p-4">
                         <Card className={cn(
-                            "transition-all duration-300 h-full",
-                            activeIndex === index ? "transform scale-105 shadow-2xl border-primary" : "opacity-60 scale-95"
+                            "transition-all duration-500 h-full",
+                            activeIndex === index ? "transform scale-100 shadow-2xl border-primary" : "opacity-60 scale-95"
                         )}>
                         <CardHeader>
                             <div className="flex items-baseline gap-4">
