@@ -39,7 +39,7 @@ export default function LessonsPage() {
     <div>
       <PageHeader
         title="Lessons Program"
-        subtitle="Individual and group instruction to hone your skills."
+        subtitle="Individual and group instruction to hone your skills and unlock your potential."
         image={headerImage}
       />
 
@@ -48,10 +48,10 @@ export default function LessonsPage() {
             <div className="space-y-6">
                 <h2 className="text-3xl font-headline font-bold">A Foundation for Growth</h2>
                 <p className="text-muted-foreground text-lg">
-                    The KYO Lessons Program is a transformative investment in the long-term accessibility, quality, and sustainability of youth music education in our region. Our lessons serve not just as musical instruction but as a bridge to ensemble performance, confidence-building, and lifelong engagement with the arts.
+                    The KYO Lessons Program is a transformative investment in your musical future. We provide high-quality, inspiring, and affordable music education for youth across the region. Our lessons serve not just as musical instruction but as a bridge to ensemble performance, confidence-building, and lifelong engagement with the arts.
                 </p>
                 <p className="text-muted-foreground text-lg">
-                    This initiative enables more youth to receive weekly, high-caliber music instruction delivered by professional and conservatory-trained teachers. We are deeply committed to making music education available, affordable, and inspiring for all youth.
+                    This initiative enables more youth to receive weekly, high-caliber music instruction delivered by professional and conservatory-trained teachers. We are deeply committed to making music education available, affordable, and inspiring for all youth, regardless of background or financial circumstances.
                 </p>
                 <Button asChild size="lg">
                     <Link href="/register">Start Your Musical Journey</Link>
@@ -75,9 +75,9 @@ export default function LessonsPage() {
       <section className="bg-secondary">
         <div className="container mx-auto">
             <div className="text-center mb-12">
-            <h2 className="text-3xl font-headline font-bold">Our Goals</h2>
+            <h2 className="text-3xl font-headline font-bold">Our Goals: Your Success</h2>
             <p className="mx-auto max-w-2xl text-muted-foreground md:text-xl mt-4">
-                We are committed to creating a space where music drives personal growth and opportunity.
+                Our program is designed to create a space where music drives personal growth, builds confidence, and opens doors to new opportunities.
             </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -101,7 +101,7 @@ export default function LessonsPage() {
       <section className="container mx-auto">
         <div className="grid md:grid-cols-3 gap-8">
           <div className="md:col-span-2 space-y-8">
-            <h2 className="text-3xl font-headline font-bold">Program Structure</h2>
+            <h2 className="text-3xl font-headline font-bold">How Our Lessons Work</h2>
             <p className="text-muted-foreground text-lg">
               Our lessons program is designed to provide consistent, high-quality instruction throughout the school year. Students benefit from weekly one-hour lessons, opportunities to perform in public recitals and showcases, and a curriculum that aligns with our ensemble programs and the Royal Conservatory of Music (RCM) framework.
             </p>

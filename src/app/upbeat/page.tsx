@@ -83,9 +83,9 @@ export default function UpbeatPage() {
       <section className="bg-secondary">
         <div className="container mx-auto">
                 <div className="text-center mb-12">
-                <h2 className="text-3xl font-headline font-bold">Our Mission</h2>
+                <h2 className="text-3xl font-headline font-bold">Our Mission: Music, Growth, and Opportunity</h2>
                 <p className="mx-auto max-w-2xl text-muted-foreground md:text-xl mt-4">
-                    We are committed to creating a space where music drives personal growth and systemic change.
+                    We are committed to creating a space where music drives personal growth, fosters inclusion, and enriches our entire community.
                 </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -111,7 +111,7 @@ export default function UpbeatPage() {
             <div className="text-center mb-12">
             <h2 className="text-3xl font-headline font-bold">Proven Impact</h2>
             <p className="mx-auto max-w-2xl text-muted-foreground md:text-xl mt-4">
-                Our data-informed approach demonstrates measurable success in youth engagement, retention, and satisfaction.
+                Our data-informed approach demonstrates measurable success in youth engagement, retention, and satisfaction. We are proud of the positive change we are creating together.
             </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -137,7 +137,7 @@ export default function UpbeatPage() {
         <div className="space-y-6">
             <h2 className="text-3xl font-headline font-bold">More Than Music Lessons</h2>
             <p className="text-muted-foreground text-lg">
-                To ensure every child can participate fully, UpBeat! eliminates common barriers by providing comprehensive, holistic support. This approach ensures students can focus on what matters most: learning, growing, and making music together.
+                To ensure every child can participate fully, UpBeat! eliminates common barriers by providing comprehensive, holistic support. This approach ensures students can focus on what matters most: learning, growing, and making music together. Everything is provided free of charge.
             </p>
              <ul className="space-y-3">
                 {holisticSupports.map((item) => (

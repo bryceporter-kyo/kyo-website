@@ -45,12 +45,12 @@ export default function OrchestrasPage() {
       <section className="container mx-auto">
         <div className="grid md:grid-cols-2 gap-16 items-center">
             <div className="space-y-6">
-                <h2 className="text-3xl font-headline font-bold">The Heart of KYO</h2>
+                <h2 className="text-3xl font-headline font-bold">The Heart of KYO: Join an Orchestra</h2>
                 <p className="text-muted-foreground text-lg">
-                    The Orchestras Program is our core educational initiative. It’s a structured, progressive suite of ensembles that helps young musicians advance their skills from beginner to pre-professional levels.
+                    The Orchestras Program is our core educational initiative. It’s where individual talent blossoms into collective artistry. We offer a structured, progressive suite of ensembles designed to help young musicians advance their skills from their first notes to pre-professional levels.
                 </p>
                 <p className="text-muted-foreground text-lg">
-                    With a focus on accessibility, we welcome youth from all backgrounds and experience levels into a safe, inclusive environment. We believe music is for everyone, and we are committed to removing financial barriers so that every student has the chance to play.
+                    With a focus on accessibility, we welcome youth from all backgrounds and experience levels into a safe, inclusive environment where they can make friends, build confidence, and share in the joy of making music. We believe music is for everyone, and we are committed to removing financial barriers so that every student has the chance to play.
                 </p>
                 <Button asChild size="lg">
                     <Link href="/register">Join an Ensemble</Link>
@@ -64,7 +64,7 @@ export default function OrchestrasPage() {
                     </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <p className="text-muted-foreground">The KYO serves over 120 youth annually, aged 7 to 22. While some programs require baseline skills, many are open to complete beginners. If you have a passion for music, there’s a place for you here.</p>
+                    <p className="text-muted-foreground">Our orchestras serve over 120 youth annually, aged 7 to 22. While some ensembles require baseline skills, many are open to complete beginners. If you have a passion for music and a desire to learn, there’s a place for you here. No student is ever turned away due to financial need.</p>
                      <div className="flex items-start gap-4 pt-4">
                         <HandHeart className="w-12 h-12 text-accent mt-1"/>
                         <div>
@@ -82,7 +82,7 @@ export default function OrchestrasPage() {
             <div className="text-center mb-12">
                 <h2 className="text-3xl font-headline font-bold">Core Orchestras</h2>
                 <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
-                    Our three core orchestras provide a clear path for students to grow as musicians, from their first notes to advanced symphonies.
+                    Our three core orchestras provide a clear path for students to grow as musicians, from their first notes to advanced symphonies. Find your place and start your journey today.
                 </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -111,7 +111,7 @@ export default function OrchestrasPage() {
             <div className="text-center mb-12">
                 <h2 className="text-3xl font-headline font-bold">Specialty Ensembles</h2>
                 <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
-                    Explore different genres and styles of music in our smaller, specialized ensembles.
+                    Ready to explore a new sound? Dive into different genres and styles of music in our smaller, specialized ensembles. These groups offer a chance to hone specific skills like improvisation and small-group collaboration.
                 </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
