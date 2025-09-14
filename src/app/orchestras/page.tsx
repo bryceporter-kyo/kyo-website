@@ -1,10 +1,10 @@
+
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import PageHeader from '@/components/shared/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Check, Users, Leaf, HandHeart, Sparkles, HandCoins, GraduationCap } from 'lucide-react';
+import { Users, HandHeart, HandCoins, GraduationCap } from 'lucide-react';
 
 const orchestras = [
   {
@@ -27,38 +27,12 @@ const orchestras = [
   },
 ];
 
-const beginnerLessons = [
-  { title: 'Beginner Strings (Violin, Viola, Cello)', schedule: 'Tuesdays, 6:15–7:00 PM', fee: '$850/year' },
-  { title: 'Beginner Brass (Trumpet, Trombone, etc.)', schedule: 'Wednesdays, 6:15–7:00 PM', fee: '$850/year' },
-  { title: 'Beginner Flute', schedule: 'Thursdays, 6:15–7:00 PM', fee: '$850/year' },
-  { title: 'Beginner Percussion (Age 10+)', schedule: 'Thursdays, 6:15–7:30 PM', fee: '$975/year', note: 'Includes performance integration with IKYO' },
-  { title: 'Beginner Guitar', schedule: 'Sundays, 12:30–1:15 PM', fee: '$850/year', note: 'Students must provide their own instrument' },
-];
-
-const intermediateLessons = [
-    { title: 'Intermediate Clarinet & Saxophone', schedule: 'Tuesdays, 6:00–6:45 PM', fee: '$850/year', description: 'Designed for youth preparing for entry into SKYO.' },
-];
-
-const supplementary = [
+const supplementaryEnsembles = [
     { title: 'Junior Folk Ensemble', schedule: 'Thursdays, 5:30–6:15 PM', fee: '$975/year', description: 'Focus on Celtic and global folk traditions for a wide range of instruments.'},
     { title: 'Senior Jazz Combo', schedule: 'Sundays, 4:30–5:30 PM', fee: '$975/year', description: 'Repertoire includes swing, blues, Latin, and more; instruction in improvisation and accompaniment.'},
     { title: 'Senior Chamber Music', schedule: 'Sundays, 12:30–5:30 PM (biweekly)', fee: '$600/year', description: 'Small ensemble coaching with professionals. Available to confident classical musicians.'},
 ];
 
-const courses = [
-    { title: 'Digital Music Production', schedule: 'Term 1: Thursdays, 7:30–8:15 PM', fee: '$500/term', description: 'Learn recording, DAW use, and production skills in any genre.'},
-    { title: 'Theory', schedule: 'Term 2: Thursdays, 7:30–8:15 PM', fee: '$500/term', description: 'Covers harmony, form, analysis, and styles beyond classical.'},
-    { title: 'Composition', schedule: 'Term 3: Thursdays, 7:30–8:15 PM', fee: '$500/term', description: 'Write original music for soloists and chamber groups; includes coaching and score preparation.'},
-]
-
-const outcomes = [
-    "Build progressive musical and ensemble skills",
-    "Develop confidence, discipline, and creative expression",
-    "Learn diverse musical styles and cultural approaches to music",
-    "Engage in mentorship with professional musicians and peers",
-    "Access pathways to performance, teaching, and post-secondary music study",
-    "Foster lifelong engagement with music"
-]
 
 export default function OrchestrasPage() {
   const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-orchestras');
@@ -107,100 +81,49 @@ export default function OrchestrasPage() {
       </section>
 
       <section className="bg-secondary">
-        <div className="container mx-auto text-center">
-            <h2 className="text-3xl font-headline font-bold">Our Programs</h2>
-            <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
-                We offer a wide range of ensembles, lessons, and courses to meet students at every stage of their musical journey. All programs operate weekly throughout the school year (September to June).
-            </p>
-            <Tabs defaultValue="orchestras" className="mt-8">
-            <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-2 md:grid-cols-5 h-auto">
-                <TabsTrigger value="orchestras">Orchestras</TabsTrigger>
-                <TabsTrigger value="beginner">Beginner Lessons</TabsTrigger>
-                <TabsTrigger value="intermediate">Intermediate</TabsTrigger>
-                <TabsTrigger value="ensembles">Ensembles</TabsTrigger>
-                <TabsTrigger value="courses">Courses</TabsTrigger>
-            </TabsList>
-            <TabsContent value="orchestras" className="mt-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {orchestras.map((item) => (
-                        <Card key={item.title} className="text-left">
-                            <CardHeader>
-                                <CardTitle>{item.title}</CardTitle>
-                                <CardDescription>{item.schedule}</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <p className="text-muted-foreground">{item.description}</p>
-                                <p className="font-bold text-lg">{item.fee}</p>
-                            </CardContent>
-                        </Card>
-                    ))}
+        <div className="container mx-auto">
+            <div className="text-center mb-12">
+                <h2 className="text-3xl font-headline font-bold">Our Ensembles</h2>
+                <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
+                    We offer a range of ensembles to meet students at every stage of their musical journey, from beginner to advanced.
+                </p>
+            </div>
+            <div className="space-y-12">
+                <div>
+                    <h3 className="text-2xl font-headline font-bold text-center mb-8">Core Orchestras</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {orchestras.map((item) => (
+                            <Card key={item.title} className="text-left flex flex-col">
+                                <CardHeader>
+                                    <CardTitle>{item.title}</CardTitle>
+                                    <CardDescription>{item.schedule}</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4 flex-grow">
+                                    <p className="text-muted-foreground">{item.description}</p>
+                                    <p className="font-bold text-lg">{item.fee}</p>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
                 </div>
-            </TabsContent>
-            <TabsContent value="beginner" className="mt-8">
-                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {beginnerLessons.map((item) => (
-                        <Card key={item.title} className="text-left">
-                            <CardHeader>
-                                <CardTitle>{item.title}</CardTitle>
-                                <CardDescription>{item.schedule}</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <p className="text-lg font-bold">{item.fee}</p>
-                                {item.note && <p className="text-sm text-muted-foreground italic">{item.note}</p>}
-                            </CardContent>
-                        </Card>
-                    ))}
+                 <div>
+                    <h3 className="text-2xl font-headline font-bold text-center mb-8">Specialty Ensembles</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {supplementaryEnsembles.map((item) => (
+                            <Card key={item.title} className="text-left flex flex-col">
+                                <CardHeader>
+                                    <CardTitle>{item.title}</CardTitle>
+                                    <CardDescription>{item.schedule}</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4 flex-grow">
+                                    <p className="text-muted-foreground">{item.description}</p>
+                                    <p className="font-bold text-lg">{item.fee}</p>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
                 </div>
-            </TabsContent>
-            <TabsContent value="intermediate" className="mt-8">
-                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-lg mx-auto">
-                    {intermediateLessons.map((item) => (
-                        <Card key={item.title} className="text-left">
-                            <CardHeader>
-                                <CardTitle>{item.title}</CardTitle>
-                                <CardDescription>{item.schedule}</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <p className="text-muted-foreground">{item.description}</p>
-                                <p className="font-bold text-lg">{item.fee}</p>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-            </TabsContent>
-             <TabsContent value="ensembles" className="mt-8">
-                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {supplementary.map((item) => (
-                        <Card key={item.title} className="text-left">
-                            <CardHeader>
-                                <CardTitle>{item.title}</CardTitle>
-                                <CardDescription>{item.schedule}</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <p className="text-muted-foreground">{item.description}</p>
-                                <p className="font-bold text-lg">{item.fee}</p>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-            </TabsContent>
-            <TabsContent value="courses" className="mt-8">
-                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {courses.map((item) => (
-                        <Card key={item.title} className="text-left">
-                            <CardHeader>
-                                <CardTitle>{item.title}</CardTitle>
-                                <CardDescription>{item.schedule}</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                 <p className="text-muted-foreground">{item.description}</p>
-                                <p className="font-bold text-lg">{item.fee}</p>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-            </TabsContent>
-            </Tabs>
+            </div>
         </div>
       </section>
 
@@ -211,14 +134,6 @@ export default function OrchestrasPage() {
                 <p className="text-muted-foreground text-lg">
                     Our program is anchored in the classical tradition but embraces a broad repertoire, including pop, film music, and works by Canadian composers. We follow an RCM equivalency model to track student progression, and our experienced instructors meet students where they are to inspire growth. Public performance is a key element, with at least three public concerts per year.
                 </p>
-                 <ul className="space-y-3">
-                    {outcomes.map((item) => (
-                        <li key={item} className="flex items-start gap-3">
-                            <Check className="h-6 w-6 mt-1 text-primary flex-shrink-0" />
-                            <span className="text-lg text-muted-foreground">{item}</span>
-                        </li>
-                    ))}
-                </ul>
             </div>
             <div className="space-y-8">
                  <Card>
@@ -249,3 +164,4 @@ export default function OrchestrasPage() {
     </div>
   );
 }
+
