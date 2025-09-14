@@ -19,7 +19,6 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
   const scrollWrapperRef = React.useRef<HTMLDivElement>(null);
 
   const [activeIndex, setActiveIndex] = React.useState(0);
-  const uniqueEvents = events;
 
   const handleScroll = React.useCallback(() => {
     const container = containerRef.current;
@@ -43,7 +42,7 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
       scrollProgress = 1;
     }
 
-    const totalItems = uniqueEvents.length;
+    const totalItems = events.length;
     if (totalItems === 0) return;
 
     // Each item gets equal scroll space with sticky behavior
@@ -87,7 +86,7 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
     if (newActiveIndex !== activeIndex) {
       setActiveIndex(newActiveIndex);
     }
-  }, [activeIndex, uniqueEvents]);
+  }, [activeIndex, events.length]);
 
   React.useEffect(() => {
     const throttledScroll = () => requestAnimationFrame(handleScroll);
@@ -106,7 +105,7 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
     const scrollableHeight = containerHeight - viewportHeight;
     
     // Target the middle of the sticky zone for the clicked item
-    const itemScrollSpace = 1 / uniqueEvents.length;
+    const itemScrollSpace = 1 / events.length;
     const targetProgress = (index * itemScrollSpace) + (itemScrollSpace * 0.5);
     const targetScrollTop = container.offsetTop + (targetProgress * scrollableHeight);
 
@@ -116,7 +115,7 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
     });
   };
 
-  if (uniqueEvents.length === 0) {
+  if (events.length === 0) {
     return (
       <div className="flex items-center justify-center h-screen">
         <p className="text-muted-foreground">No timeline events to display</p>
@@ -128,7 +127,7 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
     <div 
       ref={containerRef} 
       className="relative w-full" 
-      style={{ height: `${uniqueEvents.length * 120 + 50}vh` }}
+      style={{ height: `${events.length * 250}vh` }}
     >
       <div className="sticky top-0 flex flex-col h-screen overflow-hidden">
         <div className="text-center pt-12 md:pt-24 lg:pt-32">
@@ -137,7 +136,7 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
             Tracing our history of growth, innovation, and musical achievement.
           </p>
           <p className="text-sm text-muted-foreground/60 mt-2">
-            {uniqueEvents.length} milestone{uniqueEvents.length !== 1 ? 's' : ''}
+            {events.length} milestone{events.length !== 1 ? 's' : ''}
           </p>
         </div>
         
@@ -146,7 +145,7 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
             ref={scrollWrapperRef} 
             className="flex w-full overflow-x-hidden p-8 no-scrollbar"
           >
-            {uniqueEvents.map((event, index) => (
+            {events.map((event, index) => (
               <div 
                 key={`timeline-${index}-${event.year}-${event.title.slice(0, 10)}`} 
                 className="flex-shrink-0 w-full flex justify-center"
@@ -175,7 +174,7 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
         </div>
 
         <div className="flex justify-center items-center gap-3 pb-8">
-          {uniqueEvents.map((event, index) => (
+          {events.map((event, index) => (
             <button
               key={`dot-${index}-${event.year}`}
               onClick={() => handleDotClick(index)}
