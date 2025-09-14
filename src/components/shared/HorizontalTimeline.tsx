@@ -30,7 +30,7 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
     const scrollableHeight = container.offsetHeight - window.innerHeight;
     
     // The portion of scroll at the beginning and end that is "dead space"
-    const scrollBuffer = 0.1; 
+    const scrollBuffer = 0.05; 
     // The portion of the scroll for each "sticky" section
     const stickyThreshold = (1 - scrollBuffer * 2) / events.length; 
 
@@ -55,29 +55,30 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
         
         const cardWidth = scrollWrapper.scrollWidth / events.length;
         
-        // Make it sticky in the middle of the card's scroll section
-        if (progressWithinCard > 0.1 && progressWithinCard < 0.9) {
+        // Adjust the range for stickiness, e.g., sticky between 20% and 80% of the card's scroll section
+        const stickyStart = 0.2;
+        const stickyEnd = 0.8;
+
+        if (progressWithinCard > stickyStart && progressWithinCard < stickyEnd) {
+           // Inside the sticky part of the card's scroll section
            targetScrollLeft = newActiveIndex * cardWidth;
         } else {
-           // Smoothly transition between cards
-           const nextCardIndex = (progressWithinCard <= 0.1) 
-                ? newActiveIndex 
-                : Math.min(events.length - 1, newActiveIndex + 1);
+           // In the transition part (entering or exiting a card)
+           const transitionDuration = stickyStart; // a portion for entry, a portion for exit
+           
+           const isExiting = progressWithinCard >= stickyEnd;
 
-           const transitionProgress = (progressWithinCard <= 0.1) 
-                // Map 0.0-0.1 to 0.5-1.0 (reversed for entry)
-                ? 1 - (progressWithinCard / 0.1) * 0.5
-                // Map 0.9-1.0 to 0.0-0.5 (for exit)
-                : ((progressWithinCard - 0.9) / 0.1) * 0.5;
+           const transitionProgress = isExiting
+            ? (progressWithinCard - stickyEnd) / (1 - stickyEnd) // maps exit range [stickyEnd, 1.0] to [0, 1]
+            : progressWithinCard / stickyStart; // maps entry range [0, stickyStart] to [0, 1]
 
-           const prevCardScroll = newActiveIndex * cardWidth;
+           const prevCardIndex = isExiting ? newActiveIndex : Math.max(0, newActiveIndex - 1);
+           const nextCardIndex = isExiting ? Math.min(events.length - 1, newActiveIndex + 1) : newActiveIndex;
+
+           const prevCardScroll = prevCardIndex * cardWidth;
            const nextCardScroll = Math.min(scrollWrapper.scrollWidth - scrollWrapper.clientWidth, nextCardIndex * cardWidth);
 
-           const cardToStickTo = progressWithinCard <= 0.1 ? nextCardIndex : newActiveIndex;
-           
-           const currentCardScroll = cardToStickTo * cardWidth;
-
-           targetScrollLeft = prevCardScroll + (nextCardScroll - prevCardScroll) * Math.max(0, Math.min(1, transitionProgress));
+           targetScrollLeft = prevCardScroll + (nextCardScroll - prevCardScroll) * transitionProgress;
         }
       }
 
@@ -109,7 +110,7 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
     const scrollableHeight = container.offsetHeight - window.innerHeight;
 
     const contentScrollPercent = (index + 0.5) / events.length;
-    const scrollBuffer = 0.1;
+    const scrollBuffer = 0.05;
     const contentScrollRange = 1 - scrollBuffer * 2;
     const targetRawProgress = scrollBuffer + (contentScrollPercent * contentScrollRange);
     
