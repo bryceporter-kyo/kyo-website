@@ -18,9 +18,17 @@ import {
 
 const navLinks = [
   { name: 'Home', href: '/' },
-  { 
-    name: 'Programs', 
-    href: '#', 
+  {
+    name: 'About Us',
+    href: '#',
+    subLinks: [
+      { name: 'About Us', href: '/about' },
+      { name: 'Staff & Board', href: '/staff' },
+    ]
+  },
+  {
+    name: 'Programs',
+    href: '#',
     subLinks: [
       { name: 'Orchestras', href: '/orchestras' },
       { name: 'Upbeat!', href: '/upbeat' },
