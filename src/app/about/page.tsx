@@ -24,6 +24,7 @@ const communityRoles = [
 export default function AboutPage() {
     const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-orchestras');
     const aboutImage = PlaceHolderImages.find(p => p.id === 'program-orchestra');
+    const seasonsOfExcellence = new Date().getFullYear() - 2002;
 
     return (
         <div>
@@ -35,7 +36,7 @@ export default function AboutPage() {
             <section className="container mx-auto">
                 <div className="grid md:grid-cols-2 gap-16 items-center">
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-headline font-bold">23 Seasons of Excellence</h2>
+                        <h2 className="text-3xl font-headline font-bold">{seasonsOfExcellence} Seasons of Excellence</h2>
                         <p className="text-muted-foreground text-lg">
                             Kawartha Youth Orchestra is a vibrant community organization offering music and orchestra training to youth from elementary to post-secondary levels. Drawing students from across the Kawartha Region, we provide opportunities for young musicians seeking to go beyond their school music programs.
                         </p>
