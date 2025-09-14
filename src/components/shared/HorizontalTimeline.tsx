@@ -17,165 +17,177 @@ interface HorizontalTimelineProps {
 export default function HorizontalTimeline({ events }: HorizontalTimelineProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const scrollWrapperRef = React.useRef<HTMLDivElement>(null);
-  const textWrapperRef = React.useRef<HTMLDivElement>(null);
 
   const [activeIndex, setActiveIndex] = React.useState(0);
+  const uniqueEvents = events;
 
   const handleScroll = React.useCallback(() => {
-    const { current: container } = containerRef;
-    const { current: scrollWrapper } = scrollWrapperRef;
+    const container = containerRef.current;
+    const scrollWrapper = scrollWrapperRef.current;
+    
     if (!container || !scrollWrapper) return;
 
-    const { top } = container.getBoundingClientRect();
-    const scrollableHeight = container.offsetHeight - window.innerHeight;
-    const cardWidth = scrollWrapper.scrollWidth / events.length;
+    const containerRect = container.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const containerTop = containerRect.top;
+    const containerHeight = container.offsetHeight;
+    const scrollableHeight = containerHeight - viewportHeight;
     
-    // The buffer defines the percentage of the start and end of the scroll
-    // that should be "dead space" before/after the animation.
-    const scrollBuffer = 0.05; 
-    
-    if (top <= 0 && top >= -scrollableHeight) {
-      // We are within the scrollable container
-      const rawScrollProgress = Math.max(0, Math.min(1, -top / scrollableHeight));
-      
-      let newActiveIndex = 0;
-      let targetScrollLeft = 0;
-
-      const progressPastBuffer = (rawScrollProgress - scrollBuffer) / (1 - scrollBuffer * 2);
-
-      if (rawScrollProgress < scrollBuffer) {
-        // We are in the top buffer zone
-        newActiveIndex = 0;
-        targetScrollLeft = 0;
-      } else if (rawScrollProgress >= 1 - scrollBuffer) {
-        // We are in the bottom buffer zone
-        newActiveIndex = events.length - 1;
-        targetScrollLeft = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
-      } else {
-        // We are in the main content scroll area
-        const progressInContent = (rawScrollProgress - scrollBuffer) / (1 - scrollBuffer * 2);
-        
-        const eventScrollSpace = 1 / events.length;
-        newActiveIndex = Math.floor(progressInContent / eventScrollSpace);
-        
-        const progressWithinEvent = (progressInContent % eventScrollSpace) / eventScrollSpace;
-
-        // Define the "sticky" portion for each card (e.g., from 25% to 75% of its scroll space)
-        const stickyStart = 0.25;
-        const stickyEnd = 0.75;
-        
-        const currentCardScroll = newActiveIndex * cardWidth;
-
-        if (progressWithinEvent > stickyStart && progressWithinEvent < stickyEnd) {
-          // In the sticky part, stay on the current card
-          targetScrollLeft = currentCardScroll;
-        } else {
-          // In the transition part (either entering or exiting the sticky zone)
-          const isExiting = progressWithinEvent >= stickyEnd;
-          const transitionProgress = isExiting
-              ? (progressWithinEvent - stickyEnd) / (1 - stickyEnd) // Progress from 0 to 1 as we exit
-              : progressWithinEvent / stickyStart; // Progress from 0 to 1 as we enter
-          
-          const nextCardIndex = Math.min(events.length - 1, newActiveIndex + 1);
-          const nextCardScroll = nextCardIndex * cardWidth;
-
-          // Smoothly interpolate between the current card and the next card's scroll position
-          targetScrollLeft = currentCardScroll + (nextCardScroll - currentCardScroll) * transitionProgress;
-        }
-      }
-
-      if (newActiveIndex !== activeIndex) {
-          setActiveIndex(newActiveIndex);
-      }
-      
-      // Clamp the final scroll position to prevent overscrolling
-      scrollWrapper.scrollLeft = Math.max(0, Math.min(targetScrollLeft, scrollWrapper.scrollWidth - scrollWrapper.clientWidth));
-
-    } else if (top > 0) {
-        // Scrolled above the container
-        scrollWrapper.scrollLeft = 0;
-        if (activeIndex !== 0) setActiveIndex(0);
+    // Calculate scroll progress (0 to 1)
+    let scrollProgress = 0;
+    if (containerTop <= 0 && containerTop >= -scrollableHeight) {
+      scrollProgress = Math.abs(containerTop) / scrollableHeight;
+    } else if (containerTop > 0) {
+      scrollProgress = 0;
     } else {
-        // Scrolled past the container
-        const targetScrollLeft = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
-        scrollWrapper.scrollLeft = targetScrollLeft;
-        if (activeIndex !== events.length - 1) setActiveIndex(events.length - 1);
+      scrollProgress = 1;
     }
-  }, [activeIndex, events.length]);
+
+    const totalItems = uniqueEvents.length;
+    if (totalItems === 0) return;
+
+    // Each item gets equal scroll space with sticky behavior
+    const itemScrollSpace = 1 / totalItems;
+    
+    // Find which item section we're in
+    const currentSection = Math.min(Math.floor(scrollProgress / itemScrollSpace), totalItems - 1);
+    const progressInSection = (scrollProgress % itemScrollSpace) / itemScrollSpace;
+    
+    // Define sticky zones - each item is "sticky" for 60% of its scroll space
+    const stickyZoneStart = 0.2;
+    const stickyZoneEnd = 0.8;
+    
+    let newActiveIndex = currentSection;
+    let horizontalProgress = 0;
+    
+    if (progressInSection >= stickyZoneStart && progressInSection <= stickyZoneEnd) {
+      // In sticky zone - stay on current item
+      newActiveIndex = currentSection;
+      horizontalProgress = currentSection / (totalItems - 1);
+    } else if (progressInSection < stickyZoneStart) {
+      // Transitioning from previous item
+      const transitionProgress = progressInSection / stickyZoneStart;
+      const prevIndex = Math.max(0, currentSection - 1);
+      newActiveIndex = currentSection;
+      horizontalProgress = (prevIndex + transitionProgress * (currentSection - prevIndex)) / (totalItems - 1);
+    } else {
+      // Transitioning to next item
+      const transitionProgress = (progressInSection - stickyZoneEnd) / (1 - stickyZoneEnd);
+      const nextIndex = Math.min(totalItems - 1, currentSection + 1);
+      newActiveIndex = nextIndex;
+      horizontalProgress = (currentSection + transitionProgress * (nextIndex - currentSection)) / (totalItems - 1);
+    }
+
+    // Apply horizontal scroll
+    const maxHorizontalScroll = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
+    const targetScrollLeft = horizontalProgress * maxHorizontalScroll;
+    scrollWrapper.scrollLeft = targetScrollLeft;
+
+    // Update active index
+    if (newActiveIndex !== activeIndex) {
+      setActiveIndex(newActiveIndex);
+    }
+  }, [activeIndex, uniqueEvents]);
 
   React.useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const throttledScroll = () => requestAnimationFrame(handleScroll);
+    window.addEventListener("scroll", throttledScroll, { passive: true });
+    handleScroll(); // Initial call
+    
+    return () => window.removeEventListener("scroll", throttledScroll);
   }, [handleScroll]);
   
   const handleDotClick = (index: number) => {
-    const { current: container } = containerRef;
+    const container = containerRef.current;
     if (!container) return;
     
-    const scrollableHeight = container.offsetHeight - window.innerHeight;
-
-    // Center the click on the "sticky" part of the event's scroll space
-    const eventScrollSpace = 1 / events.length;
-    const contentScrollPercent = (index * eventScrollSpace) + (eventScrollSpace / 2);
-
-    const scrollBuffer = 0.05;
-    const contentScrollRange = 1 - scrollBuffer * 2;
-    const targetRawProgress = scrollBuffer + (contentScrollPercent * contentScrollRange);
+    const viewportHeight = window.innerHeight;
+    const containerHeight = container.offsetHeight;
+    const scrollableHeight = containerHeight - viewportHeight;
     
-    const targetScrollTop = container.offsetTop + (targetRawProgress * scrollableHeight);
+    // Target the middle of the sticky zone for the clicked item
+    const itemScrollSpace = 1 / uniqueEvents.length;
+    const targetProgress = (index * itemScrollSpace) + (itemScrollSpace * 0.5);
+    const targetScrollTop = container.offsetTop + (targetProgress * scrollableHeight);
 
     window.scrollTo({
       top: targetScrollTop,
       behavior: 'smooth'
     });
+  };
+
+  if (uniqueEvents.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-muted-foreground">No timeline events to display</p>
+      </div>
+    );
   }
 
   return (
-    <div ref={containerRef} className="relative w-full" style={{ height: `${events.length * 300}vh` }}>
-      <div ref={textWrapperRef} className="sticky top-0 flex flex-col h-screen overflow-hidden">
+    <div 
+      ref={containerRef} 
+      className="relative w-full" 
+      style={{ height: `${uniqueEvents.length * 120 + 50}vh` }}
+    >
+      <div className="sticky top-0 flex flex-col h-screen overflow-hidden">
         <div className="text-center pt-12 md:pt-24 lg:pt-32">
-            <h2 className="text-3xl font-headline font-bold">Our Journey</h2>
-            <p className="mx-auto max-w-2xl text-muted-foreground md:text-xl mt-4">
-                Tracing our history of growth, innovation, and musical achievement.
-            </p>
+          <h2 className="text-3xl font-headline font-bold">Our Journey</h2>
+          <p className="mx-auto max-w-2xl text-muted-foreground md:text-xl mt-4">
+            Tracing our history of growth, innovation, and musical achievement.
+          </p>
+          <p className="text-sm text-muted-foreground/60 mt-2">
+            {uniqueEvents.length} milestone{uniqueEvents.length !== 1 ? 's' : ''}
+          </p>
         </div>
         
         <div className="flex-grow flex items-center">
-            <div ref={scrollWrapperRef} className="flex w-full overflow-x-hidden p-8 no-scrollbar">
-                {events.map((event, index) => (
-                <div key={index} className="flex-shrink-0 w-full flex justify-center">
-                    <div className="w-full md:w-3/4 lg:w-1/2 p-4">
-                        <Card className={cn(
-                            "transition-all duration-500 h-full",
-                            activeIndex === index ? "transform scale-100 shadow-2xl border-primary" : "opacity-60 scale-95"
-                        )}>
-                        <CardHeader>
-                            <div className="flex items-baseline gap-4">
-                                <p className="text-4xl font-bold text-primary">{event.year}</p>
-                                <CardTitle className="font-headline text-2xl">{event.title}</CardTitle>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-muted-foreground">{event.content}</p>
-                        </CardContent>
-                        </Card>
-                    </div>
+          <div 
+            ref={scrollWrapperRef} 
+            className="flex w-full overflow-x-hidden p-8 no-scrollbar"
+          >
+            {uniqueEvents.map((event, index) => (
+              <div 
+                key={`timeline-${index}-${event.year}-${event.title.slice(0, 10)}`} 
+                className="flex-shrink-0 w-full flex justify-center"
+              >
+                <div className="w-full md:w-3/4 lg:w-1/2 p-4">
+                  <Card className={cn(
+                    "transition-all duration-500 ease-out h-full transform-gpu",
+                    activeIndex === index 
+                      ? "scale-100 shadow-2xl border-primary opacity-100 ring-2 ring-primary/20" 
+                      : "opacity-50 scale-95 shadow-md"
+                  )}>
+                    <CardHeader>
+                      <div className="flex items-baseline gap-4">
+                        <p className="text-4xl font-bold text-primary">{event.year}</p>
+                        <CardTitle className="font-headline text-2xl">{event.title}</CardTitle>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground leading-relaxed">{event.content}</p>
+                    </CardContent>
+                  </Card>
                 </div>
-                ))}
-            </div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="flex justify-center items-center gap-4 pb-8">
-            {events.map((event, index) => (
+        <div className="flex justify-center items-center gap-3 pb-8">
+          {uniqueEvents.map((event, index) => (
             <button
-                key={index}
-                onClick={() => handleDotClick(index)}
-                className={cn("h-3 w-3 rounded-full transition-all duration-300", 
-                  activeIndex === index ? 'bg-primary scale-125' : 'bg-muted hover:bg-primary/50'
-                )}
-                aria-label={`Go to year ${event.year}`}
+              key={`dot-${index}-${event.year}`}
+              onClick={() => handleDotClick(index)}
+              className={cn(
+                "h-3 w-3 rounded-full transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary/50", 
+                activeIndex === index 
+                  ? 'bg-primary scale-125 shadow-lg ring-2 ring-primary/30' 
+                  : 'bg-muted hover:bg-primary/50'
+              )}
+              aria-label={`Go to ${event.year}: ${event.title}`}
             />
-            ))}
+          ))}
         </div>
 
         <style jsx global>{`
@@ -183,8 +195,8 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
             display: none;
           }
           .no-scrollbar {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
           }
         `}</style>
       </div>
