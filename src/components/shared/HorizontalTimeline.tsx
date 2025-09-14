@@ -12,7 +12,7 @@ const timelineData = [
   },
   {
     year: "2013-2016",
-    title: "Strategic Recruitment",
+    title: "Outreach & Recruitment",
     content: "A new strategic plan led to the hiring of Ann Millen for recruitment. She successfully established bursaries and an instrument library through community donations, significantly lowering barriers to entry. Outreach events in schools helped attract a new generation of musicians.",
   },
   {
@@ -27,10 +27,11 @@ const timelineData = [
   },
   {
     year: "2022-Present",
-    title: "Growth and New Leadership",
+    title: "Growth & New Leadership",
     content: "The organization has continued its growth trajectory, welcoming new artistic leaders like Dr. Alexander Cannon, Maziar Heidari, and currently Murray Lefebvre. With expanded faculty and the addition of a Jazz Ensemble, KYO has solidified its role as a comprehensive center for youth music education in the Kawarthas.",
   },
 ]
+
 
 export default function HorizontalTimeline() {
   const [activeIndex, setActiveIndex] = React.useState(0);
@@ -47,14 +48,13 @@ export default function HorizontalTimeline() {
       const viewportHeight = window.innerHeight;
       
       const scrollableHeight = containerHeight - viewportHeight;
-      const scrollProgress = Math.max(0, Math.min(1, (scrollY - containerTop) / scrollableHeight));
+      const scrollProgress = Math.max(0, Math.min(1, (scrollY - containerTop + viewportHeight / 2) / scrollableHeight));
       
-      const newIndex = Math.floor(scrollProgress * timelineData.length);
+      let newIndex = Math.floor(scrollProgress * timelineData.length);
+      newIndex = Math.min(newIndex, timelineData.length - 1);
       
-      if (newIndex < timelineData.length) {
+      if (newIndex !== activeIndex) {
         setActiveIndex(newIndex);
-      } else {
-        setActiveIndex(timelineData.length - 1);
       }
     };
 
@@ -62,7 +62,7 @@ export default function HorizontalTimeline() {
     handleScroll(); // Initial check
 
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [activeIndex]);
 
   return (
      <div className="container mx-auto">
@@ -72,37 +72,29 @@ export default function HorizontalTimeline() {
           Tracing our history of growth, innovation, and musical achievement.
         </p>
       </div>
-      <div ref={containerRef} className="relative" style={{ height: `${timelineData.length * 100}vh` }}>
-        <div className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden">
-          <div className="relative w-full max-w-3xl h-96">
+      <div ref={containerRef} className="relative" style={{ height: `${timelineData.length * 80}vh` }}>
+        <div className="sticky top-1/2 -translate-y-1/2 flex h-screen w-full items-center justify-center overflow-hidden" style={{ height: '400px' }}>
+          <div className="relative w-full max-w-3xl h-full">
             {timelineData.map((event, index) => {
-               const distance = Math.abs(activeIndex - index);
-               const isActive = activeIndex === index;
+              const isActive = activeIndex === index;
 
               return (
                 <div
-                  key={event.year}
-                  className={cn(
-                    "absolute inset-0 w-full h-full transition-all duration-500 ease-in-out",
-                  )}
-                  style={{
-                    opacity: isActive ? 1 : 0,
-                    transform: `translateY(${(index - activeIndex) * 100}px) scale(${1 - distance * 0.1})`,
-                    zIndex: timelineData.length - distance,
-                  }}
+                  key={`${event.year}-${event.title}`}
+                  className="absolute inset-0 w-full h-full"
                 >
                   <Card className={cn(
-                      "w-full h-full flex flex-col justify-center",
-                      isActive ? "border-primary shadow-2xl" : "shadow-md"
+                      "absolute inset-0 w-full h-full flex flex-col justify-center transition-all duration-500 ease-in-out",
+                      isActive ? "opacity-100 scale-100" : "opacity-0 scale-95",
                   )}>
                     <CardHeader>
-                      <div className="flex items-baseline gap-4">
-                        <p className="text-4xl font-bold text-primary">{event.year}</p>
-                        <CardTitle className="font-headline text-2xl">{event.title}</CardTitle>
+                      <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-4">
+                        <p className="text-4xl md:text-5xl font-bold text-primary">{event.year}</p>
+                        <CardTitle className="font-headline text-2xl md:text-3xl">{event.title}</CardTitle>
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-muted-foreground leading-relaxed text-lg">{event.content}</p>
+                      <p className="text-muted-foreground leading-relaxed text-base md:text-xl">{event.content}</p>
                     </CardContent>
                   </Card>
                 </div>
