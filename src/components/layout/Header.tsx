@@ -36,8 +36,15 @@ const navLinks = [
     ]
   },
   { name: 'Calendar', href: '/calendar' },
-  { name: 'Support', href: '/support' },
-  { name: 'Donate', href: '/donate' },
+  {
+    name: 'Get Involved',
+    href: '#',
+    subLinks: [
+        { name: 'Support Us', href: '/support' },
+        { name: 'Volunteer', href: '/volunteer' },
+        { name: 'Donate', href: '/donate' },
+    ]
+  },
 ];
 
 export default function Header() {

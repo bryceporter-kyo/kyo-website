@@ -89,6 +89,12 @@
       "description": "A stylish wall calendar with dates circled.",
       "imageUrl": "https://picsum.photos/seed/114/1200/400",
       "imageHint": "wall calendar"
+    },
+    {
+      "id": "page-header-volunteer",
+      "description": "A group of people working together for a cause.",
+      "imageUrl": "https://picsum.photos/seed/115/1200/400",
+      "imageHint": "volunteers community"
     }
   ]
 }
