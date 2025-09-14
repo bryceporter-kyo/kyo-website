@@ -84,17 +84,17 @@ export default function HorizontalTimeline() {
                   className="absolute inset-0 w-full h-full"
                 >
                   <Card className={cn(
-                      "absolute inset-0 w-full h-full flex flex-col justify-center transition-all duration-500 ease-in-out",
+                      "absolute inset-0 w-full h-full flex flex-col justify-center transition-all duration-500 ease-in-out p-6",
                       isActive ? "opacity-100 scale-100" : "opacity-0 scale-95",
                   )}>
                     <CardHeader>
-                      <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-4">
-                        <p className="text-4xl md:text-5xl font-bold text-primary">{event.year}</p>
+                       <div className="flex flex-col sm:flex-row sm:items-baseline gap-x-4 gap-y-2">
+                        <p className="text-4xl md:text-5xl font-bold text-primary whitespace-nowrap">{event.year}</p>
                         <CardTitle className="font-headline text-2xl md:text-3xl">{event.title}</CardTitle>
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-muted-foreground leading-relaxed text-base md:text-xl">{event.content}</p>
+                      <p className="text-muted-foreground leading-relaxed text-lg md:text-xl">{event.content}</p>
                     </CardContent>
                   </Card>
                 </div>
