@@ -140,16 +140,8 @@ export default function AboutPage() {
                 </div>
             </section>
 
-             <section className="bg-secondary">
-                <div className="container mx-auto">
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl font-headline font-bold">Our Journey</h2>
-                        <p className="mx-auto max-w-2xl text-muted-foreground md:text-xl mt-4">
-                            Tracing our history of growth, innovation, and musical achievement.
-                        </p>
-                    </div>
-                    <HorizontalTimeline events={timelineData} />
-                </div>
+             <section className="bg-secondary p-0">
+                <HorizontalTimeline events={timelineData} />
             </section>
 
             <section>
