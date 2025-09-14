@@ -5,84 +5,57 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
 const timelineData = [
-  {
+    {
     year: "2007-2012",
-    title: "Origins of KYO",
-    content: "KYO was founded by Karen Lauder, Ben Bell, and Steven Brown, who gathered skilled young musicians in the Peterborough area. Michael Newnham, the new conductor of the Peterborough Symphony Orchestra (PSO), was brought on to conduct. Membership grew to around 30 players, but declined to 11 by 2011 due to members aging out and reduced local music programs.",
+    title: "The Founding Years",
+    content: "KYO was established by Karen Lauder, Ben Bell, and Steven Brown, with Michael Newnham of the Peterborough Symphony Orchestra as the first conductor. The group grew to 30 players but later declined as founding members aged out and local school music programs were reduced.",
   },
   {
     year: "2013-2016",
-    title: "Outreach and Recruitment",
-    content: "Following a new strategic plan, Ann Millen was hired for a recruitment project. She established bursaries to lower financial barriers and created an instrument library through public donations. Outreach events and school concerts helped attract new musicians, including from the home-schooling community.",
+    title: "Strategic Recruitment",
+    content: "A new strategic plan led to the hiring of Ann Millen for recruitment. She successfully established bursaries and an instrument library through community donations, significantly lowering barriers to entry. Outreach events in schools helped attract a new generation of musicians.",
   },
   {
     year: "2017-2019",
     title: "Expanding Ensembles",
-    content: "To cater to varying skill levels, the Junior Kawartha Youth Orchestra (JKYO) was launched for new players, led by Marilyn Chalk. As players progressed, the Intermediate Kawartha Youth Orchestra (IKYO) was formed under her leadership, with John Fautley taking over JKYO. The Community Foundation of Greater Peterborough (CFGP) provided solid support, managing dedicated funds for KYO.",
+    content: "To cater to diverse skill levels, the Junior (JKYO) and Intermediate (IKYO) orchestras were launched under the leadership of Marilyn Chalk and later John Fautley. The Community Foundation of Greater Peterborough provided crucial support by managing dedicated funds for KYO.",
   },
   {
     year: "2020-2021",
-    title: "Adaptation and New Programs",
-    content: "Inspired by El Sistema, the board launched UPBEAT!, an after-school music program for social change, in 2020. In response to the pandemic, KYO went virtual with e-orchestras, virtual concerts, and livestreams. The 'Farm Team' program also expanded to include all orchestral instrument groups. JKYO Conductor Marilyn Chalk became Acting Conductor of The Orchestras.",
+    title: "Pandemic Adaptation & New Programs",
+    content: "Inspired by the El Sistema model, the UPBEAT! after-school program was launched in 2020. In response to the COVID-19 pandemic, KYO pivoted to virtual e-orchestras and online concerts to keep the music playing. Marilyn Chalk became the Acting Conductor for The Orchestras during this period.",
   },
   {
     year: "2022-Present",
     title: "Growth and New Leadership",
-    content: "KYO continued to grow, welcoming new artistic leadership including Dr. Alexander Cannon, Maziar Heidari, and currently Murray Lefebvre at the helm of the Senior KYO. The organization solidified its status as a comprehensive centre for music education in the Kawarthas with expanded faculty and programs, including a Jazz Ensemble.",
+    content: "The organization has continued its growth trajectory, welcoming new artistic leaders like Dr. Alexander Cannon, Maziar Heidari, and currently Murray Lefebvre. With expanded faculty and the addition of a Jazz Ensemble, KYO has solidified its role as a comprehensive center for youth music education in the Kawarthas.",
   },
-];
+]
 
-
-function TimelineCard({ event, isActive }: { event: typeof timelineData[0], isActive: boolean }) {
-  const cardRef = React.useRef<HTMLDivElement>(null);
-
-  return (
-    <div ref={cardRef} className="py-12">
-       <Card className={cn(
-          "transition-all duration-700 ease-in-out w-full max-w-3xl mx-auto",
-          isActive ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
-      )}>
-        <CardHeader>
-          <div className="flex items-baseline gap-4">
-            <p className="text-4xl font-bold text-primary">{event.year}</p>
-            <CardTitle className="font-headline text-2xl">{event.title}</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground leading-relaxed">{event.content}</p>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-
-export default function VerticalTimeline() {
-  const [activeIndex, setActiveIndex] = React.useState(-1);
-  const timelineRef = React.useRef<HTMLDivElement>(null);
-
+export default function HorizontalTimeline() {
+  const [activeIndex, setActiveIndex] = React.useState(0);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  
   React.useEffect(() => {
     const handleScroll = () => {
-      const timeline = timelineRef.current;
-      if (!timeline) return;
+      const container = containerRef.current;
+      if (!container) return;
 
-      const scrollPosition = window.scrollY + window.innerHeight / 2;
+      const scrollY = window.scrollY;
+      const containerTop = container.offsetTop;
+      const containerHeight = container.offsetHeight;
+      const viewportHeight = window.innerHeight;
       
-      const childrenArray = Array.from(timeline.children) as HTMLElement[];
-
-      let currentActiveIndex = -1;
-
-      for (let i = 0; i < childrenArray.length; i++) {
-        const child = childrenArray[i];
-        const childTop = child.offsetTop + timeline.offsetTop;
-        const childBottom = childTop + child.offsetHeight;
-        
-        if (scrollPosition >= childTop && scrollPosition < childBottom) {
-          currentActiveIndex = i;
-          break;
-        }
+      const scrollableHeight = containerHeight - viewportHeight;
+      const scrollProgress = Math.max(0, Math.min(1, (scrollY - containerTop) / scrollableHeight));
+      
+      const newIndex = Math.floor(scrollProgress * timelineData.length);
+      
+      if (newIndex < timelineData.length) {
+        setActiveIndex(newIndex);
+      } else {
+        setActiveIndex(timelineData.length - 1);
       }
-      setActiveIndex(currentActiveIndex);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -92,21 +65,52 @@ export default function VerticalTimeline() {
   }, []);
 
   return (
-    <div className="container mx-auto">
-        <div className="text-center mb-12">
-            <h2 className="text-3xl font-headline font-bold">Our Journey</h2>
-            <p className="mx-auto max-w-2xl text-muted-foreground md:text-xl mt-4">
-                Tracing our history of growth, innovation, and musical achievement.
-            </p>
+     <div className="container mx-auto">
+      <div className="text-center mb-12">
+        <h2 className="text-3xl font-headline font-bold">Our Journey</h2>
+        <p className="mx-auto max-w-2xl text-muted-foreground md:text-xl mt-4">
+          Tracing our history of growth, innovation, and musical achievement.
+        </p>
+      </div>
+      <div ref={containerRef} className="relative" style={{ height: `${timelineData.length * 100}vh` }}>
+        <div className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden">
+          <div className="relative w-full max-w-3xl h-96">
+            {timelineData.map((event, index) => {
+               const distance = Math.abs(activeIndex - index);
+               const isActive = activeIndex === index;
+
+              return (
+                <div
+                  key={event.year}
+                  className={cn(
+                    "absolute inset-0 w-full h-full transition-all duration-500 ease-in-out",
+                  )}
+                  style={{
+                    opacity: isActive ? 1 : 0,
+                    transform: `translateY(${(index - activeIndex) * 100}px) scale(${1 - distance * 0.1})`,
+                    zIndex: timelineData.length - distance,
+                  }}
+                >
+                  <Card className={cn(
+                      "w-full h-full flex flex-col justify-center",
+                      isActive ? "border-primary shadow-2xl" : "shadow-md"
+                  )}>
+                    <CardHeader>
+                      <div className="flex items-baseline gap-4">
+                        <p className="text-4xl font-bold text-primary">{event.year}</p>
+                        <CardTitle className="font-headline text-2xl">{event.title}</CardTitle>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground leading-relaxed text-lg">{event.content}</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              );
+            })}
+          </div>
         </div>
-        <div ref={timelineRef} className="relative">
-            {/* Vertical line */}
-            <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-0.5 bg-border hidden md:block" />
-            
-            {timelineData.map((event, index) => (
-                <TimelineCard key={index} event={event} isActive={index === activeIndex} />
-            ))}
-        </div>
+      </div>
     </div>
   );
 }
