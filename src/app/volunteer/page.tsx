@@ -3,7 +3,7 @@ import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { Heart, Handshake, Gift, Star, Ticket, Users } from "lucide-react";
+import { Heart, Handshake, Gift, Star, Ticket, Users, Camera, Wrench } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -15,18 +15,18 @@ const volunteerRoles = [
     },
     {
         icon: Users,
-        title: "Program Assistance",
-        description: "Lend a hand during our weekly programs. Assist with student check-in, snack distribution, and monitoring practice rooms. Your presence helps create a safe and organized environment for our young musicians.",
+        title: "Program Assistance (UpBeat!)",
+        description: "Lend a hand during our weekly UpBeat! program. Assist with student check-in, meal prep and service, and setup/teardown. Your presence helps create a safe and organized environment for our young musicians.",
+    },
+    {
+        icon: Wrench,
+        title: "Technical Skills",
+        description: "Put your specific talents to use. We need help with instrument maintenance, photography, digital recording, and post-production. Your expertise amplifies our knowledge and enhances our programs.",
     },
     {
         icon: Handshake,
-        title: "Fundraising & Outreach",
-        description: "Join our team at community events to spread the word about KYO. Help us with fundraising campaigns, donor thank-you calls, or representing us at local fairs. Your voice helps us grow our community.",
-    },
-    {
-        icon: Star,
-        title: "Serve on a Committee",
-        description: "Lend your expertise to one of our board committees. We have opportunities in finance, governance, fundraising, and more. Help shape the strategic direction of KYO and ensure our long-term success.",
+        title: "Operational & Admin Support",
+        description: "Are you a whiz at bookkeeping, data management, or event coordination? Help our day-to-day operations run smoothly. Your organizational skills are invaluable to our mission's success.",
     },
 ]
 
@@ -46,10 +46,10 @@ export default function VolunteerPage() {
                     <div className="space-y-6">
                         <h2 className="text-3xl font-headline font-bold">Be the Heartbeat of KYO</h2>
                         <p className="text-muted-foreground text-lg">
-                            Volunteers are essential to everything we do. From concert halls to classrooms, your energy and dedication create a vibrant, supportive community where young musicians can thrive. By giving your time, you become a partner in our mission and a role model for our students.
+                            Volunteers are essential to everything we do. From concert halls to classrooms, your energy and dedication create a vibrant, supportive community where young musicians can thrive. Many minds and hands make light work of the numerous tasks required to sustain our programs.
                         </p>
                         <p className="text-muted-foreground text-lg">
-                            Whether you can offer a few hours at a single event or provide ongoing support, there’s a place for you at KYO Hub. Explore the opportunities to see how you can make a meaningful impact.
+                            By giving your time, you become a partner in our mission and a role model for our students. Whether you have specialized skills or simply a passion for music and community, there’s a place for you here.
                         </p>
                          <Button asChild size="lg">
                             <Link href="/register">Sign Up to Volunteer</Link>
@@ -75,17 +75,17 @@ export default function VolunteerPage() {
                     <div className="text-center mb-12">
                         <h2 className="text-3xl font-headline font-bold">How You Can Help</h2>
                         <p className="mx-auto max-w-2xl text-muted-foreground md:text-xl mt-4">
-                            We have a variety of roles to match your skills and availability.
+                            We have a variety of roles to match your skills, interests, and availability. Find the perfect fit and make a real difference.
                         </p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                         {volunteerRoles.map(role => (
                              <Card key={role.title}>
-                                <CardHeader className="flex flex-row items-start gap-4">
-                                    <div className="bg-primary text-primary-foreground p-3 rounded-full mt-1">
-                                        <role.icon className="w-6 h-6" />
+                                <CardHeader className="items-center text-center">
+                                     <div className="bg-primary text-primary-foreground p-4 rounded-full">
+                                        <role.icon className="w-8 h-8" />
                                     </div>
-                                    <CardTitle className="font-headline text-xl">{role.title}</CardTitle>
+                                    <CardTitle className="font-headline text-xl pt-4">{role.title}</CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <p className="text-muted-foreground">{role.description}</p>
@@ -101,11 +101,11 @@ export default function VolunteerPage() {
                     <div className="rounded-lg bg-primary text-primary-foreground p-8 md:p-12 text-center">
                         <h2 className="text-3xl font-headline font-bold">Ready to Make a Difference?</h2>
                         <p className="mt-4 max-w-2xl mx-auto text-lg text-primary-foreground/80">
-                            Your contribution of time and expertise is one of the most valuable gifts you can give. Join our community of dedicated volunteers today.
+                            Your contribution of time and expertise is one of the most valuable gifts you can give. Join our dedicated community and help us inspire the next generation of musicians.
                         </p>
                         <div className="mt-8 flex justify-center">
                             <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 font-bold">
-                                <Link href="/register">Become a Volunteer</Link>
+                                <Link href="/register">Become a Volunteer Today</Link>
                             </Button>
                         </div>
                     </div>
