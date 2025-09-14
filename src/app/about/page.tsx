@@ -1,10 +1,11 @@
 import PageHeader from "@/components/shared/PageHeader";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { Award, BarChart, Users, Milestone, HeartHandshake, Briefcase, GraduationCap, User, DollarSign, Group } from 'lucide-react';
+import { Award, Users, DollarSign, Group, GraduationCap, HeartHandshake, User, Briefcase } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
+import HorizontalTimeline from "@/components/shared/HorizontalTimeline";
 
 const stats = [
     { number: '70+', label: 'Concerts Performed', icon: Award },
@@ -20,32 +21,39 @@ const communityRoles = [
     { title: 'Board & Donors', description: 'Dedicated individuals and businesses whose expertise and support advance our mission and sustain our programs.', icon: Briefcase },
 ]
 
-const milestones = [
-    {
-        year: '2002-2007',
-        events: [
-            "KYO is founded to provide advanced music training.",
-            "The organization establishes itself as a key part of the region's arts community."
-        ]
-    },
-    {
-        year: '2009-2016',
-        events: [
-            "Awarded an Ontario Trillium Foundation Grant for promotion.",
-            "Celebrated our 10th anniversary.",
-            "Created our second ensemble, the Junior KYO (JKYO)."
-        ]
-    },
-    {
-        year: '2020-2024',
-        events: [
-            "Launched UPBEAT! Downtown, a social-impact after-school program.",
-            "Pioneered a virtual e-orchestra program during the global pandemic.",
-            "Expanded Farm Team programming for all instrument groups.",
-            "Welcomed new artistic leadership to guide growth and development."
-        ]
-    }
-]
+const timelineData = [
+  {
+    year: "2007",
+    title: "Origins of KYO",
+    content: "KYO founders Karen Lauder, Ben Bell, and Steven Brown began gathering highly skilled young musicians in the Peterborough area to form an ensemble. Michael Newnham, the new conductor of the Peterborough Symphony Orchestra (PSO), was brought on to conduct the newly formed youth orchestra.",
+  },
+  {
+    year: "2013-2016",
+    title: "Outreach and Recruitment",
+    content: "A strategic plan focusing on recruitment was developed. Ann Millen was hired for a recruitment project, establishing bursaries to lower financial barriers and creating an instrument library through public donations. Outreach events and school concerts helped attract new musicians, including from the home-schooling community.",
+  },
+  {
+      year: "2017",
+      title: "Launch of UPBEAT!",
+      content: "Inspired by the El Sistema program, the KYO board launched UPBEAT!, an after-school music program for social change in downtown Peterborough. A pilot project in 2018, funded by an Ontario Trillium Foundation (OTF) seed grant, led to a 3-year development grant, officially launching the program.",
+  },
+  {
+      year: "2019",
+      title: "Expanding Ensembles",
+      content: "To cater to varying skill levels, the Junior Kawartha Youth Orchestra (JKYO) was launched for new players, led by Marilyn Chalk. As players progressed, the Intermediate Kawartha Youth Orchestra (IKYO) was formed under her leadership, with John Fautley taking over JKYO.",
+  },
+  {
+      year: "2020",
+      title: "Adapting to Challenges",
+      content: "KYO went virtual with an e-orchestras training program in response to the COVID-19 pandemic. This included virtual broadcast concerts and livestreamed events. The organization also expanded its 'Farm Team' program for all orchestral instrument groups.",
+  },
+  {
+      year: "2022-Present",
+      title: "Growth and New Leadership",
+      content: "KYO continued to grow, welcoming new conductors and instructors across its programs. Maziar Heidari, and later Murray Lefebvre, took the helm of the Senior KYO. The organization solidified its status as a comprehensive centre for music education in the Kawarthas.",
+  },
+];
+
 
 export default function AboutPage() {
     const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-orchestras');
@@ -140,42 +148,7 @@ export default function AboutPage() {
                             Tracing our history of growth, innovation, and musical achievement.
                         </p>
                     </div>
-                    <div className="relative">
-                        <div className="absolute left-1/2 -translate-x-1/2 h-full w-0.5 bg-border" aria-hidden="true"></div>
-                        <div className="space-y-16">
-                            {milestones.map((milestone, index) => (
-                                <div key={index} className="relative flex items-start">
-                                    <div className="flex-1 text-right pr-8">
-                                        {index % 2 === 0 && (
-                                            <Card>
-                                                <CardHeader>
-                                                    <ul className="list-disc list-inside text-left space-y-2 text-muted-foreground">
-                                                        {milestone.events.map((event, i) => <li key={i}>{event}</li>)}
-                                                    </ul>
-                                                </CardHeader>
-                                            </Card>
-                                        )}
-                                    </div>
-                                    <div className="absolute left-1/2 -translate-x-1/2 bg-background p-2">
-                                        <div className="bg-primary text-primary-foreground rounded-full w-24 h-24 flex items-center justify-center font-headline text-lg font-bold">
-                                            {milestone.year}
-                                        </div>
-                                    </div>
-                                    <div className="flex-1 pl-8">
-                                        {index % 2 !== 0 && (
-                                           <Card>
-                                                <CardHeader>
-                                                    <ul className="list-disc list-inside text-left space-y-2 text-muted-foreground">
-                                                        {milestone.events.map((event, i) => <li key={i}>{event}</li>)}
-                                                    </ul>
-                                                </CardHeader>
-                                            </Card>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                    <HorizontalTimeline events={timelineData} />
                 </div>
             </section>
 
