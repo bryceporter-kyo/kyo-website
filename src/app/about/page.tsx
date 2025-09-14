@@ -106,7 +106,7 @@ export default function AboutPage() {
                 </div>
             </section>
 
-             <section className="bg-secondary p-0">
+             <section className="bg-secondary">
                 <HorizontalTimeline />
             </section>
 
