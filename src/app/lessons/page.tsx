@@ -1,38 +1,39 @@
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import PageHeader from '@/components/shared/PageHeader';
-import InstructorCard from '@/components/shared/InstructorCard';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Check } from 'lucide-react';
+import { Check, Target, Users, GraduationCap, Music } from 'lucide-react';
+import Image from 'next/image';
 
-const instructors = [
+const programGoals = [
     {
-        name: 'Kenji Tanaka',
-        title: 'Advanced Strings & Conducting',
-        bio: 'In addition to his conducting duties, Maestro Tanaka offers advanced private instruction for violin and viola students aiming for a professional career, as well as introductory conducting lessons.',
-        image: PlaceHolderImages.find(p => p.id === 'instructor-1')
-      },
-      {
-        name: 'Maria Rossi',
-        title: 'Violin & Viola',
-        bio: 'With a focus on strong technical foundation and musical expression, Maria Rossi works with students of all levels, from beginners to advanced players preparing for auditions.',
-        image: PlaceHolderImages.find(p => p.id === 'instructor-2')
-      },
-      {
-        name: 'David Chen',
-        title: 'Piano & Music Theory',
-        bio: 'David Chen offers piano lessons for all ages and specializes in making music theory engaging and understandable for all students, providing a crucial supplement to their practical studies.',
-        image: PlaceHolderImages.find(p => p.id === 'instructor-3')
-      }
+        icon: GraduationCap,
+        title: "Increase Access to Music",
+        description: "Grow our capacity to deliver high-quality instrumental lessons for youth aged 6-18, from complete beginners to advanced players."
+    },
+    {
+        icon: Target,
+        title: "Strengthen Musical Pathways",
+        description: "Integrate private instruction with our tiered ensembles, creating a clear path from beginner lessons to our advanced orchestras."
+    },
+    {
+        icon: Users,
+        title: "Build Confidence & Community",
+        description: "Support musical progression and retention, ensuring lessons connect meaningfully with ensemble participation and long-term skill development."
+    }
 ];
 
 const instruments = [
-  'Violin', 'Viola', 'Cello', 'Double Bass', 'Piano', 'Flute', 'Clarinet', 'Trumpet', 'Percussion'
+  'Violin', 'Viola', 'Cello', 'Double Bass',
+  'Flute', 'Clarinet', 'Saxophone', 'Oboe', 'Bassoon',
+  'Trumpet', 'French Horn', 'Trombone', 'Tuba',
+  'Percussion', 'Guitar'
 ]
 
 export default function LessonsPage() {
   const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-lessons');
+  const aboutImage = PlaceHolderImages.find(p => p.id === 'program-lessons');
 
   return (
     <div>
@@ -43,22 +44,86 @@ export default function LessonsPage() {
       />
 
       <section className="container mx-auto">
+        <div className="grid md:grid-cols-2 gap-16 items-center">
+            <div className="space-y-6">
+                <h2 className="text-3xl font-headline font-bold">A Foundation for Growth</h2>
+                <p className="text-muted-foreground text-lg">
+                    The KYO Lessons Program is a transformative investment in the long-term accessibility, quality, and sustainability of youth music education in our region. Our lessons serve not just as musical instruction but as a bridge to ensemble performance, confidence-building, and lifelong engagement with the arts.
+                </p>
+                <p className="text-muted-foreground text-lg">
+                    This initiative enables more youth to receive weekly, high-caliber music instruction delivered by professional and conservatory-trained teachers. We are deeply committed to making music education available, affordable, and inspiring for all youth.
+                </p>
+                <Button asChild size="lg">
+                    <Link href="/register">Start Your Musical Journey</Link>
+                </Button>
+            </div>
+            {aboutImage && (
+                <div className="rounded-lg overflow-hidden shadow-xl">
+                    <Image
+                        src={aboutImage.imageUrl}
+                        alt={aboutImage.description}
+                        width={600}
+                        height={400}
+                        className="object-cover w-full h-full"
+                        data-ai-hint={aboutImage.imageHint}
+                    />
+                </div>
+            )}
+        </div>
+      </section>
+
+      <section className="bg-secondary">
+        <div className="container mx-auto">
+            <div className="text-center mb-12">
+            <h2 className="text-3xl font-headline font-bold">Our Goals</h2>
+            <p className="mx-auto max-w-2xl text-muted-foreground md:text-xl mt-4">
+                We are committed to creating a space where music drives personal growth and opportunity.
+            </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {programGoals.map(goal => (
+                    <Card key={goal.title} className="text-center flex flex-col">
+                        <CardHeader className="items-center">
+                            <div className="bg-primary text-primary-foreground p-4 rounded-full">
+                                <goal.icon className="h-8 w-8" />
+                            </div>
+                            <CardTitle className="font-headline text-2xl pt-4">{goal.title}</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex-grow">
+                            <p className="text-muted-foreground">{goal.description}</p>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+        </div>
+      </section>
+      
+      <section className="container mx-auto">
         <div className="grid md:grid-cols-3 gap-8">
           <div className="md:col-span-2 space-y-8">
-            <h2 className="text-3xl font-headline font-bold">About the Program</h2>
+            <h2 className="text-3xl font-headline font-bold">Program Structure</h2>
             <p className="text-muted-foreground text-lg">
-              Our Lessons Program offers personalized instruction from our faculty of experienced and dedicated teaching artists. We provide both individual and small group lessons, allowing for a tailored approach to meet each student's unique goals and learning style. Whether you are a complete beginner or an advanced musician, our instructors are here to guide you on your musical journey.
+              Our lessons program is designed to provide consistent, high-quality instruction throughout the school year. Students benefit from weekly one-hour lessons, opportunities to perform in public recitals and showcases, and a curriculum that aligns with our ensemble programs and the Royal Conservatory of Music (RCM) framework.
             </p>
             <p className="text-muted-foreground text-lg">
-              Private lessons offer one-on-one attention and a curriculum designed specifically for the student, while group lessons provide a collaborative and social learning environment. We believe that a strong foundation in technique and musicianship is key to a lifetime of musical enjoyment and achievement.
+              The Lessons Program is a foundational pillar in the KYO’s broader ecosystem. It directly supports student progression into our many ensembles, including orchestras, jazz, wind, and chamber groups. This interconnected approach strengthens learning, builds peer connections, and improves retention over time.
             </p>
 
-            <h2 className="text-3xl font-headline font-bold mt-12">Meet the Instructors</h2>
-            <div className="space-y-8">
-              {instructors.map((instructor) => (
-                <InstructorCard key={instructor.name} {...instructor} />
-              ))}
-            </div>
+            <Card className="bg-primary text-primary-foreground">
+              <CardHeader className="flex flex-row items-start gap-4">
+                <Music className="w-8 h-8 mt-1"/>
+                <div>
+                    <CardTitle className="font-headline text-2xl">A Pathway to Performance</CardTitle>
+                    <CardDescription className="text-primary-foreground/80">Every student has the opportunity to perform three times annually in studio recitals and KYO ensemble concerts.</CardDescription>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p>Ensemble participation provides real-world performance experience that reinforces learning goals and builds artistry. Lesson instruction is synchronized with our orchestra programming, creating a seamless path from individual growth to ensemble excellence.</p>
+                <Button asChild variant="secondary" className="mt-6">
+                  <Link href="/orchestras">Explore Our Ensembles</Link>
+                </Button>
+              </CardContent>
+            </Card>
           </div>
           
           <div className="md:col-span-1 space-y-8">
@@ -67,7 +132,7 @@ export default function LessonsPage() {
                 <CardTitle className="font-headline text-2xl">Instruments Offered</CardTitle>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-2">
+                <ul className="space-y-2 columns-2">
                     {instruments.map(inst => (
                         <li key={inst} className="flex items-center gap-2 text-muted-foreground">
                             <Check className="w-5 h-5 text-accent"/>
@@ -78,13 +143,13 @@ export default function LessonsPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-primary text-primary-foreground">
+            <Card className="bg-secondary">
               <CardHeader>
                 <CardTitle className="font-headline text-2xl">Start Your Lessons</CardTitle>
               </CardHeader>
               <CardContent>
-                <p>Ready to take the next step? Register today to be matched with an instructor and schedule your first lesson.</p>
-                <Button asChild variant="secondary" className="mt-4 w-full">
+                <p className="text-muted-foreground">Ready to take the next step? Register today to be matched with an instructor and schedule your first lesson. No prior experience is required for many of our beginner programs!</p>
+                <Button asChild className="mt-4 w-full">
                   <Link href="/register">Register for Lessons</Link>
                 </Button>
               </CardContent>
