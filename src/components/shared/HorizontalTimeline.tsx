@@ -28,63 +28,82 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
 
     const { top } = container.getBoundingClientRect();
     const scrollableHeight = container.offsetHeight - window.innerHeight;
+    const cardWidth = scrollWrapper.scrollWidth / events.length;
     
+    // The buffer defines the percentage of the start and end of the scroll
+    // that should be "dead space" before/after the animation.
     const scrollBuffer = 0.05; 
     
     if (top <= 0 && top >= -scrollableHeight) {
-        const rawScrollProgress = Math.max(0, Math.min(1, -top / scrollableHeight));
-        
-        let newActiveIndex = 0;
-        let targetScrollLeft = 0;
-        const cardWidth = scrollWrapper.scrollWidth / events.length;
+      // We are within the scrollable container
+      const rawScrollProgress = Math.max(0, Math.min(1, -top / scrollableHeight));
+      
+      let newActiveIndex = 0;
+      let targetScrollLeft = 0;
 
-        if (rawScrollProgress < scrollBuffer) {
-            newActiveIndex = 0;
-            targetScrollLeft = 0;
-        } else if (rawScrollProgress >= 1 - scrollBuffer) {
-            newActiveIndex = events.length - 1;
-            targetScrollLeft = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
+      if (rawScrollProgress < scrollBuffer) {
+        // We are in the top buffer zone
+        newActiveIndex = 0;
+        targetScrollLeft = 0;
+      } else if (rawScrollProgress >= 1 - scrollBuffer) {
+        // We are in the bottom buffer zone
+        newActiveIndex = events.length - 1;
+        targetScrollLeft = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
+      } else {
+        // We are in the main content scroll area
+        const progressInContent = (rawScrollProgress - scrollBuffer) / (1 - scrollBuffer * 2);
+        
+        const eventScrollSpace = 1 / events.length;
+        newActiveIndex = Math.floor(progressInContent / eventScrollSpace);
+        
+        const progressWithinEvent = (progressInContent % eventScrollSpace) / eventScrollSpace;
+
+        // Define the "sticky" portion for each card (e.g., from 25% to 75% of its scroll space)
+        const stickyStart = 0.25;
+        const stickyEnd = 0.75;
+        
+        const currentCardScroll = newActiveIndex * cardWidth;
+
+        if (progressWithinEvent > stickyStart && progressWithinEvent < stickyEnd) {
+          // In the sticky part, stay on the current card
+          targetScrollLeft = currentCardScroll;
         } else {
-            const progressInContent = (rawScrollProgress - scrollBuffer) / (1 - scrollBuffer * 2);
-            
-            const eventScrollSpace = 1 / events.length;
-            newActiveIndex = Math.floor(progressInContent / eventScrollSpace);
-            
-            const progressWithinEvent = (progressInContent % eventScrollSpace) / eventScrollSpace;
+          // In the transition part (either entering or exiting the sticky zone)
+          const isExiting = progressWithinEvent >= stickyEnd;
+          const transitionProgress = isExiting
+              ? (progressWithinEvent - stickyEnd) / (1 - stickyEnd) // Progress from 0 to 1 as we exit
+              : progressWithinEvent / stickyStart; // Progress from 0 to 1 as we enter
+          
+          const nextCardIndex = Math.min(events.length - 1, newActiveIndex + 1);
+          const nextCardScroll = nextCardIndex * cardWidth;
 
-            const stickyStart = 0.25;
-            const stickyEnd = 0.75;
-            
-            let currentCardScroll = newActiveIndex * cardWidth;
+          // The card we are transitioning from
+          const fromCardScroll = currentCardScroll;
+          // The card we are transitioning to. If exiting, it's the next card. If entering, it's the current card.
+          const toCardScroll = isExiting ? nextCardScroll : currentCardScroll;
+          
+          // For the entering transition, we are actually coming from the previous card's end position
+          const effectiveFromScroll = isExiting ? fromCardScroll : (newActiveIndex > 0 ? (newActiveIndex -1) * cardWidth : 0)
 
-            if (progressWithinEvent > stickyStart && progressWithinEvent < stickyEnd) {
-                // In the sticky part
-                targetScrollLeft = currentCardScroll;
-            } else {
-                // In the transition part (either entering or exiting)
-                const isExiting = progressWithinEvent >= stickyEnd;
-                const transitionProgress = isExiting
-                    ? (progressWithinEvent - stickyEnd) / (1 - stickyEnd)
-                    : progressWithinEvent / stickyStart;
-                
-                const nextCardIndex = Math.min(events.length - 1, newActiveIndex + 1);
-                const nextCardScroll = nextCardIndex * cardWidth;
-
-                targetScrollLeft = currentCardScroll + (nextCardScroll - currentCardScroll) * transitionProgress;
-            }
+          targetScrollLeft = isExiting
+            ? fromCardScroll + (toCardScroll - fromCardScroll) * transitionProgress
+            : effectiveFromScroll + (toCardScroll - effectiveFromScroll) * transitionProgress;
         }
+      }
 
-        if (newActiveIndex !== activeIndex) {
-            setActiveIndex(newActiveIndex);
-        }
-        
-        // Clamp the final scroll position to prevent overscrolling
-        scrollWrapper.scrollLeft = Math.min(targetScrollLeft, scrollWrapper.scrollWidth - scrollWrapper.clientWidth);
+      if (newActiveIndex !== activeIndex) {
+          setActiveIndex(newActiveIndex);
+      }
+      
+      // Clamp the final scroll position to prevent overscrolling
+      scrollWrapper.scrollLeft = Math.min(targetScrollLeft, scrollWrapper.scrollWidth - scrollWrapper.clientWidth);
 
     } else if (top > 0) {
+        // Scrolled above the container
         scrollWrapper.scrollLeft = 0;
         if (activeIndex !== 0) setActiveIndex(0);
     } else {
+        // Scrolled past the container
         const targetScrollLeft = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
         scrollWrapper.scrollLeft = targetScrollLeft;
         if (activeIndex !== events.length - 1) setActiveIndex(events.length - 1);
@@ -102,6 +121,7 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
     
     const scrollableHeight = container.offsetHeight - window.innerHeight;
 
+    // Center the click on the "sticky" part of the event's scroll space
     const eventScrollSpace = 1 / events.length;
     const contentScrollPercent = (index * eventScrollSpace) + (eventScrollSpace / 2);
 
@@ -118,7 +138,7 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
   }
 
   return (
-    <div ref={containerRef} className="relative w-full" style={{ height: `${events.length * 200}vh` }}>
+    <div ref={containerRef} className="relative w-full" style={{ height: `${events.length * 300}vh` }}>
       <div ref={textWrapperRef} className="sticky top-0 flex flex-col h-screen overflow-hidden">
         <div className="text-center pt-12 md:pt-24 lg:pt-32">
             <h2 className="text-3xl font-headline font-bold">Our Journey</h2>
