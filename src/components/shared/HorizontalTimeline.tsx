@@ -22,7 +22,7 @@ const timelineData = [
   },
   {
     year: "2020-2021",
-    title: "Pandemic Adaptation & New Programs",
+    title: "Pandemic Adaptation",
     content: "Inspired by the El Sistema model, the UPBEAT! after-school program was launched in 2020. In response to the COVID-19 pandemic, KYO pivoted to virtual e-orchestras and online concerts to keep the music playing. Marilyn Chalk became the Acting Conductor for The Orchestras during this period.",
   },
   {
@@ -48,21 +48,19 @@ export default function HorizontalTimeline() {
       const viewportHeight = window.innerHeight;
       
       const scrollableHeight = containerHeight - viewportHeight;
-      const scrollProgress = Math.max(0, Math.min(1, (scrollY - containerTop + viewportHeight / 2) / scrollableHeight));
+      const scrollProgress = Math.max(0, Math.min(1, (scrollY - containerTop) / scrollableHeight));
       
       let newIndex = Math.floor(scrollProgress * timelineData.length);
       newIndex = Math.min(newIndex, timelineData.length - 1);
       
-      if (newIndex !== activeIndex) {
-        setActiveIndex(newIndex);
-      }
+      setActiveIndex(newIndex);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll(); // Initial check
 
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [activeIndex]);
+  }, []);
 
   return (
      <div className="container mx-auto">
@@ -72,11 +70,12 @@ export default function HorizontalTimeline() {
           Tracing our history of growth, innovation, and musical achievement.
         </p>
       </div>
-      <div ref={containerRef} className="relative" style={{ height: `${timelineData.length * 80}vh` }}>
+      <div ref={containerRef} className="relative w-full" style={{ height: `${timelineData.length * 100}vh` }}>
         <div className="sticky top-1/2 -translate-y-1/2 flex h-screen w-full items-center justify-center overflow-hidden" style={{ height: '400px' }}>
           <div className="relative w-full max-w-3xl h-full">
             {timelineData.map((event, index) => {
               const isActive = activeIndex === index;
+              const yearParts = event.year.split('-');
 
               return (
                 <div
@@ -85,12 +84,15 @@ export default function HorizontalTimeline() {
                 >
                   <Card className={cn(
                       "absolute inset-0 w-full h-full flex flex-col justify-center transition-all duration-500 ease-in-out p-6",
-                      isActive ? "opacity-100 scale-100" : "opacity-0 scale-95",
+                      isActive ? "opacity-100" : "opacity-0",
                   )}>
                     <CardHeader>
-                       <div className="flex flex-col sm:flex-row sm:items-baseline gap-x-4 gap-y-2">
-                        <p className="text-4xl md:text-5xl font-bold text-primary whitespace-nowrap">{event.year}</p>
-                        <CardTitle className="font-headline text-2xl md:text-3xl">{event.title}</CardTitle>
+                       <div className="flex items-start gap-4">
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-primary/80 leading-tight">{yearParts[0]}-</p>
+                          <p className="text-2xl font-bold text-primary/80 leading-tight">{yearParts[1]}</p>
+                        </div>
+                        <CardTitle className="font-headline text-4xl md:text-5xl">{event.title}</CardTitle>
                       </div>
                     </CardHeader>
                     <CardContent>
