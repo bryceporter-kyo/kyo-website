@@ -4,17 +4,35 @@ import * as React from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
-interface TimelineEvent {
-  year: string;
-  title: string;
-  content: string;
-}
+const timelineData = [
+  {
+    year: "2007-2012",
+    title: "Origins of KYO",
+    content: "KYO was founded by Karen Lauder, Ben Bell, and Steven Brown, who gathered skilled young musicians in the Peterborough area. Michael Newnham, the new conductor of the Peterborough Symphony Orchestra (PSO), was brought on to conduct. Membership grew to around 30 players, but declined to 11 by 2011 due to members aging out and reduced local music programs.",
+  },
+  {
+    year: "2013-2016",
+    title: "Outreach and Recruitment",
+    content: "Following a new strategic plan, Ann Millen was hired for a recruitment project. She established bursaries to lower financial barriers and created an instrument library through public donations. Outreach events and school concerts helped attract new musicians, including from the home-schooling community.",
+  },
+  {
+      year: "2017-2019",
+      title: "Expanding Ensembles",
+      content: "To cater to varying skill levels, the Junior Kawartha Youth Orchestra (JKYO) was launched for new players, led by Marilyn Chalk. As players progressed, the Intermediate Kawartha Youth Orchestra (IKYO) was formed under her leadership, with John Fautley taking over JKYO. The Community Foundation of Greater Peterborough (CFGP) provided solid support, managing dedicated funds for KYO.",
+  },
+  {
+      year: "2020-2021",
+      title: "Adaptation and New Programs",
+      content: "Inspired by El Sistema, the board launched UPBEAT!, an after-school music program for social change. In response to the pandemic, KYO went virtual with e-orchestras, virtual concerts, and livestreams. The 'Farm Team' program also expanded to include all orchestral instrument groups. JKYO Conductor Marilyn Chalk became Acting Conductor of The Orchestras.",
+  },
+  {
+      year: "2022-Present",
+      title: "Growth and New Leadership",
+      content: "KYO continued to grow, welcoming new artistic leadership including Dr. Alexander Cannon, Maziar Heidari, and currently Murray Lefebvre at the helm of the Senior KYO. The organization solidified its status as a comprehensive centre for music education in the Kawarthas with expanded faculty and programs, including a Jazz Ensemble.",
+  },
+];
 
-interface HorizontalTimelineProps {
-  events: TimelineEvent[];
-}
-
-export default function HorizontalTimeline({ events }: HorizontalTimelineProps) {
+export default function HorizontalTimeline() {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const scrollWrapperRef = React.useRef<HTMLDivElement>(null);
 
@@ -42,7 +60,7 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
       scrollProgress = 1;
     }
 
-    const totalItems = events.length;
+    const totalItems = timelineData.length;
     if (totalItems === 0) return;
 
     // Each item gets equal scroll space with sticky behavior
@@ -86,7 +104,7 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
     if (newActiveIndex !== activeIndex) {
       setActiveIndex(newActiveIndex);
     }
-  }, [activeIndex, events.length]);
+  }, [activeIndex]);
 
   React.useEffect(() => {
     const throttledScroll = () => requestAnimationFrame(handleScroll);
@@ -105,7 +123,7 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
     const scrollableHeight = containerHeight - viewportHeight;
     
     // Target the middle of the sticky zone for the clicked item
-    const itemScrollSpace = 1 / events.length;
+    const itemScrollSpace = 1 / timelineData.length;
     const targetProgress = (index * itemScrollSpace) + (itemScrollSpace * 0.5);
     const targetScrollTop = container.offsetTop + (targetProgress * scrollableHeight);
 
@@ -115,7 +133,7 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
     });
   };
 
-  if (events.length === 0) {
+  if (timelineData.length === 0) {
     return (
       <div className="flex items-center justify-center h-screen">
         <p className="text-muted-foreground">No timeline events to display</p>
@@ -127,7 +145,7 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
     <div 
       ref={containerRef} 
       className="relative w-full" 
-      style={{ height: `${events.length * 250}vh` }}
+      style={{ height: `${timelineData.length * 120 + 50}vh` }}
     >
       <div className="sticky top-0 flex flex-col h-screen overflow-hidden">
         <div className="text-center pt-12 md:pt-24 lg:pt-32">
@@ -136,7 +154,7 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
             Tracing our history of growth, innovation, and musical achievement.
           </p>
           <p className="text-sm text-muted-foreground/60 mt-2">
-            {events.length} milestone{events.length !== 1 ? 's' : ''}
+            {timelineData.length} milestone{timelineData.length !== 1 ? 's' : ''}
           </p>
         </div>
         
@@ -145,7 +163,7 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
             ref={scrollWrapperRef} 
             className="flex w-full overflow-x-hidden p-8 no-scrollbar"
           >
-            {events.map((event, index) => (
+            {timelineData.map((event, index) => (
               <div 
                 key={`timeline-${index}-${event.year}-${event.title.slice(0, 10)}`} 
                 className="flex-shrink-0 w-full flex justify-center"
@@ -174,7 +192,7 @@ export default function HorizontalTimeline({ events }: HorizontalTimelineProps) 
         </div>
 
         <div className="flex justify-center items-center gap-3 pb-8">
-          {events.map((event, index) => (
+          {timelineData.map((event, index) => (
             <button
               key={`dot-${index}-${event.year}`}
               onClick={() => handleDotClick(index)}

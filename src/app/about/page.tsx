@@ -21,35 +21,6 @@ const communityRoles = [
     { title: 'Board & Donors', description: 'Dedicated individuals and businesses whose expertise and support advance our mission and sustain our programs.', icon: Briefcase },
 ]
 
-const timelineData = [
-  {
-    year: "2007-2012",
-    title: "Origins of KYO",
-    content: "KYO was founded by Karen Lauder, Ben Bell, and Steven Brown, who gathered skilled young musicians in the Peterborough area. Michael Newnham, the new conductor of the Peterborough Symphony Orchestra (PSO), was brought on to conduct. Membership grew to around 30 players, but declined to 11 by 2011 due to members aging out and reduced local music programs.",
-  },
-  {
-    year: "2013-2016",
-    title: "Outreach and Recruitment",
-    content: "Following a new strategic plan, Ann Millen was hired for a recruitment project. She established bursaries to lower financial barriers and created an instrument library through public donations. Outreach events and school concerts helped attract new musicians, including from the home-schooling community.",
-  },
-  {
-      year: "2017-2019",
-      title: "Expanding Ensembles",
-      content: "To cater to varying skill levels, the Junior Kawartha Youth Orchestra (JKYO) was launched for new players, led by Marilyn Chalk. As players progressed, the Intermediate Kawartha Youth Orchestra (IKYO) was formed under her leadership, with John Fautley taking over JKYO. The Community Foundation of Greater Peterborough (CFGP) provided solid support, managing dedicated funds for KYO.",
-  },
-  {
-      year: "2020-2021",
-      title: "Adaptation and New Programs",
-      content: "Inspired by El Sistema, the board launched UPBEAT!, an after-school music program for social change. In response to the pandemic, KYO went virtual with e-orchestras, virtual concerts, and livestreams. The 'Farm Team' program also expanded to include all orchestral instrument groups. JKYO Conductor Marilyn Chalk became Acting Conductor of The Orchestras.",
-  },
-  {
-      year: "2022-Present",
-      title: "Growth and New Leadership",
-      content: "KYO continued to grow, welcoming new artistic leadership including Dr. Alexander Cannon, Maziar Heidari, and currently Murray Lefebvre at the helm of the Senior KYO. The organization solidified its status as a comprehensive centre for music education in the Kawarthas with expanded faculty and programs, including a Jazz Ensemble.",
-  },
-];
-
-
 export default function AboutPage() {
     const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-orchestras');
     const aboutImage = PlaceHolderImages.find(p => p.id === 'program-orchestra');
@@ -136,7 +107,7 @@ export default function AboutPage() {
             </section>
 
              <section className="bg-secondary p-0">
-                <HorizontalTimeline events={timelineData} />
+                <HorizontalTimeline />
             </section>
 
             <section>
