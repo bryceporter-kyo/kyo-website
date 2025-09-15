@@ -3,7 +3,7 @@ import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { Check, Heart, Mail, Landmark, HandCoins, Guitar, ExternalLink, MessageCircle, Car, Calendar, Repeat } from "lucide-react";
+import { Check, Heart, Mail, Landmark, HandCoins, Guitar, ExternalLink, MessageCircle, Car, Calendar, Repeat, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -102,7 +102,7 @@ export default function DonatePage() {
                   </CardContent>
                   <CardFooter>
                     <Button asChild className="w-full" variant={tier.popular ? 'default' : 'outline'}>
-                      <Link href={tier.href}>Donate Monthly</Link>
+                      <Link href={tier.href} target="_blank" rel="noopener noreferrer">Donate Monthly</Link>
                     </Button>
                   </CardFooter>
                 </Card>
@@ -120,7 +120,7 @@ export default function DonatePage() {
                 <CardContent>
                      <p className="text-muted-foreground mb-6">Click the button below to make a secure one-time donation. You can choose the amount you'd like to give.</p>
                     <Button asChild size="lg">
-                        <Link href="https://donate.stripe.com/fZufZhekc8z4gBebT1b3q08">Donate Today</Link>
+                        <Link href="https://donate.stripe.com/fZufZhekc8z4gBebT1b3q08" target="_blank" rel="noopener noreferrer">Donate Today</Link>
                     </Button>
                 </CardContent>
                  <CardFooter>
@@ -139,19 +139,33 @@ export default function DonatePage() {
                     Choose the donation method that works best for you. Every contribution over $20 qualifies for a charitable tax receipt.
                 </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                {otherDonationMethods.map(method => (
-                    <Card key={method.title}>
-                        <CardHeader className="flex flex-row items-center gap-4">
-                            <method.icon className="w-8 h-8 text-primary"/>
-                            <CardTitle className="font-headline text-xl">{method.title}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-muted-foreground">{method.description}</p>
-                            <p className="font-mono text-sm bg-muted p-2 rounded-md mt-4">{method.details}</p>
-                        </CardContent>
-                    </Card>
-                ))}
+            <div className="max-w-4xl mx-auto space-y-8">
+                <Card>
+                    <CardHeader className="flex flex-row items-center gap-4">
+                        <ShieldCheck className="w-8 h-8 text-primary"/>
+                        <CardTitle className="font-headline text-xl">Donate Securities via CanadaHelps</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-muted-foreground">Donating securities or mutual funds is the most tax-efficient way to give. Your gift of publicly traded securities will have a big impact, and you will not pay capital gains tax. CanadaHelps makes it easy to donate securities online.</p>
+                        <Button asChild variant="outline" className="mt-4">
+                            <Link href="https://www.canadahelps.org/en/dn/116608" target="_blank" rel="noopener noreferrer">Donate Securities<ExternalLink className="ml-2 h-4 w-4" /></Link>
+                        </Button>
+                    </CardContent>
+                </Card>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {otherDonationMethods.map(method => (
+                        <Card key={method.title}>
+                            <CardHeader className="flex flex-row items-center gap-4">
+                                <method.icon className="w-8 h-8 text-primary"/>
+                                <CardTitle className="font-headline text-xl">{method.title}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-muted-foreground">{method.description}</p>
+                                <p className="font-mono text-sm bg-muted p-2 rounded-md mt-4">{method.details}</p>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
             </div>
              <div className="text-center mt-12">
                 <p className="text-muted-foreground">For the fastest tax receipt, we encourage supporters to donate online.</p>
@@ -173,7 +187,7 @@ export default function DonatePage() {
                 </CardContent>
                 <CardFooter>
                     <Button asChild variant="outline">
-                        <Link href="#">Visit the Trust <ExternalLink /></Link>
+                        <Link href="#" target="_blank" rel="noopener noreferrer">Visit the Trust <ExternalLink className="ml-2 h-4 w-4" /></Link>
                     </Button>
                 </CardFooter>
             </Card>
@@ -189,7 +203,7 @@ export default function DonatePage() {
                 </CardContent>
                 <CardFooter>
                     <Button asChild variant="outline">
-                        <Link href="mailto:email@thekyo.ca">Contact Us <Mail /></Link>
+                        <Link href="mailto:email@thekyo.ca">Contact Us <Mail className="ml-2 h-4 w-4" /></Link>
                     </Button>
                 </CardFooter>
             </Card>
@@ -205,7 +219,7 @@ export default function DonatePage() {
                 </CardContent>
                 <CardFooter>
                      <Button asChild variant="outline">
-                        <Link href="#">Learn More <ExternalLink /></Link>
+                        <Link href="#" target="_blank" rel="noopener noreferrer">Learn More <ExternalLink className="ml-2 h-4 w-4" /></Link>
                     </Button>
                 </CardFooter>
             </Card>
@@ -221,7 +235,7 @@ export default function DonatePage() {
                 </CardContent>
                 <CardFooter>
                      <Button asChild variant="outline">
-                        <Link href="mailto:email@thekyo.ca">Get in Touch <Mail /></Link>
+                        <Link href="mailto:email@thekyo.ca">Get in Touch <Mail className="ml-2 h-4 w-4" /></Link>
                     </Button>
                 </CardFooter>
             </Card>
