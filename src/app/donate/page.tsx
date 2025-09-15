@@ -6,6 +6,7 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Check, Heart, Mail, Landmark, HandCoins, Guitar, ExternalLink, MessageCircle, Car, Calendar, Repeat, ShieldCheck, CreditCard } from "lucide-react";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import Image from "next/image";
 
 
 const monthlyTiers = [
@@ -260,6 +261,31 @@ export default function DonatePage() {
                     </Button>
                 </CardFooter>
             </Card>
+        </div>
+      </section>
+
+       <section className="bg-secondary">
+        <div className="container mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-headline font-bold">A Special Thank You to Our Supporters</h2>
+            <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
+                Our work is only possible because of the tremendous generosity of our community, corporate, and government supporters. We are deeply grateful for your commitment to youth music education.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 items-center">
+            {Array.from({ length: 10 }).map((_, index) => (
+              <div key={index} className="flex justify-center">
+                <Image
+                  src={`https://picsum.photos/seed/logo${index}/200/100?grayscale`}
+                  alt={`Supporter Logo ${index + 1}`}
+                  width={160}
+                  height={80}
+                  className="object-contain"
+                  data-ai-hint="company logo"
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
