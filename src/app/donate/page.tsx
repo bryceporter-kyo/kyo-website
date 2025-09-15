@@ -208,7 +208,7 @@ export default function DonatePage() {
                 </CardContent>
                 <CardFooter>
                     <Button asChild variant="outline">
-                        <Link href="#" target="_blank" rel="noopener noreferrer">Visit the Trust <ExternalLink className="ml-2 h-4 w-4" /></Link>
+                        <Link href="https://cfgp.ca/project/tenuto-trust/" target="_blank" rel="noopener noreferrer">Visit the Trust <ExternalLink className="ml-2 h-4 w-4" /></Link>
                     </Button>
                 </CardFooter>
             </Card>
