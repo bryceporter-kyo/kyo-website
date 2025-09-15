@@ -240,7 +240,7 @@ export default function DonatePage() {
                 </CardContent>
                 <CardFooter>
                      <Button asChild variant="outline">
-                        <Link href="#" target="_blank" rel="noopener noreferrer">Learn More <ExternalLink className="ml-2 h-4 w-4" /></Link>
+                        <Link href="https://donatecar.ca/org/donate.php" target="_blank" rel="noopener noreferrer">Learn More <ExternalLink className="ml-2 h-4 w-4" /></Link>
                     </Button>
                 </CardFooter>
             </Card>
