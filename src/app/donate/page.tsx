@@ -80,7 +80,7 @@ export default function DonatePage() {
         <Tabs defaultValue="monthly" className="max-w-5xl mx-auto">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="monthly"><Repeat className="mr-2"/>Monthly Donation</TabsTrigger>
-            <TabsTrigger value="one-time"><Calendar className="mr-2"/>One-Time Donation</TabsTrigger>
+            <TabsTrigger value="one-time"><Heart className="mr-2"/>One-Time Donation</TabsTrigger>
           </TabsList>
           <TabsContent value="monthly" className="mt-12">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -196,7 +196,7 @@ export default function DonatePage() {
       </section>
 
       <section className="container mx-auto">
-         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             <Card className="flex flex-col">
                 <CardHeader>
                     <div className="bg-primary text-primary-foreground p-4 rounded-full w-fit">
@@ -305,7 +305,6 @@ export default function DonatePage() {
             </div>
         </div>
       </section>
-
     </div>
   );
 }
