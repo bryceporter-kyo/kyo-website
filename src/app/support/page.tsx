@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Gift, Handshake, Heart } from "lucide-react";
 import Image from "next/image";
+import Link from 'next/link';
 
 const supportOptions = [
     {
@@ -29,6 +30,7 @@ const supportOptions = [
 export default function SupportPage() {
     const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-support');
     const supportImage = PlaceHolderImages.find(p => p.id === 'support-volunteer');
+    const supportCtaImage = PlaceHolderImages.find(p => p.id === 'support-cta');
 
     return (
         <div>
@@ -88,6 +90,35 @@ export default function SupportPage() {
                         ))}
                     </div>
                  </div>
+            </section>
+
+             <section className="bg-secondary">
+                 <div className="container mx-auto">
+                    <div className="rounded-lg bg-primary text-primary-foreground p-8 md:p-12 grid md:grid-cols-2 gap-8 items-center overflow-hidden">
+                        <div className="text-center md:text-left relative z-10">
+                            <h2 className="text-3xl font-headline font-bold">Become a Benefactor</h2>
+                            <p className="mt-4 max-w-xl mx-auto md:mx-0 text-lg text-primary-foreground/80">
+                                Your contribution, whether time, talent, or a donation, is an investment in the future of arts and culture in our community. Join us and make a lasting impact.
+                            </p>
+                            <div className="mt-8 flex justify-center md:justify-start">
+                                <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 font-bold">
+                                    <Link href="/donate">Donate Now</Link>
+                                </Button>
+                            </div>
+                        </div>
+                         {supportCtaImage && (
+                            <div className="relative h-64 md:h-full">
+                                <Image
+                                    src={supportCtaImage.imageUrl}
+                                    alt={supportCtaImage.description}
+                                    fill
+                                    className="object-cover rounded-lg"
+                                    data-ai-hint={supportCtaImage.imageHint}
+                                />
+                            </div>
+                        )}
+                    </div>
+                </div>
             </section>
         </div>
     )

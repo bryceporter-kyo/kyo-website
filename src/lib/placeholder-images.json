@@ -113,6 +113,30 @@
       "description": "A teacher helping a young student with a cello.",
       "imageUrl": "https://picsum.photos/seed/122/600/400",
       "imageHint": "music lesson"
+    },
+    {
+      "id": "donate-why-it-matters",
+      "description": "A close-up shot of a young student's hands playing the violin.",
+      "imageUrl": "https://picsum.photos/seed/123/600/400",
+      "imageHint": "child violin"
+    },
+    {
+      "id": "volunteer-cta",
+      "description": "A diverse group of volunteers smiling for a photo.",
+      "imageUrl": "https://picsum.photos/seed/124/600/400",
+      "imageHint": "diverse volunteers"
+    },
+    {
+      "id": "support-cta",
+      "description": "Audience applauding at a concert.",
+      "imageUrl": "https://picsum.photos/seed/125/600/400",
+      "imageHint": "audience applauding"
+    },
+    {
+      "id": "home-news",
+      "description": "A newspaper open to the arts section.",
+      "imageUrl": "https://picsum.photos/seed/126/600/400",
+      "imageHint": "arts newspaper"
     }
   ]
 }

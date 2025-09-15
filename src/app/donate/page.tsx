@@ -62,6 +62,8 @@ const otherDonationMethods = [
 
 export default function DonatePage() {
   const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-donate');
+  const whyItMattersImage = PlaceHolderImages.find(p => p.id === 'donate-why-it-matters');
+  const volunteerCtaImage = PlaceHolderImages.find(p => p.id === 'volunteer-cta');
 
   return (
     <div>
@@ -71,68 +73,87 @@ export default function DonatePage() {
         image={headerImage}
       />
       <section className="container mx-auto">
-        <div className="text-center mb-16">
+        <div className="grid md:grid-cols-2 gap-16 items-center">
+          <div className="space-y-6">
             <h2 className="text-3xl font-headline font-bold">Why Your Support Matters</h2>
-            <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
+            <p className="text-muted-foreground md:text-xl">
                 Tuition fees cover only 4% of what it takes to run our programs. The rest comes from the generosity of people like you. Your donation directly funds everything from sheet music and instrument repairs to scholarships and expert coaching, ensuring that every young person has the chance to experience the power of music.
             </p>
-        </div>
-        <Tabs defaultValue="monthly" className="max-w-5xl mx-auto">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="monthly"><Repeat className="mr-2"/>Monthly Donation</TabsTrigger>
-            <TabsTrigger value="one-time"><Heart className="mr-2"/>One-Time Donation</TabsTrigger>
-          </TabsList>
-          <TabsContent value="monthly" className="mt-12">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {monthlyTiers.map((tier) => (
-                <Card key={tier.title} className={`flex flex-col ${tier.popular ? 'border-primary shadow-2xl' : 'shadow-md'}`}>
-                  <CardHeader>
-                    <CardTitle className="font-headline text-2xl">{tier.title}</CardTitle>
-                     <p className="text-4xl font-bold flex items-baseline">{tier.amount}<span className="text-lg font-medium text-muted-foreground">{tier.period}</span></p>
-                    <CardDescription>{tier.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex-grow">
-                    <ul className="space-y-2">
-                      {tier.features.map((feature) => (
-                        <li key={feature} className="flex items-start gap-2">
-                          <Check className="h-5 w-5 mt-1 text-accent flex-shrink-0" />
-                          <span className="text-muted-foreground">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                  <CardFooter>
-                    <Button asChild className="w-full" variant={tier.popular ? 'default' : 'outline'}>
-                      <Link href={tier.href} target="_blank" rel="noopener noreferrer">Donate Monthly</Link>
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
+          </div>
+          {whyItMattersImage && (
+            <div className="rounded-lg overflow-hidden shadow-xl">
+              <Image
+                src={whyItMattersImage.imageUrl}
+                alt={whyItMattersImage.description}
+                width={600}
+                height={400}
+                className="object-cover w-full h-full"
+                data-ai-hint={whyItMattersImage.imageHint}
+              />
             </div>
-          </TabsContent>
-          <TabsContent value="one-time" className="mt-12">
-            <Card className="max-w-2xl mx-auto text-center">
-                <CardHeader>
-                    <CardTitle className="font-headline text-3xl">Make a One-Time Gift</CardTitle>
-                    <CardDescription className="text-lg">
-                        Every single donation, no matter the size, helps us provide essential musical opportunities to local youth. Thank you for your support!
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                     <p className="text-muted-foreground mb-6">Click the button below to make a secure one-time donation. You can choose the amount you'd like to give.</p>
-                    <Button asChild size="lg">
-                        <Link href="https://donate.stripe.com/fZufZhekc8z4gBebT1b3q08" target="_blank" rel="noopener noreferrer">Donate Today</Link>
-                    </Button>
-                </CardContent>
-                 <CardFooter>
-                    <p className="text-sm text-muted-foreground mx-auto">Donations over $20 qualify for a charitable tax receipt.</p>
-                </CardFooter>
-            </Card>
-          </TabsContent>
-        </Tabs>
+          )}
+        </div>
       </section>
 
       <section className="bg-secondary">
+        <div className="container mx-auto">
+          <Tabs defaultValue="monthly" className="max-w-5xl mx-auto">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="monthly"><Repeat className="mr-2"/>Monthly Donation</TabsTrigger>
+              <TabsTrigger value="one-time"><Heart className="mr-2"/>One-Time Donation</TabsTrigger>
+            </TabsList>
+            <TabsContent value="monthly" className="mt-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {monthlyTiers.map((tier) => (
+                  <Card key={tier.title} className={`flex flex-col ${tier.popular ? 'border-primary shadow-2xl' : 'shadow-md'}`}>
+                    <CardHeader>
+                      <CardTitle className="font-headline text-2xl">{tier.title}</CardTitle>
+                       <p className="text-4xl font-bold flex items-baseline">{tier.amount}<span className="text-lg font-medium text-muted-foreground">{tier.period}</span></p>
+                      <CardDescription>{tier.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-grow">
+                      <ul className="space-y-2">
+                        {tier.features.map((feature) => (
+                          <li key={feature} className="flex items-start gap-2">
+                            <Check className="h-5 w-5 mt-1 text-accent flex-shrink-0" />
+                            <span className="text-muted-foreground">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                    <CardFooter>
+                      <Button asChild className="w-full" variant={tier.popular ? 'default' : 'outline'}>
+                        <Link href={tier.href} target="_blank" rel="noopener noreferrer">Donate Monthly</Link>
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+            <TabsContent value="one-time" className="mt-12">
+              <Card className="max-w-2xl mx-auto text-center">
+                  <CardHeader>
+                      <CardTitle className="font-headline text-3xl">Make a One-Time Gift</CardTitle>
+                      <CardDescription className="text-lg">
+                          Every single donation, no matter the size, helps us provide essential musical opportunities to local youth. Thank you for your support!
+                      </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                       <p className="text-muted-foreground mb-6">Click the button below to make a secure one-time donation. You can choose the amount you'd like to give.</p>
+                      <Button asChild size="lg">
+                          <Link href="https://donate.stripe.com/fZufZhekc8z4gBebT1b3q08" target="_blank" rel="noopener noreferrer">Donate Today</Link>
+                      </Button>
+                  </CardContent>
+                   <CardFooter>
+                      <p className="text-sm text-muted-foreground mx-auto">Donations over $20 qualify for a charitable tax receipt.</p>
+                  </CardFooter>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </section>
+
+      <section>
         <div className="container mx-auto">
             <div className="text-center mb-12">
                 <h2 className="text-3xl font-headline font-bold">More Ways to Give</h2>
@@ -195,8 +216,8 @@ export default function DonatePage() {
         </div>
       </section>
 
-      <section className="container mx-auto">
-         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+      <section className="bg-secondary">
+         <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <Card className="flex flex-col">
                 <CardHeader>
                     <div className="bg-primary text-primary-foreground p-4 rounded-full w-fit">
@@ -264,7 +285,7 @@ export default function DonatePage() {
         </div>
       </section>
 
-       <section className="bg-secondary">
+       <section>
         <div className="container mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-headline font-bold">A Special Thank You to Our Supporters</h2>
@@ -289,18 +310,33 @@ export default function DonatePage() {
         </div>
       </section>
 
-      <section>
+      <section className="bg-secondary">
         <div className="container mx-auto">
-            <div className="rounded-lg bg-primary text-primary-foreground p-8 md:p-12 text-center">
-                <Heart className="w-16 h-16 mx-auto mb-6 text-white"/>
-                <h2 className="text-3xl font-headline font-bold">Not Ready to Donate? Volunteer!</h2>
-                <p className="mt-4 max-w-2xl mx-auto text-lg text-primary-foreground/80">
-                   Your time and talent are just as valuable. By volunteering, you play a crucial role in our mission. Explore how you can make a lasting difference today.
-                </p>
-                <div className="mt-8 flex justify-center">
-                    <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 font-bold">
-                        <Link href="/volunteer">Learn About Volunteering</Link>
-                    </Button>
+            <div className="rounded-lg bg-primary text-primary-foreground p-8 md:p-12 overflow-hidden relative">
+                <div className="grid md:grid-cols-2 gap-8 items-center">
+                    <div className="text-center md:text-left relative z-10">
+                        <Heart className="w-16 h-16 mx-auto md:mx-0 mb-6 text-white"/>
+                        <h2 className="text-3xl font-headline font-bold">Not Ready to Donate? Volunteer!</h2>
+                        <p className="mt-4 max-w-xl mx-auto md:mx-0 text-lg text-primary-foreground/80">
+                           Your time and talent are just as valuable. By volunteering, you play a crucial role in our mission. Explore how you can make a lasting difference today.
+                        </p>
+                        <div className="mt-8 flex justify-center md:justify-start">
+                            <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 font-bold">
+                                <Link href="/volunteer">Learn About Volunteering</Link>
+                            </Button>
+                        </div>
+                    </div>
+                    {volunteerCtaImage && (
+                        <div className="relative h-64 md:h-full">
+                            <Image
+                                src={volunteerCtaImage.imageUrl}
+                                alt={volunteerCtaImage.description}
+                                fill
+                                className="object-cover rounded-lg"
+                                data-ai-hint={volunteerCtaImage.imageHint}
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

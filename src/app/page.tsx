@@ -52,6 +52,7 @@ const newsItems = [
 
 export default function Home() {
   const heroImage = PlaceHolderImages.find(p => p.id === 'hero-concert');
+  const newsImage = PlaceHolderImages.find(p => p.id === 'home-news');
 
   return (
     <div className="flex flex-col min-h-dvh">
@@ -139,18 +140,32 @@ export default function Home() {
                 Stay up-to-date with the latest happenings at KYO Hub.
               </p>
             </div>
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {newsItems.map((item) => (
-                <Card key={item.id} className="flex flex-col">
-                  <CardHeader>
-                    <CardTitle className="text-xl font-headline">{item.title}</CardTitle>
-                    <p className="text-sm text-muted-foreground">{item.date}</p>
-                  </CardHeader>
-                  <CardContent className="flex-grow">
-                    <p className="text-muted-foreground">{item.excerpt}</p>
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-8">
+                  {newsItems.map((item) => (
+                    <Card key={item.id} className="flex flex-col">
+                      <CardHeader>
+                        <CardTitle className="text-xl font-headline">{item.title}</CardTitle>
+                        <p className="text-sm text-muted-foreground">{item.date}</p>
+                      </CardHeader>
+                      <CardContent className="flex-grow">
+                        <p className="text-muted-foreground">{item.excerpt}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+              </div>
+              {newsImage && (
+                <div className="hidden md:block rounded-lg overflow-hidden shadow-lg">
+                   <Image
+                      src={newsImage.imageUrl}
+                      alt={newsImage.description}
+                      width={600}
+                      height={800}
+                      className="object-cover w-full h-full"
+                      data-ai-hint={newsImage.imageHint}
+                    />
+                </div>
+              )}
             </div>
           </div>
         </section>

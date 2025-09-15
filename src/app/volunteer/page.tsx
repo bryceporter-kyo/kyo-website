@@ -33,6 +33,7 @@ const volunteerRoles = [
 export default function VolunteerPage() {
     const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-volunteer');
     const volunteerImage = PlaceHolderImages.find(p => p.id === 'support-volunteer');
+    const volunteerCtaImage = PlaceHolderImages.find(p => p.id === 'volunteer-cta');
 
     return (
         <div>
@@ -98,16 +99,29 @@ export default function VolunteerPage() {
 
              <section>
                  <div className="container mx-auto">
-                    <div className="rounded-lg bg-primary text-primary-foreground p-8 md:p-12 text-center">
-                        <h2 className="text-3xl font-headline font-bold">Ready to Make a Difference?</h2>
-                        <p className="mt-4 max-w-2xl mx-auto text-lg text-primary-foreground/80">
-                            Your contribution of time and expertise is one of the most valuable gifts you can give. Join our dedicated community and help us inspire the next generation of musicians.
-                        </p>
-                        <div className="mt-8 flex justify-center">
-                            <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 font-bold">
-                                <Link href="/register">Become a Volunteer Today</Link>
-                            </Button>
+                    <div className="rounded-lg bg-primary text-primary-foreground p-8 md:p-12 grid md:grid-cols-2 gap-8 items-center overflow-hidden">
+                        <div className="text-center md:text-left relative z-10">
+                            <h2 className="text-3xl font-headline font-bold">Ready to Make a Difference?</h2>
+                            <p className="mt-4 max-w-xl mx-auto md:mx-0 text-lg text-primary-foreground/80">
+                                Your contribution of time and expertise is one of the most valuable gifts you can give. Join our dedicated community and help us inspire the next generation of musicians.
+                            </p>
+                            <div className="mt-8 flex justify-center md:justify-start">
+                                <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 font-bold">
+                                    <Link href="/register">Become a Volunteer Today</Link>
+                                </Button>
+                            </div>
                         </div>
+                         {volunteerCtaImage && (
+                            <div className="relative h-64 md:h-full">
+                                <Image
+                                    src={volunteerCtaImage.imageUrl}
+                                    alt={volunteerCtaImage.description}
+                                    fill
+                                    className="object-cover rounded-lg"
+                                    data-ai-hint={volunteerCtaImage.imageHint}
+                                />
+                            </div>
+                        )}
                     </div>
                 </div>
             </section>
