@@ -3,7 +3,7 @@ import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { Check, Heart, Mail, Landmark, HandCoins, Guitar, ExternalLink, MessageCircle } from "lucide-react";
+import { Check, Heart, Mail, Landmark, HandCoins, Guitar, ExternalLink, MessageCircle, Car } from "lucide-react";
 import Link from "next/link";
 
 const donationTiers = [
@@ -123,7 +123,7 @@ export default function DonatePage() {
       </section>
 
       <section className="container mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
             <Card className="flex flex-col">
                 <CardHeader>
                     <div className="bg-primary text-primary-foreground p-4 rounded-full w-fit">
@@ -153,6 +153,22 @@ export default function DonatePage() {
                 <CardFooter>
                     <Button asChild variant="outline">
                         <Link href="mailto:email@thekyo.ca">Contact Us <Mail /></Link>
+                    </Button>
+                </CardFooter>
+            </Card>
+             <Card className="flex flex-col">
+                <CardHeader>
+                    <div className="bg-primary text-primary-foreground p-4 rounded-full w-fit">
+                        <Car className="h-8 w-8" />
+                    </div>
+                    <CardTitle className="font-headline text-2xl pt-4">Donate a Car</CardTitle>
+                </CardHeader>
+                <CardContent className="flex-grow">
+                    <p className="text-muted-foreground">Donate your car, truck, RV, boat, or motorcycle through Donate a Car Canada. They handle all the details, making it easy for KYO to benefit, and you'll receive a tax receipt.</p>
+                </CardContent>
+                <CardFooter>
+                     <Button asChild variant="outline">
+                        <Link href="#">Learn More <ExternalLink /></Link>
                     </Button>
                 </CardFooter>
             </Card>
