@@ -272,14 +272,14 @@ export default function DonatePage() {
                 Our work is only possible because of the tremendous generosity of our community, corporate, and government supporters. We are deeply grateful for your commitment to youth music education.
             </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 items-center">
-            {Array.from({ length: 10 }).map((_, index) => (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-8 items-center max-w-4xl mx-auto">
+            {Array.from({ length: 9 }).map((_, index) => (
               <div key={index} className="flex justify-center">
                 <Image
-                  src={`https://picsum.photos/seed/logo${index}/200/100?grayscale`}
+                  src={`https://picsum.photos/seed/logo${index}/240/120?grayscale`}
                   alt={`Supporter Logo ${index + 1}`}
-                  width={160}
-                  height={80}
+                  width={200}
+                  height={100}
                   className="object-contain"
                   data-ai-hint="company logo"
                 />
