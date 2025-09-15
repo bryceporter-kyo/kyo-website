@@ -34,6 +34,7 @@ const instruments = [
 export default function LessonsPage() {
   const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-lessons');
   const aboutImage = PlaceHolderImages.find(p => p.id === 'program-lessons');
+  const studentImage = PlaceHolderImages.find(p => p.id === 'lessons-teacher-student');
 
   return (
     <div>
@@ -99,8 +100,20 @@ export default function LessonsPage() {
       </section>
       
       <section className="container mx-auto">
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="md:col-span-2 space-y-8">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          {studentImage && (
+            <div className="rounded-lg overflow-hidden shadow-xl md:order-last">
+                <Image
+                    src={studentImage.imageUrl}
+                    alt={studentImage.description}
+                    width={600}
+                    height={400}
+                    className="object-cover w-full h-full"
+                    data-ai-hint={studentImage.imageHint}
+                />
+            </div>
+          )}
+          <div className="space-y-8">
             <h2 className="text-3xl font-headline font-bold">How Our Lessons Work</h2>
             <p className="text-muted-foreground text-lg">
               Our lessons program is designed to provide consistent, high-quality instruction throughout the school year. Students benefit from weekly one-hour lessons, opportunities to perform in public recitals and showcases, and a curriculum that aligns with our ensemble programs and the Royal Conservatory of Music (RCM) framework.
@@ -108,8 +121,14 @@ export default function LessonsPage() {
             <p className="text-muted-foreground text-lg">
               The Lessons Program is a foundational pillar in the KYO’s broader ecosystem. It directly supports student progression into our many ensembles, including orchestras, jazz, wind, and chamber groups. This interconnected approach strengthens learning, builds peer connections, and improves retention over time.
             </p>
+          </div>
+        </div>
+      </section>
 
-            <Card className="bg-primary text-primary-foreground">
+      <section className='bg-secondary'>
+        <div className="container mx-auto grid md:grid-cols-3 gap-8">
+          <div className="md:col-span-2">
+            <Card className="bg-primary text-primary-foreground h-full flex flex-col">
               <CardHeader className="flex flex-row items-start gap-4">
                 <Music className="w-8 h-8 mt-1"/>
                 <div>
@@ -117,12 +136,14 @@ export default function LessonsPage() {
                     <CardDescription className="text-primary-foreground/80">Every student has the opportunity to perform three times annually in studio recitals and KYO ensemble concerts.</CardDescription>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-grow">
                 <p>Ensemble participation provides real-world performance experience that reinforces learning goals and builds artistry. Lesson instruction is synchronized with our orchestra programming, creating a seamless path from individual growth to ensemble excellence.</p>
-                <Button asChild variant="secondary" className="mt-6">
+              </CardContent>
+              <div className="p-6 pt-0">
+                <Button asChild variant="secondary">
                   <Link href="/orchestras">Explore Our Ensembles</Link>
                 </Button>
-              </CardContent>
+              </div>
             </Card>
           </div>
           
@@ -143,7 +164,7 @@ export default function LessonsPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-secondary">
+            <Card className="bg-background">
               <CardHeader>
                 <CardTitle className="font-headline text-2xl">Start Your Lessons</CardTitle>
               </CardHeader>

@@ -95,6 +95,24 @@
       "description": "A group of people working together for a cause.",
       "imageUrl": "https://picsum.photos/seed/115/1200/400",
       "imageHint": "volunteers community"
+    },
+    {
+      "id": "orchestra-kids-playing",
+      "description": "Young musicians playing various instruments in an orchestra.",
+      "imageUrl": "https://picsum.photos/seed/120/600/400",
+      "imageHint": "young orchestra"
+    },
+    {
+      "id": "upbeat-kids-smiling",
+      "description": "Happy children holding violins in a group.",
+      "imageUrl": "https://picsum.photos/seed/121/600/400",
+      "imageHint": "happy children"
+    },
+    {
+      "id": "lessons-teacher-student",
+      "description": "A teacher helping a young student with a cello.",
+      "imageUrl": "https://picsum.photos/seed/122/600/400",
+      "imageHint": "music lesson"
     }
   ]
 }

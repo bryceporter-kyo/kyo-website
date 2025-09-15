@@ -1,10 +1,12 @@
 
+
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import PageHeader from '@/components/shared/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Users, HandHeart, Music, Award, University, GraduationCap } from 'lucide-react';
+import Image from 'next/image';
 
 const orchestras = [
   {
@@ -54,6 +56,7 @@ const scholarships = [
 
 export default function OrchestrasPage() {
   const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-orchestras');
+  const joinImage = PlaceHolderImages.find(p => p.id === 'orchestra-kids-playing');
 
   return (
     <div>
@@ -82,24 +85,18 @@ export default function OrchestrasPage() {
                     </Button>
                 </div>
             </div>
-             <Card className="bg-secondary">
-                <CardHeader>
-                    <div className="flex items-center gap-4">
-                        <Users className="w-8 h-8 text-primary"/>
-                        <CardTitle className="font-headline text-2xl">Who Can Join?</CardTitle>
-                    </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <p className="text-muted-foreground">Our orchestras serve youth aged 8 to 28 residing in the Kawartha and Greater Peterborough areas. We encourage our musicians to actively participate in their school’s music programs.</p>
-                     <div className="flex items-start gap-4 pt-4">
-                        <HandHeart className="w-12 h-12 text-accent mt-1"/>
-                        <div>
-                            <h4 className="font-bold">Our Commitment to Access</h4>
-                            <p className="text-muted-foreground text-sm">We believe everyone should have the chance to experience music! We keep our tuition fees reasonable and offer financial aid to those who need it.</p>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+             {joinImage && (
+                <div className="rounded-lg overflow-hidden shadow-xl">
+                    <Image
+                        src={joinImage.imageUrl}
+                        alt={joinImage.description}
+                        width={600}
+                        height={400}
+                        className="object-cover w-full h-full"
+                        data-ai-hint={joinImage.imageHint}
+                    />
+                </div>
+            )}
         </div>
       </section>
 

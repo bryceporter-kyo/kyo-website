@@ -42,6 +42,7 @@ const holisticSupports = [
 export default function UpbeatPage() {
   const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-upbeat');
   const aboutImage = PlaceHolderImages.find(p => p.id === 'program-upbeat');
+  const kidsImage = PlaceHolderImages.find(p => p.id === 'upbeat-kids-smiling');
 
   return (
     <div>
@@ -108,27 +109,53 @@ export default function UpbeatPage() {
 
       <section>
         <div className="container mx-auto">
-            <div className="text-center mb-12">
-            <h2 className="text-3xl font-headline font-bold">Proven Impact</h2>
-            <p className="mx-auto max-w-2xl text-muted-foreground md:text-xl mt-4">
-                Our data-informed approach demonstrates measurable success in youth engagement, retention, and satisfaction. We are proud of the positive change we are creating together.
-            </p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {impactStats.map(stat => (
-                    <Card key={stat.label}>
+             <div className="grid md:grid-cols-2 gap-12 items-center">
+                {kidsImage && (
+                    <div className="rounded-lg overflow-hidden shadow-xl">
+                        <Image
+                            src={kidsImage.imageUrl}
+                            alt={kidsImage.description}
+                            width={600}
+                            height={400}
+                            className="object-cover w-full h-full"
+                            data-ai-hint={kidsImage.imageHint}
+                        />
+                    </div>
+                )}
+                <div className="space-y-6">
+                    <h2 className="text-3xl font-headline font-bold">Proven Impact</h2>
+                    <p className="text-muted-foreground text-lg">
+                        Our data-informed approach demonstrates measurable success in youth engagement, retention, and satisfaction. We are proud of the positive change we are creating together.
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        {impactStats.slice(0, 2).map(stat => (
+                            <Card key={stat.label}>
+                                <CardHeader className="flex flex-row items-center justify-between">
+                                    <p className="text-4xl font-bold text-primary">{stat.number}</p>
+                                    <div className="bg-accent text-accent-foreground p-3 rounded-full">
+                                        <stat.icon className="w-5 h-5" />
+                                    </div>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="font-semibold">{stat.label}</p>
+                                    <p className="text-sm text-muted-foreground">{stat.description}</p>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between">
-                            <p className="text-5xl font-bold text-primary">{stat.number}</p>
+                            <p className="text-4xl font-bold text-primary">{impactStats[2].number}</p>
                             <div className="bg-accent text-accent-foreground p-3 rounded-full">
-                                <stat.icon className="w-6 h-6" />
+                                <impactStats[2].icon className="w-5 h-5" />
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <p className="font-semibold text-lg">{stat.label}</p>
-                            <p className="text-sm text-muted-foreground">{stat.description}</p>
+                            <p className="font-semibold">{impactStats[2].label}</p>
+                            <p className="text-sm text-muted-foreground">{impactStats[2].description}</p>
                         </CardContent>
                     </Card>
-                ))}
+                </div>
             </div>
         </div>
       </section>
