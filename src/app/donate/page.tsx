@@ -3,7 +3,7 @@ import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { Check, Heart, Mail, Landmark, HandCoins, Guitar, ExternalLink, MessageCircle, Car, Calendar, Repeat, ShieldCheck } from "lucide-react";
+import { Check, Heart, Mail, Landmark, HandCoins, Guitar, ExternalLink, MessageCircle, Car, Calendar, Repeat, ShieldCheck, CreditCard } from "lucide-react";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -135,37 +135,58 @@ export default function DonatePage() {
         <div className="container mx-auto">
             <div className="text-center mb-12">
                 <h2 className="text-3xl font-headline font-bold">More Ways to Give</h2>
-                <p className="mx-auto max-w-2xl text-muted-foreground md:text-xl mt-4">
+                <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
                     Choose the donation method that works best for you. Every contribution over $20 qualifies for a charitable tax receipt.
                 </p>
             </div>
             <div className="max-w-4xl mx-auto space-y-8">
-                <Card>
-                    <CardHeader className="flex flex-row items-center gap-4">
-                        <ShieldCheck className="w-8 h-8 text-primary"/>
-                        <CardTitle className="font-headline text-xl">Donate Securities via CanadaHelps</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-muted-foreground">Donating securities or mutual funds is the most tax-efficient way to give. Your gift of publicly traded securities will have a big impact, and you will not pay capital gains tax. CanadaHelps makes it easy to donate securities online.</p>
-                        <Button asChild variant="outline" className="mt-4">
-                            <Link href="https://www.canadahelps.org/en/dn/116608" target="_blank" rel="noopener noreferrer">Donate Securities<ExternalLink className="ml-2 h-4 w-4" /></Link>
-                        </Button>
-                    </CardContent>
-                </Card>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {otherDonationMethods.map(method => (
-                        <Card key={method.title}>
-                            <CardHeader className="flex flex-row items-center gap-4">
-                                <method.icon className="w-8 h-8 text-primary"/>
-                                <CardTitle className="font-headline text-xl">{method.title}</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-muted-foreground">{method.description}</p>
-                                <p className="font-mono text-sm bg-muted p-2 rounded-md mt-4">{method.details}</p>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
+              <Tabs defaultValue="canadahelps-general">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="canadahelps-general"><CreditCard className="mr-2"/>Donate via CanadaHelps</TabsTrigger>
+                  <TabsTrigger value="canadahelps-securities"><ShieldCheck className="mr-2"/>Donate Securities</TabsTrigger>
+                </TabsList>
+                <TabsContent value="canadahelps-general" className="mt-8">
+                   <Card>
+                      <CardHeader>
+                          <CardTitle className="font-headline text-xl">Donate via CanadaHelps</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                          <p className="text-muted-foreground">Use CanadaHelps to make a secure one-time or monthly donation. It's a simple and effective way to support our mission and receive an instant tax receipt.</p>
+                          <Button asChild variant="outline" className="mt-4">
+                              <Link href="https://www.canadahelps.org/en/dn/136099" target="_blank" rel="noopener noreferrer">Donate on CanadaHelps<ExternalLink className="ml-2 h-4 w-4" /></Link>
+                          </Button>
+                      </CardContent>
+                  </Card>
+                </TabsContent>
+                 <TabsContent value="canadahelps-securities" className="mt-8">
+                   <Card>
+                      <CardHeader>
+                          <CardTitle className="font-headline text-xl">Donate Securities or Mutual Funds</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                          <p className="text-muted-foreground">Donating publicly traded securities is the most tax-efficient way to give. You will not pay capital gains tax on the appreciated value of your shares, which means a larger gift for us and a greater tax credit for you. CanadaHelps makes it easy.</p>
+                          <Button asChild variant="outline" className="mt-4">
+                              <Link href="https://www.canadahelps.org/en/dn/116608" target="_blank" rel="noopener noreferrer">Donate Securities<ExternalLink className="ml-2 h-4 w-4" /></Link>
+                          </Button>
+                      </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {otherDonationMethods.map(method => (
+                      <Card key={method.title}>
+                          <CardHeader className="flex flex-row items-center gap-4">
+                              <method.icon className="w-8 h-8 text-primary"/>
+                              <CardTitle className="font-headline text-xl">{method.title}</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                              <p className="text-muted-foreground">{method.description}</p>
+                              <p className="font-mono text-sm bg-muted p-2 rounded-md mt-4">{method.details}</p>
+                          </CardContent>
+                      </Card>
+                  ))}
+              </div>
             </div>
              <div className="text-center mt-12">
                 <p className="text-muted-foreground">For the fastest tax receipt, we encourage supporters to donate online.</p>
