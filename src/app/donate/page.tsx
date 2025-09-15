@@ -3,34 +3,44 @@ import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { Check, Heart, Mail, Landmark, HandCoins, Guitar, ExternalLink, MessageCircle, Car } from "lucide-react";
+import { Check, Heart, Mail, Landmark, HandCoins, Guitar, ExternalLink, MessageCircle, Car, Calendar, Repeat } from "lucide-react";
 import Link from "next/link";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-const donationTiers = [
+
+const monthlyTiers = [
   {
     title: 'Friend of KYO',
-    amount: '$50',
+    amount: '$10',
+    period: '/month',
     description: 'Provides a student with a season\'s worth of sheet music, unlocking new pieces to learn and master.',
-    features: ['Supports core program needs']
+    features: ['Supports core program needs'],
+    href: 'https://donate.stripe.com/4gM7sLdg83eKfxa6yHb3q07',
   },
   {
     title: 'Supporter',
-    amount: '$150',
+    amount: '$25',
+    period: '/month',
     description: 'Funds a group sectional coaching, giving students direct mentorship from a professional musician.',
-    features: ['Enhances learning experiences', 'Provides expert instruction']
+    features: ['Enhances learning experiences', 'Provides expert instruction'],
+    href: 'https://donate.stripe.com/aFa5kD4JC3eK84Ie19b3q06',
   },
   {
     title: 'Patron',
-    amount: '$500',
+    amount: '$50',
+    period: '/month',
     description: 'Contributes to a partial scholarship, making music education accessible for a deserving student.',
     features: ['Increases program accessibility', 'Empowers a young musician'],
     popular: true,
+    href: 'https://donate.stripe.com/8x29ATb807v0bgUg9hb3q05'
   },
   {
     title: 'Benefactor',
-    amount: '$1,000+',
+    amount: '$100+',
+    period: '/month',
     description: 'Underwrites a full student scholarship for one year, transforming a young musician\'s life.',
-    features: ['Provides a full year of music', 'Creates a lasting impact']
+    features: ['Provides a full year of music', 'Creates a lasting impact'],
+    href: 'https://donate.stripe.com/7sY6oH8ZSaHc3Ose19b3q04'
   },
 ];
 
@@ -66,32 +76,59 @@ export default function DonatePage() {
                 Tuition fees cover only 4% of what it takes to run our programs. The rest comes from the generosity of people like you. Your donation directly funds everything from sheet music and instrument repairs to scholarships and expert coaching, ensuring that every young person has the chance to experience the power of music.
             </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {donationTiers.map((tier) => (
-            <Card key={tier.title} className={`flex flex-col ${tier.popular ? 'border-primary shadow-2xl' : 'shadow-md'}`}>
-              <CardHeader>
-                <CardTitle className="font-headline text-2xl">{tier.title}</CardTitle>
-                <p className="text-4xl font-bold">{tier.amount}</p>
-                <CardDescription>{tier.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="flex-grow">
-                <ul className="space-y-2">
-                  {tier.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-2">
-                      <Check className="h-5 w-5 mt-1 text-accent flex-shrink-0" />
-                      <span className="text-muted-foreground">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-              <CardFooter>
-                <Button className="w-full" variant={tier.popular ? 'default' : 'outline'}>
-                  Donate Online
-                </Button>
-              </CardFooter>
+        <Tabs defaultValue="monthly" className="max-w-5xl mx-auto">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="monthly"><Repeat className="mr-2"/>Monthly Donation</TabsTrigger>
+            <TabsTrigger value="one-time"><Calendar className="mr-2"/>One-Time Donation</TabsTrigger>
+          </TabsList>
+          <TabsContent value="monthly" className="mt-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {monthlyTiers.map((tier) => (
+                <Card key={tier.title} className={`flex flex-col ${tier.popular ? 'border-primary shadow-2xl' : 'shadow-md'}`}>
+                  <CardHeader>
+                    <CardTitle className="font-headline text-2xl">{tier.title}</CardTitle>
+                     <p className="text-4xl font-bold flex items-baseline">{tier.amount}<span className="text-lg font-medium text-muted-foreground">{tier.period}</span></p>
+                    <CardDescription>{tier.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex-grow">
+                    <ul className="space-y-2">
+                      {tier.features.map((feature) => (
+                        <li key={feature} className="flex items-start gap-2">
+                          <Check className="h-5 w-5 mt-1 text-accent flex-shrink-0" />
+                          <span className="text-muted-foreground">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                  <CardFooter>
+                    <Button asChild className="w-full" variant={tier.popular ? 'default' : 'outline'}>
+                      <Link href={tier.href}>Donate Monthly</Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+          <TabsContent value="one-time" className="mt-12">
+            <Card className="max-w-2xl mx-auto text-center">
+                <CardHeader>
+                    <CardTitle className="font-headline text-3xl">Make a One-Time Gift</CardTitle>
+                    <CardDescription className="text-lg">
+                        Every single donation, no matter the size, helps us provide essential musical opportunities to local youth. Thank you for your support!
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                     <p className="text-muted-foreground mb-6">Click the button below to make a secure one-time donation. You can choose the amount you'd like to give.</p>
+                    <Button asChild size="lg">
+                        <Link href="https://donate.stripe.com/fZufZhekc8z4gBebT1b3q08">Donate Today</Link>
+                    </Button>
+                </CardContent>
+                 <CardFooter>
+                    <p className="text-sm text-muted-foreground mx-auto">Donations over $20 qualify for a charitable tax receipt.</p>
+                </CardFooter>
             </Card>
-          ))}
-        </div>
+          </TabsContent>
+        </Tabs>
       </section>
 
       <section className="bg-secondary">
