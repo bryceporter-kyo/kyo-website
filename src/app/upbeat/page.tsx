@@ -3,24 +3,29 @@ import PageHeader from '@/components/shared/PageHeader';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Target, HeartHandshake, Users, Award, Smile, BarChart, Check, Quote, HandCoins } from 'lucide-react';
+import { Target, HeartHandshake, Users, Award, Smile, BarChart, Check, Quote, HandCoins, BookOpen, Truck, LifeBuoy } from 'lucide-react';
 import Image from 'next/image';
 
 const programGoals = [
     {
-        icon: Target,
-        title: "Youth Development & Equitable Access",
-        description: "Empowering young musicians by offering high-quality, accessible music education that fosters confidence, discipline, and emotional resilience."
+        icon: Award,
+        title: "Accessible Music Education",
+        description: "Eliminating economic and logistical barriers by offering high-quality string education (violin, viola, and cello) completely free of charge to families."
     },
     {
         icon: HeartHandshake,
-        title: "Social Support & Inclusion",
-        description: "Providing a safe, structured, and nurturing after-school environment that promotes positive social interaction and a strong sense of belonging."
+        title: "Holistic Youth Development",
+        description: "Supporting social-emotional growth and youth wellbeing through mentorship, ensemble participation, and a trained Wellness Coordinator."
+    },
+     {
+        icon: Users,
+        title: "Equity & Inclusion",
+        description: "Offering culturally responsive, trauma-informed, and neurodivergent-inclusive programming that reflects the diversity of our participants."
     },
     {
-        icon: Users,
-        title: "Cultural & Community Enrichment",
-        description: "Deepening community engagement by bringing youth performances to schools, neighbourhood hubs, and public concerts."
+        icon: Target,
+        title: "Pathways to Progression",
+        description: "Preparing students for KYO’s Junior and Intermediate orchestras, aiming for RCM Grade 3 proficiency within their three-year UpBeat! trajectory."
     }
 ];
 
@@ -48,7 +53,7 @@ export default function UpbeatPage() {
     <div>
       <PageHeader
         title="UpBeat!"
-        subtitle="Removing Barriers, Building Futures: Music, Mentorship, and Equity for Youth"
+        subtitle="An Investment in Equity, Belonging, and Youth Potential"
         image={headerImage}
       />
 
@@ -57,10 +62,10 @@ export default function UpbeatPage() {
             <div className="space-y-6">
                 <h2 className="text-3xl font-headline font-bold">What is UpBeat!?</h2>
                 <p className="text-muted-foreground text-lg">
-                    UpBeat! is the Kawartha Youth Orchestra’s fully subsidized after-school music and social development program for youth aged 8–14 who face barriers to accessing music education. Rooted in the transformative principles of El Sistema, UpBeat! combines ensemble string instruction, nutritional support, emotional wellness services, and free transportation—all at no cost.
+                    UpBeat! is KYO’s innovative after-school music and social development program for youth aged 8–14 facing economic and systemic barriers. It offers fully subsidized string instruction, holistic social-emotional supports, nutritious food, and transportation—all at no cost to families.
                 </p>
-                    <p className="text-muted-foreground text-lg">
-                    Running Tuesdays and Thursdays from 3:30 p.m. to 5:30 p.m. throughout the school year, the program cultivates both musical ability and personal growth, helping children develop confidence, empathy, and resilience in a safe and joyful environment.
+                <p className="text-muted-foreground text-lg">
+                    More than just music lessons, UpBeat! creates a safe, joyful, and inclusive environment where young people experience belonging, build confidence, and develop lifelong skills. For many, it is their first meaningful experience with organized music—an opportunity that, without UpBeat!, would remain out of reach.
                 </p>
                 <Button asChild size="lg">
                   <Link href="/register">Enroll in UpBeat!</Link>
@@ -85,18 +90,18 @@ export default function UpbeatPage() {
         <div className="container mx-auto">
                 <div className="text-center mb-12">
                 <h2 className="text-3xl font-headline font-bold">Our Mission: Music, Growth, and Opportunity</h2>
-                <p className="mx-auto max-w-2xl text-muted-foreground md:text-xl mt-4">
-                    We are committed to creating a space where music drives personal growth, fosters inclusion, and enriches our entire community.
+                <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
+                    UpBeat! is guided by four interrelated goals that ensure both artistic excellence and deep social impact. We believe access to the arts is a right, not a privilege.
                 </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {programGoals.map(goal => (
                     <Card key={goal.title} className="text-center flex flex-col">
                         <CardHeader className="items-center">
                             <div className="bg-primary text-primary-foreground p-4 rounded-full">
                                 <goal.icon className="h-8 w-8" />
                             </div>
-                            <CardTitle className="font-headline text-2xl pt-4">{goal.title}</CardTitle>
+                            <CardTitle className="font-headline text-xl pt-4">{goal.title}</CardTitle>
                         </CardHeader>
                         <CardContent className="flex-grow">
                             <p className="text-muted-foreground">{goal.description}</p>
@@ -160,39 +165,65 @@ export default function UpbeatPage() {
         </div>
       </section>
 
-      <section className="container mx-auto grid md:grid-cols-2 gap-12 items-center">
-        <div className="space-y-6">
-            <h2 className="text-3xl font-headline font-bold">More Than Music Lessons</h2>
-            <p className="text-muted-foreground text-lg">
-                To ensure every child can participate fully, UpBeat! eliminates common barriers by providing comprehensive, holistic support. This approach ensures students can focus on what matters most: learning, growing, and making music together. Everything is provided free of charge.
-            </p>
-             <ul className="space-y-3">
-                {holisticSupports.map((item) => (
-                    <li key={item} className="flex items-start gap-3">
-                        <Check className="h-6 w-6 mt-1 text-primary flex-shrink-0" />
-                        <span className="text-lg text-muted-foreground">{item}</span>
-                    </li>
-                ))}
-            </ul>
+      <section className="bg-secondary">
+        <div className="container mx-auto grid md:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+                <h2 className="text-3xl font-headline font-bold">How It Works</h2>
+                <p className="text-muted-foreground text-lg">
+                    UpBeat! runs Tuesdays and Thursdays from 3:30 to 5:30 p.m. during the school year. Each session blends ensemble string instruction, theory games, movement-based learning, and creative group reflection.
+                </p>
+                 <div className="space-y-4">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center gap-4">
+                            <BookOpen className="w-8 h-8 text-primary"/>
+                            <CardTitle className="font-headline text-xl">Curriculum & Instruction</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-muted-foreground">Students receive individualized attention in small groups, helping them build confidence and essential ensemble skills. Instruction is led by a diverse team of professional music educators.</p>
+                        </CardContent>
+                    </Card>
+                     <Card>
+                        <CardHeader className="flex flex-row items-center gap-4">
+                            <Truck className="w-8 h-8 text-primary"/>
+                             <CardTitle className="font-headline text-xl">Transportation & Nutrition</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-muted-foreground">We provide free transportation from several local schools and offer a healthy snack at every session, removing key barriers to participation.</p>
+                        </CardContent>
+                    </Card>
+                     <Card>
+                        <CardHeader className="flex flex-row items-center gap-4">
+                            <LifeBuoy className="w-8 h-8 text-primary"/>
+                            <CardTitle className="font-headline text-xl">Wellness & Support</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-muted-foreground">A full-time Wellness Coordinator is always on site to help students with emotional regulation, relationship-building, and accessing further support.</p>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+            <Card className="bg-primary text-primary-foreground transform -rotate-2">
+                <CardHeader>
+                    <Quote className="w-12 h-12 text-primary-foreground/50" />
+                </CardHeader>
+                <CardContent>
+                    <blockquote className="text-2xl font-headline italic">
+                        My daughter LOVED the UPBEAT pilot program. She provided rave reviews on every ride home and would look forward to each and every session.
+                    </blockquote>
+                </CardContent>
+                <CardFooter>
+                     <p className="text-lg font-bold w-full text-right">- Jennifer, UpBeat! Parent</p>
+                </CardFooter>
+            </Card>
         </div>
-        <Card className="bg-primary text-primary-foreground transform rotate-3">
-            <CardHeader>
-                <Quote className="w-12 h-12 text-primary-foreground/50" />
-            </CardHeader>
-            <CardContent>
-                <blockquote className="text-2xl font-headline italic">
-                    My daughter LOVED the UPBEAT pilot program. She provided rave reviews on every ride home and would look forward to each and every session.
-                </blockquote>
-            </CardContent>
-            <CardFooter>
-                 <p className="text-lg font-bold w-full text-right">- Jennifer, UpBeat! Parent</p>
-            </CardFooter>
-        </Card>
       </section>
 
-        <section id="support" className="bg-secondary">
+      <section id="support">
           <div className="container mx-auto">
             <div className="rounded-lg bg-primary text-primary-foreground p-8 md:p-12 text-center">
+                <div className="w-fit mx-auto bg-primary-foreground/10 p-4 rounded-full mb-6">
+                    <HandCoins className="w-12 h-12 text-white"/>
+                </div>
               <h2 className="text-3xl font-headline font-bold">Support the UpBeat! Program</h2>
               <p className="mt-4 max-w-3xl mx-auto text-lg text-primary-foreground/80">
                 UpBeat! is a fully subsidized program that relies on the generosity of our community. Your donation directly funds instruments, instruction, and essential support for young musicians. Help us change lives through the power of music.
