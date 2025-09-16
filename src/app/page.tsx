@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { ArrowRight, Music, Users, GraduationCap } from 'lucide-react';
+import { ArrowRight, Music, Users, GraduationCap, Heart, Handshake, Eye, HandCoins, UserCheck, DollarSign, Group } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -49,6 +49,30 @@ const newsItems = [
     excerpt: 'A heartfelt thank you to all our supporters! Our recent Spring Gala was a resounding success, raising critical funds to support our student scholarship program.'
   }
 ]
+
+const coreValues = [
+    {
+        icon: Heart,
+        title: "Our Mission",
+        description: "We inspire our musicians and our instructors to develop and cultivate a love for music, and to share their music and passion with the community."
+    },
+    {
+        icon: Handshake,
+        title: "Our Philosophy",
+        description: "Music is for everyone. We foster the development of individual and group skills in an atmosphere of inclusivity, openness, collaboration, and passion. KYO encourages excellence within a nurturing environment."
+    },
+    {
+        icon: Eye,
+        title: "Our Vision",
+        description: "The Kawartha Youth Orchestra is much more than dedicated student musicians led by dynamic teaching artists – although that is pretty great. We are community."
+    }
+]
+
+const impactStats = [
+    { number: '700+', label: 'Musicians Supported', icon: Users },
+    { number: '2,700+', label: 'Community Members Impacted', icon: Group },
+    { number: '$70k+', label: 'Annual Subsidies Provided', icon: DollarSign },
+];
 
 export default function Home() {
   const heroImage = PlaceHolderImages.find(p => p.id === 'hero-concert');
@@ -132,7 +156,28 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="news" className="bg-secondary">
+        <section className="bg-secondary">
+            <div className="container mx-auto">
+                 <div className="text-center mb-12">
+                    <h2 className="text-3xl font-headline font-bold">Our Core Values</h2>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                   {coreValues.map(role => (
+                        <Card key={role.title}>
+                            <CardHeader className="flex flex-row items-center gap-4">
+                                <role.icon className="w-8 h-8 text-primary"/>
+                                <CardTitle className="font-headline text-xl">{role.title}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-muted-foreground">{role.description}</p>
+                            </CardContent>
+                        </Card>
+                   ))}
+                </div>
+            </div>
+        </section>
+
+        <section id="news" className="bg-background">
           <div className="container mx-auto">
             <div className="text-center">
               <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-4xl md:text-5xl">Latest News</h2>
@@ -166,6 +211,61 @@ export default function Home() {
                     />
                 </div>
               )}
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-secondary">
+          <div className="container mx-auto">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+                <div className="space-y-6">
+                    <h2 className="text-3xl font-headline font-bold">Financial Aid & Scholarships</h2>
+                    <p className="text-muted-foreground md:text-lg">
+                        We believe in nurturing the musical talents of all young individuals, regardless of their financial background. That’s why we offer a range of financial aid options and scholarships to support our aspiring musicians. Our scholarships are designed to recognize dedication, talent, and the pursuit of musical excellence, while our financial aid program ensures that no student misses out on the opportunity to grow and excel due to economic constraints. We invite you to explore these opportunities and join our community of passionate young artists.
+                    </p>
+                    <div className="grid grid-cols-2 gap-6">
+                         <Card>
+                            <CardHeader className="flex flex-row items-center gap-4">
+                                <HandCoins className="h-8 w-8 text-primary"/>
+                                <p className="text-3xl font-bold">$100k+</p>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="font-semibold">In annual bursaries</p>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader className="flex flex-row items-center gap-4">
+                                <UserCheck className="h-8 w-8 text-primary"/>
+                                <p className="text-3xl font-bold">120+</p>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="font-semibold">Students supported annually</p>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </div>
+                 <div className="space-y-6">
+                    <h2 className="text-3xl font-headline font-bold">Support Kawartha Youth Orchestra</h2>
+                    <p className="text-muted-foreground md:text-lg">
+                        Support KYO’s mission through various means. Donate funds, volunteer your time, or gift instruments. Every contribution helps us nurture young musical talent and enrich our community.
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                        {impactStats.map(stat => (
+                            <div key={stat.label}>
+                                <p className="text-4xl font-bold text-primary">{stat.number}</p>
+                                <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
+                            </div>
+                        ))}
+                    </div>
+                     <div className="flex flex-col sm:flex-row gap-4 justify-start">
+                        <Button asChild size="lg">
+                            <Link href="/donate">Donate Now</Link>
+                        </Button>
+                        <Button asChild size="lg" variant="outline">
+                            <Link href="/contact">Contact Us</Link>
+                        </Button>
+                    </div>
+                </div>
             </div>
           </div>
         </section>
