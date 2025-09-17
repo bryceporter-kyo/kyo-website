@@ -53,6 +53,11 @@ export default function EventsAdminPage() {
         });
         form.reset();
     }
+    
+    const parseDate = (dateString: string) => {
+        const [year, month, day] = dateString.split('-').map(Number);
+        return new Date(year, month - 1, day);
+    }
 
     return (
         <div className="container mx-auto py-12">
@@ -83,7 +88,7 @@ export default function EventsAdminPage() {
                         <TableBody>
                             {events.map((event) => (
                                 <TableRow key={event.id}>
-                                    <TableCell className="font-medium">{format(new Date(event.date), "PPP")}</TableCell>
+                                    <TableCell className="font-medium">{format(parseDate(event.date), "PPP")}</TableCell>
                                     <TableCell>{event.name}</TableCell>
                                     <TableCell>
                                         <Badge variant={event.type === 'special' ? 'default' : 'secondary'}>{event.type}</Badge>
