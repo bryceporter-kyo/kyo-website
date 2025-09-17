@@ -29,11 +29,18 @@ export default function LinksAdminPage() {
 
     const form = useForm<z.infer<typeof linkSchema>>({
         resolver: zodResolver(linkSchema),
+        defaultValues: {
+            id: "",
+            name: "",
+            url: "",
+        }
     });
 
     React.useEffect(() => {
         if (editingLink) {
             form.reset(editingLink);
+        } else {
+            form.reset({ id: "", name: "", url: "" });
         }
     }, [editingLink, form]);
 
@@ -43,6 +50,10 @@ export default function LinksAdminPage() {
             title: "Link Updated!",
             description: `The link "${values.name}" has been updated.`,
         });
+        setEditingLink(null);
+    }
+
+    const handleCancel = () => {
         setEditingLink(null);
     }
 
@@ -110,7 +121,7 @@ export default function LinksAdminPage() {
                                     />
                                     <div className="flex gap-4">
                                         <Button type="submit">Save Changes</Button>
-                                        <Button variant="outline" onClick={() => setEditingLink(null)}>Cancel</Button>
+                                        <Button variant="outline" onClick={handleCancel}>Cancel</Button>
                                     </div>
                                 </form>
                             </Form>
