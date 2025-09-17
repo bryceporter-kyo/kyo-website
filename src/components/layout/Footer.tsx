@@ -1,7 +1,7 @@
 
 import { Logo } from "@/components/icons/Logo";
 import { Button } from "@/components/ui/button";
-import { Facebook, Instagram, Mail, MapPin, Phone, Twitter } from "lucide-react";
+import { Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
 import Link from "next/link";
 
 const navLinks = [
@@ -20,9 +20,8 @@ const legalLinks = [
 ];
 
 const socialLinks = [
-  { name: 'Twitter', href: '#', icon: Twitter },
-  { name: 'Facebook', href: '#', icon: Facebook },
-  { name: 'Instagram', href: '#', icon: Instagram },
+  { name: 'Facebook', href: 'https://www.facebook.com/The.KYO.Ptbo/', icon: Facebook },
+  { name: 'Instagram', href: 'https://www.instagram.com/thekawarthayouthorchestra', icon: Instagram },
 ];
 
 export default function Footer() {
@@ -105,7 +104,7 @@ export default function Footer() {
             </p>
           <div className="flex space-x-6 mt-4 sm:mt-0">
             {socialLinks.map((social) => (
-              <a key={social.name} href={social.href} className="text-muted-foreground hover:text-primary">
+              <a key={social.name} href={social.href} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary">
                 <social.icon className="h-6 w-6" />
                 <span className="sr-only">{social.name}</span>
               </a>
