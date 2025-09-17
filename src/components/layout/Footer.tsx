@@ -68,13 +68,13 @@ export default function Footer() {
                <li className="flex items-start gap-2">
                 <MapPin className="w-5 h-5 mt-1 shrink-0 text-primary" />
                 <a href="https://www.google.com/maps/search/?api=1&query=P.O.+Box+53,+150+King+Street,+Peterborough+ON+K9J+6Y5" target="_blank" rel="noopener noreferrer" className="hover:text-primary">
-                    Mailing Address: P.O. Box 53, 150 King Street, Peterborough ON, K9J 6Y5
+                    P.O. Box 53, 150 King Street<br/>Peterborough ON, K9J 6Y5
                 </a>
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="w-5 h-5 mt-1 shrink-0 text-primary" />
                  <a href="https://www.google.com/maps/search/?api=1&query=221+Romaine+Street,+Peterborough,+ON,+K9J+2C3" target="_blank" rel="noopener noreferrer" className="hover:text-primary">
-                    Program Address: 221 Romaine Street, Peterborough, ON, K9J 2C3
+                    221 Romaine Street<br/>Peterborough, ON, K9J 2C3
                 </a>
               </li>
               <li className="flex items-center gap-2">
