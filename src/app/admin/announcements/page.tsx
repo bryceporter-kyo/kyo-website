@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { Announcement } from "@/lib/announcements";
 import React from "react";
+import { format } from "date-fns";
 
 const announcementSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters long."),
@@ -40,7 +41,7 @@ const announcementSchema = z.object({
 
 export default function AnnouncementsAdminPage() {
     const { toast } = useToast();
-    const [announcements, setAnnouncements] = React.useState<Announcement[]>(getAnnouncements());
+    const [announcements, setAnnouncements] = React.useState<Announcement[]>(() => getAnnouncements());
 
     const form = useForm<z.infer<typeof announcementSchema>>({
         resolver: zodResolver(announcementSchema),
@@ -57,12 +58,12 @@ export default function AnnouncementsAdminPage() {
 
     function onSubmit(values: z.infer<typeof announcementSchema>) {
         const newAnnouncement: Announcement = {
-            id: Math.max(...announcements.map(a => a.id), 0) + 1,
+            id: Math.max(0, ...announcements.map(a => a.id)) + 1,
             ...values,
-            date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+            date: format(new Date(), 'yyyy-MM-dd'),
             excerpt: values.content.substring(0, 100) + '...',
         };
-        setAnnouncements([newAnnouncement, ...announcements]);
+        setAnnouncements(prev => [newAnnouncement, ...prev]);
         toast({
             title: "Announcement Created!",
             description: "The new announcement has been saved.",

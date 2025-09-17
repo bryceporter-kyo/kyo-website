@@ -1,4 +1,6 @@
 
+"use client";
+
 import PageHeader from "@/components/shared/PageHeader";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Award, Users, DollarSign, Group, GraduationCap, HeartHandshake, User, Briefcase } from 'lucide-react';
@@ -7,6 +9,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
 import HorizontalTimeline from "@/components/shared/HorizontalTimeline";
+import React from "react";
 
 const stats = [
     { number: '70+', label: 'Concerts Performed', icon: Award },
@@ -25,7 +28,11 @@ const communityRoles = [
 export default function AboutPage() {
     const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-orchestras');
     const aboutImage = PlaceHolderImages.find(p => p.id === 'program-orchestra');
-    const seasonsOfExcellence = new Date().getFullYear() - 2002;
+    const [seasonsOfExcellence, setSeasonsOfExcellence] = React.useState<number | null>(null);
+
+    React.useEffect(() => {
+        setSeasonsOfExcellence(new Date().getFullYear() - 2002);
+    }, []);
 
     return (
         <div>
@@ -37,7 +44,7 @@ export default function AboutPage() {
             <section className="container mx-auto">
                 <div className="grid md:grid-cols-2 gap-16 items-center">
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-headline font-bold">{seasonsOfExcellence} Seasons of Excellence</h2>
+                        <h2 className="text-3xl font-headline font-bold">{seasonsOfExcellence ? `${seasonsOfExcellence} Seasons of Excellence` : 'Seasons of Excellence'}</h2>
                         <p className="text-muted-foreground text-lg">
                             Kawartha Youth Orchestra is a vibrant community organization offering music and orchestra training to youth from elementary to post-secondary levels. Drawing students from across the Kawartha Region, we provide opportunities for young musicians seeking to go beyond their school music programs.
                         </p>
