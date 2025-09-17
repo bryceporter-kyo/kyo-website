@@ -1,69 +1,37 @@
+
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import PageHeader from "@/components/shared/PageHeader";
-import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { getSuggestions } from "../actions/suggest-times";
-import { Loader2, Sparkles } from "lucide-react";
-import { getAnnouncements } from "@/lib/announcements";
+import { getEvents, Event } from "@/lib/events";
+import { format, isSameMonth, parseISO } from "date-fns";
+import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 export default function CalendarPage() {
-    const [date, setDate] = useState<Date | undefined>(new Date());
-    const { toast } = useToast();
+    const [month, setMonth] = useState(new Date());
+    const allEvents = useMemo(() => getEvents(), []);
 
-    const [programName, setProgramName] = useState("");
-    const [userPreferences, setUserPreferences] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-    const [suggestion, setSuggestion] = useState("");
-    
-    const announcements = getAnnouncements();
-
-    const handleSuggestion = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!programName || !userPreferences) {
-            toast({
-                title: "Missing Information",
-                description: "Please select a program and enter your preferences.",
-                variant: "destructive"
-            });
-            return;
-        }
-
-        setIsLoading(true);
-        setSuggestion("");
-
-        const res = await getSuggestions({
-            programName,
-            userPreferences,
-            instructorAvailability: "Weekdays 4 PM - 8 PM; Weekends 10 AM - 6 PM"
-        });
-
-        setIsLoading(false);
-
-        if (res.success && res.data) {
-            setSuggestion(res.data.suggestedTimes);
-             toast({
-                title: "Suggestions Ready!",
-                description: "We've found some potential time slots for you.",
-            });
-        } else {
-            toast({
-                title: "Error",
-                description: res.error,
-                variant: "destructive"
-            });
-        }
+    const parseDate = (dateString: string) => {
+        const [year, month, day] = dateString.split('-').map(Number);
+        return new Date(year, month - 1, day);
     }
+    
+    const eventsForMonth = useMemo(() => {
+        return allEvents.filter(event => isSameMonth(parseDate(event.date), month));
+    }, [allEvents, month]);
+
+    const eventDays = useMemo(() => {
+        return allEvents.map(event => parseDate(event.date));
+    }, [allEvents]);
+
+    const specialEventDays = useMemo(() => {
+        return allEvents.filter(e => e.type === 'special').map(event => parseDate(event.date));
+    }, [allEvents]);
 
 
     const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-calendar');
@@ -76,101 +44,75 @@ export default function CalendarPage() {
                 image={headerImage}
             />
             <section className="container mx-auto">
-                <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-                    <div className="lg:col-span-2">
-                        <Card>
-                            <CardContent className="p-2 md:p-6">
-                                <Calendar
-                                    mode="single"
-                                    selected={date}
-                                    onSelect={setDate}
-                                    className="rounded-md"
-                                    numberOfMonths={2}
-                                />
-                            </CardContent>
-                            <CardFooter>
-                                <CardDescription>
-                                    This calendar displays important dates. Note: This is a demo and not all events are shown.
-                                </CardDescription>
-                            </CardFooter>
-                        </Card>
-                    </div>
-                    <div className="lg:col-span-1">
-                        <Card className="bg-secondary">
-                            <CardHeader>
-                                <div className="flex items-center gap-2">
-                                     <Sparkles className="w-6 h-6 text-primary"/>
-                                    <CardTitle className="font-headline text-2xl">Find Your Best Time</CardTitle>
-                                </div>
-                                <CardDescription>
-                                    Use our AI tool to find the best practice times based on your schedule.
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <form onSubmit={handleSuggestion} className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="program">Program</Label>
-                                         <Select onValueChange={setProgramName} value={programName}>
-                                            <SelectTrigger id="program">
-                                                <SelectValue placeholder="Select a program" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="Orchestra">Orchestra</SelectItem>
-                                                <SelectItem value="Upbeat!">Upbeat!</SelectItem>
-                                                <SelectItem value="Lessons">Lessons</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="preferences">Your Availability & Preferences</Label>
-                                        <Textarea 
-                                            id="preferences" 
-                                            placeholder="e.g., 'Weekdays after 5 PM', 'Not available on weekends', 'Prefers morning slots'"
-                                            value={userPreferences}
-                                            onChange={(e) => setUserPreferences(e.target.value)}
-                                        />
-                                    </div>
-                                    <Button type="submit" className="w-full" disabled={isLoading}>
-                                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                                        Get Suggestions
-                                    </Button>
-                                </form>
-                            </CardContent>
-                        </Card>
-                        {suggestion && (
-                            <Card className="mt-8 animate-in fade-in-50">
-                                <CardHeader>
-                                    <CardTitle className="font-headline text-xl">Suggested Times</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-muted-foreground whitespace-pre-wrap">{suggestion}</p>
-                                </CardContent>
-                            </Card>
-                        )}
-                    </div>
-                </div>
-            </section>
-            <section id="announcements" className="bg-secondary">
-                <div className="container mx-auto">
-                     <div className="text-center mb-12">
-                        <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-4xl md:text-5xl">Announcements</h2>
-                        <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mt-4">
-                            Stay up-to-date with the latest happenings at KYO Hub.
-                        </p>
-                    </div>
-                    <div className="max-w-4xl mx-auto grid grid-cols-1 gap-8">
-                         {announcements.map((item) => (
-                            <Card key={item.id} className="flex flex-col">
-                            <CardHeader>
-                                <CardTitle className="text-xl font-headline">{item.title}</CardTitle>
-                                <p className="text-sm text-muted-foreground">{new Date(item.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                            </CardHeader>
-                            <CardContent className="flex-grow">
-                                <p className="text-muted-foreground">{item.excerpt}</p>
-                            </CardContent>
-                            </Card>
-                        ))}
-                    </div>
+                <div className="flex flex-col gap-8">
+                     <Card>
+                        <CardContent className="p-0 md:p-0">
+                             <Calendar
+                                mode="single"
+                                month={month}
+                                onMonthChange={setMonth}
+                                className="p-0 w-full"
+                                classNames={{
+                                    months: "flex flex-col sm:flex-row",
+                                    month: "space-y-4 w-full",
+                                    table: "w-full border-collapse space-y-1",
+                                    head_cell: "text-muted-foreground rounded-md w-[14.28%] font-normal text-sm",
+                                    row: "flex w-full mt-2",
+                                    cell: "h-24 w-[14.28%] text-center text-sm p-1 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                                    day: "h-full w-full p-1 font-normal aria-selected:opacity-100 justify-start items-start",
+                                }}
+                                modifiers={{
+                                    event: eventDays,
+                                    special: specialEventDays,
+                                }}
+                                modifiersClassNames={{
+                                    event: "day-event",
+                                    special: "day-special-event",
+                                }}
+                            />
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="font-headline text-2xl">Events for {format(month, 'MMMM yyyy')}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            {eventsForMonth.length > 0 ? (
+                                <ul className="space-y-4">
+                                    {eventsForMonth.map(event => (
+                                        <li key={event.id} className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 border rounded-lg">
+                                            <div className="flex items-center gap-4">
+                                                <div className="text-center w-16">
+                                                    <p className="font-bold text-lg">{format(parseDate(event.date), 'd')}</p>
+                                                    <p className="text-sm text-muted-foreground">{format(parseDate(event.date), 'EEE')}</p>
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-semibold text-lg">{event.name}</h3>
+                                                    <div className="text-sm text-muted-foreground flex flex-wrap gap-x-4 gap-y-1">
+                                                        {event.location && <p>{event.location}</p>}
+                                                        {event.time && <p>{event.time}</p>}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="sm:ml-auto flex items-center gap-4">
+                                                 <Badge variant={event.type === 'special' ? 'default' : 'secondary'}>{event.type}</Badge>
+                                                 {event.link && (
+                                                     <Button asChild variant="outline" size="sm">
+                                                        <Link href={event.link}>
+                                                            More Info <ArrowRight className="ml-2 h-4 w-4"/>
+                                                        </Link>
+                                                    </Button>
+                                                 )}
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className="text-muted-foreground">No events scheduled for this month.</p>
+                            )}
+                        </CardContent>
+                    </Card>
                 </div>
             </section>
         </div>
