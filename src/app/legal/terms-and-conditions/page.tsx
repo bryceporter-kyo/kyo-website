@@ -1,9 +1,17 @@
 import PageHeader from "@/components/shared/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getLinkById } from "@/lib/links";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import Link from "next/link";
 
 export default function TermsAndConditionsPage() {
   const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-conditions');
+  const mainContactLink = getLinkById('contact-main');
+  const hrCommitteeLink = getLinkById('contact-hiring-policy');
+  const chairLink = getLinkById('contact-chair');
+  const attendanceLink = getLinkById('contact-attendance');
+  const itAdminLink = getLinkById('contact-it-admin');
+
 
   return (
     <div>
@@ -122,7 +130,7 @@ export default function TermsAndConditionsPage() {
               <ol className="list-decimal list-outside pl-6 space-y-1">
                   <li>Complete the relevant registration form, providing all required information and indicate your interest in receiving a bursary;</li>
                   <li>Provide all of the information required in the application and submit the registration form;</li>
-                  <li>Bursary applications for regular requests follow the KYO’s Bursary policy based on the information provided. To amend information provided at the time of registration, please send your corrections to <a href="mailto:contactus@thekyo.ca" className="text-primary underline">contactus@thekyo.ca</a>. Bursary requests for unusual or amounts in excess of regular KYO Bursary policies are reviewed by the KYO’s accessibility committee.</li>
+                  <li>Bursary applications for regular requests follow the KYO’s Bursary policy based on the information provided. To amend information provided at the time of registration, please send your corrections to {mainContactLink ? <Link href={mainContactLink.url} className="text-primary underline">{mainContactLink.url.replace('mailto:', '')}</Link> : 'contactus@thekyo.ca'}. Bursary requests for unusual or amounts in excess of regular KYO Bursary policies are reviewed by the KYO’s accessibility committee.</li>
                   <li>Decisions on bursary amounts are communicated to registrants on the invoice provided for any accounts payable. Invoices are provided to all registrants, even if no balance owing exists or the KYO provides a 100% bursary.</li>
               </ol>
 
@@ -146,8 +154,8 @@ export default function TermsAndConditionsPage() {
               <p><strong>Child Protection Policies:</strong> KYO is committed to the safety and well-being of all its youth participants. All teachers and volunteers must adhere to child protection policies and procedures, recognize signs of abuse and neglect, and understand their obligation to report any suspicions.</p>
               <p><strong>Reporting Procedures for Suspected Abuse:</strong> In cases of suspected abuse or neglect, concerns must be immediately reported via email as follows:</p>
               <ul className="list-disc list-outside pl-6 space-y-1">
-                <li>If the abuse relates to someone not on the HR committee: report to the HR Committee at <a href="mailto:hr-committee@thekyo.ca" className="text-primary underline">hr-committee@thekyo.ca</a>.</li>
-                <li>If the abuse relates to someone on the HR committee or the Board of Directors: report to the Chair of the Board of Directors at <a href="mailto:chair@thekyo.ca" className="text-primary underline">chair@thekyo.ca</a>.</li>
+                <li>If the abuse relates to someone not on the HR committee: report to the HR Committee at {hrCommitteeLink ? <Link href={hrCommitteeLink.url} className="text-primary underline">{hrCommitteeLink.url.replace('mailto:', '')}</Link> : 'hr-committee@thekyo.ca'}.</li>
+                <li>If the abuse relates to someone on the HR committee or the Board of Directors: report to the Chair of the Board of Directors at {chairLink ? <Link href={chairLink.url} className="text-primary underline">{chairLink.url.replace('mailto:', '')}</Link> : 'chair@thekyo.ca'}.</li>
                 <li>If the abuse relates to the Chair: Report to the Program Manager.</li>
               </ul>
               <p>Confidentiality must be maintained to ensure the privacy of the individuals involved. Additionally, legal requirements for reporting to the appropriate authorities must be followed.</p>
@@ -226,7 +234,7 @@ export default function TermsAndConditionsPage() {
                 <p>We respect the privacy of our stakeholders and are committed to protecting personal information. Our privacy practices include:</p>
                 <ul className="list-disc list-outside pl-6 space-y-1">
                     <li><strong>Consent:</strong> We obtain explicit consent from individuals or their guardians before collecting, using, or disclosing personal information, except where permitted or required by law;</li>
-                    <li><strong>Access and Correction:</strong> Individuals have the right to access their personal information held by KYO and request corrections to any inaccuracies. Requests can be made in writing to our <a href="mailto:it-admin@thekyo.ca" className="text-primary underline">it-admin@thekyo.ca</a>;</li>
+                    <li><strong>Access and Correction:</strong> Individuals have the right to access their personal information held by KYO and request corrections to any inaccuracies. Requests can be made in writing to our {itAdminLink ? <Link href={itAdminLink.url} className="text-primary underline">{itAdminLink.url.replace('mailto:', '')}</Link> : 'it-admin@thekyo.ca'};</li>
                     <li><strong>Data Retention:</strong> We retain personal information only as long as necessary to fulfill the purposes for which it was collected or as required by law. Once information is no longer needed, we securely dispose of it;</li>
                     <li><strong>Disclosure:</strong> We do not disclose personal information to third parties without consent, except for service providers acting on our behalf or as required by law. All third-party service providers are contractually obligated to protect the confidentiality and security of personal information; and</li>
                     <li><strong>Annonysation:</strong> Data anonymization is a type of information sanitization whose intent is privacy protection. The KYO only provides anonymized data to grantors, donors, sponsors, or other institutions or public bodies as required, unless required otherwise as a result of by governing law, previous reporting requirements, or existing contractual relationships.</li>
@@ -254,7 +262,7 @@ export default function TermsAndConditionsPage() {
                 <div className="pl-4">
                     <p>Kawartha Youth Orchestra</p>
                     <p>Address: P.O. Box 53, 150 King Street, Peterborough, Ontario, K9J 6Y5</p>
-                    <p>Email: <a href="mailto:it-admin@thekyo.ca" className="text-primary underline">it-admin@thekyo.ca</a></p>
+                    <p>Email: {itAdminLink ? <Link href={itAdminLink.url} className="text-primary underline">{itAdminLink.url.replace('mailto:', '')}</Link> : 'it-admin@thekyo.ca'}</p>
                 </div>
             </div>
 
@@ -265,7 +273,7 @@ export default function TermsAndConditionsPage() {
                 <h4 className="font-bold text-lg font-headline text-foreground">Non-Discrimination</h4>
                 <p>KYO prohibits discrimination in all aspects of its operations, including recruitment, enrollment, participation, employment, and access to programs and services. Discrimination or harassment based on any protected characteristic is strictly prohibited and will not be tolerated. Any form of discriminatory behavior, including but not limited to verbal, physical, or visual harassment, will result in disciplinary action, up to and including termination of enrollment or employment.</p>
                 <h4 className="font-bold text-lg font-headline text-foreground">Accessibility Accommodations</h4>
-                <p>KYO is committed to providing reasonable accommodations to ensure equal access and participation for individuals with disabilities. We will work closely with individuals to identify and implement appropriate accommodations to facilitate their full inclusion in our programs and activities. Requests for accommodations should be directed to the KYO by email to <a href="mailto:contactus@thekyo.ca" className="text-primary underline">contactus@thekyo.ca</a>. We will work with the individual to assess needs and implement accommodations in accordance with applicable laws and regulations.</p>
+                <p>KYO is committed to providing reasonable accommodations to ensure equal access and participation for individuals with disabilities. We will work closely with individuals to identify and implement appropriate accommodations to facilitate their full inclusion in our programs and activities. Requests for accommodations should be directed to the KYO by email to {mainContactLink ? <Link href={mainContactLink.url} className="text-primary underline">{mainContactLink.url.replace('mailto:', '')}</Link> : 'contactus@thekyo.ca'}. We will work with the individual to assess needs and implement accommodations in accordance with applicable laws and regulations.</p>
                 <h4 className="font-bold text-lg font-headline text-foreground">Cultural Competency</h4>
                 <p>KYO recognizes the importance of cultural competency in creating an inclusive environment. We are committed to promoting cultural awareness, understanding, and sensitivity among our staff, volunteers, students, and families. The KYO makes reasonable efforts to ensure that our programs and services are culturally responsive and respectful of the diverse backgrounds and experiences of our participants. We encourage open dialogue and collaboration to foster a sense of belonging and mutual respect within our community.</p>
                 <h4 className="font-bold text-lg font-headline text-foreground">Compliance and Accountability</h4>
@@ -280,7 +288,7 @@ export default function TermsAndConditionsPage() {
                 <h4 className="font-bold text-lg font-headline text-foreground">Use of KYO Materials</h4>
                 <p>Members, including students, teachers, volunteers, and staff, may use KYO materials (e.g., sheet music, educational resources, logos) solely for authorized KYO activities and programs. Unauthorized use, reproduction, or distribution of KYO materials is strictly prohibited and may result in disciplinary action or termination from KYO programming.</p>
                 <h4 className="font-bold text-lg font-headline text-foreground">Licensing and Permissions</h4>
-                <p>Permission to use KYO materials for external purposes, including performances, recordings, publications, or any other commercial or non-commercial use, must be obtained from the KYO Board of Directors or Program Manager. Licensing agreements may be required for the use of KYO-owned compositions, arrangements, or recordings in external projects or productions.</p>
+                <p>Permission to use KYO materials for external purposes, including performances, recordings, publications, or any other commercial or non-commercial use, must be obtained from the KYO Board of Directors or Program Manager.</p>
                 <h4 className="font-bold text-lg font-headline text-foreground">Media Release</h4>
                 <p>By participating in KYO programs and activities, members consent to the use of their likeness, name, voice, or other personal attributes in photographs, videos, recordings, or other media for promotional, educational, or archival purposes. Members in some programs may be required to submit a media release waiver upon registration. This requirement will be at the discretion of the Board of Directors.</p>
                 <h4 className="font-bold text-lg font-headline text-foreground">Media Release Opt-Out</h4>
@@ -295,7 +303,7 @@ export default function TermsAndConditionsPage() {
                 <p>The KYO is committed to providing a positive and inclusive environment for all participants. To ensure a safe and enjoyable experience for everyone, we have established this Code of Conduct.</p>
                 <ul className="list-disc list-outside pl-6 space-y-1">
                     <li><strong>Respect and Courtesy:</strong> Treat fellow participants, instructors, and staff with kindness and respect. Listen attentively during rehearsals and follow the instructions of the instructors.</li>
-                    <li><strong>Punctuality:</strong> Arrive on time for rehearsals, lessons, and performances. Notify the program attendance email (<a href="mailto:attendance@thekyo.ca" className="text-primary underline">attendance@thekyo.ca</a>) in advance if you are unable to attend a session.</li>
+                    <li><strong>Punctuality:</strong> Arrive on time for rehearsals, lessons, and performances. Notify the program attendance email ({attendanceLink ? <Link href={attendanceLink.url} className="text-primary underline">{attendanceLink.url.replace('mailto:', '')}</Link> : 'attendance@thekyo.ca'}) in advance if you are unable to attend a session.</li>
                     <li><strong>Instrument Care:</strong> Respect and care for program instruments and equipment. Report any damages promptly to the class instructor or program manager.</li>
                     <li><strong>Personal Responsibility:</strong> Be responsible for your personal belongings. UpBeat staff will designate places for belongings to be kept when not in use.</li>
                     <li><strong>Communication:</strong> Express concerns or questions to instructors in a constructive manner. Avoid disruptive behavior during lessons, rehearsals, and performances.</li>
@@ -373,7 +381,7 @@ export default function TermsAndConditionsPage() {
                 <h4 className="font-bold text-lg font-headline text-foreground">Withdrawal from Programming</h4>
                 <p>Participants or their legal guardians must follow the outlined procedures below when terminating or withdrawing from the Program:</p>
                 <ul className="list-disc list-outside pl-6 space-y-1">
-                    <li><strong>Notification:</strong> To terminate enrollment or withdraw from the Program, participants or their legal guardians must submit notice by email to <a href="mailto:attendance@thekyo.ca" className="text-primary underline">attendance@thekyo.ca</a>. The notice should include the participant’s full name, contact information, and the reason for termination or withdrawal.</li>
+                    <li><strong>Notification:</strong> To terminate enrollment or withdraw from the Program, participants or their legal guardians must submit notice by email to {attendanceLink ? <Link href={attendanceLink.url} className="text-primary underline">{attendanceLink.url.replace('mailto:', '')}</Link> : 'attendance@thekyo.ca'}. The notice should include the participant’s full name, contact information, and the reason for termination or withdrawal.</li>
                 </ul>
                 <h4 className="font-bold text-lg font-headline text-foreground">Refund Policy</h4>
                 <p>Refer to Financial Policies: Refund Policies for more information.</p>

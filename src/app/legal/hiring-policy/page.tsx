@@ -1,10 +1,12 @@
 import PageHeader from "@/components/shared/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getLinkById } from "@/lib/links";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Link from "next/link";
 
 export default function HiringPolicyPage() {
   const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-hiring');
+  const hrCommitteeLink = getLinkById('contact-hiring-policy');
 
   return (
     <div>
@@ -107,7 +109,7 @@ export default function HiringPolicyPage() {
                         This policy ensures that candidates are not unduly burdened with excessive time commitments or tasks that do not align with reasonable expectations for evaluating their qualifications. The KYO understands the importance of providing a streamlined and respectful hiring experience, where candidates can confidently engage without concerns about uncompensated or excessive demands on their time.
                     </p>
                     <p>
-                        For any inquiries regarding our hiring processes or to report potential violations of this policy, candidates are encouraged to contact us at <a href="mailto:hr-committee@thekyo.ca" className="text-primary underline">hr-committee@thekyo.ca</a>. We are dedicated to upholding these standards and ensuring that all candidates are treated equitably throughout their interactions with the KYO.
+                        For any inquiries regarding our hiring processes or to report potential violations of this policy, candidates are encouraged to contact us at {hrCommitteeLink ? <Link href={hrCommitteeLink.url} className="text-primary underline">{hrCommitteeLink.url.replace('mailto:', '')}</Link> : 'hr-committee@thekyo.ca'}. We are dedicated to upholding these standards and ensuring that all candidates are treated equitably throughout their interactions with the KYO.
                     </p>
                 </div>
             </div>

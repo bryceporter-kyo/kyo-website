@@ -32,13 +32,13 @@ const financialAidOptions = [
         icon: HandHeart,
         title: "Tuition Assistance",
         description: "We offer financial aid to help make our programs accessible to all families through tuition bursaries & multiple child discounts.",
-        contact: "Contact us for more info"
+        linkId: "contact-info"
     },
     {
         icon: Music,
         title: "Instrument Loans",
         description: "The KYO has a limited number of instruments available for loan to registered musicians for the entire season, free of charge.",
-        contact: "Contact us for more info"
+        linkId: "contact-info"
     }
 ]
 
@@ -176,20 +176,25 @@ export default function OrchestrasPage() {
                 <div>
                     <h3 className="text-2xl font-headline font-bold text-center mb-8">Financial Support</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {financialAidOptions.map(option => (
-                            <Card key={option.title}>
-                                <CardHeader className="flex flex-row items-center gap-4">
-                                    <option.icon className="w-8 h-8 text-primary"/>
-                                    <CardTitle className="font-headline text-xl">{option.title}</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-muted-foreground">{option.description}</p>
-                                     <Button asChild variant="link" className="p-0 h-auto mt-4">
-                                        <Link href="mailto:info@kyohub.org">{option.contact}</Link>
-                                    </Button>
-                                </CardContent>
-                            </Card>
-                        ))}
+                        {financialAidOptions.map(option => {
+                            const link = getLinkById(option.linkId);
+                            return (
+                                <Card key={option.title}>
+                                    <CardHeader className="flex flex-row items-center gap-4">
+                                        <option.icon className="w-8 h-8 text-primary"/>
+                                        <CardTitle className="font-headline text-xl">{option.title}</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <p className="text-muted-foreground">{option.description}</p>
+                                        {link && (
+                                            <Button asChild variant="link" className="p-0 h-auto mt-4">
+                                                <Link href={link.url}>Contact us for more info</Link>
+                                            </Button>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            )
+                        })}
                     </div>
                 </div>
 

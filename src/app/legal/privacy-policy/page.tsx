@@ -1,9 +1,12 @@
 import PageHeader from "@/components/shared/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getLinkById } from "@/lib/links";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import Link from "next/link";
 
 export default function PrivacyPolicyPage() {
   const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-privacy');
+  const dpoLink = getLinkById('contact-dpo');
 
   return (
     <div>
@@ -196,7 +199,7 @@ export default function PrivacyPolicyPage() {
              <div className="space-y-4">
                 <h3 className="font-bold text-xl font-headline">11. How do You Contact us with Privacy or Personal Data Requests?</h3>
                  <p className="text-muted-foreground">
-                    We hope we can satisfy any queries you may have about the way we process your personal data. If you have any concerns or would like to exercise any of your rights, contact our Data Protection Officer by email at <a href="mailto:dpo@thekyo.ca" className="text-primary underline">dpo@thekyo.ca</a>. We are committed to working with you to obtain a fair resolution of any complaint or concern about your privacy.
+                    We hope we can satisfy any queries you may have about the way we process your personal data. If you have any concerns or would like to exercise any of your rights, contact our Data Protection Officer by email at {dpoLink ? <Link href={dpoLink.url} className="text-primary underline">{dpoLink.url.replace('mailto:', '')}</Link> : 'dpo@thekyo.ca'}. We are committed to working with you to obtain a fair resolution of any complaint or concern about your privacy.
                 </p>
             </div>
           </CardContent>

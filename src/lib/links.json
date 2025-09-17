@@ -4,6 +4,226 @@
       "id": "register",
       "name": "Main Registration Link",
       "url": "/register"
+    },
+    {
+      "id": "donate-stripe-friend",
+      "name": "Donate (Stripe) - Friend of KYO",
+      "url": "https://donate.stripe.com/4gM7sLdg83eKfxa6yHb3q07"
+    },
+    {
+      "id": "donate-stripe-supporter",
+      "name": "Donate (Stripe) - Supporter",
+      "url": "https://donate.stripe.com/aFa5kD4JC3eK84Ie19b3q06"
+    },
+    {
+      "id": "donate-stripe-patron",
+      "name": "Donate (Stripe) - Patron",
+      "url": "https://donate.stripe.com/8x29ATb807v0bgUg9hb3q05"
+    },
+    {
+      "id": "donate-stripe-benefactor",
+      "name": "Donate (Stripe) - Benefactor",
+      "url": "https://donate.stripe.com/7sY6oH8ZSaHc3Ose19b3q04"
+    },
+    {
+      "id": "donate-stripe-one-time",
+      "name": "Donate (Stripe) - One-Time",
+      "url": "https://donate.stripe.com/fZufZhekc8z4gBebT1b3q08"
+    },
+    {
+      "id": "donate-canadahelps-general",
+      "name": "Donate (CanadaHelps) - General",
+      "url": "https://www.canadahelps.org/en/dn/136099"
+    },
+    {
+      "id": "donate-canadahelps-securities",
+      "name": "Donate (CanadaHelps) - Securities",
+      "url": "https://www.canadahelps.org/en/dn/116608"
+    },
+    {
+      "id": "donate-email",
+      "name": "Donate - E-Transfer Email",
+      "url": "mailto:donations@thekyo.ca"
+    },
+    {
+      "id": "contact-instrument-donation",
+      "name": "Contact - Instrument Donation Email",
+      "url": "mailto:email@thekyo.ca"
+    },
+    {
+      "id": "contact-custom-donation",
+      "name": "Contact - Custom Donation Email",
+      "url": "mailto:email@thekyo.ca"
+    },
+    {
+      "id": "tenuto-trust",
+      "name": "External - Tenuto Trust Link",
+      "url": "https://cfgp.ca/project/tenuto-trust/"
+    },
+    {
+      "id": "donate-a-car",
+      "name": "External - Donate a Car Link",
+      "url": "https://donatecar.ca/org/donate.php"
+    },
+    {
+      "id": "internal-drive-board",
+      "name": "Internal Drive - Board of Directors",
+      "url": "https://docs.google.com/folderview?authuser=0&id=0AIg5MzxiNC6kUk9PVA"
+    },
+    {
+      "id": "internal-drive-finance",
+      "name": "Internal Drive - Business & Finance",
+      "url": "https://docs.google.com/folderview?authuser=0&id=0AErmWCq_aldfUk9PVA"
+    },
+    {
+      "id": "internal-drive-community",
+      "name": "Internal Drive - Community Engagement",
+      "url": "https://docs.google.com/folderview?authuser=0&id=0AEyvIWCQxa5sUk9PVA"
+    },
+    {
+      "id": "internal-drive-it",
+      "name": "Internal Drive - IT and Data",
+      "url": "https://docs.google.com/folderview?authuser=0&id=0AGcOhRlolhPGUk9PVA"
+    },
+    {
+      "id": "internal-drive-operations",
+      "name": "Internal Drive - Operations",
+      "url": "https://docs.google.com/folderview?authuser=0&id=0AGGadfYGeR4gUk9PVA"
+    },
+    {
+      "id": "internal-drive-programming",
+      "name": "Internal Drive - Programming",
+      "url": "https://docs.google.com/folderview?authuser=0&id=0AJg3p-IjDhMHUk9PVA"
+    },
+    {
+      "id": "internal-drive-hr",
+      "name": "Internal Drive - HR & Compliance",
+      "url": "https://docs.google.com/folderview?authuser=0&id=0ALlBblkGfNM0Uk9PVA"
+    },
+    {
+      "id": "internal-drive-templates",
+      "name": "Internal Drive - Templates",
+      "url": "https://docs.google.com/folderview?authuser=0&id=0AAAYa0lcUo66Uk9PVA"
+    },
+    {
+      "id": "internal-link-cec-onetime",
+      "name": "Internal Link - CEC One-time Donation",
+      "url": "https://donate.stripe.com/bIYdT82n68Nqdyw28a"
+    },
+    {
+      "id": "internal-link-cec-recurring",
+      "name": "Internal Link - CEC Recurring Donation",
+      "url": "https://buy.stripe.com/3cs9CSgdWaVycus6or"
+    },
+    {
+      "id": "internal-link-new-director",
+      "name": "Internal Link - New Director Form",
+      "url": "https://docs.google.com/forms/d/e/1FAIpQLSfCu3Ed8NGQ3SuiAzBhmmRz-zUVuD55nmTqKaTzvfAsTQl_IA/viewform?usp=sf_link"
+    },
+    {
+      "id": "internal-link-bylaws",
+      "name": "Internal Link - KYO By-Laws",
+      "url": "https://docs.google.com/document/d/1LBWfo3YOSOn7JJvfJiCwGWWTntUW8dAwLoz_Nuetfbk/edit?usp=sharing"
+    },
+    {
+      "id": "internal-link-hr-policy",
+      "name": "Internal Link - HR Policy Manual",
+      "url": "https://drive.google.com/a/thekyo.ca/open?id=1WFsMZhoSSsYpqtrEi8b6juUixMuTuH9Y7LlzvBPxlWY"
+    },
+    {
+      "id": "internal-link-new-volunteer",
+      "name": "Internal Link - New Volunteer Form",
+      "url": "https://docs.google.com/forms/d/e/1FAIpQLSehFJqXQ9jCuahd538rDKSOmtrEpDaF159wXOaTl3dXhMuMqA/viewform?usp=sf_link"
+    },
+    {
+      "id": "internal-link-tech-stack",
+      "name": "Internal Link - KYO Tech Stack",
+      "url": "https://docs.google.com/spreadsheets/d/10SfPaiyl-DUtscwcpLAbeYcN7schQK4p9WQ2YuyacsY/edit?usp=sharing"
+    },
+    {
+      "id": "internal-link-fees-bursaries",
+      "name": "Internal Link - Fees & Bursaries",
+      "url": "https://docs.google.com/spreadsheets/d/1ruAwHlTZcXh9fLSkyCzIWYuEDSqrS6Ye/edit?usp=sharing&ouid=104354503853228405665&rtpof=true&sd=true"
+    },
+    {
+      "id": "internal-link-program-registration",
+      "name": "Internal Link - Program Registration",
+      "url": "https://docs.google.com/spreadsheets/d/1yV-a2IjwgvRxBg9W7I63_RBMQh-MCRT0shMAHHim1Sk/edit?usp=sharing"
+    },
+    {
+      "id": "internal-link-program-offerings",
+      "name": "Internal Link - Program Offerings",
+      "url": "https://docs.google.com/document/d/1z31RtdleoYDg3oj46WJosGbwpSMVO2IenE4nUNMXunk/edit?usp=sharing"
+    },
+    {
+      "id": "internal-link-budget",
+      "name": "Internal Link - 2024-2025 Budget",
+      "url": "https://docs.google.com/spreadsheets/d/16sXl5dRiIOKwEaERmGNvJwtIxW7O8kZiL43N0SSH9Fc/edit?gid=1242267988#gid=1242267988"
+    },
+    {
+      "id": "social-facebook",
+      "name": "Social - Facebook",
+      "url": "https://www.facebook.com/The.KYO.Ptbo/"
+    },
+    {
+      "id": "social-instagram",
+      "name": "Social - Instagram",
+      "url": "https://www.instagram.com/thekawarthayouthorchestra"
+    },
+    {
+      "id": "contact-main",
+      "name": "Contact - Main Email",
+      "url": "mailto:ContactUs@thekyo.ca"
+    },
+    {
+      "id": "contact-phone",
+      "name": "Contact - Phone Number",
+      "url": "tel:705-410-4025"
+    },
+    {
+      "id": "address-mailing",
+      "name": "Address - Mailing",
+      "url": "https://www.google.com/maps/search/?api=1&query=P.O.+Box+53,+150+King+Street,+Peterborough+ON+K9J+6Y5"
+    },
+    {
+      "id": "address-physical",
+      "name": "Address - Physical",
+      "url": "https://www.google.com/maps/search/?api=1&query=221+Romaine+Street,+Peterborough,+ON,+K9J+2C3"
+    },
+    {
+      "id": "contact-info",
+      "name": "Contact - Info Email",
+      "url": "mailto:info@kyohub.org"
+    },
+    {
+      "id": "contact-hiring-policy",
+      "name": "Contact - HR Committee",
+      "url": "mailto:hr-committee@thekyo.ca"
+    },
+    {
+      "id": "contact-board",
+      "name": "Contact - Board of Directors",
+      "url": "mailto:board-of-directors@thekyo.ca"
+    },
+    {
+      "id": "contact-chair",
+      "name": "Contact - Board Chair",
+      "url": "mailto:chair@thekyo.ca"
+    },
+    {
+      "id": "contact-dpo",
+      "name": "Contact - Data Protection Officer",
+      "url": "mailto:dpo@thekyo.ca"
+    },
+    {
+      "id": "contact-it-admin",
+      "name": "Contact - IT Admin",
+      "url": "mailto:it-admin@thekyo.ca"
+    },
+    {
+      "id": "contact-attendance",
+      "name": "Contact - Attendance",
+      "url": "mailto:attendance@thekyo.ca"
     }
   ]
 }

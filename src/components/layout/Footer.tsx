@@ -1,6 +1,7 @@
 
 import { Logo } from "@/components/icons/Logo";
 import { Button } from "@/components/ui/button";
+import { getLinkById } from "@/lib/links";
 import { Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
 import Link from "next/link";
 
@@ -20,12 +21,21 @@ const legalLinks = [
   { name: 'Accessibility Policy', href: '/legal/accessibility-policy' },
 ];
 
-const socialLinks = [
-  { name: 'Facebook', href: 'https://www.facebook.com/The.KYO.Ptbo/', icon: Facebook },
-  { name: 'Instagram', href: 'https://www.instagram.com/thekawarthayouthorchestra', icon: Instagram },
-];
+const socialLinkIds = ['social-facebook', 'social-instagram'];
 
 export default function Footer() {
+  const facebookLink = getLinkById('social-facebook');
+  const instagramLink = getLinkById('social-instagram');
+  const mailingAddressLink = getLinkById('address-mailing');
+  const physicalAddressLink = getLinkById('address-physical');
+  const phoneLink = getLinkById('contact-phone');
+  const emailLink = getLinkById('contact-main');
+
+  const socialLinks = [
+    { name: 'Facebook', link: facebookLink, icon: Facebook },
+    { name: 'Instagram', link: instagramLink, icon: Instagram },
+  ];
+
   return (
     <footer className="bg-secondary">
       <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
@@ -63,23 +73,27 @@ export default function Footer() {
             <ul className="mt-4 space-y-2 text-muted-foreground">
                <li className="flex items-start gap-2">
                 <MapPin className="w-5 h-5 mt-1 shrink-0 text-primary" />
-                <a href="https://www.google.com/maps/search/?api=1&query=P.O.+Box+53,+150+King+Street,+Peterborough+ON+K9J+6Y5" target="_blank" rel="noopener noreferrer" className="hover:text-primary">
-                    P.O. Box 53, 150 King Street<br/>Peterborough ON, K9J 6Y5
-                </a>
+                {mailingAddressLink && (
+                  <a href={mailingAddressLink.url} target="_blank" rel="noopener noreferrer" className="hover:text-primary">
+                      P.O. Box 53, 150 King Street<br/>Peterborough ON, K9J 6Y5
+                  </a>
+                )}
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="w-5 h-5 mt-1 shrink-0 text-primary" />
-                 <a href="https://www.google.com/maps/search/?api=1&query=221+Romaine+Street,+Peterborough,+ON,+K9J+2C3" target="_blank" rel="noopener noreferrer" className="hover:text-primary">
-                    221 Romaine Street<br/>Peterborough, ON, K9J 2C3
-                </a>
+                 {physicalAddressLink && (
+                  <a href={physicalAddressLink.url} target="_blank" rel="noopener noreferrer" className="hover:text-primary">
+                      221 Romaine Street<br/>Peterborough, ON, K9J 2C3
+                  </a>
+                 )}
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="w-5 h-5 shrink-0 text-primary" />
-                <a href="tel:705-410-4025" className="hover:text-primary">705-410-4025</a>
+                {phoneLink && <a href={phoneLink.url} className="hover:text-primary">{phoneLink.url.replace('tel:', '')}</a>}
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-5 h-5 shrink-0 text-primary" />
-                <a href="mailto:ContactUs@thekyo.ca" className="hover:text-primary">ContactUs@thekyo.ca</a>
+                {emailLink && <a href={emailLink.url} className="hover:text-primary">{emailLink.url.replace('mailto:', '')}</a>}
               </li>
             </ul>
           </div>
@@ -107,10 +121,12 @@ export default function Footer() {
             </p>
           <div className="flex space-x-6 mt-4 sm:mt-0">
             {socialLinks.map((social) => (
-              <a key={social.name} href={social.href} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary">
-                <social.icon className="h-6 w-6" />
-                <span className="sr-only">{social.name}</span>
-              </a>
+              social.link && (
+                <a key={social.name} href={social.link.url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary">
+                  <social.icon className="h-6 w-6" />
+                  <span className="sr-only">{social.name}</span>
+                </a>
+              )
             ))}
           </div>
         </div>

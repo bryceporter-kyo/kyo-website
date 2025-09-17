@@ -7,6 +7,7 @@ import { Check, Heart, Mail, Landmark, HandCoins, Guitar, ExternalLink, MessageC
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Image from "next/image";
+import { getLinkById } from "@/lib/links";
 
 
 const monthlyTiers = [
@@ -16,7 +17,7 @@ const monthlyTiers = [
     period: '/month',
     description: 'Provides a student with a season\'s worth of sheet music, unlocking new pieces to learn and master.',
     features: ['Supports core program needs'],
-    href: 'https://donate.stripe.com/4gM7sLdg83eKfxa6yHb3q07',
+    linkId: 'donate-stripe-friend',
   },
   {
     title: 'Supporter',
@@ -24,7 +25,7 @@ const monthlyTiers = [
     period: '/month',
     description: 'Funds a group sectional coaching, giving students direct mentorship from a professional musician.',
     features: ['Enhances learning experiences', 'Provides expert instruction'],
-    href: 'https://donate.stripe.com/aFa5kD4JC3eK84Ie19b3q06',
+    linkId: 'donate-stripe-supporter',
   },
   {
     title: 'Patron',
@@ -33,7 +34,7 @@ const monthlyTiers = [
     description: 'Contributes to a partial scholarship, making music education accessible for a deserving student.',
     features: ['Increases program accessibility', 'Empowers a young musician'],
     popular: true,
-    href: 'https://donate.stripe.com/8x29ATb807v0bgUg9hb3q05'
+    linkId: 'donate-stripe-patron'
   },
   {
     title: 'Benefactor',
@@ -41,7 +42,7 @@ const monthlyTiers = [
     period: '/month',
     description: 'Underwrites a full student scholarship for one year, transforming a young musician\'s life.',
     features: ['Provides a full year of music', 'Creates a lasting impact'],
-    href: 'https://donate.stripe.com/7sY6oH8ZSaHc3Ose19b3q04'
+    linkId: 'donate-stripe-benefactor'
   },
 ];
 
@@ -57,6 +58,7 @@ const otherDonationMethods = [
         title: "By E-Transfer",
         description: "Send E-Transfer donations to donations@thekyo.ca. Please include your full name and address in the notes for a tax receipt.",
         details: "donations@thekyo.ca",
+        linkId: "donate-email"
     }
 ]
 
@@ -64,6 +66,14 @@ export default function DonatePage() {
   const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-donate');
   const whyItMattersImage = PlaceHolderImages.find(p => p.id === 'donate-why-it-matters');
   const volunteerCtaImage = PlaceHolderImages.find(p => p.id === 'volunteer-cta');
+
+  const oneTimeDonationLink = getLinkById('donate-stripe-one-time');
+  const canadaHelpsGeneralLink = getLinkById('donate-canadahelps-general');
+  const canadaHelpsSecuritiesLink = getLinkById('donate-canadahelps-securities');
+  const tenutoTrustLink = getLinkById('tenuto-trust');
+  const instrumentDonationLink = getLinkById('contact-instrument-donation');
+  const donateCarLink = getLinkById('donate-a-car');
+  const customDonationLink = getLinkById('contact-custom-donation');
 
   return (
     <div>
@@ -104,30 +114,35 @@ export default function DonatePage() {
             </TabsList>
             <TabsContent value="monthly" className="mt-12">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                {monthlyTiers.map((tier) => (
-                  <Card key={tier.title} className={`flex flex-col ${tier.popular ? 'border-primary shadow-2xl' : 'shadow-md'}`}>
-                    <CardHeader>
-                      <CardTitle className="font-headline text-2xl">{tier.title}</CardTitle>
-                       <p className="text-4xl font-bold flex items-baseline">{tier.amount}<span className="text-lg font-medium text-muted-foreground">{tier.period}</span></p>
-                      <CardDescription>{tier.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex-grow">
-                      <ul className="space-y-2">
-                        {tier.features.map((feature) => (
-                          <li key={feature} className="flex items-start gap-2">
-                            <Check className="h-5 w-5 mt-1 text-accent flex-shrink-0" />
-                            <span className="text-muted-foreground">{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                    <CardFooter>
-                      <Button asChild className="w-full" variant={tier.popular ? 'default' : 'outline'}>
-                        <Link href={tier.href} target="_blank" rel="noopener noreferrer">Donate Monthly</Link>
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                ))}
+                {monthlyTiers.map((tier) => {
+                  const tierLink = getLinkById(tier.linkId);
+                  return (
+                    <Card key={tier.title} className={`flex flex-col ${tier.popular ? 'border-primary shadow-2xl' : 'shadow-md'}`}>
+                      <CardHeader>
+                        <CardTitle className="font-headline text-2xl">{tier.title}</CardTitle>
+                        <p className="text-4xl font-bold flex items-baseline">{tier.amount}<span className="text-lg font-medium text-muted-foreground">{tier.period}</span></p>
+                        <CardDescription>{tier.description}</CardDescription>
+                      </CardHeader>
+                      <CardContent className="flex-grow">
+                        <ul className="space-y-2">
+                          {tier.features.map((feature) => (
+                            <li key={feature} className="flex items-start gap-2">
+                              <Check className="h-5 w-5 mt-1 text-accent flex-shrink-0" />
+                              <span className="text-muted-foreground">{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </CardContent>
+                      <CardFooter>
+                        {tierLink && (
+                          <Button asChild className="w-full" variant={tier.popular ? 'default' : 'outline'}>
+                            <Link href={tierLink.url} target="_blank" rel="noopener noreferrer">Donate Monthly</Link>
+                          </Button>
+                        )}
+                      </CardFooter>
+                    </Card>
+                  )
+                })}
               </div>
             </TabsContent>
             <TabsContent value="one-time" className="mt-12">
@@ -140,9 +155,11 @@ export default function DonatePage() {
                   </CardHeader>
                   <CardContent>
                        <p className="text-muted-foreground mb-6">Click the button below to make a secure one-time donation. You can choose the amount you'd like to give.</p>
-                      <Button asChild size="lg">
-                          <Link href="https://donate.stripe.com/fZufZhekc8z4gBebT1b3q08" target="_blank" rel="noopener noreferrer">Donate Today</Link>
-                      </Button>
+                      {oneTimeDonationLink && (
+                        <Button asChild size="lg">
+                            <Link href={oneTimeDonationLink.url} target="_blank" rel="noopener noreferrer">Donate Today</Link>
+                        </Button>
+                      )}
                   </CardContent>
                    <CardFooter>
                       <p className="text-sm text-muted-foreground mx-auto">Donations over $20 qualify for a charitable tax receipt.</p>
@@ -174,9 +191,11 @@ export default function DonatePage() {
                       </CardHeader>
                       <CardContent>
                           <p className="text-muted-foreground">Use CanadaHelps to make a secure one-time or monthly donation. It's a simple and effective way to support our mission and receive an instant tax receipt.</p>
-                          <Button asChild variant="outline" className="mt-4">
-                              <Link href="https://www.canadahelps.org/en/dn/136099" target="_blank" rel="noopener noreferrer">Donate on CanadaHelps<ExternalLink className="ml-2 h-4 w-4" /></Link>
-                          </Button>
+                          {canadaHelpsGeneralLink && (
+                            <Button asChild variant="outline" className="mt-4">
+                                <Link href={canadaHelpsGeneralLink.url} target="_blank" rel="noopener noreferrer">Donate on CanadaHelps<ExternalLink className="ml-2 h-4 w-4" /></Link>
+                            </Button>
+                          )}
                       </CardContent>
                   </Card>
                 </TabsContent>
@@ -187,16 +206,20 @@ export default function DonatePage() {
                       </CardHeader>
                       <CardContent>
                           <p className="text-muted-foreground">Donating publicly traded securities is the most tax-efficient way to give. You will not pay capital gains tax on the appreciated value of your shares, which means a larger gift for us and a greater tax credit for you. CanadaHelps makes it easy.</p>
-                          <Button asChild variant="outline" className="mt-4">
-                              <Link href="https://www.canadahelps.org/en/dn/116608" target="_blank" rel="noopener noreferrer">Donate Securities<ExternalLink className="ml-2 h-4 w-4" /></Link>
-                          </Button>
+                          {canadaHelpsSecuritiesLink && (
+                            <Button asChild variant="outline" className="mt-4">
+                                <Link href={canadaHelpsSecuritiesLink.url} target="_blank" rel="noopener noreferrer">Donate Securities<ExternalLink className="ml-2 h-4 w-4" /></Link>
+                            </Button>
+                          )}
                       </CardContent>
                   </Card>
                 </TabsContent>
               </Tabs>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {otherDonationMethods.map(method => (
+                  {otherDonationMethods.map(method => {
+                    const methodLink = method.linkId ? getLinkById(method.linkId) : null;
+                    return (
                       <Card key={method.title}>
                           <CardHeader className="flex flex-row items-center gap-4">
                               <method.icon className="w-8 h-8 text-primary"/>
@@ -204,10 +227,15 @@ export default function DonatePage() {
                           </CardHeader>
                           <CardContent>
                               <p className="text-muted-foreground">{method.description}</p>
-                              <p className="font-mono text-sm bg-muted p-2 rounded-md mt-4">{method.details}</p>
+                              {methodLink ? (
+                                <Link href={methodLink.url} className="font-mono text-sm bg-muted p-2 rounded-md mt-4 block break-words hover:bg-muted/80">{method.details}</Link>
+                              ) : (
+                                <p className="font-mono text-sm bg-muted p-2 rounded-md mt-4 break-words">{method.details}</p>
+                              )}
                           </CardContent>
                       </Card>
-                  ))}
+                    )
+                  })}
               </div>
             </div>
              <div className="text-center mt-12">
@@ -229,9 +257,11 @@ export default function DonatePage() {
                     <p className="text-muted-foreground">Contribute to our legacy fund for dependable, long-term support, managed by the Community Foundation of Greater Peterborough.</p>
                 </CardContent>
                 <CardFooter>
-                    <Button asChild variant="outline">
-                        <Link href="https://cfgp.ca/project/tenuto-trust/" target="_blank" rel="noopener noreferrer">Visit the Trust <ExternalLink className="ml-2 h-4 w-4" /></Link>
-                    </Button>
+                    {tenutoTrustLink && (
+                      <Button asChild variant="outline">
+                          <Link href={tenutoTrustLink.url} target="_blank" rel="noopener noreferrer">Visit the Trust <ExternalLink className="ml-2 h-4 w-4" /></Link>
+                      </Button>
+                    )}
                 </CardFooter>
             </Card>
              <Card className="flex flex-col">
@@ -245,9 +275,11 @@ export default function DonatePage() {
                     <p className="text-muted-foreground">Have an unused instrument? Let us put it to great use in the hands of a young musician who can't afford one of their own.</p>
                 </CardContent>
                 <CardFooter>
-                    <Button asChild variant="outline">
-                        <Link href="mailto:email@thekyo.ca">Contact Us <Mail className="ml-2 h-4 w-4" /></Link>
-                    </Button>
+                    {instrumentDonationLink && (
+                      <Button asChild variant="outline">
+                          <Link href={instrumentDonationLink.url}>Contact Us <Mail className="ml-2 h-4 w-4" /></Link>
+                      </Button>
+                    )}
                 </CardFooter>
             </Card>
              <Card className="flex flex-col">
@@ -261,9 +293,11 @@ export default function DonatePage() {
                     <p className="text-muted-foreground">Donate your car, truck, RV, boat, or motorcycle through Donate a Car Canada. They handle all the details, making it easy for KYO to benefit, and you'll receive a tax receipt.</p>
                 </CardContent>
                 <CardFooter>
-                     <Button asChild variant="outline">
-                        <Link href="https://donatecar.ca/org/donate.php" target="_blank" rel="noopener noreferrer">Learn More <ExternalLink className="ml-2 h-4 w-4" /></Link>
-                    </Button>
+                     {donateCarLink && (
+                        <Button asChild variant="outline">
+                          <Link href={donateCarLink.url} target="_blank" rel="noopener noreferrer">Learn More <ExternalLink className="ml-2 h-4 w-4" /></Link>
+                      </Button>
+                     )}
                 </CardFooter>
             </Card>
              <Card className="flex flex-col">
@@ -277,9 +311,11 @@ export default function DonatePage() {
                     <p className="text-muted-foreground">Have a specific way you'd like to contribute or a question about donations? We would love to hear from you.</p>
                 </CardContent>
                 <CardFooter>
-                     <Button asChild variant="outline">
-                        <Link href="mailto:email@thekyo.ca">Get in Touch <Mail className="ml-2 h-4 w-4" /></Link>
-                    </Button>
+                     {customDonationLink && (
+                        <Button asChild variant="outline">
+                          <Link href={customDonationLink.url}>Get in Touch <Mail className="ml-2 h-4 w-4" /></Link>
+                      </Button>
+                     )}
                 </CardFooter>
             </Card>
         </div>

@@ -1,10 +1,12 @@
 import PageHeader from "@/components/shared/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getLinkById } from "@/lib/links";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Link from "next/link";
 
 export default function TermsOfUsePage() {
   const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-terms');
+  const boardContactLink = getLinkById('contact-board');
 
   return (
     <div>
@@ -70,7 +72,11 @@ export default function TermsOfUsePage() {
                 <div className="pl-4">
                     <p>Attn: Board of Directors</p>
                     <p>Kawartha Youth Orchestra</p>
-                    <a href="mailto:board-of-directors@thekyo.ca" className="text-primary underline">board-of-directors@thekyo.ca</a>
+                    {boardContactLink ? (
+                      <Link href={boardContactLink.url} className="text-primary underline">{boardContactLink.url.replace('mailto:', '')}</Link>
+                    ) : (
+                      <a href="mailto:board-of-directors@thekyo.ca" className="text-primary underline">board-of-directors@thekyo.ca</a>
+                    )}
                 </div>
             </div>
             
@@ -93,7 +99,11 @@ export default function TermsOfUsePage() {
                  <div className="pl-4">
                     <p>Attn: Board of Directors</p>
                     <p>Kawartha Youth Orchestra</p>
-                    <a href="mailto:board-of-directors@thekyo.ca" className="text-primary underline">board-of-directors@thekyo.ca</a>
+                    {boardContactLink ? (
+                      <Link href={boardContactLink.url} className="text-primary underline">{boardContactLink.url.replace('mailto:', '')}</Link>
+                    ) : (
+                      <a href="mailto:board-of-directors@thekyo.ca" className="text-primary underline">board-of-directors@thekyo.ca</a>
+                    )}
                 </div>
             </div>
 
