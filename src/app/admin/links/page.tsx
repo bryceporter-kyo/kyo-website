@@ -23,7 +23,8 @@ const linkSchema = z.object({
 
 export default function LinksAdminPage() {
     const { toast } = useToast();
-    const links = getLinks();
+    const initialLinks = getLinks();
+    const [links, setLinks] = React.useState<ExternalLink[]>(initialLinks);
     const [editingLinkId, setEditingLinkId] = React.useState<string | null>(null);
 
     const form = useForm<z.infer<typeof linkSchema>>({
@@ -46,9 +47,17 @@ export default function LinksAdminPage() {
 
     function onSubmit(values: z.infer<typeof linkSchema>) {
         console.log("Updating link:", values);
+        
+        // Update the link in the local state
+        setLinks(currentLinks => 
+            currentLinks.map(link => 
+                link.id === values.id ? { ...link, url: values.url } : link
+            )
+        );
+
         toast({
             title: "Link Updated!",
-            description: `The link has been updated. (This is a placeholder)`,
+            description: `The link has been updated successfully.`,
         });
         setEditingLinkId(null);
     }
