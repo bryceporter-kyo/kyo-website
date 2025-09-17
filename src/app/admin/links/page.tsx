@@ -48,7 +48,7 @@ export default function LinksAdminPage() {
         console.log("Updating link:", values);
         toast({
             title: "Link Updated!",
-            description: `The link has been updated.`,
+            description: `The link has been updated. (This is a placeholder)`,
         });
         setEditingLinkId(null);
     }
