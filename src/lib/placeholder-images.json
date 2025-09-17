@@ -179,6 +179,12 @@
       "description": "An icon representing universal access and inclusivity.",
       "imageUrl": "https://picsum.photos/seed/129/1200/400",
       "imageHint": "accessibility icon"
+    },
+    {
+      "id": "page-header-internal",
+      "description": "A secure door with keycard access, symbolizing an internal area.",
+      "imageUrl": "https://picsum.photos/seed/130/1200/400",
+      "imageHint": "secure access"
     }
   ]
 }
