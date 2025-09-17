@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, Download, Upload } from "lucide-react";
 import Link from "next/link";
 import { getEvents } from "@/lib/events";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -20,6 +20,7 @@ import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import React from "react";
 
 const eventSchema = z.object({
   date: z.date({ required_error: "A date is required." }),
@@ -33,6 +34,7 @@ const eventSchema = z.object({
 export default function EventsAdminPage() {
     const { toast } = useToast();
     const events = getEvents();
+    const [csvFile, setCsvFile] = React.useState<File | null>(null);
 
     const form = useForm<z.infer<typeof eventSchema>>({
         resolver: zodResolver(eventSchema),
@@ -59,6 +61,48 @@ export default function EventsAdminPage() {
         return new Date(year, month - 1, day);
     }
 
+    const handleDownloadCsv = () => {
+        const csvContent = "data:text/csv;charset=utf-8," 
+            + "date,name,location,time,link,type\n"
+            + "2025-01-15,Sample Event,Online,10:00 AM,/sample-event,normal";
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "events_template.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files) {
+            setCsvFile(event.target.files[0]);
+        }
+    };
+
+    const handleImportCsv = () => {
+        if (!csvFile) {
+            toast({
+                title: "No file selected",
+                description: "Please select a CSV file to upload.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const text = e.target?.result;
+            console.log("Parsing CSV content:", text);
+            // In a real application, you would parse the CSV and send it to a server action
+            toast({
+                title: "CSV Uploaded",
+                description: "The event data is being processed. (This is a placeholder)",
+            });
+        };
+        reader.readAsText(csvFile);
+    };
+
     return (
         <div className="container mx-auto py-12">
             <div className="mb-8">
@@ -68,6 +112,34 @@ export default function EventsAdminPage() {
                         Back to Admin
                     </Link>
                 </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                 <Card>
+                    <CardHeader>
+                        <CardTitle className="font-headline text-xl">Download CSV Template</CardTitle>
+                        <CardDescription>Download a template to bulk-add events.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Button onClick={handleDownloadCsv}>
+                            <Download className="mr-2"/>
+                            Download Template
+                        </Button>
+                    </CardContent>
+                </Card>
+                 <Card>
+                    <CardHeader>
+                        <CardTitle className="font-headline text-xl">Import from CSV</CardTitle>
+                        <CardDescription>Upload a CSV file to add multiple events at once.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <Input type="file" accept=".csv" onChange={handleFileUpload} />
+                        <Button onClick={handleImportCsv} disabled={!csvFile}>
+                            <Upload className="mr-2"/>
+                            Upload Events
+                        </Button>
+                    </CardContent>
+                </Card>
             </div>
 
             <Card className="mb-12">
@@ -252,4 +324,5 @@ export default function EventsAdminPage() {
             </Card>
         </div>
     );
-}
+
+    
