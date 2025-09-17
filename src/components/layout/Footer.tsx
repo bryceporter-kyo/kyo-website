@@ -28,7 +28,7 @@ export default function Footer() {
   return (
     <footer className="bg-secondary">
       <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
           <div className="space-y-4">
             <Link href="/">
               <Logo />
@@ -54,7 +54,7 @@ export default function Footer() {
               </li>
             </ul>
           </div>
-          <div>
+          <div className="md:col-span-2">
             <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase">Contact Us</h3>
             <ul className="mt-4 space-y-2 text-muted-foreground">
                <li className="flex items-start gap-2">
