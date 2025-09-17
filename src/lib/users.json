@@ -1,0 +1,29 @@
+
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Admin User",
+      "email": "admin@thekyo.ca",
+      "roles": ["Website Editor", "Internal Editor", "Internal Viewer"]
+    },
+    {
+      "id": 2,
+      "name": "Content Editor",
+      "email": "editor@thekyo.ca",
+      "roles": ["Website Editor"]
+    },
+    {
+      "id": 3,
+      "name": "Internal Staff",
+      "email": "staff@thekyo.ca",
+      "roles": ["Internal Editor", "Internal Viewer"]
+    },
+    {
+        "id": 4,
+        "name": "Board Member",
+        "email": "board@thekyo.ca",
+        "roles": ["Internal Viewer"]
+    }
+  ]
+}
