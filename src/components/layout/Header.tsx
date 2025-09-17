@@ -54,12 +54,8 @@ export default function Header() {
   const pathname = usePathname();
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
 
-  const handleMenuEnter = (name: string) => {
-    setOpenMenus(prev => ({ ...prev, [name]: true }));
-  };
-
-  const handleMenuLeave = (name: string) => {
-    setOpenMenus(prev => ({ ...prev, [name]: false }));
+  const handleMenuInteraction = (name: string, open: boolean) => {
+    setOpenMenus(prev => ({ ...prev, [name]: open }));
   };
 
   return (
@@ -76,21 +72,16 @@ export default function Header() {
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
           {navLinks.map((link) => (
             link.subLinks ? (
-              <DropdownMenu key={link.name} open={openMenus[link.name] || false} onOpenChange={(isOpen) => setOpenMenus(prev => ({ ...prev, [link.name]: isOpen }))}>
+              <DropdownMenu key={link.name} open={openMenus[link.name]} onOpenChange={(open) => handleMenuInteraction(link.name, open)}>
                 <DropdownMenuTrigger asChild>
                   <div
-                    onMouseEnter={() => handleMenuEnter(link.name)}
-                    onMouseLeave={() => handleMenuLeave(link.name)}
+                    onMouseEnter={() => handleMenuInteraction(link.name, true)}
                     className="flex items-center gap-1 cursor-default text-muted-foreground transition-colors hover:text-primary"
                   >
                     {link.name} <ChevronDown className="h-4 w-4" />
                   </div>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  onMouseEnter={() => handleMenuEnter(link.name)}
-                  onMouseLeave={() => handleMenuLeave(link.name)}
-                  className="cursor-pointer"
-                >
+                <DropdownMenuContent onMouseLeave={() => handleMenuInteraction(link.name, false)}>
                   {link.subLinks.map(subLink => (
                     <DropdownMenuItem key={subLink.name} asChild>
                       <Link href={subLink.href} className={cn(pathname === subLink.href && "font-bold")}>{subLink.name}</Link>
