@@ -29,7 +29,7 @@ export default function InformationAccuracyPolicyPage() {
             <div className="space-y-4">
                 <h3 className="font-bold text-xl font-headline text-foreground">Purpose of Information</h3>
                 <p>
-                    The Kawartha Youth Orchestra websites (including https://www.kawarthayouthorchestra.org, https://www.thekyo.ca, and https://www.upbeat.com) serve as platforms to showcase our programs, expertise, impact, and the benefits our programs provide to the community. All information, facts, and figures presented on this website are derived from a blend of precise, verifiable data and estimations or extrapolations made in good faith.
+                    The Kawartha Youth Orchestra websites (including https://www.kawarthayouthorchestra.org and https://www.thekyo.ca) serve as platforms to showcase our programs, expertise, impact, and the benefits our programs provide to the community. All information, facts, and figures presented on this website are derived from a blend of precise, verifiable data and estimations or extrapolations made in good faith.
                 </p>
                 <p>
                     In cases where estimated data allows for a broad spectrum of potential outcomes, the Kawartha Youth Orchestra opts to utilize data representative of the 50th percentile. This choice aims to accurately portray a median outcome, assuming a normal distribution of potential results and considering estimated minimum and maximum values. These calculations are strictly intended for demonstration purposes, offering insights into the potential outcomes and achievements the Kawartha Youth Orchestra has been able to affect over the years.
@@ -61,7 +61,7 @@ export default function InformationAccuracyPolicyPage() {
                 <h3 className="font-bold text-xl font-headline text-foreground">Limitation of Liability</h3>
                 <p>
                     In no event will the Kawartha Youth Orchestra be liable for any loss or damage, including, without limitation, indirect or consequential loss or damage, or any loss or damage whatsoever arising from loss of data or profits arising out of, or in connection with, the use of this website.
-                p>
+                </p>
             </div>
 
             <div className="space-y-4">
