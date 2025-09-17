@@ -115,22 +115,29 @@ export default function EventsAdminPage() {
                 </Button>
             </div>
 
-            <Card className="mb-12">
+             <Card className="mb-12">
                 <CardHeader>
                     <CardTitle className="font-headline text-xl">Bulk Event Management</CardTitle>
+                    <CardDescription>Download a template or upload a CSV to manage events in bulk.</CardDescription>
                 </CardHeader>
-                <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div className="flex items-center gap-2">
-                        <Input id="csv-upload" type="file" accept=".csv" onChange={handleFileUpload} className="max-w-xs text-sm" />
-                        <Button onClick={handleImportCsv} disabled={!csvFile} size="sm">
-                            <Upload className="mr-2 h-4 w-4"/>
-                            Upload CSV
+                <CardContent className="grid md:grid-cols-2 gap-6 items-end">
+                    <div>
+                        <Label className="text-sm font-medium">Import from CSV</Label>
+                        <p className="text-sm text-muted-foreground mb-2">Upload a CSV file to add multiple events at once.</p>
+                        <div className="flex gap-2">
+                            <Input type="file" accept=".csv" onChange={handleFileUpload} className="max-w-xs" />
+                            <Button onClick={handleImportCsv} disabled={!csvFile} size="sm">
+                                <Upload className="mr-2 h-4 w-4"/>
+                                Upload
+                            </Button>
+                        </div>
+                    </div>
+                     <div className="text-right">
+                        <Button onClick={handleDownloadCsv} variant="outline" size="sm">
+                            <Download className="mr-2 h-4 w-4"/>
+                            Download Template
                         </Button>
                     </div>
-                    <Button onClick={handleDownloadCsv} variant="outline" size="sm">
-                        <Download className="mr-2 h-4 w-4"/>
-                        Download Template
-                    </Button>
                 </CardContent>
             </Card>
 
@@ -317,5 +324,7 @@ export default function EventsAdminPage() {
         </div>
     );
 }
+
+    
 
     

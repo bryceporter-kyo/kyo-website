@@ -81,8 +81,8 @@ export default function VolunteerPage() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                         {volunteerRoles.map(role => (
-                             <Card key={role.title}>
-                                <CardHeader className="items-center text-center">
+                             <Card key={role.title} className="text-center">
+                                <CardHeader className="items-center">
                                      <div className="bg-primary text-primary-foreground p-4 rounded-full">
                                         <role.icon className="w-8 h-8" />
                                     </div>
@@ -128,3 +128,5 @@ export default function VolunteerPage() {
         </div>
     )
 }
+
+    

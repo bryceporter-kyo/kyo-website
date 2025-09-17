@@ -126,7 +126,9 @@ export default function UsersAdminPage() {
                             </Button>
                         </div>
                     </div>
-                     <div className="text-right">
+                     <div className="md:text-right">
+                        <p className="text-sm font-medium">Download Template</p>
+                        <p className="text-sm text-muted-foreground mb-2">Get a CSV template to ensure correct formatting.</p>
                         <Button onClick={handleDownloadCsv} variant="outline" size="sm">
                             <Download className="mr-2 h-4 w-4"/>
                             Download Template
@@ -271,3 +273,5 @@ export default function UsersAdminPage() {
         </div>
     );
 }
+
+    

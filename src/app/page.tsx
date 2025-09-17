@@ -258,27 +258,15 @@ export default function Home() {
                 <div className="space-y-6">
                     <h2 className="text-3xl font-headline font-bold">Financial Aid & Scholarships</h2>
                     <p className="text-muted-foreground md:text-lg">
-                        We believe in nurturing the musical talents of all young individuals, regardless of their financial background. That’s why we offer a range of financial aid options and scholarships to support our aspiring musicians. Our scholarships are designed to recognize dedication, talent, and the pursuit of musical excellence, while our financial aid program ensures that no student misses out on the opportunity to grow and excel due to economic constraints. We invite you to explore these opportunities and join our community of passionate young artists.
+                        We believe in nurturing musical talent regardless of financial background. That’s why we offer a range of aid options, providing over <span className="font-bold text-primary">$100k in annual bursaries</span> to more than <span className="font-bold text-primary">120 students</span>. Our goal is to ensure no student misses the opportunity to grow due to economic constraints. Explore our scholarships and aid programs to join our community of passionate young artists.
                     </p>
-                    <div className="grid grid-cols-2 gap-6">
-                         <Card>
-                            <CardHeader className="flex flex-row items-center gap-4">
-                                <HandCoins className="h-8 w-8 text-primary"/>
-                                <p className="text-3xl font-bold">$100k+</p>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="font-semibold">In annual bursaries</p>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader className="flex flex-row items-center gap-4">
-                                <UserCheck className="h-8 w-8 text-primary"/>
-                                <p className="text-3xl font-bold">120+</p>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="font-semibold">Students supported annually</p>
-                            </CardContent>
-                        </Card>
+                    <div className="flex gap-4">
+                        <Button asChild>
+                            <Link href="/donate">Explore Aid</Link>
+                        </Button>
+                        <Button asChild variant="outline">
+                            <Link href="/register">Register Now</Link>
+                        </Button>
                     </div>
                 </div>
                 {financialAidImage && (
@@ -345,3 +333,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
