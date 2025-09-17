@@ -4,6 +4,7 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { ArrowRight, Music, Users, GraduationCap, Heart, Handshake, Eye, HandCoins, UserCheck, DollarSign, Group } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { getAnnouncements } from '@/lib/announcements';
 
 const programs = [
   {
@@ -28,27 +29,6 @@ const programs = [
     image: PlaceHolderImages.find(p => p.id === 'program-lessons')
   },
 ];
-
-const newsItems = [
-  {
-    id: 1,
-    title: 'KYO Hub Announces a New Season of Music and Growth',
-    date: 'August 15, 2024',
-    excerpt: 'We are thrilled to unveil our 2024-2025 season, packed with exciting concerts, new learning opportunities, and community events. Join us for another year of exceptional music-making!'
-  },
-  {
-    id: 2,
-    title: 'Meet Our Newest Instructor: Dr. Eleanor Vance',
-    date: 'August 1, 2024',
-    excerpt: 'We warmly welcome Dr. Eleanor Vance, a renowned cellist and educator, to our Lessons Program faculty. Her expertise and passion will be a great asset to our students.'
-  },
-  {
-    id: 3,
-    title: 'Successful Spring Gala Raises Funds for Scholarships',
-    date: 'July 20, 2024',
-    excerpt: 'A heartfelt thank you to all our supporters! Our recent Spring Gala was a resounding success, raising critical funds to support our student scholarship program.'
-  }
-]
 
 const coreValues = [
     {
@@ -78,6 +58,7 @@ export default function Home() {
   const heroImage = PlaceHolderImages.find(p => p.id === 'hero-concert');
   const newsImage = PlaceHolderImages.find(p => p.id === 'home-news');
   const financialAidImage = PlaceHolderImages.find(p => p.id === 'home-financial-aid');
+  const announcements = getAnnouncements().slice(0, 3);
 
   return (
     <div className="flex flex-col min-h-dvh">
@@ -186,22 +167,29 @@ export default function Home() {
                 Stay up-to-date with the latest happenings at KYO Hub.
               </p>
             </div>
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-8">
-                  {newsItems.map((item) => (
+            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+              <div className="md:col-span-2 grid grid-cols-1 gap-8">
+                  {announcements.map((item) => (
                     <Card key={item.id} className="flex flex-col">
                       <CardHeader>
                         <CardTitle className="text-xl font-headline">{item.title}</CardTitle>
-                        <p className="text-sm text-muted-foreground">{item.date}</p>
+                        <p className="text-sm text-muted-foreground">{new Date(item.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                       </CardHeader>
                       <CardContent className="flex-grow">
                         <p className="text-muted-foreground">{item.excerpt}</p>
                       </CardContent>
+                       <div className="p-6 pt-0">
+                        <Button asChild variant="link" className="p-0 h-auto">
+                          <Link href="/calendar" className="flex items-center gap-2">
+                            Read More <ArrowRight className="w-4 h-4" />
+                          </Link>
+                        </Button>
+                      </div>
                     </Card>
                   ))}
               </div>
               {newsImage && (
-                <div className="hidden md:block rounded-lg overflow-hidden shadow-lg">
+                <div className="hidden md:block rounded-lg overflow-hidden shadow-lg aspect-[3/4]">
                    <Image
                       src={newsImage.imageUrl}
                       alt={newsImage.description}

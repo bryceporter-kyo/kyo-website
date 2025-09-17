@@ -1,0 +1,22 @@
+{
+  "announcements": [
+    {
+      "id": 1,
+      "title": "KYO Hub Announces a New Season of Music and Growth",
+      "date": "2024-08-15",
+      "excerpt": "We are thrilled to unveil our 2024-2025 season, packed with exciting concerts, new learning opportunities, and community events. Join us for another year of exceptional music-making!"
+    },
+    {
+      "id": 2,
+      "title": "Meet Our Newest Instructor: Dr. Eleanor Vance",
+      "date": "2024-08-01",
+      "excerpt": "We warmly welcome Dr. Eleanor Vance, a renowned cellist and educator, to our Lessons Program faculty. Her expertise and passion will be a great asset to our students."
+    },
+    {
+      "id": 3,
+      "title": "Successful Spring Gala Raises Funds for Scholarships",
+      "date": "2024-07-20",
+      "excerpt": "A heartfelt thank you to all our supporters! Our recent Spring Gala was a resounding success, raising critical funds to support our student scholarship program."
+    }
+  ]
+}

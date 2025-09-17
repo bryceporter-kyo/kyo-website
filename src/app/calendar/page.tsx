@@ -4,7 +4,7 @@ import { useState } from "react";
 import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -13,6 +13,9 @@ import { useToast } from "@/hooks/use-toast";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { getSuggestions } from "../actions/suggest-times";
 import { Loader2, Sparkles } from "lucide-react";
+import { getAnnouncements } from "@/lib/announcements";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 export default function CalendarPage() {
     const [date, setDate] = useState<Date | undefined>(new Date());
@@ -22,6 +25,8 @@ export default function CalendarPage() {
     const [userPreferences, setUserPreferences] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [suggestion, setSuggestion] = useState("");
+    
+    const announcements = getAnnouncements();
 
     const handleSuggestion = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -142,6 +147,29 @@ export default function CalendarPage() {
                                 </CardContent>
                             </Card>
                         )}
+                    </div>
+                </div>
+            </section>
+            <section id="announcements" className="bg-secondary">
+                <div className="container mx-auto">
+                     <div className="text-center mb-12">
+                        <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-4xl md:text-5xl">Announcements</h2>
+                        <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mt-4">
+                            Stay up-to-date with the latest happenings at KYO Hub.
+                        </p>
+                    </div>
+                    <div className="max-w-4xl mx-auto grid grid-cols-1 gap-8">
+                         {announcements.map((item) => (
+                            <Card key={item.id} className="flex flex-col">
+                            <CardHeader>
+                                <CardTitle className="text-xl font-headline">{item.title}</CardTitle>
+                                <p className="text-sm text-muted-foreground">{new Date(item.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                            </CardHeader>
+                            <CardContent className="flex-grow">
+                                <p className="text-muted-foreground">{item.excerpt}</p>
+                            </CardContent>
+                            </Card>
+                        ))}
                     </div>
                 </div>
             </section>
