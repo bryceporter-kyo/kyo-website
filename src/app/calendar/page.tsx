@@ -11,6 +11,7 @@ import { format, isSameMonth, parseISO } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function CalendarPage() {
     const [month, setMonth] = useState(new Date());
@@ -79,24 +80,24 @@ export default function CalendarPage() {
                         </CardHeader>
                         <CardContent>
                             {eventsForMonth.length > 0 ? (
-                                <ul className="space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     {eventsForMonth.map(event => (
-                                        <li key={event.id} className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 border rounded-lg">
-                                            <div className="flex items-center gap-4">
-                                                <div className="text-center w-16">
-                                                    <p className="font-bold text-lg">{format(parseDate(event.date), 'd')}</p>
+                                        <Card key={event.id} className="flex flex-col">
+                                            <CardHeader className="flex flex-row items-start gap-4">
+                                                 <div className="text-center w-16 flex-shrink-0">
+                                                    <p className="text-2xl font-bold text-primary">{format(parseDate(event.date), 'd')}</p>
                                                     <p className="text-sm text-muted-foreground">{format(parseDate(event.date), 'EEE')}</p>
                                                 </div>
-                                                <div>
-                                                    <h3 className="font-semibold text-lg">{event.name}</h3>
-                                                    <div className="text-sm text-muted-foreground flex flex-wrap gap-x-4 gap-y-1">
+                                                <div className="flex-grow">
+                                                    <CardTitle className="text-xl font-headline">{event.name}</CardTitle>
+                                                     <div className="text-sm text-muted-foreground mt-1">
                                                         {event.location && <p>{event.location}</p>}
                                                         {event.time && <p>{event.time}</p>}
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div className="sm:ml-auto flex items-center gap-4">
-                                                 <Badge variant={event.type === 'special' ? 'default' : 'secondary'}>{event.type}</Badge>
+                                            </CardHeader>
+                                             <CardContent className="flex-grow flex items-end justify-between">
+                                                <Badge variant={event.type === 'special' ? 'default' : 'secondary'}>{event.type}</Badge>
                                                  {event.link && (
                                                      <Button asChild variant="outline" size="sm">
                                                         <Link href={event.link}>
@@ -104,10 +105,10 @@ export default function CalendarPage() {
                                                         </Link>
                                                     </Button>
                                                  )}
-                                            </div>
-                                        </li>
+                                            </CardContent>
+                                        </Card>
                                     ))}
-                                </ul>
+                                </div>
                             ) : (
                                 <p className="text-muted-foreground">No events scheduled for this month.</p>
                             )}
