@@ -13,10 +13,10 @@ const navLinks = [
 ];
 
 const legalLinks = [
-  { name: 'Privacy & Cookie Policy', href: '#' },
-  { name: 'Digital Terms of Use', href: '#' },
-  { name: 'Hiring & EEO Policy', href: '#' },
-  { name: 'Terms & Conditions', href: '#' },
+  { name: 'Privacy & Cookie Policy', href: '/legal/privacy-policy' },
+  { name: 'Digital Terms of Use', href: '/legal/terms-of-use' },
+  { name: 'Hiring & EEO Policy', href: '/legal/hiring-policy' },
+  { name: 'Terms & Conditions', href: '/legal/terms-and-conditions' },
 ];
 
 const socialLinks = [

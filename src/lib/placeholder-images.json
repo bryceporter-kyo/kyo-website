@@ -97,6 +97,30 @@
       "imageHint": "volunteers community"
     },
     {
+      "id": "page-header-privacy",
+      "description": "A padlock icon symbolizing security.",
+      "imageUrl": "https://picsum.photos/seed/116/1200/400",
+      "imageHint": "security privacy"
+    },
+    {
+      "id": "page-header-terms",
+      "description": "A document with a gavel, representing legal terms.",
+      "imageUrl": "https://picsum.photos/seed/117/1200/400",
+      "imageHint": "legal document"
+    },
+    {
+      "id": "page-header-hiring",
+      "description": "People shaking hands in a professional setting.",
+      "imageUrl": "https://picsum.photos/seed/118/1200/400",
+      "imageHint": "professional handshake"
+    },
+    {
+      "id": "page-header-conditions",
+      "description": "A magnifying glass over a document.",
+      "imageUrl": "https://picsum.photos/seed/119/1200/400",
+      "imageHint": "document review"
+    },
+    {
       "id": "orchestra-kids-playing",
       "description": "Young musicians playing various instruments in an orchestra.",
       "imageUrl": "https://picsum.photos/seed/120/600/400",
