@@ -13,9 +13,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { getAnnouncements, Announcement } from "@/lib/announcements";
+import { getAnnouncements } from "@/lib/announcements";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const announcementSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters long."),
@@ -37,6 +39,8 @@ export default function AnnouncementsAdminPage() {
         pinned: false,
         },
     });
+
+    const contentValue = form.watch("content");
 
     function onSubmit(values: z.infer<typeof announcementSchema>) {
         console.log(values);
@@ -123,17 +127,24 @@ export default function AnnouncementsAdminPage() {
                                 name="content"
                                 render={({ field }) => (
                                     <FormItem>
-                                    <FormLabel>Content</FormLabel>
-                                    <FormControl>
-                                        <Textarea
-                                            placeholder="Write the main content of the announcement here. This field supports plain text."
-                                            className="min-h-[200px]"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                     <FormDescription>
-                                        A full WYSIWYG editor can be integrated here later.
-                                    </FormDescription>
+                                    <FormLabel>Content (Markdown Supported)</FormLabel>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <FormControl>
+                                            <Textarea
+                                                placeholder="Write the main content of the announcement here. This field supports Markdown."
+                                                className="min-h-[300px] font-mono text-sm"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <div className="rounded-md border bg-muted p-4 min-h-[300px]">
+                                             <h4 className="text-sm font-medium mb-2 text-muted-foreground">Markdown Preview</h4>
+                                            <article className="prose prose-sm dark:prose-invert max-w-none">
+                                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                    {contentValue}
+                                                </ReactMarkdown>
+                                            </article>
+                                        </div>
+                                    </div>
                                     <FormMessage />
                                     </FormItem>
                                 )}

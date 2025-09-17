@@ -100,6 +100,7 @@ export default function Footer() {
             <div className="text-sm text-muted-foreground flex items-center gap-4">
                 <Link href="/admin" className="hover:text-primary">Admin Panel</Link>
                 <Link href="/internal" className="hover:text-primary">KYO Internal</Link>
+                <Link href="/contact" className="hover:text-primary">Contact Us</Link>
             </div>
             <p className="text-sm text-muted-foreground text-center flex-1">
                 &copy; 2025 Kawartha Youth Orchestra. All rights reserved.

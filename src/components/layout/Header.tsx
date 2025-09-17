@@ -40,6 +40,7 @@ const navLinks = [
   { name: 'Support', href: '/support' },
   { name: 'Volunteer', href: '/volunteer' },
   { name: 'Donate', href: '/donate' },
+  { name: 'Contact', href: '/contact' },
 ];
 
 export default function Header() {
