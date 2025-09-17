@@ -1,3 +1,4 @@
+
 import InstructorCard from "@/components/shared/InstructorCard";
 import PageHeader from "@/components/shared/PageHeader";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
@@ -12,7 +13,7 @@ export default function StaffPage() {
     return (
         <div>
             <PageHeader
-                title="Staff & Board"
+                title="Staff & Program Board"
                 subtitle="The dedicated individuals behind our mission."
                 image={headerImage}
             />
@@ -25,7 +26,7 @@ export default function StaffPage() {
                 </div>
                 <div className="space-y-16">
                     <div>
-                        <h3 className="text-2xl font-headline font-bold mb-8 text-left">Artistic Staff</h3>
+                        <h3 className="text-2xl font-headline font-bold mb-8 text-left">Teaching & Program Staff</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {instructors.map((instructor) => (
                                 <InstructorCard 
