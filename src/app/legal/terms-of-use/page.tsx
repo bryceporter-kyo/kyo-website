@@ -1,6 +1,7 @@
 import PageHeader from "@/components/shared/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import Link from "next/link";
 
 export default function TermsOfUsePage() {
   const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-terms');
@@ -109,7 +110,7 @@ export default function TermsOfUsePage() {
                     THE CONTENT AND FUNCTIONALITY ON THE SITE IS PROVIDED WITH THE UNDERSTANDING THAT Kawartha Youth Orchestra IS NOT HEREIN ENGAGED IN RENDERING PROFESSIONAL ADVICE AND SERVICES TO YOU. ALL CONTENT AND FUNCTIONALITY ON THE SITE IS PROVIDED “AS IS,” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING, WITHOUT LIMITATION, IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. Kawartha Youth Orchestra MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE OWNERSHIP, ACCURACY, OR ADEQUACY OF THE SITE CONTENT OR THAT THE FUNCTIONALITY ON THIS SITE WILL BE UNINTERRUPTED OR ERROR-FREE. YOU HEREBY ACKNOWLEDGE THAT YOUR USE OF THIS SITE IS AT YOUR SOLE RISK. UNDER NO CIRCUMSTANCES SHALL Kawartha Youth Orchestra OR ANY OF ITS PREDECESSORS, SUCCESSORS, PARENTS, SUBSIDIARIES, AFFILIATES, OFFICERS, DIRECTORS, SHAREHOLDERS, INVESTORS, EMPLOYEES, AGENTS, REPRESENTATIVES, ATTORNEYS, AND THEIR RESPECTIVE HEIRS, SUCCESSORS, AND ASSIGNS BE LIABLE FOR ANY DAMAGES, INCLUDING DIRECT, INCIDENTAL, PUNITIVE, SPECIAL, CONSEQUENTIAL, OR EXEMPLARY DAMAGES THAT DIRECTLY OR INDIRECTLY RESULT FROM THE USE OF, OR THE INABILITY TO USE, THIS SITE OR THE INFORMATION CONTAINED ON THIS SITE OR OBTAINED FROM YOUR USE OF THIS SITE, INCLUDING FOR VIRUSES ALLEGED TO HAVE BEEN OBTAINED FROM THE SITE, EVEN IF Kawartha Youth Orchestra HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES OR LOSSES AND REGARDLESS OF THE THEORY OF LIABILITY.
                 </p>
                  <p>
-                    For more details on how information and success metrics are presented on our website, please refer to our Information Accuracy and Success Metrics Policy.
+                    For more details on how information and success metrics are presented on our website, please refer to our <Link href="/legal/information-accuracy-policy" className="text-primary underline">Information Accuracy and Success Metrics Policy</Link>.
                 </p>
             </div>
 

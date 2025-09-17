@@ -167,6 +167,12 @@
       "description": "A smiling student holding a violin case.",
       "imageUrl": "https://picsum.photos/seed/127/600/400",
       "imageHint": "student violin"
+    },
+    {
+      "id": "page-header-accuracy",
+      "description": "A dashboard with charts and graphs, representing data and metrics.",
+      "imageUrl": "https://picsum.photos/seed/128/1200/400",
+      "imageHint": "data dashboard"
     }
   ]
 }
