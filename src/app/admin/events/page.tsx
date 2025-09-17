@@ -324,5 +324,4 @@ export default function EventsAdminPage() {
             </Card>
         </div>
     );
-
     
