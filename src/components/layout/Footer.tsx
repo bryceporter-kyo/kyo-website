@@ -31,8 +31,8 @@ export default function Footer() {
   return (
     <footer className="bg-secondary">
       <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
-          <div className="space-y-4 lg:col-span-1">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="space-y-4">
             <Link href="/">
               <Logo />
             </Link>
@@ -41,28 +41,16 @@ export default function Footer() {
             </p>
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase">Navigation</h3>
+            <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase">Quick Links</h3>
             <ul className="mt-4 space-y-2">
-              {navLinks.slice(1, 5).map((link) => (
+              {navLinks.slice(1).map((link) => (
                 <li key={link.name}>
                   <Link href={link.href} className="text-base text-muted-foreground hover:text-primary">
                     {link.name}
                   </Link>
                 </li>
               ))}
-            </ul>
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase">Get Involved</h3>
-            <ul className="mt-4 space-y-2">
-              {navLinks.slice(5).map((link) => (
-                <li key={link.name}>
-                  <Link href={link.href} className="text-base text-muted-foreground hover:text-primary">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-              <li>
+               <li>
                 <Link href="/register" className="text-base text-muted-foreground hover:text-primary">
                   Register
                 </Link>
