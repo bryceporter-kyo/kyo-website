@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -36,8 +37,15 @@ const timelineData = [
 export default function HorizontalTimeline() {
   const [activeIndex, setActiveIndex] = React.useState(0);
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const [isClient, setIsClient] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
   
   React.useEffect(() => {
+    if (!isClient) return;
+
     const handleScroll = () => {
       const container = containerRef.current;
       if (!container) return;
@@ -61,7 +69,11 @@ export default function HorizontalTimeline() {
     handleScroll();
 
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isClient]);
+
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <div ref={containerRef} className="relative w-full" style={{ height: `${timelineData.length * 100}vh` }}>

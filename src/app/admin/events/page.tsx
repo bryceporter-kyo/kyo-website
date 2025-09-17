@@ -70,8 +70,9 @@ export default function EventsAdminPage() {
     }
     
     const parseDate = (dateString: string) => {
-        const [year, month, day] = dateString.split('-').map(Number);
-        return new Date(year, month - 1, day);
+      // Dates in JSON are "YYYY-MM-DD". Using new Date() constructor is the most robust way to parse this format.
+      // It correctly handles timezones by defaulting to UTC midnight if no time is specified.
+      return new Date(dateString);
     }
 
     const handleDownloadCsv = () => {

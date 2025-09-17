@@ -68,7 +68,10 @@ export default function StaffAdminPage() {
     React.useEffect(() => {
         if (editingMember) {
             form.reset({
-                ...editingMember,
+                name: editingMember.name,
+                title: editingMember.title,
+                email: editingMember.email,
+                type: editingMember.type,
                 bio: 'bio' in editingMember ? editingMember.bio : '',
                 image: 'image' in editingMember ? editingMember.image : '',
             });
@@ -187,7 +190,7 @@ export default function StaffAdminPage() {
                                 render={({ field }) => (
                                     <FormItem>
                                     <FormLabel>Member Type</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                                    <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select a type" />
