@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ImagePlaceholder } from "@/lib/placeholder-images";
 
@@ -12,15 +11,22 @@ type InstructorCardProps = {
 
 export default function InstructorCard({ name, title, bio, image }: InstructorCardProps) {
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center gap-4">
-        <Avatar className="h-20 w-20">
-          {image && <AvatarImage src={image.imageUrl} alt={name} data-ai-hint={image.imageHint} />}
-          <AvatarFallback>{name.charAt(0)}</AvatarFallback>
-        </Avatar>
+    <Card className="text-center">
+        {image && (
+            <div className="aspect-square relative w-full overflow-hidden rounded-t-lg">
+                <Image 
+                    src={image.imageUrl} 
+                    alt={name}
+                    fill
+                    className="object-cover"
+                    data-ai-hint={image.imageHint}
+                />
+            </div>
+        )}
+      <CardHeader>
         <div>
-          <CardTitle className="font-headline text-xl">{name}</CardTitle>
-          <CardDescription>{title}</CardDescription>
+          <CardTitle className="font-headline text-2xl">{name}</CardTitle>
+          <CardDescription className="text-base">{title}</CardDescription>
         </div>
       </CardHeader>
       <CardContent>
