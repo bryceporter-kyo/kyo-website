@@ -9,12 +9,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Pencil, Trash2, UserPlus } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, UserPlus, X } from "lucide-react";
 import Link from "next/link";
 import { getBoard, getStaff } from "@/lib/staff";
+import type { StaffMember, BoardMember } from "@/lib/staff";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import React from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 const memberSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters."),
@@ -25,11 +38,18 @@ const memberSchema = z.object({
   type: z.enum(["staff", "board"]),
 });
 
+type MemberWithId = (StaffMember | BoardMember) & { type: 'staff' | 'board' };
+
 export default function StaffAdminPage() {
     const { toast } = useToast();
     const staff = getStaff();
     const board = getBoard();
-    const allMembers = [...staff, ...board.map(b => ({...b, type: 'board'}))];
+    const allMembers: MemberWithId[] = [
+        ...staff.map(s => ({...s, type: 'staff' as const})), 
+        ...board.map(b => ({...b, type: 'board' as const}))
+    ];
+    
+    const [editingMember, setEditingMember] = React.useState<MemberWithId | null>(null);
 
     const form = useForm<z.infer<typeof memberSchema>>({
         resolver: zodResolver(memberSchema),
@@ -42,14 +62,42 @@ export default function StaffAdminPage() {
             type: "staff",
         },
     });
+    
+    React.useEffect(() => {
+        if (editingMember) {
+            form.reset({
+                ...editingMember,
+                bio: 'bio' in editingMember ? editingMember.bio : '',
+                image: 'image' in editingMember ? editingMember.image : '',
+            });
+        } else {
+            form.reset({
+                name: "",
+                title: "",
+                email: "",
+                bio: "",
+                image: "",
+                type: "staff",
+            });
+        }
+    }, [editingMember, form]);
 
     function onSubmit(values: z.infer<typeof memberSchema>) {
         console.log(values);
         toast({
-            title: "Member Saved!",
-            description: "The staff/board member has been saved.",
+            title: editingMember ? "Member Updated!" : "Member Created!",
+            description: `The member "${values.name}" has been saved.`,
         });
-        form.reset();
+        setEditingMember(null);
+    }
+    
+    function handleDelete(member: MemberWithId) {
+        console.log("Deleting member:", member.name);
+        toast({
+            title: "Member Deleted",
+            description: `"${member.name}" has been deleted. (This is a placeholder)`,
+            variant: "destructive",
+        });
     }
 
     return (
@@ -85,12 +133,31 @@ export default function StaffAdminPage() {
                                     <TableCell>{member.title}</TableCell>
                                     <TableCell>{member.email}</TableCell>
                                     <TableCell className="text-right">
-                                        <Button variant="ghost" size="icon">
+                                        <Button variant="ghost" size="icon" onClick={() => setEditingMember(member)}>
                                             <Pencil className="h-4 w-4" />
                                         </Button>
-                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    This action cannot be undone. This will permanently delete the member
+                                                    "{member.name}".
+                                                </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => handleDelete(member)}>
+                                                    Delete
+                                                </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -101,8 +168,8 @@ export default function StaffAdminPage() {
             
             <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline text-2xl">Add/Edit Member</CardTitle>
-                    <CardDescription>Fill out the form below to add or edit a staff or board member.</CardDescription>
+                    <CardTitle className="font-headline text-2xl">{editingMember ? 'Edit Member' : 'Add Member'}</CardTitle>
+                    <CardDescription>{editingMember ? `Editing details for ${editingMember.name}` : 'Fill out the form below to add a new staff or board member.'}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -113,7 +180,7 @@ export default function StaffAdminPage() {
                                 render={({ field }) => (
                                     <FormItem>
                                     <FormLabel>Member Type</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                                         <FormControl>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select a type" />
@@ -187,7 +254,7 @@ export default function StaffAdminPage() {
                                     <FormItem>
                                     <FormLabel>Image (optional)</FormLabel>
                                     <FormControl>
-                                        <Input type="file" {...field} />
+                                        <Input type="file" onChange={(e) => field.onChange(e.target.files)} />
                                     </FormControl>
                                      <FormDescription>
                                         Upload a profile picture for the member.
@@ -196,10 +263,18 @@ export default function StaffAdminPage() {
                                     </FormItem>
                                 )}
                             />
-                             <Button type="submit">
-                                <UserPlus className="mr-2 h-4 w-4"/>
-                                Save Member
-                             </Button>
+                             <div className="flex gap-4">
+                                <Button type="submit">
+                                    <UserPlus className="mr-2 h-4 w-4"/>
+                                    {editingMember ? 'Update Member' : 'Save Member'}
+                                </Button>
+                                {editingMember && (
+                                    <Button variant="outline" onClick={() => setEditingMember(null)}>
+                                        <X className="mr-2 h-4 w-4" />
+                                        Cancel Edit
+                                    </Button>
+                                )}
+                             </div>
                         </form>
                     </Form>
                 </CardContent>
