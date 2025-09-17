@@ -9,9 +9,6 @@ import Link from 'next/link';
 import { Target, HeartHandshake, Users, Award, Smile, BarChart, Check, Quote, HandCoins, BookOpen, Truck, LifeBuoy } from 'lucide-react';
 import Image from 'next/image';
 import { getLinkById } from '@/lib/links';
-import React, { useEffect, useState } from 'react';
-import type { ExternalLink } from '@/lib/links';
-
 
 const programGoals = [
     {
@@ -55,11 +52,7 @@ export default function UpbeatPage() {
   const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-upbeat');
   const aboutImage = PlaceHolderImages.find(p => p.id === 'program-upbeat');
   const kidsImage = PlaceHolderImages.find(p => p.id === 'upbeat-kids-smiling');
-  const [registrationLink, setRegistrationLink] = useState<ExternalLink | undefined>(undefined);
-
-  useEffect(() => {
-    setRegistrationLink(getLinkById('register'));
-  }, []);
+  const registrationLink = getLinkById('register');
 
   return (
     <div>
