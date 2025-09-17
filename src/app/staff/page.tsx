@@ -25,7 +25,7 @@ export default function StaffPage() {
                 </div>
                 <div className="space-y-16">
                     <div>
-                        <h3 className="text-2xl font-headline font-bold mb-8 text-center md:text-left">Artistic Staff</h3>
+                        <h3 className="text-2xl font-headline font-bold mb-8 text-left">Artistic Staff</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {instructors.map((instructor) => (
                                 <InstructorCard 
@@ -39,7 +39,7 @@ export default function StaffPage() {
                         </div>
                     </div>
                     <div>
-                        <h3 className="text-2xl font-headline font-bold text-center mb-8">Board of Directors</h3>
+                        <h3 className="text-2xl font-headline font-bold mb-8 text-left">Board of Directors</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                            {board.map((member) => (
                                 <InstructorCard 
