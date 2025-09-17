@@ -1,7 +1,7 @@
 
 import PageHeader from "@/components/shared/PageHeader";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Folder, Users, DollarSign, Handshake, Cpu, Settings, Briefcase, FileText, ExternalLink, Mail } from "lucide-react";
@@ -105,14 +105,14 @@ export default function InternalPage() {
                             <a href={`mailto:${section.email}`} className="text-sm text-primary hover:underline">{section.email}</a>
                         </div>
                     </CardContent>
-                    <div className="p-6 pt-0">
+                    <CardFooter>
                         <Button asChild variant="outline" className="w-full">
                             <Link href={section.driveLink} target="_blank" rel="noopener noreferrer">
                                 <Folder className="mr-2"/>
                                 View Drive Folder
                             </Link>
                         </Button>
-                    </div>
+                    </CardFooter>
                 </Card>
             ))}
         </div>
