@@ -1,9 +1,13 @@
 
+"use client";
+
 import { Logo } from "@/components/icons/Logo";
 import { Button } from "@/components/ui/button";
 import { getLinkById } from "@/lib/links";
 import { Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
 import Link from "next/link";
+import { useState, useEffect } from 'react';
+import type { ExternalLink } from '@/lib/links';
 
 const navLinks = [
   { name: 'Home', href: '/' },
@@ -21,21 +25,27 @@ const legalLinks = [
   { name: 'Accessibility Policy', href: '/legal/accessibility-policy' },
 ];
 
-const socialLinkIds = ['social-facebook', 'social-instagram'];
-
 export default function Footer() {
-  const facebookLink = getLinkById('social-facebook');
-  const instagramLink = getLinkById('social-instagram');
-  const mailingAddressLink = getLinkById('address-mailing');
-  const physicalAddressLink = getLinkById('address-physical');
-  const phoneLink = getLinkById('contact-phone');
-  const emailLink = getLinkById('contact-main');
-  const registrationLink = getLinkById('register');
+  const [socialLinks, setSocialLinks] = useState<any[]>([]);
+  const [mailingAddressLink, setMailingAddressLink] = useState<ExternalLink | undefined>(undefined);
+  const [physicalAddressLink, setPhysicalAddressLink] = useState<ExternalLink | undefined>(undefined);
+  const [phoneLink, setPhoneLink] = useState<ExternalLink | undefined>(undefined);
+  const [emailLink, setEmailLink] = useState<ExternalLink | undefined>(undefined);
+  const [registrationLink, setRegistrationLink] = useState<ExternalLink | undefined>(undefined);
 
-  const socialLinks = [
-    { name: 'Facebook', link: facebookLink, icon: Facebook },
-    { name: 'Instagram', link: instagramLink, icon: Instagram },
-  ];
+  useEffect(() => {
+    const facebookLink = getLinkById('social-facebook');
+    const instagramLink = getLinkById('social-instagram');
+    setSocialLinks([
+      { name: 'Facebook', link: facebookLink, icon: Facebook },
+      { name: 'Instagram', link: instagramLink, icon: Instagram },
+    ]);
+    setMailingAddressLink(getLinkById('address-mailing'));
+    setPhysicalAddressLink(getLinkById('address-physical'));
+    setPhoneLink(getLinkById('contact-phone'));
+    setEmailLink(getLinkById('contact-main'));
+    setRegistrationLink(getLinkById('register'));
+  }, []);
 
   return (
     <footer className="bg-secondary">

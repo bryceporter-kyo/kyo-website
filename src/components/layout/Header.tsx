@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X, ChevronDown } from 'lucide-react';
@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { getLinkById } from '@/lib/links';
+import type { ExternalLink } from '@/lib/links';
 
 const navLinks = [
   { name: 'Home', href: '/' },
@@ -54,7 +55,11 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
-  const registrationLink = getLinkById('register');
+  const [registrationLink, setRegistrationLink] = useState<ExternalLink | undefined>(undefined);
+
+  useEffect(() => {
+    setRegistrationLink(getLinkById('register'));
+  }, []);
 
 
   const handleMenuInteraction = (name: string, open: boolean) => {
