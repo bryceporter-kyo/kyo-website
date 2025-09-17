@@ -46,7 +46,7 @@ const eventSchema = z.object({
 
 export default function EventsAdminPage() {
     const { toast } = useToast();
-    const events = getEvents();
+    const [events, setEvents] = React.useState<Event[]>(getEvents());
     const [csvFile, setCsvFile] = React.useState<File | null>(null);
 
     const form = useForm<z.infer<typeof eventSchema>>({
@@ -61,7 +61,12 @@ export default function EventsAdminPage() {
     });
 
     function onSubmit(values: z.infer<typeof eventSchema>) {
-        console.log(values);
+        const newEvent: Event = {
+          id: Math.max(...events.map(e => e.id), 0) + 1,
+          ...values,
+          date: format(values.date, 'yyyy-MM-dd'),
+        };
+        setEvents([...events, newEvent].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
         toast({
             title: "Event Created!",
             description: "The new event has been saved.",
@@ -117,11 +122,11 @@ export default function EventsAdminPage() {
         reader.readAsText(csvFile);
     };
     
-    function handleDelete(event: Event) {
-        console.log("Deleting event:", event.name);
+    function handleDelete(eventToDelete: Event) {
+        setEvents(events.filter(event => event.id !== eventToDelete.id));
         toast({
             title: "Event Deleted",
-            description: `"${event.name}" has been deleted. (This is a placeholder)`,
+            description: `"${eventToDelete.name}" has been deleted.`,
             variant: "destructive",
         });
     }

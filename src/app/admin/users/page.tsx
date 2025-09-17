@@ -46,7 +46,7 @@ const userSchema = z.object({
 
 export default function UsersAdminPage() {
     const { toast } = useToast();
-    const users = getUsers();
+    const [users, setUsers] = React.useState<UserType[]>(getUsers());
     const [csvFile, setCsvFile] = React.useState<File | null>(null);
 
     const form = useForm<z.infer<typeof userSchema>>({
@@ -59,7 +59,13 @@ export default function UsersAdminPage() {
     });
 
     function onSubmit(values: z.infer<typeof userSchema>) {
-        console.log(values);
+        const newUser: UserType = {
+            id: Math.max(...users.map(u => u.id), 0) + 1,
+            name: values.name,
+            email: values.email,
+            roles: values.roles as UserRole[],
+        };
+        setUsers([...users, newUser]);
         toast({
             title: "User Created!",
             description: "The new user has been saved.",
@@ -109,11 +115,11 @@ export default function UsersAdminPage() {
         reader.readAsText(csvFile);
     };
     
-    function handleDelete(user: UserType) {
-        console.log("Deleting user:", user.name);
+    function handleDelete(userToDelete: UserType) {
+        setUsers(users.filter(user => user.id !== userToDelete.id));
         toast({
             title: "User Deleted",
-            description: `"${user.name}" has been deleted. (This is a placeholder)`,
+            description: `"${userToDelete.name}" has been deleted. (This is a placeholder)`,
             variant: "destructive",
         });
     }

@@ -15,7 +15,6 @@ import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { getAnnouncements } from "@/lib/announcements";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
@@ -30,6 +29,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import type { Announcement } from "@/lib/announcements";
+import React from "react";
 
 const announcementSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters long."),
@@ -40,7 +40,7 @@ const announcementSchema = z.object({
 
 export default function AnnouncementsAdminPage() {
     const { toast } = useToast();
-    const announcements = getAnnouncements();
+    const [announcements, setAnnouncements] = React.useState<Announcement[]>(getAnnouncements());
 
     const form = useForm<z.infer<typeof announcementSchema>>({
         resolver: zodResolver(announcementSchema),
@@ -56,7 +56,13 @@ export default function AnnouncementsAdminPage() {
     const imageField = form.register("imageUrl");
 
     function onSubmit(values: z.infer<typeof announcementSchema>) {
-        console.log(values);
+        const newAnnouncement: Announcement = {
+            id: Math.max(...announcements.map(a => a.id), 0) + 1,
+            ...values,
+            date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+            excerpt: values.content.substring(0, 100) + '...',
+        };
+        setAnnouncements([newAnnouncement, ...announcements]);
         toast({
             title: "Announcement Created!",
             description: "The new announcement has been saved.",
@@ -64,11 +70,11 @@ export default function AnnouncementsAdminPage() {
         form.reset();
     }
 
-    function handleDelete(announcement: Announcement) {
-        console.log("Deleting announcement:", announcement.title);
+    function handleDelete(announcementToDelete: Announcement) {
+        setAnnouncements(announcements.filter(announcement => announcement.id !== announcementToDelete.id));
         toast({
             title: "Announcement Deleted",
-            description: `"${announcement.title}" has been deleted. (This is a placeholder)`,
+            description: `"${announcementToDelete.title}" has been deleted.`,
             variant: "destructive",
         });
     }
