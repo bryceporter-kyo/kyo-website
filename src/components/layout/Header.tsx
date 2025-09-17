@@ -21,9 +21,9 @@ const navLinks = [
   { name: 'Home', href: '/' },
   {
     name: 'About Us',
-    href: '#',
+    href: '/about',
     subLinks: [
-      { name: 'About Us', href: '/about' },
+      { name: 'Our Story', href: '/about' },
       { name: 'Staff & Board', href: '/staff' },
     ]
   },
@@ -37,9 +37,15 @@ const navLinks = [
     ]
   },
   { name: 'Calendar', href: '/calendar' },
-  { name: 'Support', href: '/support' },
-  { name: 'Volunteer', href: '/volunteer' },
-  { name: 'Donate', href: '/donate' },
+  {
+    name: 'Support Us',
+    href: '/support',
+    subLinks: [
+        { name: 'Ways to Give', href: '/support' },
+        { name: 'Donate', href: '/donate' },
+        { name: 'Volunteer', href: '/volunteer' },
+    ]
+  },
   { name: 'Contact', href: '/contact' },
 ];
 
