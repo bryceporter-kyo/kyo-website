@@ -110,7 +110,7 @@ export default function Header() {
         <div className="hidden md:flex items-center gap-4">
           {registrationLink && (
             <Button asChild>
-              <Link href={registrationLink.url}>Register</Link>
+              <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Register</Link>
             </Button>
           )}
         </div>
@@ -165,7 +165,7 @@ export default function Header() {
                 </nav>
                  {registrationLink && (
                   <Button asChild className="w-full mt-8">
-                      <Link href={registrationLink.url} onClick={() => setIsMobileMenuOpen(false)}>Register</Link>
+                      <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer" onClick={() => setIsMobileMenuOpen(false)}>Register</Link>
                   </Button>
                 )}
               </div>

@@ -56,7 +56,7 @@ export default function VolunteerPage() {
                         </p>
                          {registrationLink && (
                            <Button asChild size="lg">
-                              <Link href={registrationLink.url}>Sign Up to Volunteer</Link>
+                              <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Sign Up to Volunteer</Link>
                           </Button>
                          )}
                     </div>
@@ -112,7 +112,7 @@ export default function VolunteerPage() {
                             <div className="mt-8 flex justify-center md:justify-start">
                                 {registrationLink && (
                                   <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 font-bold">
-                                      <Link href={registrationLink.url}>Become a Volunteer Today</Link>
+                                      <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Become a Volunteer Today</Link>
                                   </Button>
                                 )}
                             </div>

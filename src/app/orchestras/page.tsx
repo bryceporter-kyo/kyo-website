@@ -82,10 +82,10 @@ export default function OrchestrasPage() {
                   {registrationLink && (
                     <>
                       <Button asChild size="lg">
-                          <Link href={registrationLink.url}>Register for 2025-2026</Link>
+                          <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Register for 2025-2026</Link>
                       </Button>
                       <Button asChild size="lg" variant="outline">
-                          <Link href={registrationLink.url}>Sign Up for an Audition</Link>
+                          <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Sign Up for an Audition</Link>
                       </Button>
                     </>
                   )}
@@ -127,7 +127,7 @@ export default function OrchestrasPage() {
                         {registrationLink && (
                           <CardFooter>
                             <Button asChild className="w-full">
-                                  <Link href={registrationLink.url}>Register Now</Link>
+                                  <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Register Now</Link>
                               </Button>
                           </CardFooter>
                         )}
@@ -156,7 +156,7 @@ export default function OrchestrasPage() {
                     <p className="text-muted-foreground mb-6">Explore topics like Composition, Music Theory, Instrument Practice, and Film Scoring from the comfort of your home. These courses are designed to complement your ensemble experience and deepen your musical understanding.</p>
                      {registrationLink && (
                         <Button asChild size="lg">
-                          <Link href={registrationLink.url}>Register for a Course</Link>
+                          <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Register for a Course</Link>
                       </Button>
                      )}
                 </CardContent>

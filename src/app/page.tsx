@@ -107,7 +107,7 @@ export default function Home() {
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
               {registrationLink && (
                 <Button asChild size="lg" className="font-bold">
-                  <Link href={registrationLink.url}>Register Now</Link>
+                  <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Register Now</Link>
                 </Button>
               )}
               <Button asChild size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white hover:text-primary">
@@ -281,7 +281,7 @@ export default function Home() {
                         </Button>
                         {registrationLink && (
                           <Button asChild variant="outline">
-                              <Link href={registrationLink.url}>Register Now</Link>
+                              <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Register Now</Link>
                           </Button>
                         )}
                     </div>

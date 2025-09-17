@@ -1,3 +1,4 @@
+
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import PageHeader from '@/components/shared/PageHeader';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -71,7 +72,7 @@ export default function UpbeatPage() {
                 </p>
                 {registrationLink && (
                   <Button asChild size="lg">
-                    <Link href={registrationLink.url}>Enroll in UpBeat!</Link>
+                    <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Enroll in UpBeat!</Link>
                   </Button>
                 )}
             </div>

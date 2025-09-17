@@ -3,7 +3,7 @@
     {
       "id": "register",
       "name": "Main Registration Link",
-      "url": "/register"
+      "url": "https://www.google.com/forms/about/"
     },
     {
       "id": "donate-stripe-friend",

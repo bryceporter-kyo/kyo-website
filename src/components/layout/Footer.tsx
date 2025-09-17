@@ -30,6 +30,7 @@ export default function Footer() {
   const physicalAddressLink = getLinkById('address-physical');
   const phoneLink = getLinkById('contact-phone');
   const emailLink = getLinkById('contact-main');
+  const registrationLink = getLinkById('register');
 
   const socialLinks = [
     { name: 'Facebook', link: facebookLink, icon: Facebook },
@@ -62,9 +63,11 @@ export default function Footer() {
                 </li>
               ))}
                <li>
-                <Link href="/register" className="text-base text-muted-foreground hover:text-primary">
-                  Register
-                </Link>
+                {registrationLink && (
+                  <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer" className="text-base text-muted-foreground hover:text-primary">
+                    Register
+                  </Link>
+                )}
               </li>
             </ul>
           </div>

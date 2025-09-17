@@ -1,3 +1,4 @@
+
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import PageHeader from '@/components/shared/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -59,7 +60,7 @@ export default function LessonsPage() {
                 </p>
                 {registrationLink && (
                   <Button asChild size="lg">
-                      <Link href={registrationLink.url}>Start Your Musical Journey</Link>
+                      <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Start Your Musical Journey</Link>
                   </Button>
                 )}
             </div>
@@ -177,7 +178,7 @@ export default function LessonsPage() {
                 <p className="text-muted-foreground">Ready to take the next step? Register today to be matched with an instructor and schedule your first lesson. No prior experience is required for many of our beginner programs!</p>
                 {registrationLink && (
                   <Button asChild className="mt-4 w-full">
-                    <Link href={registrationLink.url}>Register for Lessons</Link>
+                    <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Register for Lessons</Link>
                   </Button>
                 )}
               </CardContent>
