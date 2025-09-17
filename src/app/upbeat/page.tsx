@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Target, HeartHandshake, Users, Award, Smile, BarChart, Check, Quote, HandCoins, BookOpen, Truck, LifeBuoy } from 'lucide-react';
 import Image from 'next/image';
 import { getLinkById } from '@/lib/links';
+import React from 'react';
 
 const programGoals = [
     {
