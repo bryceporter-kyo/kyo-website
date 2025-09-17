@@ -8,9 +8,6 @@ const navLinks = [
   { name: 'Orchestras', href: '/orchestras' },
   { name: 'Upbeat!', href: '/upbeat' },
   { name: 'Lessons', href: '/lessons' },
-  { name: 'Calendar', href: '/calendar' },
-  { name: 'Support', href: '/support' },
-  { name: 'Volunteer', href: '/volunteer' },
   { name: 'Donate', href: '/donate' },
 ];
 
