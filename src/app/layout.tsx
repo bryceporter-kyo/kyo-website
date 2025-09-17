@@ -29,16 +29,16 @@ export default function RootLayout({
         <SidebarProvider>
           <div className="relative flex min-h-dvh flex-col bg-background">
             <Header />
-            <main className="flex-1">
+            <main className={cn("flex-1", isAdminRoute && "grid md:grid-cols-[auto_1fr]")}>
               {isAdminRoute ? (
-                <div className="grid md:grid-cols-[auto_1fr] flex-1">
+                <>
                   <Sidebar>
                     <AdminSidebar />
                   </Sidebar>
                   <SidebarInset>
                     {children}
                   </SidebarInset>
-                </div>
+                </>
               ) : (
                 children
               )}
