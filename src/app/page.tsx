@@ -77,6 +77,7 @@ const impactStats = [
 export default function Home() {
   const heroImage = PlaceHolderImages.find(p => p.id === 'hero-concert');
   const newsImage = PlaceHolderImages.find(p => p.id === 'home-news');
+  const financialAidImage = PlaceHolderImages.find(p => p.id === 'home-financial-aid');
 
   return (
     <div className="flex flex-col min-h-dvh">
@@ -244,33 +245,49 @@ export default function Home() {
                         </Card>
                     </div>
                 </div>
-                 <div className="space-y-6">
-                    <h2 className="text-3xl font-headline font-bold">Support Kawartha Youth Orchestra</h2>
-                    <p className="text-muted-foreground md:text-lg">
-                        Support KYO’s mission through various means. Donate funds, volunteer your time, or gift instruments. Every contribution helps us nurture young musical talent and enrich our community.
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-                        {impactStats.map(stat => (
-                            <div key={stat.label}>
-                                <p className="text-4xl font-bold text-primary">{stat.number}</p>
-                                <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
-                            </div>
-                        ))}
+                {financialAidImage && (
+                    <div className="rounded-lg overflow-hidden shadow-xl">
+                        <Image
+                            src={financialAidImage.imageUrl}
+                            alt={financialAidImage.description}
+                            width={600}
+                            height={400}
+                            className="object-cover w-full h-full"
+                            data-ai-hint={financialAidImage.imageHint}
+                        />
                     </div>
-                     <div className="flex flex-col sm:flex-row gap-4 justify-start">
-                        <Button asChild size="lg">
-                            <Link href="/donate">Donate Now</Link>
-                        </Button>
-                        <Button asChild size="lg" variant="outline">
-                            <Link href="/contact">Contact Us</Link>
-                        </Button>
-                    </div>
-                </div>
+                )}
             </div>
           </div>
         </section>
 
-        <section id="support" className="bg-background">
+        <section className="bg-background">
+             <div className="container mx-auto text-center">
+                <h2 className="text-3xl font-headline font-bold">Support Kawartha Youth Orchestra</h2>
+                <p className="text-muted-foreground md:text-lg max-w-3xl mx-auto mt-4">
+                    Support KYO’s mission through various means. Donate funds, volunteer your time, or gift instruments. Every contribution helps us nurture young musical talent and enrich our community.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center max-w-3xl mx-auto mt-8">
+                    {impactStats.map(stat => (
+                        <div key={stat.label}>
+                            <p className="text-4xl font-bold text-primary">{stat.number}</p>
+                            <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
+                        </div>
+                    ))}
+                </div>
+                 <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+                    <Button asChild size="lg">
+                        <Link href="/donate">Donate Now</Link>
+                    </Button>
+                    <Button asChild size="lg" variant="outline">
+                        <Link href="/contact">Contact Us</Link>
+                    </Button>
+                </div>
+            </div>
+        </section>
+
+
+        <section id="support" className="bg-secondary">
           <div className="container mx-auto">
             <div className="rounded-lg bg-primary text-primary-foreground p-8 md:p-12 text-center">
               <h2 className="text-3xl font-headline font-bold">Support Our Mission</h2>

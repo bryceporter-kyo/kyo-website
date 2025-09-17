@@ -137,6 +137,12 @@
       "description": "A newspaper open to the arts section.",
       "imageUrl": "https://picsum.photos/seed/126/600/400",
       "imageHint": "arts newspaper"
+    },
+    {
+      "id": "home-financial-aid",
+      "description": "A smiling student holding a violin case.",
+      "imageUrl": "https://picsum.photos/seed/127/600/400",
+      "imageHint": "student violin"
     }
   ]
 }
