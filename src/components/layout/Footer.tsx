@@ -29,8 +29,8 @@ export default function Footer() {
   return (
     <footer className="bg-secondary">
       <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
-          <div className="space-y-4 md:col-span-2">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+          <div className="space-y-4 md:col-span-5">
             <Link href="/">
               <Logo />
             </Link>
@@ -41,7 +41,7 @@ export default function Footer() {
               Kawartha Youth Orchestra (KYO) is a registered charitable nonprofit organization (CRA #89168 2700 RR 0001). We are grateful for the support of the Community Foundation of Greater Peterborough, Google Grants, NetSuite Social Impact, the City of Peterborough Community Investment Grant, the Lloyd Carr Harris Foundation, and the F.K. Morrow Foundation.
             </p>
           </div>
-          <div>
+          <div className="md:col-span-2">
             <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase">Quick Links</h3>
             <ul className="mt-4 space-y-2">
               {navLinks.slice(1).map((link) => (
@@ -58,7 +58,7 @@ export default function Footer() {
               </li>
             </ul>
           </div>
-          <div>
+          <div className="md:col-span-3">
             <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase">Contact Us</h3>
             <ul className="mt-4 space-y-2 text-muted-foreground">
                <li className="flex items-start gap-2">
@@ -83,7 +83,7 @@ export default function Footer() {
               </li>
             </ul>
           </div>
-           <div>
+           <div className="md:col-span-2">
             <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase">Legal</h3>
             <ul className="mt-4 space-y-2">
               {legalLinks.map((link) => (
