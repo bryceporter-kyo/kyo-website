@@ -16,6 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { getLinkById } from '@/lib/links';
 
 const navLinks = [
   { name: 'Home', href: '/' },
@@ -53,6 +54,8 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
+  const registrationLink = getLinkById('register');
+
 
   const handleMenuInteraction = (name: string, open: boolean) => {
     setOpenMenus(prev => ({ ...prev, [name]: open }));
@@ -105,9 +108,11 @@ export default function Header() {
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
-          <Button asChild>
-            <Link href="/register">Register</Link>
-          </Button>
+          {registrationLink && (
+            <Button asChild>
+              <Link href={registrationLink.url}>Register</Link>
+            </Button>
+          )}
         </div>
 
         {/* Mobile Navigation */}
@@ -158,9 +163,11 @@ export default function Header() {
                      )
                   ))}
                 </nav>
-                 <Button asChild className="w-full mt-8">
-                    <Link href="/register" onClick={() => setIsMobileMenuOpen(false)}>Register</Link>
-                </Button>
+                 {registrationLink && (
+                  <Button asChild className="w-full mt-8">
+                      <Link href={registrationLink.url} onClick={() => setIsMobileMenuOpen(false)}>Register</Link>
+                  </Button>
+                )}
               </div>
             </SheetContent>
           </Sheet>

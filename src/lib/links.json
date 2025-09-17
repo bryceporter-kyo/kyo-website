@@ -1,0 +1,9 @@
+{
+  "links": [
+    {
+      "id": "register",
+      "name": "Main Registration Link",
+      "url": "/register"
+    }
+  ]
+}

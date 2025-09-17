@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Target, HeartHandshake, Users, Award, Smile, BarChart, Check, Quote, HandCoins, BookOpen, Truck, LifeBuoy } from 'lucide-react';
 import Image from 'next/image';
+import { getLinkById } from '@/lib/links';
 
 const programGoals = [
     {
@@ -48,6 +49,7 @@ export default function UpbeatPage() {
   const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-upbeat');
   const aboutImage = PlaceHolderImages.find(p => p.id === 'program-upbeat');
   const kidsImage = PlaceHolderImages.find(p => p.id === 'upbeat-kids-smiling');
+  const registrationLink = getLinkById('register');
 
   return (
     <div>
@@ -67,9 +69,11 @@ export default function UpbeatPage() {
                 <p className="text-muted-foreground text-lg">
                     More than just music lessons, UpBeat! creates a safe, joyful, and inclusive environment where young people experience belonging, build confidence, and develop lifelong skills. For many, it is their first meaningful experience with organized music—an opportunity that, without UpBeat!, would remain out of reach.
                 </p>
-                <Button asChild size="lg">
-                  <Link href="/register">Enroll in UpBeat!</Link>
-                </Button>
+                {registrationLink && (
+                  <Button asChild size="lg">
+                    <Link href={registrationLink.url}>Enroll in UpBeat!</Link>
+                  </Button>
+                )}
             </div>
             {aboutImage && (
                 <div className="rounded-lg overflow-hidden shadow-xl">

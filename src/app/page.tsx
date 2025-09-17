@@ -6,6 +6,7 @@ import { ArrowRight, Music, Users, GraduationCap, Heart, Handshake, Eye, HandCoi
 import Image from 'next/image';
 import Link from 'next/link';
 import { getAnnouncements } from '@/lib/announcements';
+import { getLinkById } from '@/lib/links';
 
 const programs = [
   {
@@ -79,6 +80,7 @@ export default function Home() {
   const newsImage = PlaceHolderImages.find(p => p.id === 'home-news');
   const financialAidImage = PlaceHolderImages.find(p => p.id === 'home-financial-aid');
   const announcements = getAnnouncements().slice(0, 3);
+  const registrationLink = getLinkById('register');
 
   return (
     <div className="flex flex-col min-h-dvh">
@@ -103,9 +105,11 @@ export default function Home() {
               KYO Hub provides exceptional music education and performance opportunities to young people, fostering artistic excellence, personal growth, and a lifelong love of music.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild size="lg" className="font-bold">
-                <Link href="/register">Register Now</Link>
-              </Button>
+              {registrationLink && (
+                <Button asChild size="lg" className="font-bold">
+                  <Link href={registrationLink.url}>Register Now</Link>
+                </Button>
+              )}
               <Button asChild size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white hover:text-primary">
                 <Link href="/support">Support Us</Link>
               </Button>
@@ -265,9 +269,11 @@ export default function Home() {
                         <Button asChild>
                             <Link href="/donate">Explore Aid</Link>
                         </Button>
-                        <Button asChild variant="outline">
-                            <Link href="/register">Register Now</Link>
-                        </Button>
+                        {registrationLink && (
+                          <Button asChild variant="outline">
+                              <Link href={registrationLink.url}>Register Now</Link>
+                          </Button>
+                        )}
                     </div>
                 </div>
                 {financialAidImage && (
@@ -314,5 +320,3 @@ export default function Home() {
     </div>
   );
 }
-
-    

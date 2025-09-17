@@ -6,6 +6,7 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Heart, Handshake, Gift, Star, Ticket, Users, Camera, Wrench } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { getLinkById } from '@/lib/links';
 
 const volunteerRoles = [
     {
@@ -34,6 +35,7 @@ export default function VolunteerPage() {
     const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-volunteer');
     const volunteerImage = PlaceHolderImages.find(p => p.id === 'support-volunteer');
     const volunteerCtaImage = PlaceHolderImages.find(p => p.id === 'volunteer-cta');
+    const registrationLink = getLinkById('register');
 
     return (
         <div>
@@ -52,9 +54,11 @@ export default function VolunteerPage() {
                         <p className="text-muted-foreground text-lg">
                             By giving your time, you become a partner in our mission and a role model for our students. Whether you have specialized skills or simply a passion for music and community, there’s a place for you here.
                         </p>
-                         <Button asChild size="lg">
-                            <Link href="/register">Sign Up to Volunteer</Link>
-                        </Button>
+                         {registrationLink && (
+                           <Button asChild size="lg">
+                              <Link href={registrationLink.url}>Sign Up to Volunteer</Link>
+                          </Button>
+                         )}
                     </div>
                     {volunteerImage && (
                         <div className="rounded-lg overflow-hidden shadow-lg">
@@ -106,9 +110,11 @@ export default function VolunteerPage() {
                                 Your contribution of time and expertise is one of the most valuable gifts you can give. Join our dedicated community and help us inspire the next generation of musicians.
                             </p>
                             <div className="mt-8 flex justify-center md:justify-start">
-                                <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 font-bold">
-                                    <Link href="/register">Become a Volunteer Today</Link>
-                                </Button>
+                                {registrationLink && (
+                                  <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 font-bold">
+                                      <Link href={registrationLink.url}>Become a Volunteer Today</Link>
+                                  </Button>
+                                )}
                             </div>
                         </div>
                          {volunteerCtaImage && (
@@ -128,5 +134,3 @@ export default function VolunteerPage() {
         </div>
     )
 }
-
-    

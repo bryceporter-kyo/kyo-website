@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Check, Target, Users, GraduationCap, Music } from 'lucide-react';
 import Image from 'next/image';
+import { getLinkById } from '@/lib/links';
 
 const programGoals = [
     {
@@ -35,6 +36,8 @@ export default function LessonsPage() {
   const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-lessons');
   const aboutImage = PlaceHolderImages.find(p => p.id === 'program-lessons');
   const studentImage = PlaceHolderImages.find(p => p.id === 'lessons-teacher-student');
+  const registrationLink = getLinkById('register');
+
 
   return (
     <div>
@@ -54,9 +57,11 @@ export default function LessonsPage() {
                 <p className="text-muted-foreground text-lg">
                     This initiative enables more youth to receive weekly, high-caliber music instruction delivered by professional and conservatory-trained teachers. We are deeply committed to making music education available, affordable, and inspiring for all youth, regardless of background or financial circumstances.
                 </p>
-                <Button asChild size="lg">
-                    <Link href="/register">Start Your Musical Journey</Link>
-                </Button>
+                {registrationLink && (
+                  <Button asChild size="lg">
+                      <Link href={registrationLink.url}>Start Your Musical Journey</Link>
+                  </Button>
+                )}
             </div>
             {aboutImage && (
                 <div className="rounded-lg overflow-hidden shadow-xl">
@@ -170,9 +175,11 @@ export default function LessonsPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">Ready to take the next step? Register today to be matched with an instructor and schedule your first lesson. No prior experience is required for many of our beginner programs!</p>
-                <Button asChild className="mt-4 w-full">
-                  <Link href="/register">Register for Lessons</Link>
-                </Button>
+                {registrationLink && (
+                  <Button asChild className="mt-4 w-full">
+                    <Link href={registrationLink.url}>Register for Lessons</Link>
+                  </Button>
+                )}
               </CardContent>
             </Card>
           </div>

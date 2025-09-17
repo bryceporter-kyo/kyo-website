@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Users, HandHeart, Music, Award, University, GraduationCap } from 'lucide-react';
 import Image from 'next/image';
+import { getLinkById } from '@/lib/links';
 
 const orchestras = [
   {
@@ -57,6 +58,7 @@ const scholarships = [
 export default function OrchestrasPage() {
   const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-orchestras');
   const joinImage = PlaceHolderImages.find(p => p.id === 'orchestra-kids-playing');
+  const registrationLink = getLinkById('register');
 
   return (
     <div>
@@ -77,12 +79,16 @@ export default function OrchestrasPage() {
                     To enhance their musical journey, we recommend that all KYO members pursue private lessons. Our team is ready to assist you with information on private instruction opportunities.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
-                    <Button asChild size="lg">
-                        <Link href="/register">Register for 2025-2026</Link>
-                    </Button>
-                     <Button asChild size="lg" variant="outline">
-                        <Link href="/register">Sign Up for an Audition</Link>
-                    </Button>
+                  {registrationLink && (
+                    <>
+                      <Button asChild size="lg">
+                          <Link href={registrationLink.url}>Register for 2025-2026</Link>
+                      </Button>
+                      <Button asChild size="lg" variant="outline">
+                          <Link href={registrationLink.url}>Sign Up for an Audition</Link>
+                      </Button>
+                    </>
+                  )}
                 </div>
             </div>
              {joinImage && (
@@ -118,11 +124,13 @@ export default function OrchestrasPage() {
                         <CardContent className="space-y-4 flex-grow">
                             <p className="text-muted-foreground">{item.description}</p>
                         </CardContent>
-                        <CardFooter>
-                           <Button asChild className="w-full">
-                                <Link href="/register">Register Now</Link>
-                            </Button>
-                        </CardFooter>
+                        {registrationLink && (
+                          <CardFooter>
+                            <Button asChild className="w-full">
+                                  <Link href={registrationLink.url}>Register Now</Link>
+                              </Button>
+                          </CardFooter>
+                        )}
                     </Card>
                 ))}
             </div>
@@ -146,9 +154,11 @@ export default function OrchestrasPage() {
                 </CardHeader>
                 <CardContent className="text-center">
                     <p className="text-muted-foreground mb-6">Explore topics like Composition, Music Theory, Instrument Practice, and Film Scoring from the comfort of your home. These courses are designed to complement your ensemble experience and deepen your musical understanding.</p>
-                     <Button asChild size="lg">
-                        <Link href="/register">Register for a Course</Link>
-                    </Button>
+                     {registrationLink && (
+                        <Button asChild size="lg">
+                          <Link href={registrationLink.url}>Register for a Course</Link>
+                      </Button>
+                     )}
                 </CardContent>
             </Card>
         </div>
