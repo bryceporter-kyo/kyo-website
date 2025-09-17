@@ -1,0 +1,37 @@
+{
+  "events": [
+    {
+      "id": 1,
+      "date": "2024-09-15",
+      "name": "Season Opening Concert",
+      "location": "Showplace Performance Centre",
+      "time": "7:30 PM",
+      "link": "/events/season-opening",
+      "type": "special"
+    },
+    {
+      "id": 2,
+      "date": "2024-10-20",
+      "name": "Senior Orchestra Rehearsal",
+      "type": "normal"
+    },
+    {
+      "id": 3,
+      "date": "2024-11-05",
+      "name": "UpBeat! Fall Showcase",
+      "location": "George Street United Church",
+      "time": "6:00 PM",
+      "link": "/events/upbeat-fall",
+      "type": "special"
+    },
+    {
+      "id": 4,
+      "date": "2024-12-15",
+      "name": "Holiday Concert",
+      "location": "Showplace Performance Centre",
+      "time": "7:30 PM",
+      "link": "/events/holiday-concert",
+      "type": "special"
+    }
+  ]
+}
