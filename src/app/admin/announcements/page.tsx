@@ -11,8 +11,11 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { getAnnouncements, Announcement } from "@/lib/announcements";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 
 const announcementSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters long."),
@@ -23,6 +26,7 @@ const announcementSchema = z.object({
 
 export default function AnnouncementsAdminPage() {
     const { toast } = useToast();
+    const announcements = getAnnouncements();
 
     const form = useForm<z.infer<typeof announcementSchema>>({
         resolver: zodResolver(announcementSchema),
@@ -53,6 +57,45 @@ export default function AnnouncementsAdminPage() {
                     </Link>
                 </Button>
             </div>
+
+            <Card className="mb-12">
+                <CardHeader>
+                    <CardTitle className="font-headline text-2xl">Existing Announcements</CardTitle>
+                    <CardDescription>Manage, edit, or delete existing announcements.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Title</TableHead>
+                                <TableHead className="w-[100px] text-center">Pinned</TableHead>
+                                <TableHead className="text-right w-[150px]">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {announcements.map((announcement) => (
+                                <TableRow key={announcement.id}>
+                                    <TableCell className="font-medium">{announcement.title}</TableCell>
+                                    <TableCell className="text-center">
+                                        <Switch
+                                            checked={announcement.pinned}
+                                            aria-label="Pin announcement"
+                                        />
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <Button variant="ghost" size="icon">
+                                            <Pencil className="h-4 w-4" />
+                                        </Button>
+                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
             
             <Card>
                 <CardHeader>

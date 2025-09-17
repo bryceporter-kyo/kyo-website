@@ -5,11 +5,18 @@ export type Announcement = {
   title: string;
   date: string;
   excerpt: string;
+  pinned?: boolean;
 };
 
 const announcements: Announcement[] = data.announcements;
 
 export function getAnnouncements(): Announcement[] {
+  // Add pinned property for demo purposes
+  const announcementsWithPinned = announcements.map((a, i) => ({
+    ...a,
+    pinned: i === 0, // Pin the first announcement by default
+  }));
+  
   // Sort by date descending
-  return announcements.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  return announcementsWithPinned.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
