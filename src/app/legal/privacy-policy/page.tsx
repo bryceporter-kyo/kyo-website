@@ -26,7 +26,7 @@ export default function PrivacyPolicyPage() {
                 <p className="text-muted-foreground mb-4">
                     Kawartha Youth Orchestra, its subsidiaries, and its affiliates (“Kawartha Youth Orchestra”, “KYO”, “we”, “us”, “our”) respect your privacy and are committed to protecting your personal data. This Privacy & Cookie Policy (also referred to as Privacy Policy) describes our data collection and processing activities, including:
                 </p>
-                <ul className="list-decimal list-inside space-y-2 text-muted-foreground mb-4">
+                <ul className="list-decimal list-outside pl-6 space-y-2 text-muted-foreground mb-4">
                     <li>what personal data we may collect when you interact with us through our various channels online (such as our website at https://kawarthayouthorchestra.org, https://thekyo.ca, https://upbeat.com and via our apps and social networks) and offline (such as over the telephone, via text, messaging application, in meetings or at events) and what we may do with that personal data;</li>
                     <li>how we may collect and process information through the use of cookies and related tracking technologies on our online channels; and</li>
                     <li>your data protection rights, including (where applicable) a right to object to processing and a right to withdraw your consent to processing, and how to exercise them.</li>
@@ -76,7 +76,7 @@ export default function PrivacyPolicyPage() {
               <p className="text-muted-foreground">
                 We may collect, create, use, store and otherwise process different categories of personal data depending on how you use and interact with our products, services and online channels. We have grouped these categories below as follows:
               </p>
-              <ul className="list-disc list-inside space-y-2 text-muted-foreground">
+              <ul className="list-disc list-outside pl-6 space-y-2 text-muted-foreground">
                   <li><strong>Identifier Data</strong>, including first name, maiden name, last name, job title, and company name.</li>
                   <li><strong>Contact Data</strong>, including your address(es), email address(es), and telephone number(s).</li>
                   <li><strong>Profile Data</strong>, including your CV, professional background, professional headshot, languages spoken, location and country of residence, relevant qualifications, career history and moves, and any additional information, which may include special category personal data and sensitive personal information to the extent it is manifestly made public by you or you voluntarily choose to provide it to Kawartha Youth Orchestra in connection with a particular project or service offering.</li>
@@ -142,7 +142,7 @@ export default function PrivacyPolicyPage() {
                  <p className="text-muted-foreground">
                     We may be required to share your personal data with the third parties listed below for the purposes described in Section 3 above or otherwise with your consent:
                 </p>
-                <ul className="list-disc list-inside space-y-2 text-muted-foreground">
+                <ul className="list-disc list-outside pl-6 space-y-2 text-muted-foreground">
                     <li><strong>Affiliates</strong>: Kawartha Youth Orchestra is a business with global operations, based in Canada. The personal data collected by us in accordance with this Privacy & Cookie Policy may be used and shared amongst our group companies (acting on behalf of Kawartha Youth Orchestra) to support the effective functioning of Kawartha Youth Orchestra’s business and the provision of its products and services.</li>
                     <li><strong>Service Providers</strong>: When we employ a third-party to perform a function on our behalf, we provide it with the personal data that it needs to perform its specific function. These companies are contractually authorised to use your personal data only as necessary to provide these products or services to us.</li>
                     <li><strong>Clients</strong>: We may share Identifier Data, Contact Data, Due Diligence Data, Profile Data and Transaction Data relating to our consultants with our clients in connection with a particular project.</li>
