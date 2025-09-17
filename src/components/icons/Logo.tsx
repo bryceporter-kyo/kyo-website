@@ -18,8 +18,10 @@ export function Logo({ className }: { className?: string }) {
         <circle cx="6" cy="18" r="3" />
         <circle cx="18" cy="16" r="3" />
       </svg>
-      <span className="font-headline font-bold text-lg hidden sm:inline-block">Kawartha Youth Orchestra</span>
-      <span className="font-headline font-bold text-lg sm:hidden">KYO</span>
+      <div className="font-headline font-bold text-lg">
+        <span className="sm:hidden">KYO</span>
+        <span className="hidden sm:inline">Kawartha Youth Orchestra</span>
+      </div>
     </div>
   );
 }
