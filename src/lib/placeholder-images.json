@@ -173,6 +173,12 @@
       "description": "A dashboard with charts and graphs, representing data and metrics.",
       "imageUrl": "https://picsum.photos/seed/128/1200/400",
       "imageHint": "data dashboard"
+    },
+    {
+      "id": "page-header-accessibility",
+      "description": "An icon representing universal access and inclusivity.",
+      "imageUrl": "https://picsum.photos/seed/129/1200/400",
+      "imageHint": "accessibility icon"
     }
   ]
 }

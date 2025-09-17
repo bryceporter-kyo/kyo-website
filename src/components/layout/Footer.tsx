@@ -17,6 +17,7 @@ const legalLinks = [
   { name: 'Digital Terms of Use', href: '/legal/terms-of-use' },
   { name: 'Hiring & EEO Policy', href: '/legal/hiring-policy' },
   { name: 'Terms & Conditions', href: '/legal/terms-and-conditions' },
+  { name: 'Accessibility Policy', href: '/legal/accessibility-policy' },
 ];
 
 const socialLinks = [
