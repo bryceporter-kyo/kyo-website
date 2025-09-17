@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 
 export function Logo({ className }: { className?: string }) {
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn("flex items-center gap-3", className)}>
       <svg
         width="28"
         height="28"
@@ -18,7 +18,8 @@ export function Logo({ className }: { className?: string }) {
         <circle cx="6" cy="18" r="3" />
         <circle cx="18" cy="16" r="3" />
       </svg>
-      <span className="font-headline font-bold text-xl">KYO Hub</span>
+      <span className="font-headline font-bold text-lg hidden sm:inline-block">Kawartha Youth Orchestra</span>
+      <span className="font-headline font-bold text-lg sm:hidden">KYO</span>
     </div>
   );
 }

@@ -102,7 +102,7 @@ export default function Home() {
               Nurturing the Next Generation of Musicians
             </h1>
             <p className="mt-4 max-w-3xl mx-auto text-lg md:text-xl text-neutral-200">
-              KYO Hub provides exceptional music education and performance opportunities to young people, fostering artistic excellence, personal growth, and a lifelong love of music.
+              The Kawartha Youth Orchestra provides exceptional music education and performance opportunities to young people, fostering artistic excellence, personal growth, and a lifelong love of music.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
               {registrationLink && (
@@ -217,7 +217,7 @@ export default function Home() {
             <div className="text-center">
               <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-4xl md:text-5xl">Latest News</h2>
               <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mt-4">
-                Stay up-to-date with the latest happenings at KYO Hub.
+                Stay up-to-date with the latest happenings at the Kawartha Youth Orchestra.
               </p>
             </div>
             <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
@@ -262,8 +262,18 @@ export default function Home() {
             <div className="grid md:grid-cols-2 gap-12 items-center">
                 <div className="space-y-6">
                     <h2 className="text-3xl font-headline font-bold">Financial Aid & Scholarships</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-center">
+                        <div className="bg-secondary p-6 rounded-lg">
+                            <p className="text-4xl font-bold text-primary">$100k+</p>
+                            <p className="text-sm text-muted-foreground mt-1">In Annual Bursaries</p>
+                        </div>
+                        <div className="bg-secondary p-6 rounded-lg">
+                            <p className="text-4xl font-bold text-primary">120+</p>
+                            <p className="text-sm text-muted-foreground mt-1">Students Supported</p>
+                        </div>
+                    </div>
                     <p className="text-muted-foreground md:text-lg">
-                        We believe in nurturing musical talent regardless of financial background. That’s why we offer a range of aid options, providing over <span className="font-bold text-primary">$100k in annual bursaries</span> to more than <span className="font-bold text-primary">120 students</span>. Our goal is to ensure no student misses the opportunity to grow due to economic constraints. Explore our scholarships and aid programs to join our community of passionate young artists.
+                        We believe in nurturing musical talent regardless of financial background. Our goal is to ensure no student misses the opportunity to grow due to economic constraints. Explore our scholarships and aid programs to join our community of passionate young artists.
                     </p>
                     <div className="flex gap-4">
                         <Button asChild>
