@@ -65,17 +65,25 @@ export default function Footer() {
           <div>
             <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase">Contact Us</h3>
             <ul className="mt-4 space-y-2 text-muted-foreground">
+               <li className="flex items-start gap-2">
+                <MapPin className="w-5 h-5 mt-1 shrink-0 text-primary" />
+                <a href="https://www.google.com/maps/search/?api=1&query=P.O.+Box+53,+150+King+Street,+Peterborough+ON+K9J+6Y5" target="_blank" rel="noopener noreferrer" className="hover:text-primary">
+                    Mailing Address: P.O. Box 53, 150 King Street, Peterborough ON, K9J 6Y5
+                </a>
+              </li>
               <li className="flex items-start gap-2">
                 <MapPin className="w-5 h-5 mt-1 shrink-0 text-primary" />
-                <span>123 Music Lane, Harmony City, 12345</span>
+                 <a href="https://www.google.com/maps/search/?api=1&query=221+Romaine+Street,+Peterborough,+ON,+K9J+2C3" target="_blank" rel="noopener noreferrer" className="hover:text-primary">
+                    Program Address: 221 Romaine Street, Peterborough, ON, K9J 2C3
+                </a>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="w-5 h-5 shrink-0 text-primary" />
-                <span>(123) 456-7890</span>
+                <a href="tel:705-410-4025" className="hover:text-primary">705-410-4025</a>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-5 h-5 shrink-0 text-primary" />
-                <a href="mailto:info@kyohub.org" className="hover:text-primary">info@kyohub.org</a>
+                <a href="mailto:ContactUs@thekyo.ca" className="hover:text-primary">ContactUs@thekyo.ca</a>
               </li>
             </ul>
           </div>
