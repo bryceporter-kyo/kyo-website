@@ -16,7 +16,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { SidebarTrigger } from '../ui/sidebar';
 
 const navLinks = [
   { name: 'Home', href: '/' },
@@ -46,17 +45,11 @@ const navLinks = [
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
-  const isAdminRoute = pathname.startsWith('/admin');
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-2">
-            {isAdminRoute && (
-                <div className="md:hidden">
-                    <SidebarTrigger />
-                </div>
-            )}
             <Link href="/" className="flex items-center gap-2">
             <Logo />
             </Link>

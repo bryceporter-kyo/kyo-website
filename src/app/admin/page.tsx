@@ -1,28 +1,46 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Newspaper, Users, Image as ImageIcon, Calendar } from "lucide-react";
+import Link from "next/link";
+
+const adminTiles = [
+    { href: "/admin/announcements", label: "Announcements", icon: Newspaper },
+    { href: "/admin/images", label: "Images", icon: ImageIcon },
+    { href: "/admin/events", label: "Events", icon: Calendar },
+    { href: "/admin/users", label: "Users", icon: Users },
+]
 
 export default function AdminDashboardPage() {
   return (
-    <div>
+    <div className="container mx-auto py-12">
       <h1 className="text-3xl font-bold font-headline mb-2">Admin Dashboard</h1>
-      <p className="text-muted-foreground mb-8">Welcome to the KYO Hub Admin Panel.</p>
+      <p className="text-muted-foreground mb-8">Manage your site content and users.</p>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {adminTiles.map((tile) => (
+          <Link href={tile.href} key={tile.href}>
+            <Card className="hover:border-primary hover:shadow-lg transition-all h-full flex flex-col justify-center items-center text-center">
+              <CardHeader className="items-center">
+                <div className="p-4 bg-primary text-primary-foreground rounded-full">
+                  <tile.icon className="w-8 h-8" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <CardTitle className="text-xl font-headline">{tile.label}</CardTitle>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
+      </div>
+
+       <div className="mt-12">
+         <Card>
           <CardHeader>
-            <CardTitle>Content Management</CardTitle>
-            <CardDescription>Manage announcements, events, and images.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">This section is under construction. Future updates will allow you to edit site content directly from here.</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>User Management</CardTitle>
+            <CardTitle>User Creation</CardTitle>
             <CardDescription>Administer user accounts and permissions.</CardDescription>
           </CardHeader>
           <CardContent>
-             <p className="text-muted-foreground">This section is under construction. User authentication and roles will be managed here.</p>
+             <p className="text-muted-foreground">This section is under construction. User authentication and roles will be managed here once Firebase Authentication is set up.</p>
           </CardContent>
         </Card>
       </div>
