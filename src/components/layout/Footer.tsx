@@ -97,7 +97,12 @@ export default function Footer() {
           </div>
         </div>
         <div className="mt-8 border-t border-border pt-8 flex flex-col sm:flex-row items-center justify-between">
-          <p className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} KYO Hub. All rights reserved.</p>
+            <div className="text-sm text-muted-foreground">
+                <Link href="/admin" className="hover:text-primary">Admin Panel</Link>
+            </div>
+            <p className="text-sm text-muted-foreground text-center flex-1">
+                &copy; 2025 Kawartha Youth Orchestra. All rights reserved.
+            </p>
           <div className="flex space-x-6 mt-4 sm:mt-0">
             {socialLinks.map((social) => (
               <a key={social.name} href={social.href} className="text-muted-foreground hover:text-primary">
