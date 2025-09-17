@@ -21,7 +21,7 @@ const memberSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters."),
   email: z.string().email("Please enter a valid email address."),
   bio: z.string().optional(),
-  image: z.string().optional(),
+  image: z.any().optional(),
   type: z.enum(["staff", "board"]),
 });
 
@@ -185,12 +185,12 @@ export default function StaffAdminPage() {
                                 name="image"
                                 render={({ field }) => (
                                     <FormItem>
-                                    <FormLabel>Image ID (optional)</FormLabel>
+                                    <FormLabel>Image (optional)</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="e.g., 'instructor-1'" {...field} />
+                                        <Input type="file" {...field} />
                                     </FormControl>
                                      <FormDescription>
-                                        The ID of the image from the Image Management page.
+                                        Upload a profile picture for the member.
                                     </FormDescription>
                                     <FormMessage />
                                     </FormItem>
