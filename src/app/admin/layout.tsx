@@ -8,7 +8,7 @@ export default function AdminLayout({
 }) {
   return (
     <SidebarProvider>
-      <div className="flex flex-1">
+      <div className="grid md:grid-cols-[auto_1fr] flex-1">
         <Sidebar>
           <AdminSidebar />
         </Sidebar>
