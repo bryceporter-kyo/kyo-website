@@ -1,7 +1,7 @@
 
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Newspaper, Users, Image as ImageIcon, Calendar } from "lucide-react";
+import { Newspaper, Users, Image as ImageIcon, Calendar, UsersRound } from "lucide-react";
 import Link from "next/link";
 
 const adminTiles = [
@@ -9,6 +9,7 @@ const adminTiles = [
     { href: "/admin/images", label: "Images", icon: ImageIcon },
     { href: "/admin/events", label: "Events", icon: Calendar },
     { href: "/admin/users", label: "Users", icon: Users },
+    { href: "/admin/staff", label: "Staff & Board", icon: UsersRound },
 ]
 
 export default function AdminDashboardPage() {
@@ -17,7 +18,7 @@ export default function AdminDashboardPage() {
       <h1 className="text-3xl font-bold font-headline mb-2">Admin Dashboard</h1>
       <p className="text-muted-foreground mb-8">Manage your site content and users.</p>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {adminTiles.map((tile) => (
           <Link href={tile.href} key={tile.href}>
             <Card className="hover:border-primary hover:shadow-lg transition-all h-full flex flex-col justify-center items-center text-center">

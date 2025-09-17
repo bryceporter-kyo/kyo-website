@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Folder, Users, DollarSign, Handshake, Cpu, Settings, Briefcase, FileText, ExternalLink, Mail } from "lucide-react";
+import { getBoard, getStaff } from "@/lib/staff";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const internalSections = [
     {
@@ -81,6 +83,8 @@ const externalLinks = [
 
 export default function InternalPage() {
   const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-internal');
+  const staff = getStaff();
+  const board = getBoard();
   return (
     <div>
       <PageHeader
@@ -92,7 +96,7 @@ export default function InternalPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {internalSections.map(section => (
                 <Card key={section.title} className="flex flex-col">
-                    <CardHeader className="h-28">
+                    <CardHeader className="h-28 flex flex-col justify-start">
                         <div className="flex items-start gap-4">
                              <section.icon className="w-8 h-8 text-primary flex-shrink-0" />
                              <CardTitle className="font-headline text-xl">{section.title}</CardTitle>
@@ -116,6 +120,45 @@ export default function InternalPage() {
                 </Card>
             ))}
         </div>
+
+        <Card className="mt-12">
+            <CardHeader>
+                <CardTitle className="font-headline text-2xl">Staff & Board Directory</CardTitle>
+                <CardDescription>Contact information for internal personnel.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Title</TableHead>
+                            <TableHead>Email</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {staff.map(person => (
+                            <TableRow key={person.id}>
+                                <TableCell className="font-medium">{person.name}</TableCell>
+                                <TableCell>{person.title}</TableCell>
+                                <TableCell>
+                                    <a href={`mailto:${person.email}`} className="text-primary hover:underline">{person.email}</a>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                        {board.map(person => (
+                            <TableRow key={person.id}>
+                                <TableCell className="font-medium">{person.name}</TableCell>
+                                <TableCell>{person.title}</TableCell>
+                                <TableCell>
+                                     <a href={`mailto:${person.email}`} className="text-primary hover:underline">{person.email}</a>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
+
          <Card className="mt-12">
             <CardHeader>
                 <CardTitle className="font-headline text-2xl">Quick Links</CardTitle>

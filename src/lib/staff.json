@@ -1,0 +1,55 @@
+
+{
+  "staff": [
+    {
+      "id": "s1",
+      "name": "Kenji Tanaka",
+      "title": "Artistic Director & Conductor, Symphony Orchestra",
+      "bio": "Maestro Tanaka brings over 20 years of international conducting experience. His dynamic leadership and passion for music inspire students to reach new artistic heights. He is a graduate of the Juilliard School.",
+      "image": "instructor-1",
+      "email": "kenji.tanaka@thekyo.ca"
+    },
+    {
+      "id": "s2",
+      "name": "Maria Rossi",
+      "title": "Conductor, Concert Orchestra",
+      "bio": "An accomplished violinist and educator, Maria Rossi is dedicated to developing the ensemble skills of intermediate musicians. Her energetic rehearsals create a positive and engaging learning environment.",
+      "image": "instructor-2",
+      "email": "maria.rossi@thekyo.ca"
+    },
+    {
+      "id": "s3",
+      "name": "David Chen",
+      "title": "Upbeat! Program Director & Piano Instructor",
+      "bio": "David Chen is a specialist in early childhood music education and offers piano lessons for all ages. His innovative approach combines movement, games, and storytelling to introduce young children to the fundamentals of music.",
+      "image": "instructor-3",
+      "email": "david.chen@thekyo.ca"
+    }
+  ],
+  "board": [
+    {
+      "id": "b1",
+      "name": "Eleanor Vance",
+      "title": "Board Chair",
+      "email": "eleanor.vance@thekyo.ca"
+    },
+    {
+      "id": "b2",
+      "name": "Samuel Jones",
+      "title": "Vice Chair",
+      "email": "samuel.jones@thekyo.ca"
+    },
+    {
+      "id": "b3",
+      "name": "Olivia Martinez",
+      "title": "Treasurer",
+      "email": "olivia.martinez@thekyo.ca"
+    },
+    {
+      "id": "b4",
+      "name": "Benjamin Carter",
+      "title": "Secretary",
+      "email": "benjamin.carter@thekyo.ca"
+    }
+  ]
+}
