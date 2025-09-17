@@ -1,23 +1,23 @@
-import type { Metadata } from 'next';
+
+'use client';
+
 import './globals.css';
 import { cn } from '@/lib/utils';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Toaster } from "@/components/ui/toaster";
-
-export const metadata: Metadata = {
-  title: 'KYO Hub',
-  description: 'Nurturing young musicians to achieve their full potential.',
-  icons: {
-    icon: '/favicon.ico',
-  },
-};
+import { usePathname } from 'next/navigation';
+import { SidebarProvider, Sidebar, SidebarInset } from '@/components/ui/sidebar';
+import AdminSidebar from './admin/_components/AdminSidebar';
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
+  const isAdminRoute = pathname.startsWith('/admin');
+
   return (
     <html lang="en" className="scroll-smooth">
       <head>
@@ -26,11 +26,26 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400..900&family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
       </head>
       <body className={cn('font-body antialiased', 'min-h-screen bg-background')}>
-        <div className="relative flex min-h-dvh flex-col bg-background">
-          <Header />
-          <main className="flex-1 grid">{children}</main>
-          <Footer />
-        </div>
+        <SidebarProvider>
+          <div className="relative flex min-h-dvh flex-col bg-background">
+            <Header />
+            <main className="flex-1 grid">
+              {isAdminRoute ? (
+                <div className="grid md:grid-cols-[auto_1fr] flex-1">
+                  <Sidebar>
+                    <AdminSidebar />
+                  </Sidebar>
+                  <SidebarInset>
+                    {children}
+                  </SidebarInset>
+                </div>
+              ) : (
+                children
+              )}
+            </main>
+            <Footer />
+          </div>
+        </SidebarProvider>
         <Toaster />
       </body>
     </html>
