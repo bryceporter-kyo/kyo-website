@@ -31,9 +31,9 @@ const navLinks = [
     name: 'Programs',
     href: '#',
     subLinks: [
-      { name: 'Orchestras', href: '/orchestras' },
+      { name: 'The Orchestras', href: '/orchestras' },
       { name: 'Upbeat!', href: '/upbeat' },
-      { name: 'Lessons Program', href: '/lessons' },
+      { name: 'Lessons', href: '/lessons' },
     ]
   },
   { name: 'Calendar', href: '/calendar' },
@@ -84,7 +84,7 @@ export default function Header() {
                 <DropdownMenuContent onMouseLeave={() => handleMenuInteraction(link.name, false)}>
                   {link.subLinks.map(subLink => (
                     <DropdownMenuItem key={subLink.name} asChild>
-                      <Link href={subLink.href} className={cn(pathname === subLink.href && "font-bold")}>{subLink.name}</Link>
+                      <Link href={subLink.href} className={cn("cursor-pointer", pathname === subLink.href && "font-bold")}>{subLink.name}</Link>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
