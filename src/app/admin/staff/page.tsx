@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -61,6 +62,8 @@ export default function StaffAdminPage() {
             type: "staff",
         },
     });
+
+    const imageField = form.register("image");
     
     React.useEffect(() => {
         if (editingMember) {
@@ -99,6 +102,11 @@ export default function StaffAdminPage() {
         });
     }
 
+    const handleEditClick = (member: MemberWithId) => {
+        setEditingMember(member);
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
     return (
         <div className="container mx-auto py-12">
             <div className="mb-8">
@@ -132,7 +140,7 @@ export default function StaffAdminPage() {
                                     <TableCell>{member.title}</TableCell>
                                     <TableCell>{member.email}</TableCell>
                                     <TableCell className="text-right">
-                                        <Button variant="ghost" size="icon" onClick={() => setEditingMember(member)}>
+                                        <Button variant="ghost" size="icon" onClick={() => handleEditClick(member)}>
                                             <Pencil className="h-4 w-4" />
                                         </Button>
                                         <AlertDialog>
@@ -246,22 +254,16 @@ export default function StaffAdminPage() {
                                     </FormItem>
                                 )}
                             />
-                            <FormField
-                                control={form.control}
-                                name="image"
-                                render={({ field }) => (
-                                    <FormItem>
-                                    <FormLabel>Image (optional)</FormLabel>
-                                    <FormControl>
-                                        <Input type="file" onChange={(e) => field.onChange(e.target.files)} />
-                                    </FormControl>
-                                     <FormDescription>
-                                        Upload a profile picture for the member.
-                                    </FormDescription>
-                                    <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                            <FormItem>
+                                <FormLabel>Image (optional)</FormLabel>
+                                <FormControl>
+                                    <Input type="file" {...imageField} />
+                                </FormControl>
+                                    <FormDescription>
+                                    Upload a profile picture for the member.
+                                </FormDescription>
+                                <FormMessage />
+                            </FormItem>
                              <div className="flex gap-4">
                                 <Button type="submit">
                                     <UserPlus className="mr-2 h-4 w-4"/>

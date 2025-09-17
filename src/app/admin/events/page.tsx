@@ -22,6 +22,18 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import React from "react";
 import { Label } from "@/components/ui/label";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import type { Event } from "@/lib/events";
 
 const eventSchema = z.object({
   date: z.date({ required_error: "A date is required." }),
@@ -103,6 +115,15 @@ export default function EventsAdminPage() {
         };
         reader.readAsText(csvFile);
     };
+    
+    function handleDelete(event: Event) {
+        console.log("Deleting event:", event.name);
+        toast({
+            title: "Event Deleted",
+            description: `"${event.name}" has been deleted. (This is a placeholder)`,
+            variant: "destructive",
+        });
+    }
 
     return (
         <div className="container mx-auto py-12">
@@ -168,9 +189,28 @@ export default function EventsAdminPage() {
                                         <Button variant="ghost" size="icon">
                                             <Pencil className="h-4 w-4" />
                                         </Button>
-                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    This action cannot be undone. This will permanently delete the event
+                                                    "{event.name}".
+                                                </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => handleDelete(event)}>
+                                                    Delete
+                                                </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -324,7 +364,3 @@ export default function EventsAdminPage() {
         </div>
     );
 }
-
-    
-
-    

@@ -12,12 +12,23 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Pencil, Trash2, User, Upload, Download } from "lucide-react";
 import Link from "next/link";
 import { getUsers } from "@/lib/users";
-import type { UserRole } from "@/lib/users";
+import type { User as UserType, UserRole } from "@/lib/users";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import React from "react";
 import { Label } from "@/components/ui/label";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const roles: { id: UserRole; label: string }[] = [
     { id: 'Website Editor', label: 'Website Editor' },
@@ -97,6 +108,15 @@ export default function UsersAdminPage() {
         };
         reader.readAsText(csvFile);
     };
+    
+    function handleDelete(user: UserType) {
+        console.log("Deleting user:", user.name);
+        toast({
+            title: "User Deleted",
+            description: `"${user.name}" has been deleted. (This is a placeholder)`,
+            variant: "destructive",
+        });
+    }
 
     return (
         <div className="container mx-auto py-12">
@@ -168,9 +188,28 @@ export default function UsersAdminPage() {
                                         <Button variant="ghost" size="icon">
                                             <Pencil className="h-4 w-4" />
                                         </Button>
-                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    This action cannot be undone. This will permanently delete the user
+                                                    "{user.name}".
+                                                </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => handleDelete(user)}>
+                                                    Delete
+                                                </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -273,5 +312,3 @@ export default function UsersAdminPage() {
         </div>
     );
 }
-
-    

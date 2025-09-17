@@ -57,6 +57,10 @@ export default function LinksAdminPage() {
         setEditingLink(null);
     }
 
+    const handleEditClick = (link: ExternalLink) => {
+        setEditingLink(link);
+    }
+
     return (
         <div className="container mx-auto py-12">
             <div className="mb-8">
@@ -92,7 +96,7 @@ export default function LinksAdminPage() {
                                         </a>
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        <Button variant="ghost" size="icon" onClick={() => setEditingLink(link)}>
+                                        <Button variant="ghost" size="icon" onClick={() => handleEditClick(link)}>
                                             <Pencil className="h-4 w-4" />
                                         </Button>
                                     </TableCell>

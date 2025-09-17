@@ -18,11 +18,23 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import type { Announcement } from "@/lib/announcements";
 
 const announcementSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters long."),
   content: z.string().min(20, "Content must be at least 20 characters long."),
-  imageUrl: z.string().url("Please enter a valid image URL.").optional().or(z.literal('')),
+  imageUrl: z.any().optional(),
   pinned: z.boolean().default(false),
 });
 
@@ -33,22 +45,32 @@ export default function AnnouncementsAdminPage() {
     const form = useForm<z.infer<typeof announcementSchema>>({
         resolver: zodResolver(announcementSchema),
         defaultValues: {
-        title: "",
-        content: "",
-        imageUrl: "",
-        pinned: false,
+            title: "",
+            content: "",
+            imageUrl: "",
+            pinned: false,
         },
     });
 
     const contentValue = form.watch("content");
+    const imageField = form.register("imageUrl");
 
     function onSubmit(values: z.infer<typeof announcementSchema>) {
         console.log(values);
         toast({
-        title: "Announcement Created!",
-        description: "The new announcement has been saved.",
+            title: "Announcement Created!",
+            description: "The new announcement has been saved.",
         });
         form.reset();
+    }
+
+    function handleDelete(announcement: Announcement) {
+        console.log("Deleting announcement:", announcement.title);
+        toast({
+            title: "Announcement Deleted",
+            description: `"${announcement.title}" has been deleted. (This is a placeholder)`,
+            variant: "destructive",
+        });
     }
 
     return (
@@ -90,9 +112,28 @@ export default function AnnouncementsAdminPage() {
                                         <Button variant="ghost" size="icon">
                                             <Pencil className="h-4 w-4" />
                                         </Button>
-                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    This action cannot be undone. This will permanently delete the announcement
+                                                    "{announcement.title}".
+                                                </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => handleDelete(announcement)}>
+                                                    Delete
+                                                </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -149,22 +190,16 @@ export default function AnnouncementsAdminPage() {
                                     </FormItem>
                                 )}
                             />
-                            <FormField
-                                control={form.control}
-                                name="imageUrl"
-                                render={({ field }) => (
-                                    <FormItem>
-                                    <FormLabel>Image</FormLabel>
-                                    <FormControl>
-                                        <Input type="file" {...field} />
-                                    </FormControl>
-                                    <FormDescription>
-                                        Upload an image for the announcement (optional).
-                                    </FormDescription>
-                                    <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                            <FormItem>
+                                <FormLabel>Image</FormLabel>
+                                <FormControl>
+                                    <Input type="file" {...imageField} />
+                                </FormControl>
+                                <FormDescription>
+                                    Upload an image for the announcement (optional).
+                                </FormDescription>
+                                <FormMessage />
+                            </FormItem>
                             <FormField
                                 control={form.control}
                                 name="pinned"
