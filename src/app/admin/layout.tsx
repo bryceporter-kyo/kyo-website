@@ -8,12 +8,14 @@ export default function AdminLayout({
 }) {
   return (
     <SidebarProvider>
-      <Sidebar>
-        <AdminSidebar />
-      </Sidebar>
-      <SidebarInset>
-        <div className="p-4 sm:p-6 lg:p-8">{children}</div>
-      </SidebarInset>
+      <div className="flex flex-1">
+        <Sidebar>
+          <AdminSidebar />
+        </Sidebar>
+        <SidebarInset>
+          <div className="p-4 sm:p-6 lg:p-8">{children}</div>
+        </SidebarInset>
+      </div>
     </SidebarProvider>
   );
 }
