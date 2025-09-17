@@ -83,7 +83,7 @@ export default function TermsAndConditionsPage() {
               <p><strong>Tuition and Enrollment Fees:</strong> All fees associated with participation in KYO programs are outlined at the time of registration. These fees cover tuition, materials, and other program-specific expenses required for the successful delivery of our programs unless otherwise stated. Any specific amounts or material requiring purchasing will be communicated to participants prior to the start of each program.</p>
               <p><strong>Payment Schedules and Methods:</strong> The KYO recommends that all members pay their membership dues at the beginning of the season. This ensures smooth administration and allows for better financial planning and resource allocation. Despite this recommendation, members may opt for alternative payment schedules, such as quarterly or monthly payments. To arrange this, members must communicate their preferred payment plan to the KYO prior to their fees becoming due. Acceptable payment methods include:</p>
               <ul className="list-disc list-outside pl-6 space-y-1">
-                <li>Credit/Debit Card through PayPal, or Square;</li>
+                <li>Credit/Debit Card through PayPal, NetSuite Pay, or Stripe;</li>
                 <li>Electronic Funds Transfer (EFT) or Interac E-Transfer;</li>
                 <li>Direct Deposit;</li>
                 <li>Cheque (by mail or in-person); or</li>
