@@ -29,7 +29,7 @@ export default function RootLayout({
         <SidebarProvider>
           <div className="relative flex min-h-dvh flex-col bg-background">
             <Header />
-            <main className="flex-1 grid">
+            <main className="flex-1">
               {isAdminRoute ? (
                 <div className="grid md:grid-cols-[auto_1fr] flex-1">
                   <Sidebar>
