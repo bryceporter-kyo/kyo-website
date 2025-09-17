@@ -14,6 +14,13 @@ const navLinks = [
   { name: 'Donate', href: '/donate' },
 ];
 
+const legalLinks = [
+  { name: 'Privacy & Cookie Policy', href: '#' },
+  { name: 'Digital Terms of Use', href: '#' },
+  { name: 'Hiring & EEO Policy', href: '#' },
+  { name: 'Terms & Conditions', href: '#' },
+];
+
 const socialLinks = [
   { name: 'Twitter', href: '#', icon: Twitter },
   { name: 'Facebook', href: '#', icon: Facebook },
@@ -24,8 +31,8 @@ export default function Footer() {
   return (
     <footer className="bg-secondary">
       <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+          <div className="space-y-4 lg:col-span-1">
             <Link href="/">
               <Logo />
             </Link>
@@ -85,6 +92,18 @@ export default function Footer() {
                 <Mail className="w-5 h-5 shrink-0 text-primary" />
                 <a href="mailto:ContactUs@thekyo.ca" className="hover:text-primary">ContactUs@thekyo.ca</a>
               </li>
+            </ul>
+          </div>
+           <div>
+            <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase">Legal</h3>
+            <ul className="mt-4 space-y-2">
+              {legalLinks.map((link) => (
+                <li key={link.name}>
+                  <Link href={link.href} className="text-base text-muted-foreground hover:text-primary">
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
