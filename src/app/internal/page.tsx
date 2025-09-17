@@ -10,56 +10,56 @@ const internalSections = [
     {
         title: "Board of Directors",
         icon: Users,
-        chair: "Bryce Porter",
+        manager: "Bryce Porter",
         email: "bryce.porter@thekyo.ca",
         driveLink: "https://docs.google.com/folderview?authuser=0&id=0AIg5MzxiNC6kUk9PVA"
     },
     {
         title: "Business & Finance",
         icon: DollarSign,
-        chair: "Bryce Porter",
+        manager: "Bryce Porter",
         email: "bryce.porter@thekyo.ca",
         driveLink: "https://docs.google.com/folderview?authuser=0&id=0AErmWCq_aldfUk9PVA"
     },
     {
         title: "Community Engagement",
         icon: Handshake,
-        chair: "Joy Simmonds",
+        manager: "Joy Simmonds",
         email: "joy.simmonds@thekyo.ca",
         driveLink: "https://docs.google.com/folderview?authuser=0&id=0AEyvIWCQxa5sUk9PVA"
     },
     {
         title: "IT and Data",
         icon: Cpu,
-        chair: "IT Admin",
+        manager: "IT Admin",
         email: "it-admin@thekyo.ca",
         driveLink: "https://docs.google.com/folderview?authuser=0&id=0AGcOhRlolhPGUk9PVA"
     },
     {
         title: "Operations",
         icon: Settings,
-        chair: "Carolyn Hoy",
+        manager: "Carolyn Hoy",
         email: "carolyn.hoy@thekyo.ca",
         driveLink: "https://docs.google.com/folderview?authuser=0&id=0AGGadfYGeR4gUk9PVA"
     },
     {
         title: "Programming",
         icon: Briefcase,
-        chair: "Colin McMahon",
+        manager: "Colin McMahon",
         email: "colin.mcmahon@thekyo.ca",
         driveLink: "https://docs.google.com/folderview?authuser=0&id=0AJg3p-IjDhMHUk9PVA"
     },
     {
         title: "HR & Compliance",
         icon: Users,
-        chair: "HR Committee",
+        manager: "HR Committee",
         email: "hr-committee@thekyo.ca",
         driveLink: "https://docs.google.com/folderview?authuser=0&id=0ALlBblkGfNM0Uk9PVA"
     },
     {
         title: "Templates",
         icon: FileText,
-        chair: "IT Admin",
+        manager: "IT Admin",
         email: "it-admin@thekyo.ca",
         driveLink: "https://docs.google.com/folderview?authuser=0&id=0AAAYa0lcUo66Uk9PVA"
     }
@@ -99,10 +99,10 @@ export default function InternalPage() {
                         </div>
                     </CardHeader>
                     <CardContent className="flex-grow space-y-2">
-                        <p className="text-sm text-muted-foreground">Chair: {section.chair}</p>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Mail className="w-4 h-4"/>
-                            <a href={`mailto:${section.email}`} className="hover:text-primary">{section.email}</a>
+                        <div>
+                            <p className="text-sm font-semibold text-muted-foreground">Managed by:</p>
+                            <p className="text-sm">{section.manager}</p>
+                            <a href={`mailto:${section.email}`} className="text-sm text-primary hover:underline">{section.email}</a>
                         </div>
                     </CardContent>
                     <div className="p-6 pt-0">
