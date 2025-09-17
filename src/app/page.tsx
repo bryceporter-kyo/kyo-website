@@ -226,7 +226,7 @@ export default function Home() {
                     <Card key={item.id} className="flex flex-col">
                       <CardHeader>
                         <CardTitle className="text-xl font-headline">{item.title}</CardTitle>
-                        <p className="text-sm text-muted-foreground">{new Date(item.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                        <p className="text-sm text-muted-foreground">{item.date}</p>
                       </CardHeader>
                       <CardContent className="flex-grow">
                         <p className="text-muted-foreground">{item.excerpt}</p>

@@ -1,28 +1,30 @@
 
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import PageHeader from "@/components/shared/PageHeader";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { getEvents, Event } from "@/lib/events";
-import { format, isSameMonth, parseISO } from "date-fns";
+import { format, isSameMonth } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function CalendarPage() {
-    const [month, setMonth] = useState(new Date());
+    const [month, setMonth] = useState<Date | undefined>(new Date());
     const allEvents = useMemo(() => getEvents(), []);
 
     const parseDate = (dateString: string) => {
-        const [year, month, day] = dateString.split('-').map(Number);
-        return new Date(year, month - 1, day);
+        // Dates in JSON are "YYYY-MM-DD", which can be parsed directly by new Date()
+        // but it's safer to ensure it's treated as UTC to avoid timezone issues.
+        return new Date(`${dateString}T00:00:00`);
     }
     
     const eventsForMonth = useMemo(() => {
+        if (!month) return [];
         return allEvents.filter(event => isSameMonth(parseDate(event.date), month));
     }, [allEvents, month]);
 
@@ -52,6 +54,7 @@ export default function CalendarPage() {
                                 mode="single"
                                 month={month}
                                 onMonthChange={setMonth}
+                                selected={month}
                                 className="p-0 w-full"
                                 classNames={{
                                     months: "flex flex-col sm:flex-row",
@@ -76,7 +79,7 @@ export default function CalendarPage() {
 
                     <Card>
                         <CardHeader>
-                            <CardTitle className="font-headline text-2xl">Events for {format(month, 'MMMM yyyy')}</CardTitle>
+                            <CardTitle className="font-headline text-2xl">Events for {month ? format(month, 'MMMM yyyy') : '...'}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             {eventsForMonth.length > 0 ? (

@@ -1,3 +1,4 @@
+
 import data from './announcements.json';
 
 export type Announcement = {
@@ -11,12 +12,13 @@ export type Announcement = {
 const announcements: Announcement[] = data.announcements;
 
 export function getAnnouncements(): Announcement[] {
-  // Add pinned property for demo purposes
+  // Add pinned property for demo purposes and format date
   const announcementsWithPinned = announcements.map((a, i) => ({
     ...a,
+    date: new Date(a.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
     pinned: i === 0, // Pin the first announcement by default
   }));
   
-  // Sort by date descending
+  // Sort by original date descending
   return announcementsWithPinned.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
