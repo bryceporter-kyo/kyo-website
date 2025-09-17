@@ -70,10 +70,25 @@ export default function ContactPage() {
                     </Card>
                 </div>
             </section>
+            
             <section className="bg-secondary">
+                <div className="container mx-auto text-center">
+                    <h2 className="text-2xl font-headline font-bold mb-4">Follow us on Social Media</h2>
+                    <p className="text-muted-foreground mb-8 max-w-xl mx-auto">Stay connected with the latest news, concert announcements, and behind-the-scenes moments from our young musicians.</p>
+                    <div className="flex justify-center gap-6">
+                        {socialLinks.map(social => social.link && (
+                            <Link key={social.name} href={social.link.url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                                <social.icon className="w-10 h-10" />
+                                <span className="sr-only">{social.name}</span>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            </section>
+            
+            <section>
                 <ContactMap />
             </section>
         </div>
     )
 }
-
