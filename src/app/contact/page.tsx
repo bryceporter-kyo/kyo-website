@@ -29,7 +29,7 @@ export default function ContactPage() {
                 subtitle="Get in touch with KYO. We're here to answer your questions, hear your feedback, and explore how you can be part of our musical community."
                 image={headerImage}
             />
-            <section className="container mx-auto">
+            <section className="container mx-auto py-12 md:py-16">
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <ContactInfoCard
                         icon={Clock}
@@ -71,7 +71,7 @@ export default function ContactPage() {
                 </div>
             </section>
             
-            <section className="bg-secondary">
+            <section className="bg-secondary py-12 md:py-16">
                 <div className="container mx-auto text-center">
                     <h2 className="text-2xl font-headline font-bold mb-4">Follow us on Social Media</h2>
                     <p className="text-muted-foreground mb-8 max-w-xl mx-auto">Stay connected with the latest news, concert announcements, and behind-the-scenes moments from our young musicians.</p>
@@ -86,7 +86,7 @@ export default function ContactPage() {
                 </div>
             </section>
             
-            <section>
+            <section className="py-12 md:py-16">
                 <ContactMap />
             </section>
         </div>
