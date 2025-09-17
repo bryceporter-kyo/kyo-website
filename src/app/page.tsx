@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -285,7 +286,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="bg-secondary">
+        <section id="support" className="bg-secondary">
              <div className="container mx-auto text-center">
                 <h2 className="text-3xl font-headline font-bold">Support Kawartha Youth Orchestra</h2>
                 <p className="text-muted-foreground md:text-lg max-w-3xl mx-auto mt-4">
@@ -309,27 +310,9 @@ export default function Home() {
                 </div>
             </div>
         </section>
-
-
-        <section id="support" className="bg-background">
-          <div className="container mx-auto">
-            <div className="rounded-lg bg-primary text-primary-foreground p-8 md:p-12 text-center">
-              <h2 className="text-3xl font-headline font-bold">Support Our Mission</h2>
-              <p className="mt-4 max-w-2xl mx-auto text-lg text-primary-foreground/80">
-                Your generosity empowers us to provide transformative musical experiences for young people. Help us continue our work by making a donation or learning about other ways to contribute.
-              </p>
-              <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 font-bold">
-                  <Link href="/donate">Donate Today</Link>
-                </Button>
-                <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary">
-                  <Link href="/support">Ways to Give</Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
     </div>
   );
 }
+
+    
