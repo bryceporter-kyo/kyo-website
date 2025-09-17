@@ -1,9 +1,10 @@
+
 {
   "links": [
     {
       "id": "register",
       "name": "Main Registration Link",
-      "url": "https://www.google.com/forms/about/"
+      "url": "https://docs.google.com/forms/d/e/1FAIpQLSf3tGbfSdo8jdVtx85G7BbX0c4AVxTgRUviCLkhbBDbXia19A/viewform?usp=sf_link"
     },
     {
       "id": "donate-stripe-friend",
