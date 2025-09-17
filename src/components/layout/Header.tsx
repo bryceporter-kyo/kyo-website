@@ -52,6 +52,15 @@ const navLinks = [
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
+
+  const handleMenuEnter = (name: string) => {
+    setOpenMenus(prev => ({ ...prev, [name]: true }));
+  };
+
+  const handleMenuLeave = (name: string) => {
+    setOpenMenus(prev => ({ ...prev, [name]: false }));
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm">
@@ -67,13 +76,21 @@ export default function Header() {
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
           {navLinks.map((link) => (
             link.subLinks ? (
-              <DropdownMenu key={link.name}>
+              <DropdownMenu key={link.name} open={openMenus[link.name] || false} onOpenChange={(isOpen) => setOpenMenus(prev => ({ ...prev, [link.name]: isOpen }))}>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-1">
+                  <div
+                    onMouseEnter={() => handleMenuEnter(link.name)}
+                    onMouseLeave={() => handleMenuLeave(link.name)}
+                    className="flex items-center gap-1 cursor-default text-muted-foreground transition-colors hover:text-primary"
+                  >
                     {link.name} <ChevronDown className="h-4 w-4" />
-                  </Button>
+                  </div>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent>
+                <DropdownMenuContent
+                  onMouseEnter={() => handleMenuEnter(link.name)}
+                  onMouseLeave={() => handleMenuLeave(link.name)}
+                  className="cursor-pointer"
+                >
                   {link.subLinks.map(subLink => (
                     <DropdownMenuItem key={subLink.name} asChild>
                       <Link href={subLink.href} className={cn(pathname === subLink.href && "font-bold")}>{subLink.name}</Link>
