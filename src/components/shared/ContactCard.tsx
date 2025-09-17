@@ -2,7 +2,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getLinkById } from "@/lib/links";
 import { Mail, MapPin, Phone } from "lucide-react";
-import Link from "next/link";
 
 export default function ContactCard() {
     const phoneLink = getLinkById('contact-phone');
