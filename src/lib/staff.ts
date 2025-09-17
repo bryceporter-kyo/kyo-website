@@ -14,6 +14,8 @@ export type BoardMember = {
     name: string;
     title: string;
     email: string;
+    bio?: string;
+    image?: string;
 }
 
 const staff: StaffMember[] = data.staff;

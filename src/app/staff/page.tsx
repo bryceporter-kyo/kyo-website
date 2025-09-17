@@ -2,8 +2,6 @@ import InstructorCard from "@/components/shared/InstructorCard";
 import PageHeader from "@/components/shared/PageHeader";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { getBoard, getStaff } from "@/lib/staff";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export default function StaffPage() {
     const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-support');
@@ -42,31 +40,20 @@ export default function StaffPage() {
                     </div>
                     <div>
                         <h3 className="text-2xl font-headline font-bold text-center mb-8">Board of Directors</h3>
-                        <Card className="max-w-4xl mx-auto">
-                            <CardContent className="p-0">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Name</TableHead>
-                                            <TableHead>Title</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {board.map(member => (
-                                            <TableRow key={member.id}>
-                                                <TableCell className="font-medium">{member.name}</TableCell>
-                                                <TableCell>{member.title}</TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </CardContent>
-                        </Card>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                           {board.map((member) => (
+                                <InstructorCard 
+                                    key={member.id}
+                                    name={member.name}
+                                    title={member.title}
+                                    bio={member.bio ?? ''}
+                                    image={PlaceHolderImages.find(p => p.id === member.image)}
+                                />
+                            ))}
+                        </div>
                     </div>
                 </div>
             </section>
         </div>
     );
 }
-
-    

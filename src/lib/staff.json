@@ -31,25 +31,33 @@
       "id": "b1",
       "name": "Eleanor Vance",
       "title": "Board Chair",
-      "email": "eleanor.vance@thekyo.ca"
+      "email": "eleanor.vance@thekyo.ca",
+      "bio": "Eleanor is a passionate advocate for arts education and has served on the KYO board for five years, bringing a wealth of non-profit governance experience.",
+      "image": "board-1"
     },
     {
       "id": "b2",
       "name": "Samuel Jones",
       "title": "Vice Chair",
-      "email": "samuel.jones@thekyo.ca"
+      "email": "samuel.jones@thekyo.ca",
+      "bio": "A local business leader and amateur cellist, Samuel is dedicated to fostering community partnerships and ensuring the long-term sustainability of the orchestra.",
+      "image": "board-2"
     },
     {
       "id": "b3",
       "name": "Olivia Martinez",
       "title": "Treasurer",
-      "email": "olivia.martinez@thekyo.ca"
+      "email": "olivia.martinez@thekyo.ca",
+      "bio": "As a certified public accountant, Olivia provides invaluable financial oversight and strategic planning to guide the KYO's fiscal health and growth.",
+      "image": "board-3"
     },
     {
       "id": "b4",
       "name": "Benjamin Carter",
       "title": "Secretary",
-      "email": "benjamin.carter@thekyo.ca"
+      "email": "benjamin.carter@thekyo.ca",
+      "bio": "Benjamin's expertise in communications and his dedication to our mission help keep our organization running smoothly and transparently.",
+      "image": "board-4"
     }
   ]
 }

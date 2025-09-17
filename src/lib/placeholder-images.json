@@ -49,6 +49,30 @@
       "imageUrl": "https://picsum.photos/seed/107/200/200",
       "imageHint": "male teacher"
     },
+    {
+      "id": "board-1",
+      "description": "Professional headshot of board member Eleanor Vance.",
+      "imageUrl": "https://picsum.photos/seed/131/200/200",
+      "imageHint": "female professional"
+    },
+    {
+      "id": "board-2",
+      "description": "Professional headshot of board member Samuel Jones.",
+      "imageUrl": "https://picsum.photos/seed/132/200/200",
+      "imageHint": "male professional"
+    },
+    {
+      "id": "board-3",
+      "description": "Professional headshot of board member Olivia Martinez.",
+      "imageUrl": "https://picsum.photos/seed/133/200/200",
+      "imageHint": "female leader"
+    },
+    {
+      "id": "board-4",
+      "description": "Professional headshot of board member Benjamin Carter.",
+      "imageUrl": "https://picsum.photos/seed/134/200/200",
+      "imageHint": "male leader"
+    },
      {
       "id": "page-header-orchestras",
       "description": "Wide shot of an orchestra from behind the conductor.",
