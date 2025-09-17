@@ -289,7 +289,7 @@ export default function Home() {
              <div className="container mx-auto text-center">
                 <h2 className="text-3xl font-headline font-bold">Support Kawartha Youth Orchestra</h2>
                 <p className="text-muted-foreground md:text-lg max-w-3xl mx-auto mt-4">
-                    Support KYO’s mission through various means. Donate funds, volunteer your time, or gift instruments. Every contribution helps us nurture young musical talent and enrich our community.
+                    Your generosity empowers us to provide transformative musical experiences for young people. Help us continue our work by making a donation or learning about other ways to contribute.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center max-w-3xl mx-auto mt-8">
                     {impactStats.map(stat => (
@@ -333,5 +333,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
