@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { ArrowRight, Music, Users, GraduationCap, Heart, Handshake, Eye, HandCoins, UserCheck, DollarSign, Group } from 'lucide-react';
+import { ArrowRight, Music, Users, GraduationCap, Heart, Handshake, Eye, HandCoins, UserCheck, DollarSign, Group, Quote } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getAnnouncements } from '@/lib/announcements';
@@ -46,7 +46,26 @@ const coreValues = [
         title: "Our Vision",
         description: "The Kawartha Youth Orchestra is much more than dedicated student musicians led by dynamic teaching artists – although that is pretty great. We are community."
     }
-]
+];
+
+const testimonials = [
+  {
+    quote: "The KYO embraced my son with open arms and through its commitment to his development was able to further drive not only advancement in music but also confidence and life skills.",
+    author: "Lynda",
+    role: "KYO Parent"
+  },
+  {
+    quote: "My daughter LOVED the UPBEAT pilot program. She provided rave reviews on every ride home and would look forward to each and every session. Congratulations on such a successful pilot!!",
+    author: "Jennifer",
+    role: "KYO Parent"
+  },
+  {
+    quote: "Wow, where do I start? I was asked to write a two-line testimonial in support of Kawartha Youth Orchestra (KYO). That is impossible. To summarize how Incredible KYO is and the dedicated volunteers into two lines can’t be done",
+    author: "Spyro",
+    role: "KYO Parent"
+  }
+];
+
 
 const impactStats = [
     { number: '700+', label: 'Musicians Supported', icon: Users },
@@ -159,7 +178,36 @@ export default function Home() {
             </div>
         </section>
 
-        <section id="news" className="bg-background">
+        <section>
+          <div className="container mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-headline font-bold">What Our Community is Saying</h2>
+              <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed mt-4">
+                We are proud to have the support of our incredible community of parents and students.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {testimonials.map((testimonial) => (
+                <Card key={testimonial.author} className="flex flex-col">
+                  <CardHeader>
+                    <Quote className="w-10 h-10 text-primary mb-4" />
+                  </CardHeader>
+                  <CardContent className="flex-grow">
+                    <blockquote className="text-muted-foreground italic text-lg">
+                      {testimonial.quote}
+                    </blockquote>
+                  </CardContent>
+                  <CardFooter>
+                    <p className="font-bold w-full text-right">- {testimonial.author}, <span className="font-normal text-muted-foreground">{testimonial.role}</span></p>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+
+        <section id="news" className="bg-secondary">
           <div className="container mx-auto">
             <div className="text-center">
               <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-4xl md:text-5xl">Latest News</h2>
@@ -204,7 +252,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="bg-secondary">
+        <section className="bg-background">
           <div className="container mx-auto">
             <div className="grid md:grid-cols-2 gap-12 items-center">
                 <div className="space-y-6">
@@ -249,7 +297,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="bg-background">
+        <section className="bg-secondary">
              <div className="container mx-auto text-center">
                 <h2 className="text-3xl font-headline font-bold">Support Kawartha Youth Orchestra</h2>
                 <p className="text-muted-foreground md:text-lg max-w-3xl mx-auto mt-4">
@@ -275,7 +323,7 @@ export default function Home() {
         </section>
 
 
-        <section id="support" className="bg-secondary">
+        <section id="support" className="bg-background">
           <div className="container mx-auto">
             <div className="rounded-lg bg-primary text-primary-foreground p-8 md:p-12 text-center">
               <h2 className="text-3xl font-headline font-bold">Support Our Mission</h2>
