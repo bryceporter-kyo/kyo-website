@@ -1,3 +1,4 @@
+
 import { Logo } from "@/components/icons/Logo";
 import { Button } from "@/components/ui/button";
 import { Facebook, Instagram, Mail, MapPin, Phone, Twitter } from "lucide-react";
@@ -35,6 +36,9 @@ export default function Footer() {
             </Link>
             <p className="text-sm text-muted-foreground">
               Nurturing the next generation of musicians.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Kawartha Youth Orchestra (KYO) is a registered charitable nonprofit organization (CRA #89168 2700 RR 0001). We are grateful for the support of the Community Foundation of Greater Peterborough, Google Grants, NetSuite Social Impact, the City of Peterborough Community Investment Grant, the Lloyd Carr Harris Foundation, and the F.K. Morrow Foundation.
             </p>
           </div>
           <div>
