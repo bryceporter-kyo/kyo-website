@@ -5,7 +5,7 @@ import * as React from "react";
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger as SheetTriggerPrimitive } from '@/components/ui/sheet';
@@ -52,12 +52,15 @@ const navLinks = [
   { name: 'Contact', href: '/contact' },
 ];
 
-const ListItem = ({ className, title, children, href, ...props }: { className?: string, title: string, children: React.ReactNode, href: string }) => {
+const ListItem = React.forwardRef<
+  React.ElementRef<"a">,
+  React.ComponentPropsWithoutRef<"a">
+>(({ className, title, children, ...props }, ref) => {
   return (
     <li>
       <NavigationMenuLink asChild>
-        <Link
-          href={href}
+        <a
+          ref={ref}
           className={cn(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
             className
@@ -68,11 +71,11 @@ const ListItem = ({ className, title, children, href, ...props }: { className?: 
           <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
             {children}
           </p>
-        </Link>
+        </a>
       </NavigationMenuLink>
     </li>
-  )
-}
+  );
+});
 ListItem.displayName = "ListItem"
 
 
@@ -83,7 +86,10 @@ export default function Header() {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
 
   useEffect(() => {
-    setRegistrationLink(getLinkById('register'));
+    const link = getLinkById('register');
+    if (link) {
+      setRegistrationLink(link.url);
+    }
   }, []);
 
   return (
@@ -103,11 +109,10 @@ export default function Header() {
         >
           <NavigationMenuList>
             {navLinks.map((link) => (
-              <NavigationMenuItem key={link.name} value={link.name}>
+              <NavigationMenuItem key={link.name} value={link.name} onMouseEnter={() => link.subLinks && setActiveMenu(link.name)}>
                 {link.subLinks ? (
                   <>
                     <NavigationMenuTrigger 
-                        onMouseEnter={() => setActiveMenu(link.name)}
                         className={cn(activeMenu === link.name && "bg-accent/50")}
                     >
                         {link.name}
@@ -116,18 +121,18 @@ export default function Header() {
                       <ul className="grid w-[400px] gap-3 p-4 md:w-[200px] lg:w-[250px] ">
                         {link.subLinks.map((subLink) => (
                            <li key={subLink.name}>
-                            <NavigationMenuLink asChild>
-                              <Link href={subLink.href} className={cn(navigationMenuTriggerStyle(), "font-normal w-full justify-start", pathname === subLink.href && "font-bold")}>
+                            <Link href={subLink.href} legacyBehavior passHref>
+                              <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "font-normal w-full justify-start", pathname === subLink.href && "font-bold")}>
                                 {subLink.name}
-                              </Link>
-                            </NavigationMenuLink>
+                              </NavigationMenuLink>
+                            </Link>
                           </li>
                         ))}
                       </ul>
                     </NavigationMenuContent>
                   </>
                 ) : (
-                   <Link href={link.href} passHref>
+                   <Link href={link.href} legacyBehavior passHref>
                      <NavigationMenuLink 
                         onMouseEnter={() => setActiveMenu(null)}
                         className={cn(navigationMenuTriggerStyle(), pathname === link.href ? 'font-bold' : '')}>
