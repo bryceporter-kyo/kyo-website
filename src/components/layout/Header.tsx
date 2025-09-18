@@ -119,24 +119,23 @@ export default function Header() {
                       <ul className="grid w-[400px] gap-3 p-4 md:w-[200px] lg:w-[250px] ">
                         {link.subLinks.map((subLink) => (
                            <li key={subLink.name}>
-                            <Link href={subLink.href} legacyBehavior passHref>
-                              <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "font-normal", pathname === subLink.href && "font-bold")}>
+                            <NavigationMenuLink asChild>
+                              <Link href={subLink.href} className={cn(navigationMenuTriggerStyle(), "font-normal w-full justify-start", pathname === subLink.href && "font-bold")}>
                                 {subLink.name}
-                              </NavigationMenuLink>
-                            </Link>
+                              </Link>
+                            </NavigationMenuLink>
                           </li>
                         ))}
                       </ul>
                     </NavigationMenuContent>
                   </>
                 ) : (
-                  <Link href={link.href} legacyBehavior passHref>
-                    <NavigationMenuLink 
-                        onMouseEnter={() => setActiveMenu(null)}
-                        className={cn(navigationMenuTriggerStyle(), pathname === link.href ? 'text-primary' : 'text-muted-foreground')}>
+                  <NavigationMenuLink asChild onMouseEnter={() => setActiveMenu(null)}
+                  className={cn(pathname === link.href && 'text-primary font-bold')}>
+                    <Link href={link.href}>
                       {link.name}
-                    </NavigationMenuLink>
-                  </Link>
+                    </Link>
+                  </NavigationMenuLink>
                 )}
               </NavigationMenuItem>
             ))}
