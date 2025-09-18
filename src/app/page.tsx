@@ -133,53 +133,49 @@ export default function Home() {
     <div className="flex flex-col min-h-dvh">
       <main className="flex-1">
         <section className="relative h-[60vh] md:h-[80vh] w-full flex items-center justify-center text-center text-white p-0">
-          {heroSlides.map((slide, index) => (
-            slide.image && (
-              <Image
-                key={slide.image.id}
-                src={slide.image.imageUrl}
-                alt={slide.image.description}
-                fill
-                className={`object-cover transition-opacity duration-1000 ease-in-out ${index === activeIndex ? 'opacity-100' : 'opacity-0'}`}
-                priority={index === 0}
-                data-ai-hint={slide.image.imageHint}
-              />
-            )
-          ))}
-          <div className="absolute inset-0 bg-black/50" />
-          <div className="relative z-10 container mx-auto px-4 md:px-6">
             {heroSlides.map((slide, index) => (
-              <div
-                key={slide.title}
-                className={`transition-opacity duration-1000 ease-in-out ${index === activeIndex ? 'opacity-100' : 'opacity-0'}`}
-              >
-                {index === activeIndex && (
-                  <div className="flex flex-col justify-center items-center">
+                slide.image && (
+                <Image
+                    key={slide.image.id}
+                    src={slide.image.imageUrl}
+                    alt={slide.image.description}
+                    fill
+                    className={`object-cover transition-opacity duration-1000 ease-in-out ${index === activeIndex ? 'opacity-100' : 'opacity-0'}`}
+                    priority={index === 0}
+                    data-ai-hint={slide.image.imageHint}
+                />
+                )
+            ))}
+            <div className="absolute inset-0 bg-black/50" />
+            <div className="relative container mx-auto px-4 md:px-6">
+                {heroSlides.map((slide, index) => (
+                <div
+                    key={slide.title}
+                    className={`absolute inset-0 flex flex-col justify-center items-center transition-opacity duration-1000 ease-in-out ${index === activeIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+                >
                     <h1 className="text-4xl md:text-6xl lg:text-7xl font-headline font-bold tracking-tight">
-                      {slide.title}
+                        {slide.title}
                     </h1>
                     <p className="mt-4 max-w-3xl mx-auto text-lg md:text-xl text-neutral-200">
-                      {slide.subtitle}
+                        {slide.subtitle}
                     </p>
                     <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                      {slide.buttons.map((button) => {
+                        {slide.buttons.map((button) => {
                         const href = button.isExternal ? registrationLink : button.href;
                         if (!href) return null;
                         
                         return (
-                          <Button key={button.text} asChild size="lg" variant={button.variant === 'outline' ? 'outline' : 'default'} className={button.variant === 'outline' ? "bg-transparent border-white text-white hover:bg-white hover:text-primary" : "font-bold"}>
+                            <Button key={button.text} asChild size="lg" variant={button.variant === 'outline' ? 'outline' : 'default'} className={button.variant === 'outline' ? "bg-transparent border-white text-white hover:bg-white hover:text-primary" : "font-bold"}>
                             <Link href={href} target={button.isExternal ? "_blank" : "_self"} rel={button.isExternal ? "noopener noreferrer" : ""}>
-                              {button.text}
+                                {button.text}
                             </Link>
-                          </Button>
+                            </Button>
                         )
-                      })}
+                        })}
                     </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+                </div>
+                ))}
+            </div>
         </section>
 
         <section id="programs" className="bg-background">

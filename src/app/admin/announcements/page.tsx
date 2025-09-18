@@ -31,6 +31,7 @@ import {
 import type { Announcement } from "@/lib/announcements";
 import React from "react";
 import { format } from "date-fns";
+import { utcToZonedTime } from "date-fns-tz";
 
 const announcementSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters long."),
@@ -67,7 +68,8 @@ export default function AnnouncementsAdminPage() {
             date: format(new Date(), 'yyyy-MM-dd'),
             excerpt: values.content.substring(0, 100) + '...',
         };
-        setAnnouncements(prev => [newAnnouncement, ...prev].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+        const announcementsWithNew = [newAnnouncement, ...announcements].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setAnnouncements(announcementsWithNew);
         toast({
             title: "Announcement Created!",
             description: "The new announcement has been saved.",

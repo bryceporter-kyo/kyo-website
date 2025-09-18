@@ -46,8 +46,12 @@ const eventSchema = z.object({
 
 export default function EventsAdminPage() {
     const { toast } = useToast();
-    const [events, setEvents] = React.useState<Event[]>(getEvents());
+    const [events, setEvents] = React.useState<Event[]>([]);
     const [csvFile, setCsvFile] = React.useState<File | null>(null);
+
+    React.useEffect(() => {
+        setEvents(getEvents());
+    }, []);
 
     const form = useForm<z.infer<typeof eventSchema>>({
         resolver: zodResolver(eventSchema),
@@ -66,7 +70,8 @@ export default function EventsAdminPage() {
           ...values,
           date: format(values.date, 'yyyy-MM-dd'),
         };
-        setEvents([...events, newEvent].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
+        const updatedEvents = [...events, newEvent].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        setEvents(updatedEvents);
         toast({
             title: "Event Created!",
             description: "The new event has been saved.",
@@ -75,9 +80,8 @@ export default function EventsAdminPage() {
     }
     
     const parseDate = (dateString: string) => {
-      // Dates in JSON are "YYYY-MM-DD". Using new Date() constructor is the most robust way to parse this format.
-      // It correctly handles timezones by defaulting to UTC midnight if no time is specified.
-      return new Date(dateString);
+      // Dates in JSON are "YYYY-MM-DD". Using new Date(`${dateString}T00:00:00`) treats it as UTC midnight.
+      return new Date(`${dateString}T00:00:00`);
     }
 
     const handleDownloadCsv = () => {
