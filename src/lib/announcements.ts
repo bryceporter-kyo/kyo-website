@@ -15,7 +15,7 @@ export function getAnnouncements(): Announcement[] {
   // Add pinned property for demo purposes and format date
   const announcementsWithPinned = announcements.map((a, i) => ({
     ...a,
-    date: new Date(a.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+    date: new Date(a.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }),
     pinned: i === 0, // Pin the first announcement by default
   }));
   
