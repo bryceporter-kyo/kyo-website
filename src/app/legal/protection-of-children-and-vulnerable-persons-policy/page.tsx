@@ -22,7 +22,7 @@ export default function ProtectionPolicyPage() {
                 </CardHeader>
                 <CardContent className="text-muted-foreground">
                     <p>
-                        The Kawartha Youth Orchestra (KYO), including the UpBeat! Downtown program, is committed to providing safe, supportive, and respectful environments for children and vulnerable persons. This policy outlines KYO’s duty of care, standards of conduct, and mandatory reporting responsibilities to ensure that all participants are protected from harm. By implementing this policy, KYO affirms its commitment to safeguarding every child and vulnerable person entrusted to its care.
+                        The Kawartha Youth Orchestra (KYO), including the UpBeat! program, is committed to providing safe, supportive, and respectful environments for children and vulnerable persons. This policy outlines KYO’s duty of care, standards of conduct, and mandatory reporting responsibilities to ensure that all participants are protected from harm. By implementing this policy, KYO affirms its commitment to safeguarding every child and vulnerable person entrusted to its care.
                     </p>
                 </CardContent>
             </Card>
