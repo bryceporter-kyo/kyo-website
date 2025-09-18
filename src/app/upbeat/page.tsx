@@ -32,7 +32,7 @@ const programGoals = [
     {
         icon: Target,
         title: "Pathways to Progression",
-        description: "Preparing students for KYO's Junior and Intermediate orchestras, aiming for RCM Grade 3 proficiency within their three-year UpBeat! trajectory."
+        description: "Preparing students for KYO’s Junior and Intermediate orchestras, aiming for RCM Grade 3 proficiency within their three-year UpBeat! trajectory."
     }
 ];
 
