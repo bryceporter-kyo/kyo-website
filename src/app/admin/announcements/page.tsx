@@ -41,7 +41,11 @@ const announcementSchema = z.object({
 
 export default function AnnouncementsAdminPage() {
     const { toast } = useToast();
-    const [announcements, setAnnouncements] = React.useState<Announcement[]>(() => getAnnouncements());
+    const [announcements, setAnnouncements] = React.useState<Announcement[]>([]);
+
+    React.useEffect(() => {
+        setAnnouncements(getAnnouncements());
+    }, []);
 
     const form = useForm<z.infer<typeof announcementSchema>>({
         resolver: zodResolver(announcementSchema),
@@ -63,7 +67,7 @@ export default function AnnouncementsAdminPage() {
             date: format(new Date(), 'yyyy-MM-dd'),
             excerpt: values.content.substring(0, 100) + '...',
         };
-        setAnnouncements(prev => [newAnnouncement, ...prev]);
+        setAnnouncements(prev => [newAnnouncement, ...prev].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
         toast({
             title: "Announcement Created!",
             description: "The new announcement has been saved.",

@@ -12,10 +12,16 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CalendarPage() {
-    const [month, setMonth] = useState<Date | undefined>(new Date());
-    const allEvents = useMemo(() => getEvents(), []);
+    const [month, setMonth] = useState<Date | undefined>(undefined);
+    const [allEvents, setAllEvents] = useState<Event[]>([]);
+    
+    useEffect(() => {
+        setMonth(new Date());
+        setAllEvents(getEvents());
+    }, []);
 
     const parseDate = (dateString: string) => {
         // Dates in JSON are "YYYY-MM-DD", which can be parsed directly by new Date()
@@ -50,30 +56,34 @@ export default function CalendarPage() {
                 <div className="flex flex-col gap-8">
                      <Card>
                         <CardContent className="p-0 md:p-0">
-                             <Calendar
-                                mode="single"
-                                month={month}
-                                onMonthChange={setMonth}
-                                selected={month}
-                                className="p-0 w-full"
-                                classNames={{
-                                    months: "flex flex-col sm:flex-row",
-                                    month: "space-y-4 w-full",
-                                    table: "w-full border-collapse space-y-1",
-                                    head_cell: "text-muted-foreground rounded-md w-[14.28%] font-normal text-sm",
-                                    row: "flex w-full mt-2",
-                                    cell: "h-24 w-[14.28%] text-center text-sm p-1 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-                                    day: "h-full w-full p-1 font-normal aria-selected:opacity-100 justify-start items-start",
-                                }}
-                                modifiers={{
-                                    event: eventDays,
-                                    special: specialEventDays,
-                                }}
-                                modifiersClassNames={{
-                                    event: "day-event",
-                                    special: "day-special-event",
-                                }}
-                            />
+                            {month ? (
+                                <Calendar
+                                    mode="single"
+                                    month={month}
+                                    onMonthChange={setMonth}
+                                    selected={month}
+                                    className="p-0 w-full"
+                                    classNames={{
+                                        months: "flex flex-col sm:flex-row",
+                                        month: "space-y-4 w-full",
+                                        table: "w-full border-collapse space-y-1",
+                                        head_cell: "text-muted-foreground rounded-md w-[14.28%] font-normal text-sm",
+                                        row: "flex w-full mt-2",
+                                        cell: "h-24 w-[14.28%] text-center text-sm p-1 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                                        day: "h-full w-full p-1 font-normal aria-selected:opacity-100 justify-start items-start",
+                                    }}
+                                    modifiers={{
+                                        event: eventDays,
+                                        special: specialEventDays,
+                                    }}
+                                    modifiersClassNames={{
+                                        event: "day-event",
+                                        special: "day-special-event",
+                                    }}
+                                />
+                            ) : (
+                                <Skeleton className="w-full h-[400px]" />
+                            )}
                         </CardContent>
                     </Card>
 
