@@ -52,30 +52,23 @@ const navLinks = [
   { name: 'Contact', href: '/contact' },
 ];
 
-const ListItem = React.forwardRef<
-  React.ElementRef<"a">,
-  React.ComponentPropsWithoutRef<"a">
->(({ className, title, children, ...props }, ref) => {
+const ListItem = ({ className, title, href }: { className?: string, title: string, href: string }) => {
   return (
     <li>
       <NavigationMenuLink asChild>
-        <a
-          ref={ref}
+        <Link
+          href={href}
           className={cn(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
             className
           )}
-          {...props}
         >
           <div className="text-sm font-medium leading-none">{title}</div>
-          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-            {children}
-          </p>
-        </a>
+        </Link>
       </NavigationMenuLink>
     </li>
   );
-});
+};
 ListItem.displayName = "ListItem"
 
 
@@ -111,7 +104,7 @@ export default function Header() {
               <NavigationMenuItem key={link.name} value={link.name} onMouseEnter={() => setActiveMenu(link.name)}>
                 {link.subLinks ? (
                   <>
-                    <NavigationMenuTrigger 
+                    <NavigationMenuTrigger
                         className={cn(activeMenu === link.name && "bg-accent/50")}
                     >
                         {link.name}
@@ -119,19 +112,13 @@ export default function Header() {
                     <NavigationMenuContent>
                       <ul className="grid w-[400px] gap-3 p-4 md:w-[200px] lg:w-[250px] ">
                         {link.subLinks.map((subLink) => (
-                           <li key={subLink.name}>
-                            <Link href={subLink.href} legacyBehavior passHref>
-                              <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "font-normal w-full justify-start", pathname === subLink.href && "font-bold")}>
-                                {subLink.name}
-                              </NavigationMenuLink>
-                            </Link>
-                          </li>
+                           <ListItem key={subLink.name} href={subLink.href} title={subLink.name} />
                         ))}
                       </ul>
                     </NavigationMenuContent>
                   </>
                 ) : (
-                   <Link href={link.href} legacyBehavior passHref>
+                   <Link href={link.href} passHref asChild>
                      <NavigationMenuLink
                         onMouseEnter={() => setActiveMenu(null)}
                         className={cn(navigationMenuTriggerStyle(), pathname === link.href ? 'font-bold' : '')}>
