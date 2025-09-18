@@ -210,6 +210,12 @@
       "description": "A secure door with keycard access, symbolizing an internal area.",
       "imageUrl": "https://picsum.photos/seed/130/1200/400",
       "imageHint": "secure access"
+    },
+    {
+      "id": "page-header-protection",
+      "description": "A shield icon representing protection and safety.",
+      "imageUrl": "https://picsum.photos/seed/135/1200/400",
+      "imageHint": "shield protection"
     }
   ]
 }

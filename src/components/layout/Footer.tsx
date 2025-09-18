@@ -23,6 +23,7 @@ const legalLinks = [
   { name: 'Hiring & EEO Policy', href: '/legal/hiring-policy' },
   { name: 'Terms & Conditions', href: '/legal/terms-and-conditions' },
   { name: 'Accessibility Policy', href: '/legal/accessibility-policy' },
+  { name: 'Protection Policy', href: '/legal/protection-of-children-and-vulnerable-persons-policy' },
 ];
 
 type SocialLink = {
@@ -152,5 +153,3 @@ export default function Footer() {
     </footer>
   );
 }
-
-    
