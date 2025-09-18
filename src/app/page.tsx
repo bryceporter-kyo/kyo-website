@@ -113,6 +113,7 @@ export default function Home() {
   const [activeIndex, setActiveIndex] = useState(0);
   const newsImage = PlaceHolderImages.find(p => p.id === 'home-news');
   const financialAidImage = PlaceHolderImages.find(p => p.id === 'home-financial-aid');
+  const coreValuesImage = PlaceHolderImages.find(p => p.id === 'support-volunteer');
   const announcements = getAnnouncements().slice(0, 3);
   const [registrationLink, setRegistrationLink] = useState<ExternalLink | undefined>(undefined);
 
@@ -226,21 +227,34 @@ export default function Home() {
 
         <section className="bg-secondary">
             <div className="container mx-auto">
-                 <div className="text-center mb-12">
+                <div className="text-center mb-12">
                     <h2 className="text-3xl font-headline font-bold">Our Core Values</h2>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                   {coreValues.map(role => (
-                        <Card key={role.title}>
-                            <CardHeader className="flex flex-row items-center gap-4">
-                                <role.icon className="w-8 h-8 text-primary"/>
-                                <CardTitle className="font-headline text-xl">{role.title}</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-muted-foreground">{role.description}</p>
-                            </CardContent>
-                        </Card>
-                   ))}
+                <div className="grid md:grid-cols-2 gap-12 items-center">
+                    <div className="space-y-8">
+                        {coreValues.map(value => (
+                            <Card key={value.title}>
+                                <CardHeader className="flex flex-row items-center gap-4">
+                                    <value.icon className="w-8 h-8 text-primary"/>
+                                    <CardTitle className="font-headline text-xl">{value.title}</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-muted-foreground">{value.description}</p>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                    {coreValuesImage && (
+                        <div className="rounded-lg overflow-hidden shadow-xl aspect-square">
+                            <Image
+                                src={coreValuesImage.imageUrl}
+                                alt={coreValuesImage.description}
+                                fill
+                                className="object-cover"
+                                data-ai-hint={coreValuesImage.imageHint}
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
         </section>
@@ -392,5 +406,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
