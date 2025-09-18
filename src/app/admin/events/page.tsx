@@ -55,8 +55,8 @@ export default function EventsAdminPage() {
     }, []);
     
     const parseDate = (dateString: string) => {
-      // Dates in JSON are "YYYY-MM-DD". Using new Date(`${dateString}T00:00:00Z`) treats it as UTC midnight.
-      return new Date(`${dateString}T00:00:00Z`);
+      // Dates in JSON are "YYYY-MM-DD". 
+      return new Date(dateString);
     }
 
     const form = useForm<z.infer<typeof eventSchema>>({
@@ -90,7 +90,7 @@ export default function EventsAdminPage() {
           type: "normal",
         });
       }
-    }, [editingEvent, form, parseDate]);
+    }, [editingEvent, form]);
 
     function onSubmit(values: z.infer<typeof eventSchema>) {
         if (editingEvent) {

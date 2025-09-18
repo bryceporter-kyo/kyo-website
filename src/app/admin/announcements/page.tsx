@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { getAnnouncements } from "@/lib/announcements";
+import { getAnnouncements, addAnnouncement, deleteAnnouncement, updateAnnouncement } from "@/lib/announcements";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -31,7 +31,6 @@ import {
 import type { Announcement } from "@/lib/announcements";
 import React from "react";
 import { format } from "date-fns";
-import { utcToZonedTime } from "date-fns-tz";
 
 const announcementSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters long."),
@@ -80,7 +79,8 @@ export default function AnnouncementsAdminPage() {
     }
 
     function handleDelete(announcementToDelete: Announcement) {
-        setAnnouncements(announcements.filter(announcement => announcement.id !== announcementToDelete.id));
+        deleteAnnouncement(announcementToDelete.id);
+        setAnnouncements(getAnnouncements());
         toast({
             title: "Announcement Deleted",
             description: `"${announcementToDelete.title}" has been deleted.`,
@@ -89,16 +89,14 @@ export default function AnnouncementsAdminPage() {
     }
 
     function handlePinToggle(announcementId: number) {
-        setAnnouncements(announcements.map(announcement => 
-            announcement.id === announcementId 
-            ? { ...announcement, pinned: !announcement.pinned } 
-            : announcement
-        ));
-        const toggledAnnouncement = announcements.find(a => a.id === announcementId);
-        if (toggledAnnouncement) {
+        const announcement = announcements.find(a => a.id === announcementId);
+        if (announcement) {
+            const updated = { ...announcement, pinned: !announcement.pinned };
+            updateAnnouncement(updated);
+            setAnnouncements(getAnnouncements());
             toast({
                 title: "Announcement Updated",
-                description: `"${toggledAnnouncement.title}" pinning status changed.`,
+                description: `"${updated.title}" pinning status changed.`,
             });
         }
     }

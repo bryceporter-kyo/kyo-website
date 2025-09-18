@@ -46,8 +46,6 @@ export default function LinksAdminPage() {
     };
 
     function onSubmit(values: z.infer<typeof linkSchema>) {
-        console.log("Updating link:", values);
-        
         // Update the link in the local state
         setLinks(currentLinks => 
             currentLinks.map(link => 
@@ -82,7 +80,7 @@ export default function LinksAdminPage() {
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)}>
+                        <form onSubmit={(e) => { e.preventDefault(); form.handleSubmit(onSubmit)(); }}>
                             <Table>
                                 <TableHeader>
                                     <TableRow>
