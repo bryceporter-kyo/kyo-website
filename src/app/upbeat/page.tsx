@@ -65,7 +65,7 @@ export default function UpbeatPage() {
             <div className="space-y-6">
                 <h2 className="text-3xl font-headline font-bold">What is UpBeat!?</h2>
                 <p className="text-muted-foreground text-lg">
-                    UpBeat! is KYO's innovative after-school music and social development program for youth aged 8–14 facing economic and systemic barriers. It offers fully subsidized string instruction, holistic social-emotional supports, nutritious food, and transportation—all at no cost to families.
+                    UpBeat! is KYO's innovative after-school music and social development program for youth aged 8-14 facing economic and systemic barriers. It offers fully subsidized string instruction, holistic social-emotional supports, nutritious food, and transportation—all at no cost to families.
                 </p>
                 <p className="text-muted-foreground text-lg">
                     More than just music lessons, UpBeat! creates a safe, joyful, and inclusive environment where young people experience belonging, build confidence, and develop lifelong skills. For many, it is their first meaningful experience with organized music—an opportunity that, without UpBeat!, would remain out of reach.
@@ -247,3 +247,5 @@ export default function UpbeatPage() {
     </div>
   );
 }
+
+    
