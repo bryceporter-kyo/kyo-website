@@ -68,7 +68,7 @@ export default function UpbeatPage() {
                     UpBeat! is KYO’s innovative after-school music and social development program for youth aged 8–14 facing economic and systemic barriers. It offers fully subsidized string instruction, holistic social-emotional supports, nutritious food, and transportation—all at no cost to families.
                 </p>
                 <p className="text-muted-foreground text-lg">
-                    More than just music lessons, UpBeat! creates a safe, joyful, and inclusive environment where young people experience belonging, build confidence, and develop lifelong skills. For many, it is their first meaningful experience with organized music—an opportunity that, without UpBeat!, would remain out of reach.
+                    More than just music lessons, UpBeat! create a safe, joyful, and inclusive environment where young people experience belonging, build confidence, and develop lifelong skills. For many, it is their first meaningful experience with organized music—an opportunity that, without UpBeat!, would remain out of reach.
                 </p>
                 {registrationLink && (
                   <Button asChild size="lg">
@@ -141,7 +141,7 @@ export default function UpbeatPage() {
                         {impactStats.slice(0, 2).map(stat => (
                             <Card key={stat.label} className="transition-all duration-300 hover:shadow-lg hover:border-primary/50">
                                 <CardHeader className="flex flex-row items-center justify-between">
-                                    <AnimatedCounter target={stat.number} suffix={stat.suffix} className="text-4xl font-bold text-primary" />
+                                     <AnimatedCounter target={stat.number} suffix={stat.suffix} className="text-4xl font-bold text-primary" />
                                     <div className="bg-accent text-accent-foreground p-3 rounded-full">
                                         <stat.icon className="w-5 h-5" />
                                     </div>
@@ -155,7 +155,7 @@ export default function UpbeatPage() {
                     </div>
                      <Card className="transition-all duration-300 hover:shadow-lg hover:border-primary/50">
                         <CardHeader className="flex flex-row items-center justify-between">
-                            <AnimatedCounter target={impactStats[2].number} suffix={impactStats[2].suffix} className="text-4xl font-bold text-primary" />
+                           <AnimatedCounter target={impactStats[2].number} suffix={impactStats[2].suffix} className="text-4xl font-bold text-primary" />
                             <div className="bg-accent text-accent-foreground p-3 rounded-full">
                                 <impactStats[2].icon className="w-5 h-5" />
                             </div>
