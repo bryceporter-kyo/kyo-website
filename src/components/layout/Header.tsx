@@ -55,11 +55,12 @@ const navLinks = [
 const ListItem = React.forwardRef<
   React.ElementRef<"a">,
   React.ComponentPropsWithoutRef<"a">
->(({ className, title, children, ...props }, ref) => {
+>(({ className, title, children, href, ...props }, ref) => {
   return (
     <li>
       <NavigationMenuLink asChild>
-        <a
+        <Link
+          href={href!}
           ref={ref}
           className={cn(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
@@ -71,7 +72,7 @@ const ListItem = React.forwardRef<
           <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
             {children}
           </p>
-        </a>
+        </Link>
       </NavigationMenuLink>
     </li>
   )
@@ -88,7 +89,7 @@ export default function Header() {
   useEffect(() => {
     const link = getLinkById('register');
     if (link) {
-      setRegistrationLink(link.url);
+      setRegistrationLink(link);
     }
   }, []);
 
@@ -108,10 +109,11 @@ export default function Header() {
         >
           <NavigationMenuList onMouseLeave={() => setActiveMenu(null)}>
             {navLinks.map((link) => (
-              <NavigationMenuItem key={link.name} value={link.name} onMouseEnter={() => setActiveMenu(link.name)}>
+              <NavigationMenuItem key={link.name} value={link.name}>
                 {link.subLinks ? (
                   <>
                     <NavigationMenuTrigger
+                        onMouseEnter={() => setActiveMenu(link.name)}
                         className={cn(navigationMenuTriggerStyle(), activeMenu === link.name && "bg-accent/50")}
                     >
                         {link.name}
@@ -125,13 +127,14 @@ export default function Header() {
                     </NavigationMenuContent>
                   </>
                 ) : (
-                    <NavigationMenuLink asChild
-                        className={cn(navigationMenuTriggerStyle(), pathname === link.href ? 'font-bold' : '')}
-                         onMouseEnter={() => setActiveMenu(null)}
+                   <NavigationMenuLink asChild>
+                     <Link
+                      href={link.href!}
+                      onMouseEnter={() => setActiveMenu(null)}
+                      className={cn(navigationMenuTriggerStyle(), pathname === link.href ? 'font-bold' : '')}
                     >
-                       <Link href={link.href}>
-                        {link.name}
-                       </Link>
+                      {link.name}
+                    </Link>
                    </NavigationMenuLink>
                 )}
               </NavigationMenuItem>
@@ -186,7 +189,7 @@ export default function Header() {
                      ) : (
                         <Link
                             key={link.name}
-                            href={link.href}
+                            href={link.href!}
                             className="text-lg font-medium"
                             onClick={() => setIsMobileMenuOpen(false)}
                         >
