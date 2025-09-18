@@ -1,6 +1,7 @@
 
 "use client";
 
+import * as React from "react";
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -82,6 +83,7 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const [registrationLink, setRegistrationLink] = useState<ExternalLink | undefined>(undefined);
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
 
   useEffect(() => {
     setRegistrationLink(getLinkById('register'));
@@ -98,13 +100,21 @@ export default function Header() {
 
 
         {/* Desktop Navigation */}
-        <NavigationMenu className="hidden md:flex">
+        <NavigationMenu 
+            className="hidden md:flex"
+            onMouseLeave={() => setActiveMenu(null)}
+        >
           <NavigationMenuList>
             {navLinks.map((link) => (
-              <NavigationMenuItem key={link.name}>
+              <NavigationMenuItem key={link.name} value={link.name}>
                 {link.subLinks ? (
                   <>
-                    <NavigationMenuTrigger>{link.name}</NavigationMenuTrigger>
+                    <NavigationMenuTrigger 
+                        onMouseEnter={() => setActiveMenu(link.name)}
+                        className={cn(activeMenu === link.name && "bg-accent/50")}
+                    >
+                        {link.name}
+                    </NavigationMenuTrigger>
                     <NavigationMenuContent>
                       <ul className="grid w-[400px] gap-3 p-4 md:w-[200px] lg:w-[250px] ">
                         {link.subLinks.map((subLink) => (
@@ -121,7 +131,9 @@ export default function Header() {
                   </>
                 ) : (
                   <Link href={link.href} legacyBehavior passHref>
-                    <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), pathname === link.href ? 'text-primary' : 'text-muted-foreground')}>
+                    <NavigationMenuLink 
+                        onMouseEnter={() => setActiveMenu(null)}
+                        className={cn(navigationMenuTriggerStyle(), pathname === link.href ? 'text-primary' : 'text-muted-foreground')}>
                       {link.name}
                     </NavigationMenuLink>
                   </Link>
