@@ -68,7 +68,7 @@ export default function ProtectionPolicyPage() {
                 <CardContent className="space-y-4 text-muted-foreground">
                     <h4 className="font-bold text-lg font-headline text-foreground">4.1 Police Vulnerable Sector Screening Check</h4>
                     <p>
-                        All staff and volunteers are required to provide proof of a current Police Vulnerable Sector Screening Check prior to participating in KYO programs. Screening documentation must be reviewed, approved, and recorded by the Chair of the Board of Directors, the Director of Business & Finance, and/or the Director of Human Resources.
+                        All staff and volunteers are required to provide proof of a current Police Vulnerable Sector Screening Check prior to participating in KYO programs. Screening documentation must be reviewed, approved, and recorded by the KYOs Operations Manager.
                     </p>
                     <h4 className="font-bold text-lg font-headline text-foreground pt-2">4.2 Ongoing Compliance</h4>
                     <p>
