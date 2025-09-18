@@ -109,7 +109,7 @@ export default function UpbeatPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {programGoals.map(goal => (
-                    <Card key={goal.title} className="text-center flex flex-col">
+                    <Card key={goal.title} className="text-center flex flex-col transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                         <CardHeader className="items-center">
                             <div className="bg-primary text-primary-foreground p-4 rounded-full">
                                 <goal.icon className="h-8 w-8" />
@@ -147,7 +147,7 @@ export default function UpbeatPage() {
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         {impactStats.slice(0, 2).map(stat => (
-                            <Card key={stat.label}>
+                            <Card key={stat.label} className="transition-all duration-300 hover:shadow-lg hover:border-primary/50">
                                 <CardHeader className="flex flex-row items-center justify-between">
                                     <p className="text-4xl font-bold text-primary">{stat.number}</p>
                                     <div className="bg-accent text-accent-foreground p-3 rounded-full">
@@ -161,7 +161,7 @@ export default function UpbeatPage() {
                             </Card>
                         ))}
                     </div>
-                     <Card>
+                     <Card className="transition-all duration-300 hover:shadow-lg hover:border-primary/50">
                         <CardHeader className="flex flex-row items-center justify-between">
                             <p className="text-4xl font-bold text-primary">{impactStats[2].number}</p>
                             <div className="bg-accent text-accent-foreground p-3 rounded-full">
@@ -255,5 +255,3 @@ export default function UpbeatPage() {
     </div>
   );
 }
-
-    

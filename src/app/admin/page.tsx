@@ -21,10 +21,10 @@ export default function AdminDashboardPage() {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {adminTiles.map((tile) => (
-          <Link href={tile.href} key={tile.href}>
-            <Card className="hover:border-primary hover:shadow-lg transition-all h-full flex flex-col justify-center items-center text-center">
+          <Link href={tile.href} key={tile.href} className="group">
+            <Card className="group-hover:border-primary group-hover:shadow-lg transition-all h-full flex flex-col justify-center items-center text-center">
               <CardHeader className="items-center">
-                <div className="p-4 bg-primary text-primary-foreground rounded-full">
+                <div className="p-4 bg-primary text-primary-foreground rounded-full transition-all duration-300 group-hover:scale-110 group-hover:bg-primary/90">
                   <tile.icon className="w-8 h-8" />
                 </div>
               </CardHeader>

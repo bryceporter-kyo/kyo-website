@@ -89,7 +89,7 @@ export default function LessonsPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {programGoals.map(goal => (
-                    <Card key={goal.title} className="text-center flex flex-col">
+                    <Card key={goal.title} className="text-center flex flex-col transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                         <CardHeader className="items-center">
                             <div className="bg-primary text-primary-foreground p-4 rounded-full">
                                 <goal.icon className="h-8 w-8" />

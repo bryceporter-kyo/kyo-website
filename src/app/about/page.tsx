@@ -77,7 +77,7 @@ export default function AboutPage() {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                         {stats.map(stat => (
-                            <Card key={stat.label} className="text-center">
+                            <Card key={stat.label} className="text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                                 <CardHeader className="items-center">
                                     <div className="bg-primary text-primary-foreground p-4 rounded-full">
                                         <stat.icon className="w-8 h-8" />
@@ -102,7 +102,7 @@ export default function AboutPage() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                    {communityRoles.map(role => (
-                        <Card key={role.title}>
+                        <Card key={role.title} className="transition-all duration-300 hover:shadow-lg hover:border-primary/50">
                             <CardHeader className="flex flex-row items-center gap-4">
                                 <role.icon className="w-8 h-8 text-primary"/>
                                 <CardTitle className="font-headline text-xl">{role.title}</CardTitle>

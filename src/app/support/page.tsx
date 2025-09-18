@@ -73,7 +73,7 @@ export default function SupportPage() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {supportOptions.map(option => (
-                            <Card key={option.title} className="text-center flex flex-col">
+                            <Card key={option.title} className="text-center flex flex-col transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                                 <CardHeader className="items-center">
                                     <div className="bg-primary text-primary-foreground p-4 rounded-full">
                                         <option.icon className="h-8 w-8" />

@@ -233,7 +233,7 @@ export default function Home() {
                 <div className="grid md:grid-cols-2 gap-12 items-center">
                     <div className="space-y-8">
                         {coreValues.map(value => (
-                            <Card key={value.title}>
+                            <Card key={value.title} className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                                 <CardHeader className="flex flex-row items-center gap-4">
                                     <value.icon className="w-8 h-8 text-primary"/>
                                     <CardTitle className="font-headline text-xl">{value.title}</CardTitle>
@@ -269,12 +269,12 @@ export default function Home() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {testimonials.map((testimonial) => (
-                <Card key={testimonial.author} className="flex flex-col bg-primary text-primary-foreground">
+                <Card key={testimonial.author} className="flex flex-col bg-primary text-primary-foreground transition-all duration-300 hover:shadow-xl hover:scale-105">
                   <CardHeader>
                     <Quote className="w-10 h-10 text-primary-foreground mb-4" />
                   </CardHeader>
                   <CardContent className="flex-grow">
-                    <blockquote className="text-primary-foreground text-lg">
+                    <blockquote className="text-primary-foreground text-lg font-normal">
                       {testimonial.quote}
                     </blockquote>
                   </CardContent>
@@ -299,7 +299,7 @@ export default function Home() {
             <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
               <div className="md:col-span-2 grid grid-cols-1 gap-8">
                   {announcements.map((item) => (
-                    <Card key={item.id} className="flex flex-col">
+                    <Card key={item.id} className="flex flex-col transition-all duration-300 hover:shadow-lg hover:border-primary/50">
                       <CardHeader>
                         <CardTitle className="text-xl font-headline">{item.title}</CardTitle>
                         <p className="text-sm text-muted-foreground">{item.date}</p>
@@ -406,5 +406,3 @@ export default function Home() {
     </div>
   );
 }
-
-    

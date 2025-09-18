@@ -116,7 +116,7 @@ export default function OrchestrasPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {orchestras.map((item) => (
-                    <Card key={item.title} className="text-left flex flex-col">
+                    <Card key={item.title} className="text-left flex flex-col transition-all duration-300 hover:shadow-lg hover:border-primary/50">
                         <CardHeader>
                             <CardTitle className="font-headline text-2xl">{item.title}</CardTitle>
                             <CardDescription>{item.experience}</CardDescription>
@@ -145,7 +145,7 @@ export default function OrchestrasPage() {
                     Broaden your musical horizons with our digital courses. These flexible online classes are available for all ages with no prior experience necessary.
                 </p>
             </div>
-            <Card className="max-w-3xl mx-auto">
+            <Card className="max-w-3xl mx-auto transition-all duration-300 hover:shadow-lg hover:border-primary/50">
                 <CardHeader className="items-center text-center">
                     <div className="bg-primary text-primary-foreground p-4 rounded-full w-fit">
                         <University className="h-8 w-8" />
@@ -179,7 +179,7 @@ export default function OrchestrasPage() {
                         {financialAidOptions.map(option => {
                             const link = getLinkById(option.linkId);
                             return (
-                                <Card key={option.title}>
+                                <Card key={option.title} className="transition-all duration-300 hover:shadow-lg hover:border-primary/50">
                                     <CardHeader className="flex flex-row items-center gap-4">
                                         <option.icon className="w-8 h-8 text-primary"/>
                                         <CardTitle className="font-headline text-xl">{option.title}</CardTitle>
@@ -202,7 +202,7 @@ export default function OrchestrasPage() {
                     <h3 className="text-2xl font-headline font-bold text-center mb-8">Scholarship Opportunities</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {scholarships.map(scholarship => (
-                            <Card key={scholarship.title}>
+                            <Card key={scholarship.title} className="transition-all duration-300 hover:shadow-lg hover:border-primary/50">
                                 <CardHeader className="flex flex-row items-center gap-4">
                                     <scholarship.icon className="w-8 h-8 text-primary"/>
                                     <CardTitle className="font-headline text-xl">{scholarship.title}</CardTitle>
