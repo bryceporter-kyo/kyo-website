@@ -103,13 +103,12 @@ export default function Header() {
 
 
         {/* Desktop Navigation */}
-        <NavigationMenu 
-            className="hidden md:flex"
-            onMouseLeave={() => setActiveMenu(null)}
+        <NavigationMenu
+          className="hidden md:flex"
         >
-          <NavigationMenuList>
+          <NavigationMenuList onMouseLeave={() => setActiveMenu(null)}>
             {navLinks.map((link) => (
-              <NavigationMenuItem key={link.name} onMouseEnter={() => setActiveMenu(link.name)}>
+              <NavigationMenuItem key={link.name} value={link.name} onMouseEnter={() => setActiveMenu(link.name)}>
                 {link.subLinks ? (
                   <>
                     <NavigationMenuTrigger 
