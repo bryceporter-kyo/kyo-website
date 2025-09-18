@@ -151,10 +151,10 @@ export default function Home() {
             {heroSlides.map((slide, index) => (
               <div
                 key={slide.title}
-                className={`transition-opacity duration-1000 ease-in-out ${index === activeIndex ? 'opacity-100' : 'opacity-0 absolute inset-0 flex flex-col justify-center items-center'}`}
+                className={`transition-opacity duration-1000 ease-in-out ${index === activeIndex ? 'opacity-100' : 'opacity-0'}`}
               >
                 {index === activeIndex && (
-                  <>
+                  <div className="flex flex-col justify-center items-center">
                     <h1 className="text-4xl md:text-6xl lg:text-7xl font-headline font-bold tracking-tight">
                       {slide.title}
                     </h1>
@@ -175,7 +175,7 @@ export default function Home() {
                         )
                       })}
                     </div>
-                  </>
+                  </div>
                 )}
               </div>
             ))}
