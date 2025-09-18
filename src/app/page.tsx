@@ -1,4 +1,7 @@
 
+"use client";
+
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -75,44 +78,95 @@ const impactStats = [
     { number: '$70k+', label: 'Annual Subsidies Provided', icon: DollarSign },
 ];
 
+const heroSlides = [
+    {
+        title: "Nurturing the Next Generation of Musicians",
+        subtitle: "The Kawartha Youth Orchestra provides exceptional music education and performance opportunities to young people, fostering artistic excellence, personal growth, and a lifelong love of music.",
+        image: PlaceHolderImages.find(p => p.id === 'hero-concert'),
+        buttons: [
+            { text: "Learn More", href: "/about", variant: "default" },
+            { text: "See Our Programs", href: "/orchestras", variant: "outline" }
+        ]
+    },
+    {
+        title: "Your Support Creates Harmony",
+        subtitle: "Your generosity empowers young musicians, funds scholarships, and sustains our vibrant programs. Help us keep the music playing for generations to come.",
+        image: PlaceHolderImages.find(p => p.id === 'page-header-donate'),
+        buttons: [
+            { text: "Donate Today", href: "/donate", variant: "default" },
+            { text: "More Ways to Give", href: "/support", variant: "outline" }
+        ]
+    },
+    {
+        title: "Find Your Place on Stage",
+        subtitle: "Auditions are open for our upcoming season. Join a community of passionate young musicians and take your skills to the next level.",
+        image: PlaceHolderImages.find(p => p.id === 'orchestra-kids-playing'),
+        buttons: [
+            { text: "Register Now", href: "/register", variant: "default", isExternal: true },
+            { text: "Explore Ensembles", href: "/orchestras", variant: "outline" }
+        ]
+    },
+];
+
 export default function Home() {
-  const heroImage = PlaceHolderImages.find(p => p.id === 'hero-concert');
+  const [activeIndex, setActiveIndex] = useState(0);
   const newsImage = PlaceHolderImages.find(p => p.id === 'home-news');
   const financialAidImage = PlaceHolderImages.find(p => p.id === 'home-financial-aid');
   const announcements = getAnnouncements().slice(0, 3);
-  const registrationLink = getLinkById('register');
+  const [registrationLink, setRegistrationLink] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    const link = getLinkById('register');
+    if (link) {
+      setRegistrationLink(link.url);
+    }
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveIndex((prevIndex) => (prevIndex + 1) % heroSlides.length);
+    }, 7000); // Change slide every 7 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  const activeSlide = heroSlides[activeIndex];
 
   return (
     <div className="flex flex-col min-h-dvh">
       <main className="flex-1">
-        <section className="relative h-[60vh] md:h-[80vh] w-full flex items-center justify-center text-center text-white p-0">
-          {heroImage && (
+        <section className="relative h-[60vh] md:h-[80vh] w-full flex items-center justify-center text-center text-white p-0 transition-all duration-1000 ease-in-out">
+          {activeSlide.image && (
              <Image
-              src={heroImage.imageUrl}
-              alt={heroImage.description}
+              src={activeSlide.image.imageUrl}
+              alt={activeSlide.image.description}
               fill
-              className="object-cover"
+              className="object-cover transition-opacity duration-1000"
               priority
-              data-ai-hint={heroImage.imageHint}
+              key={activeSlide.image.id}
+              data-ai-hint={activeSlide.image.imageHint}
             />
           )}
           <div className="absolute inset-0 bg-black/50" />
           <div className="relative z-10 container mx-auto px-4 md:px-6">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-headline font-bold tracking-tight">
-              Nurturing the Next Generation of Musicians
+              {activeSlide.title}
             </h1>
             <p className="mt-4 max-w-3xl mx-auto text-lg md:text-xl text-neutral-200">
-              The Kawartha Youth Orchestra provides exceptional music education and performance opportunities to young people, fostering artistic excellence, personal growth, and a lifelong love of music.
+              {activeSlide.subtitle}
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-              {registrationLink && (
-                <Button asChild size="lg" className="font-bold">
-                  <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Register Now</Link>
-                </Button>
-              )}
-              <Button asChild size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white hover:text-primary">
-                <Link href="/support">Support Us</Link>
-              </Button>
+              {activeSlide.buttons.map((button) => {
+                const href = button.isExternal ? registrationLink : button.href;
+                if (!href) return null;
+                
+                return (
+                  <Button key={button.text} asChild size="lg" variant={button.variant === 'outline' ? 'outline' : 'default'} className={button.variant === 'outline' ? "bg-transparent border-white text-white hover:bg-white hover:text-primary" : "font-bold"}>
+                    <Link href={href} target={button.isExternal ? "_blank" : "_self"} rel={button.isExternal ? "noopener noreferrer" : ""}>
+                      {button.text}
+                    </Link>
+                  </Button>
+                )
+              })}
             </div>
           </div>
         </section>
@@ -281,7 +335,7 @@ export default function Home() {
                         </Button>
                         {registrationLink && (
                           <Button asChild variant="outline">
-                              <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Register Now</Link>
+                              <Link href={registrationLink} target="_blank" rel="noopener noreferrer">Register Now</Link>
                           </Button>
                         )}
                     </div>
