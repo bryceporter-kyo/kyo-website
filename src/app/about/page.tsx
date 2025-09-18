@@ -16,7 +16,7 @@ const stats = [
     { number: 70, suffix: '+', label: 'Concerts Performed', icon: Award },
     { number: 700, suffix: '+', label: 'Musicians Supported', icon: Users },
     { number: 2700, suffix: '+', label: 'Community Members Impacted', icon: Group },
-    { number: 70000, prefix: '$', suffix: 'k+', label: 'Annual Subsidies Provided', icon: DollarSign },
+    { number: 70000, prefix: '$', label: 'Annual Subsidies Provided', icon: DollarSign },
 ];
 
 const communityRoles = [

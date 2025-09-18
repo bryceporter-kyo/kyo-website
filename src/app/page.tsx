@@ -77,7 +77,7 @@ const testimonials = [
 const impactStats = [
     { number: 700, suffix: '+', label: 'Musicians Supported', icon: Users },
     { number: 2700, suffix: '+', label: 'Community Members Impacted', icon: Group },
-    { number: 70000, prefix: '$', suffix: 'k+', label: 'Annual Subsidies Provided', icon: DollarSign },
+    { number: 70000, prefix: '$', label: 'Annual Subsidies Provided', icon: DollarSign },
 ];
 
 const heroSlides = [
@@ -134,7 +134,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-dvh">
-      <main className="flex-1 -z-10">
+      <main className="flex-1">
         <section className="relative h-[60vh] md:h-[80vh] w-full flex items-center justify-center text-center text-white p-0">
             {heroSlides.map((slide, index) => (
                 slide.image && (
@@ -181,233 +181,233 @@ export default function Home() {
             </div>
         </section>
 
-        <section id="programs" className="bg-background">
-          <div className="container mx-auto">
-            <div className="text-center">
-              <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-4xl md:text-5xl">Our Programs</h2>
-              <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mt-4">
-                We offer a range of programs designed to meet students where they are, from beginners to advanced performers.
-              </p>
-            </div>
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {programs.map((program) => (
-                <Card key={program.title} className="flex flex-col overflow-hidden group transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                  {program.image && (
-                    <div className="aspect-video overflow-hidden">
-                      <Image
-                        src={program.image.imageUrl}
-                        alt={program.image.description}
-                        width={600}
-                        height={400}
-                        className="object-cover transition-transform duration-300 group-hover:scale-110"
-                        data-ai-hint={program.image.imageHint}
-                      />
+        <main className="relative z-20 bg-background">
+            <section id="programs" className="bg-background">
+            <div className="container mx-auto">
+                <div className="text-center">
+                <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-4xl md:text-5xl">Our Programs</h2>
+                <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mt-4">
+                    We offer a range of programs designed to meet students where they are, from beginners to advanced performers.
+                </p>
+                </div>
+                <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {programs.map((program) => (
+                    <Card key={program.title} className="flex flex-col overflow-hidden group transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                    {program.image && (
+                        <div className="aspect-video overflow-hidden">
+                        <Image
+                            src={program.image.imageUrl}
+                            alt={program.image.description}
+                            width={600}
+                            height={400}
+                            className="object-cover transition-transform duration-300 group-hover:scale-110"
+                            data-ai-hint={program.image.imageHint}
+                        />
+                        </div>
+                    )}
+                    <CardHeader>
+                        <div className="flex items-center gap-4">
+                        <program.icon className="w-8 h-8 text-primary" />
+                        <CardTitle className="font-headline text-2xl">{program.title}</CardTitle>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="flex-grow">
+                        <CardDescription>{program.description}</CardDescription>
+                    </CardContent>
+                    <div className="p-6 pt-0">
+                        <Button asChild variant="link" className="p-0 h-auto">
+                        <Link href={program.href} className="flex items-center gap-2">
+                            Learn More <ArrowRight className="w-4 h-4" />
+                        </Link>
+                        </Button>
                     </div>
-                  )}
-                  <CardHeader>
-                    <div className="flex items-center gap-4">
-                      <program.icon className="w-8 h-8 text-primary" />
-                      <CardTitle className="font-headline text-2xl">{program.title}</CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="flex-grow">
-                    <CardDescription>{program.description}</CardDescription>
-                  </CardContent>
-                  <div className="p-6 pt-0">
-                    <Button asChild variant="link" className="p-0 h-auto">
-                      <Link href={program.href} className="flex items-center gap-2">
-                        Learn More <ArrowRight className="w-4 h-4" />
-                      </Link>
-                    </Button>
-                  </div>
-                </Card>
-              ))}
+                    </Card>
+                ))}
+                </div>
             </div>
-          </div>
-        </section>
+            </section>
 
-       <section className="bg-secondary">
+        <section className="bg-secondary">
+                <div className="container mx-auto">
+                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                        <div className="space-y-8">
+                            <h2 className="text-3xl font-headline font-bold text-center md:text-left">Our Core Values</h2>
+                            {coreValues.map(value => (
+                                <Card key={value.title} className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                                    <CardHeader className="flex flex-row items-center gap-4">
+                                        <value.icon className="w-8 h-8 text-primary"/>
+                                        <CardTitle className="font-headline text-xl">{value.title}</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <p className="text-muted-foreground">{value.description}</p>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                        {coreValuesImage && (
+                            <div className="rounded-lg overflow-hidden shadow-xl aspect-square relative">
+                                <Image
+                                    src={coreValuesImage.imageUrl}
+                                    alt={coreValuesImage.description}
+                                    fill
+                                    className="object-cover"
+                                    data-ai-hint={coreValuesImage.imageHint}
+                                />
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </section>
+
+            <section>
             <div className="container mx-auto">
                 <div className="text-center mb-12">
-                    <h2 className="text-3xl font-headline font-bold">Our Core Values</h2>
+                <h2 className="text-3xl font-headline font-bold">What Our Community is Saying</h2>
+                <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed mt-4">
+                    We are proud to have the support of our incredible community of parents and students.
+                </p>
                 </div>
-                <div className="grid md:grid-cols-2 gap-12 items-center">
-                     <div className="space-y-8">
-                        {coreValues.map(value => (
-                            <Card key={value.title} className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                                <CardHeader className="flex flex-row items-center gap-4">
-                                    <value.icon className="w-8 h-8 text-primary"/>
-                                    <CardTitle className="font-headline text-xl">{value.title}</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-muted-foreground">{value.description}</p>
-                                </CardContent>
-                            </Card>
-                        ))}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {testimonials.map((testimonial) => (
+                    <Card key={testimonial.author} className="flex flex-col bg-primary text-primary-foreground transition-all duration-300 hover:shadow-xl hover:scale-105">
+                    <CardHeader>
+                        <Quote className="w-10 h-10 text-primary-foreground/80 mb-4" />
+                    </CardHeader>
+                    <CardContent className="flex-grow">
+                        <blockquote className="text-primary-foreground/90 font-medium">
+                        {testimonial.quote}
+                        </blockquote>
+                    </CardContent>
+                    <CardFooter>
+                        <p className="font-bold w-full text-right">- {testimonial.author}, <span className="font-normal text-primary-foreground/80">{testimonial.role}</span></p>
+                    </CardFooter>
+                    </Card>
+                ))}
+                </div>
+            </div>
+            </section>
+
+
+            <section id="news" className="bg-secondary">
+            <div className="container mx-auto">
+                <div className="text-center">
+                <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-4xl md:text-5xl">Latest News</h2>
+                <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mt-4">
+                    Stay up-to-date with the latest happenings at the Kawartha Youth Orchestra.
+                </p>
+                </div>
+                <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+                <div className="md:col-span-2 grid grid-cols-1 gap-8">
+                    {announcements.map((item) => (
+                        <Card key={item.id} className="flex flex-col transition-all duration-300 hover:shadow-lg hover:border-primary/50">
+                        <CardHeader>
+                            <CardTitle className="text-xl font-headline">{item.title}</CardTitle>
+                            <p className="text-sm text-muted-foreground">{item.date}</p>
+                        </CardHeader>
+                        <CardContent className="flex-grow">
+                            <p className="text-muted-foreground">{item.excerpt}</p>
+                        </CardContent>
+                        <div className="p-6 pt-0">
+                            <Button asChild variant="link" className="p-0 h-auto">
+                            <Link href="/calendar" className="flex items-center gap-2">
+                                Read More <ArrowRight className="w-4 h-4" />
+                            </Link>
+                            </Button>
+                        </div>
+                        </Card>
+                    ))}
+                </div>
+                {newsImage && (
+                    <div className="hidden md:block rounded-lg overflow-hidden shadow-lg aspect-[3/4]">
+                    <Image
+                        src={newsImage.imageUrl}
+                        alt={newsImage.description}
+                        width={600}
+                        height={800}
+                        className="object-cover w-full h-full"
+                        data-ai-hint={newsImage.imageHint}
+                        />
                     </div>
-                    {coreValuesImage && (
-                        <div className="rounded-lg overflow-hidden shadow-xl aspect-square relative">
+                )}
+                </div>
+            </div>
+            </section>
+
+            <section className="bg-background">
+            <div className="container mx-auto">
+                <div className="grid md:grid-cols-2 gap-12 items-center">
+                    <div className="space-y-6">
+                        <h2 className="text-3xl font-headline font-bold">Financial Aid & Scholarships</h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-center">
+                            <div className="bg-secondary p-6 rounded-lg">
+                                <AnimatedCounter target={100000} prefix="$" suffix="k+" className="text-4xl font-bold text-primary" />
+                                <p className="text-sm text-muted-foreground mt-1">In Annual Bursaries</p>
+                            </div>
+                            <div className="bg-secondary p-6 rounded-lg">
+                                <AnimatedCounter target={120} suffix="+" className="text-4xl font-bold text-primary" />
+                                <p className="text-sm text-muted-foreground mt-1">Students Supported</p>
+                            </div>
+                        </div>
+                        <p className="text-muted-foreground md:text-lg">
+                            We believe in nurturing musical talent regardless of financial background. Our goal is to ensure no student misses the opportunity to grow due to economic constraints. Explore our scholarships and aid programs to join our community of passionate young artists.
+                        </p>
+                        <div className="flex gap-4">
+                            <Button asChild>
+                                <Link href="/donate">Explore Aid</Link>
+                            </Button>
+                            {registrationLink && (
+                            <Button asChild variant="outline">
+                                <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Register Now</Link>
+                            </Button>
+                            )}
+                        </div>
+                    </div>
+                    {financialAidImage && (
+                        <div className="rounded-lg overflow-hidden shadow-xl">
                             <Image
-                                src={coreValuesImage.imageUrl}
-                                alt={coreValuesImage.description}
-                                fill
-                                className="object-cover"
-                                data-ai-hint={coreValuesImage.imageHint}
+                                src={financialAidImage.imageUrl}
+                                alt={financialAidImage.description}
+                                width={600}
+                                height={400}
+                                className="object-cover w-full h-full"
+                                data-ai-hint={financialAidImage.imageHint}
                             />
                         </div>
                     )}
                 </div>
             </div>
-        </section>
+            </section>
 
-        <section>
-          <div className="container mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-headline font-bold">What Our Community is Saying</h2>
-              <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed mt-4">
-                We are proud to have the support of our incredible community of parents and students.
-              </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {testimonials.map((testimonial) => (
-                <Card key={testimonial.author} className="flex flex-col bg-primary text-primary-foreground transition-all duration-300 hover:shadow-xl hover:scale-105">
-                  <CardHeader>
-                    <Quote className="w-10 h-10 text-primary-foreground/80 mb-4" />
-                  </CardHeader>
-                  <CardContent className="flex-grow">
-                    <blockquote className="text-primary-foreground text-lg">
-                      {testimonial.quote}
-                    </blockquote>
-                  </CardContent>
-                  <CardFooter>
-                    <p className="font-bold w-full text-right">- {testimonial.author}, <span className="font-normal text-primary-foreground/80">{testimonial.role}</span></p>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-
-
-        <section id="news" className="bg-secondary">
-          <div className="container mx-auto">
-            <div className="text-center">
-              <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-4xl md:text-5xl">Latest News</h2>
-              <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mt-4">
-                Stay up-to-date with the latest happenings at the Kawartha Youth Orchestra.
-              </p>
-            </div>
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-              <div className="md:col-span-2 grid grid-cols-1 gap-8">
-                  {announcements.map((item) => (
-                    <Card key={item.id} className="flex flex-col transition-all duration-300 hover:shadow-lg hover:border-primary/50">
-                      <CardHeader>
-                        <CardTitle className="text-xl font-headline">{item.title}</CardTitle>
-                        <p className="text-sm text-muted-foreground">{item.date}</p>
-                      </CardHeader>
-                      <CardContent className="flex-grow">
-                        <p className="text-muted-foreground">{item.excerpt}</p>
-                      </CardContent>
-                       <div className="p-6 pt-0">
-                        <Button asChild variant="link" className="p-0 h-auto">
-                          <Link href="/calendar" className="flex items-center gap-2">
-                            Read More <ArrowRight className="w-4 h-4" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </Card>
-                  ))}
-              </div>
-              {newsImage && (
-                <div className="hidden md:block rounded-lg overflow-hidden shadow-lg aspect-[3/4]">
-                   <Image
-                      src={newsImage.imageUrl}
-                      alt={newsImage.description}
-                      width={600}
-                      height={800}
-                      className="object-cover w-full h-full"
-                      data-ai-hint={newsImage.imageHint}
-                    />
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-background">
-          <div className="container mx-auto">
-            <div className="grid md:grid-cols-2 gap-12 items-center">
-                <div className="space-y-6">
-                    <h2 className="text-3xl font-headline font-bold">Financial Aid & Scholarships</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-center">
-                        <div className="bg-secondary p-6 rounded-lg">
-                            <AnimatedCounter target={100000} prefix="$" suffix="k+" className="text-4xl font-bold text-primary" />
-                            <p className="text-sm text-muted-foreground mt-1">In Annual Bursaries</p>
-                        </div>
-                        <div className="bg-secondary p-6 rounded-lg">
-                            <AnimatedCounter target={120} suffix="+" className="text-4xl font-bold text-primary" />
-                            <p className="text-sm text-muted-foreground mt-1">Students Supported</p>
-                        </div>
-                    </div>
-                    <p className="text-muted-foreground md:text-lg">
-                        We believe in nurturing musical talent regardless of financial background. Our goal is to ensure no student misses the opportunity to grow due to economic constraints. Explore our scholarships and aid programs to join our community of passionate young artists.
+            <section id="support" className="bg-secondary">
+                <div className="container mx-auto text-center">
+                    <h2 className="text-3xl font-headline font-bold">Support Kawartha Youth Orchestra</h2>
+                    <p className="text-muted-foreground md:text-lg max-w-3xl mx-auto mt-4">
+                        Your generosity empowers us to provide transformative musical experiences for young people. Help us continue our work by making a donation or learning about other ways to contribute.
                     </p>
-                    <div className="flex gap-4">
-                        <Button asChild>
-                            <Link href="/donate">Explore Aid</Link>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center max-w-3xl mx-auto mt-8">
+                        {impactStats.map(stat => (
+                            <div key={stat.label}>
+                                <AnimatedCounter 
+                                    target={stat.number}
+                                    prefix={stat.prefix}
+                                    suffix={stat.number === 70000 ? 'k+' : stat.suffix}
+                                    className="text-4xl font-bold text-primary"
+                                />
+                                <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+                        <Button asChild size="lg">
+                            <Link href="/donate">Donate Now</Link>
                         </Button>
-                        {registrationLink && (
-                          <Button asChild variant="outline">
-                              <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Register Now</Link>
-                          </Button>
-                        )}
+                        <Button asChild size="lg" variant="outline">
+                            <Link href="/contact">Contact Us</Link>
+                        </Button>
                     </div>
                 </div>
-                {financialAidImage && (
-                    <div className="rounded-lg overflow-hidden shadow-xl">
-                        <Image
-                            src={financialAidImage.imageUrl}
-                            alt={financialAidImage.description}
-                            width={600}
-                            height={400}
-                            className="object-cover w-full h-full"
-                            data-ai-hint={financialAidImage.imageHint}
-                        />
-                    </div>
-                )}
-            </div>
-          </div>
-        </section>
-
-        <section id="support" className="bg-secondary">
-             <div className="container mx-auto text-center">
-                <h2 className="text-3xl font-headline font-bold">Support Kawartha Youth Orchestra</h2>
-                <p className="text-muted-foreground md:text-lg max-w-3xl mx-auto mt-4">
-                    Your generosity empowers us to provide transformative musical experiences for young people. Help us continue our work by making a donation or learning about other ways to contribute.
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center max-w-3xl mx-auto mt-8">
-                    {impactStats.map(stat => (
-                        <div key={stat.label}>
-                            <AnimatedCounter 
-                                target={stat.number}
-                                prefix={stat.prefix}
-                                suffix={stat.number === 70000 ? 'k+' : stat.suffix}
-                                className="text-4xl font-bold text-primary"
-                            />
-                            <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
-                        </div>
-                    ))}
-                </div>
-                 <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-                    <Button asChild size="lg">
-                        <Link href="/donate">Donate Now</Link>
-                    </Button>
-                    <Button asChild size="lg" variant="outline">
-                        <Link href="/contact">Contact Us</Link>
-                    </Button>
-                </div>
-            </div>
-        </section>
+            </section>
+        </main>
       </main>
     </div>
   );
