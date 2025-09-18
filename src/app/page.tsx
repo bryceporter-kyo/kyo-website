@@ -10,6 +10,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { getAnnouncements } from '@/lib/announcements';
 import { getLinkById } from '@/lib/links';
+import type { ExternalLink } from '@/lib/links';
 
 const programs = [
   {
@@ -113,12 +114,12 @@ export default function Home() {
   const newsImage = PlaceHolderImages.find(p => p.id === 'home-news');
   const financialAidImage = PlaceHolderImages.find(p => p.id === 'home-financial-aid');
   const announcements = getAnnouncements().slice(0, 3);
-  const [registrationLink, setRegistrationLink] = useState<string | undefined>(undefined);
+  const [registrationLink, setRegistrationLink] = useState<ExternalLink | undefined>(undefined);
 
   useEffect(() => {
     const link = getLinkById('register');
     if (link) {
-      setRegistrationLink(link.url);
+      setRegistrationLink(link);
     }
   }, []);
 
@@ -161,7 +162,7 @@ export default function Home() {
                     </p>
                     <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
                         {slide.buttons.map((button) => {
-                        const href = button.isExternal ? registrationLink : button.href;
+                        const href = button.isExternal && registrationLink ? registrationLink.url : button.href;
                         if (!href) return null;
                         
                         return (
@@ -342,7 +343,7 @@ export default function Home() {
                         </Button>
                         {registrationLink && (
                           <Button asChild variant="outline">
-                              <Link href={registrationLink} target="_blank" rel="noopener noreferrer">Register Now</Link>
+                              <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Register Now</Link>
                           </Button>
                         )}
                     </div>
@@ -391,3 +392,5 @@ export default function Home() {
     </div>
   );
 }
+
+    

@@ -25,8 +25,14 @@ const legalLinks = [
   { name: 'Accessibility Policy', href: '/legal/accessibility-policy' },
 ];
 
+type SocialLink = {
+  name: string;
+  link: ExternalLink | undefined;
+  icon: React.ElementType;
+}
+
 export default function Footer() {
-  const [socialLinks, setSocialLinks] = useState<any[]>([]);
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [mailingAddressLink, setMailingAddressLink] = useState<ExternalLink | undefined>(undefined);
   const [physicalAddressLink, setPhysicalAddressLink] = useState<ExternalLink | undefined>(undefined);
   const [phoneLink, setPhoneLink] = useState<ExternalLink | undefined>(undefined);
@@ -147,3 +153,5 @@ export default function Footer() {
     </footer>
   );
 }
+
+    
