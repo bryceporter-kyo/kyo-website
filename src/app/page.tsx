@@ -133,7 +133,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-dvh">
-      <main className="flex-1">
+      <main className="flex-1 relative z-10">
         <section className="relative h-[60vh] md:h-[80vh] w-full flex items-center justify-center text-center text-white p-0">
             {heroSlides.map((slide, index) => (
                 slide.image && (
@@ -149,11 +149,11 @@ export default function Home() {
                 )
             ))}
             <div className="absolute inset-0 bg-black/50" />
-            <div className="relative container mx-auto px-4 md:px-6">
+            <div className="relative z-10 container mx-auto px-4 md:px-6">
                 {heroSlides.map((slide, index) => (
                 <div
                     key={slide.title}
-                    className={`absolute inset-0 flex flex-col justify-center items-center transition-opacity duration-1000 ease-in-out ${index === activeIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+                    className={`absolute inset-0 flex flex-col justify-center items-center transition-opacity duration-1000 ease-in-out ${index === activeIndex ? 'opacity-100' : 'opacity-0'}`}
                 >
                     <h1 className="text-4xl md:text-6xl lg:text-7xl font-headline font-bold tracking-tight">
                         {slide.title}
@@ -245,7 +245,7 @@ export default function Home() {
                         ))}
                     </div>
                     {coreValuesImage && (
-                        <div className="rounded-lg overflow-hidden shadow-xl aspect-square">
+                        <div className="rounded-lg overflow-hidden shadow-xl aspect-square relative">
                             <Image
                                 src={coreValuesImage.imageUrl}
                                 alt={coreValuesImage.description}
