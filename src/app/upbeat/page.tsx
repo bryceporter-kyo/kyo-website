@@ -4,10 +4,10 @@
 import { useState, useEffect } from 'react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import PageHeader from '@/components/shared/PageHeader';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Target, HeartHandshake, Users, Award, Smile, BarChart, Check, Quote, HandCoins, BookOpen, Truck, LifeBuoy } from 'lucide-react';
+import { Target, HeartHandshake, Users, Award, Smile, BarChart, Quote, HandCoins, BookOpen, Truck, LifeBuoy } from 'lucide-react';
 import Image from 'next/image';
 import { getLinkById } from '@/lib/links';
 import type { ExternalLink } from '@/lib/links';
@@ -41,15 +41,6 @@ const impactStats = [
     { number: 92, suffix: '%', label: 'Participant Satisfaction', icon: Smile, description: 'Positive or highly positive experiences reported by students and families.' },
     { number: 100, suffix: '+', label: 'Students on Waitlist', icon: BarChart, description: 'Demonstrating a high demand for the program in our community.' },
 ];
-
-const holisticSupports = [
-    "Ensemble-Based String Instruction",
-    "Music Literacy & Creative Exploration",
-    "On-Site Social-Emotional Support",
-    "Healthy Snacks at Every Session",
-    "Free Transportation from Local Schools",
-    "Multiple Public Performance Opportunities"
-]
 
 export default function UpbeatPage() {
   const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-upbeat');
