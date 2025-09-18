@@ -208,89 +208,86 @@ export default function UpbeatPage() {
 
      <section className="bg-secondary">
         <div className="container mx-auto">
-             <Tabs defaultValue="structure" className="w-full">
-                <TabsList className="grid w-full grid-cols-3 mx-auto max-w-2xl">
-                    <TabsTrigger value="structure">Program Structure</TabsTrigger>
-                    <TabsTrigger value="quality">Instructional Quality</TabsTrigger>
-                    <TabsTrigger value="participants">Who Participates</TabsTrigger>
-                </TabsList>
-                <TabsContent value="structure" className="mt-12">
-                    <Card>
-                        <CardHeader className="text-center">
-                            <CardTitle className="font-headline text-2xl">How UpBeat! Works</CardTitle>
-                            <CardDescription>
-                                UpBeat! runs twice weekly (Tuesdays and Thursdays, 3:30–5:30 p.m.) throughout the school year, providing a consistent, enriching, and supportive after-school experience.
-                            </CardDescription>
+            <div className="text-center mb-12">
+                <h2 className="text-3xl font-headline font-bold">How UpBeat! Works</h2>
+                <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
+                    UpBeat! runs twice weekly (Tuesdays and Thursdays, 3:30–5:30 p.m.) throughout the school year, providing a consistent, enriching, and supportive after-school experience.
+                </p>
+            </div>
+            <div className="max-w-3xl mx-auto space-y-6">
+                {coreActivities.map(activity => (
+                    <Card key={activity.title} className="bg-background transition-all duration-300 hover:shadow-md hover:border-primary/30">
+                        <CardHeader className="flex flex-row items-center gap-4">
+                            <activity.icon className="w-8 h-8 text-primary flex-shrink-0" />
+                            <CardTitle className="font-headline text-lg">{activity.title}</CardTitle>
                         </CardHeader>
-                        <CardContent className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                           {coreActivities.map(activity => (
-                               <Card key={activity.title} className="bg-background">
-                                   <CardHeader className="flex flex-row items-center gap-4">
-                                       <activity.icon className="w-8 h-8 text-primary flex-shrink-0" />
-                                       <CardTitle className="font-headline text-lg">{activity.title}</CardTitle>
-                                   </CardHeader>
-                                   <CardContent>
-                                       <p className="text-muted-foreground text-sm">{activity.description}</p>
-                                   </CardContent>
-                               </Card>
-                           ))}
+                        <CardContent>
+                            <p className="text-muted-foreground text-sm">{activity.description}</p>
                         </CardContent>
                     </Card>
-                </TabsContent>
-                <TabsContent value="quality" className="mt-12">
-                    <Card>
-                        <CardHeader className="text-center">
-                            <CardTitle className="font-headline text-2xl">Instructional Quality & Professional Development</CardTitle>
-                             <CardDescription>
-                                Our program's success is built on the expertise and dedication of our teaching artists, who are committed to both musical excellence and student well-being.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="grid md:grid-cols-2 gap-6">
-                            {instructionalHighlights.map(highlight => (
-                                <div key={highlight.title} className="flex items-start gap-4 p-4 rounded-lg">
-                                    <highlight.icon className="w-10 h-10 text-primary flex-shrink-0 mt-1" />
-                                    <div>
-                                        <h4 className="font-bold font-headline text-lg">{highlight.title}</h4>
-                                        <p className="text-muted-foreground">{highlight.description}</p>
+                ))}
+            </div>
+            <div className="mt-12">
+                <Tabs defaultValue="quality" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2 mx-auto max-w-xl">
+                        <TabsTrigger value="quality">Instructional Quality</TabsTrigger>
+                        <TabsTrigger value="participants">Who Participates</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="quality" className="mt-12">
+                        <Card>
+                            <CardHeader className="text-center">
+                                <CardTitle className="font-headline text-2xl">Instructional Quality & Professional Development</CardTitle>
+                                <CardDescription>
+                                    Our program's success is built on the expertise and dedication of our teaching artists, who are committed to both musical excellence and student well-being.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="grid md:grid-cols-2 gap-6">
+                                {instructionalHighlights.map(highlight => (
+                                    <div key={highlight.title} className="flex items-start gap-4 p-4 rounded-lg">
+                                        <highlight.icon className="w-10 h-10 text-primary flex-shrink-0 mt-1" />
+                                        <div>
+                                            <h4 className="font-bold font-headline text-lg">{highlight.title}</h4>
+                                            <p className="text-muted-foreground">{highlight.description}</p>
+                                        </div>
                                     </div>
+                                ))}
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                    <TabsContent value="participants" className="mt-12">
+                        <Card>
+                            <CardHeader className="text-center">
+                                <CardTitle className="font-headline text-2xl">Who We Serve</CardTitle>
+                                <CardDescription>
+                                    UpBeat! is a social equity initiative designed for youth facing barriers to traditional music programs. No prior experience is required—just a passion for music.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="grid md:grid-cols-2 gap-8 items-center">
+                                {impactImage && (
+                                    <div className="rounded-lg overflow-hidden shadow-lg aspect-video">
+                                        <Image
+                                            src={impactImage.imageUrl}
+                                            alt={impactImage.description}
+                                            width={600}
+                                            height={400}
+                                            className="object-cover w-full h-full"
+                                            data-ai-hint={impactImage.imageHint}
+                                        />
+                                    </div>
+                                )}
+                                <div className="space-y-4">
+                                    <h4 className="font-bold font-headline text-lg">2024-2025 Demographics</h4>
+                                    <ul className="space-y-3">
+                                        <li className="flex items-start gap-3"><Check className="w-5 h-5 text-accent flex-shrink-0 mt-1" /><p className="text-muted-foreground"><strong className="text-foreground">>50%</strong> of participants identify as non-white in a region that is 93% white.</p></li>
+                                        <li className="flex items-start gap-3"><Check className="w-5 h-5 text-accent flex-shrink-0 mt-1" /><p className="text-muted-foreground">Average family household income is <strong className="text-foreground">~60%</strong> of the national average.</p></li>
+                                        <li className="flex items-start gap-3"><Check className="w-5 h-5 text-accent flex-shrink-0 mt-1" /><p className="text-muted-foreground">Students include Indigenous, newcomer, and neurodivergent youth.</p></li>
+                                    </ul>
                                 </div>
-                            ))}
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-                 <TabsContent value="participants" className="mt-12">
-                     <Card>
-                         <CardHeader className="text-center">
-                            <CardTitle className="font-headline text-2xl">Who We Serve</CardTitle>
-                            <CardDescription>
-                                UpBeat! is a social equity initiative designed for youth facing barriers to traditional music programs. No prior experience is required—just a passion for music.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="grid md:grid-cols-2 gap-8 items-center">
-                            {impactImage && (
-                                <div className="rounded-lg overflow-hidden shadow-lg aspect-video">
-                                     <Image
-                                        src={impactImage.imageUrl}
-                                        alt={impactImage.description}
-                                        width={600}
-                                        height={400}
-                                        className="object-cover w-full h-full"
-                                        data-ai-hint={impactImage.imageHint}
-                                    />
-                                </div>
-                            )}
-                            <div className="space-y-4">
-                                <h4 className="font-bold font-headline text-lg">2024-2025 Demographics</h4>
-                                <ul className="space-y-3">
-                                    <li className="flex items-start gap-3"><Check className="w-5 h-5 text-accent flex-shrink-0 mt-1" /><p className="text-muted-foreground"><strong className="text-foreground">>50%</strong> of participants identify as non-white in a region that is 93% white.</p></li>
-                                    <li className="flex items-start gap-3"><Check className="w-5 h-5 text-accent flex-shrink-0 mt-1" /><p className="text-muted-foreground">Average family household income is <strong className="text-foreground">~60%</strong> of the national average.</p></li>
-                                    <li className="flex items-start gap-3"><Check className="w-5 h-5 text-accent flex-shrink-0 mt-1" /><p className="text-muted-foreground">Students include Indigenous, newcomer, and neurodivergent youth.</p></li>
-                                </ul>
-                            </div>
-                        </CardContent>
-                     </Card>
-                </TabsContent>
-             </Tabs>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                </Tabs>
+            </div>
         </div>
       </section>
 
@@ -403,5 +400,3 @@ export default function UpbeatPage() {
     </div>
   );
 }
-
-    
