@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { getAnnouncements } from '@/lib/announcements';
 import { getLinkById } from '@/lib/links';
 import type { ExternalLink } from '@/lib/links';
+import AnimatedCounter from '@/components/shared/AnimatedCounter';
 
 const programs = [
   {
@@ -74,9 +75,9 @@ const testimonials = [
 
 
 const impactStats = [
-    { number: '700+', label: 'Musicians Supported', icon: Users },
-    { number: '2,700+', label: 'Community Members Impacted', icon: Group },
-    { number: '$70k+', label: 'Annual Subsidies Provided', icon: DollarSign },
+    { number: 700, suffix: '+', label: 'Musicians Supported', icon: Users },
+    { number: 2700, suffix: '+', label: 'Community Members Impacted', icon: Group },
+    { number: 70000, prefix: '$', suffix: 'k+', label: 'Annual Subsidies Provided', icon: DollarSign },
 ];
 
 const heroSlides = [
@@ -133,7 +134,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-dvh">
-      <main className="flex-1">
+      <main className="flex-1 -z-10">
         <section className="relative h-[60vh] md:h-[80vh] w-full flex items-center justify-center text-center text-white p-0">
             {heroSlides.map((slide, index) => (
                 slide.image && (
@@ -225,13 +226,13 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="bg-secondary">
+       <section className="bg-secondary">
             <div className="container mx-auto">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl font-headline font-bold">Our Core Values</h2>
                 </div>
                 <div className="grid md:grid-cols-2 gap-12 items-center">
-                    <div className="space-y-8">
+                     <div className="space-y-8">
                         {coreValues.map(value => (
                             <Card key={value.title} className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                                 <CardHeader className="flex flex-row items-center gap-4">
@@ -271,10 +272,10 @@ export default function Home() {
               {testimonials.map((testimonial) => (
                 <Card key={testimonial.author} className="flex flex-col bg-primary text-primary-foreground transition-all duration-300 hover:shadow-xl hover:scale-105">
                   <CardHeader>
-                    <Quote className="w-10 h-10 text-primary-foreground mb-4" />
+                    <Quote className="w-10 h-10 text-primary-foreground/80 mb-4" />
                   </CardHeader>
                   <CardContent className="flex-grow">
-                    <blockquote className="text-primary-foreground text-lg font-normal">
+                    <blockquote className="text-primary-foreground text-lg">
                       {testimonial.quote}
                     </blockquote>
                   </CardContent>
@@ -340,11 +341,11 @@ export default function Home() {
                     <h2 className="text-3xl font-headline font-bold">Financial Aid & Scholarships</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-center">
                         <div className="bg-secondary p-6 rounded-lg">
-                            <p className="text-4xl font-bold text-primary">$100k+</p>
+                            <AnimatedCounter target={100000} prefix="$" suffix="k+" className="text-4xl font-bold text-primary" />
                             <p className="text-sm text-muted-foreground mt-1">In Annual Bursaries</p>
                         </div>
                         <div className="bg-secondary p-6 rounded-lg">
-                            <p className="text-4xl font-bold text-primary">120+</p>
+                            <AnimatedCounter target={120} suffix="+" className="text-4xl font-bold text-primary" />
                             <p className="text-sm text-muted-foreground mt-1">Students Supported</p>
                         </div>
                     </div>
@@ -387,7 +388,12 @@ export default function Home() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center max-w-3xl mx-auto mt-8">
                     {impactStats.map(stat => (
                         <div key={stat.label}>
-                            <p className="text-4xl font-bold text-primary">{stat.number}</p>
+                            <AnimatedCounter 
+                                target={stat.number}
+                                prefix={stat.prefix}
+                                suffix={stat.number === 70000 ? 'k+' : stat.suffix}
+                                className="text-4xl font-bold text-primary"
+                            />
                             <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
                         </div>
                     ))}

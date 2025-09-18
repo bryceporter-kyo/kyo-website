@@ -10,12 +10,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
 import HorizontalTimeline from "@/components/shared/HorizontalTimeline";
 import React from "react";
+import AnimatedCounter from "@/components/shared/AnimatedCounter";
 
 const stats = [
-    { number: '70+', label: 'Concerts Performed', icon: Award },
-    { number: '700+', label: 'Musicians Supported', icon: Users },
-    { number: '2,700+', label: 'Community Members Impacted', icon: Group },
-    { number: '$70k+', label: 'Annual Subsidies Provided', icon: DollarSign },
+    { number: 70, suffix: '+', label: 'Concerts Performed', icon: Award },
+    { number: 700, suffix: '+', label: 'Musicians Supported', icon: Users },
+    { number: 2700, suffix: '+', label: 'Community Members Impacted', icon: Group },
+    { number: 70000, prefix: '$', suffix: 'k+', label: 'Annual Subsidies Provided', icon: DollarSign },
 ];
 
 const communityRoles = [
@@ -82,7 +83,12 @@ export default function AboutPage() {
                                     <div className="bg-primary text-primary-foreground p-4 rounded-full">
                                         <stat.icon className="w-8 h-8" />
                                     </div>
-                                    <p className="text-4xl font-bold pt-4">{stat.number}</p>
+                                    <AnimatedCounter
+                                        target={stat.number}
+                                        prefix={stat.prefix}
+                                        suffix={stat.number === 70000 ? 'k+' : stat.suffix}
+                                        className="text-4xl font-bold pt-4"
+                                    />
                                 </CardHeader>
                                 <CardContent>
                                     <p className="text-muted-foreground font-semibold">{stat.label}</p>

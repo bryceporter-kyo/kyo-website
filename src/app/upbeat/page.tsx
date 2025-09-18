@@ -11,6 +11,7 @@ import { Target, HeartHandshake, Users, Award, Smile, BarChart, Check, Quote, Ha
 import Image from 'next/image';
 import { getLinkById } from '@/lib/links';
 import type { ExternalLink } from '@/lib/links';
+import AnimatedCounter from '@/components/shared/AnimatedCounter';
 
 const programGoals = [
     {
@@ -36,9 +37,9 @@ const programGoals = [
 ];
 
 const impactStats = [
-    { number: '87%', label: 'Youth Retention Rate', icon: Award, description: 'Significantly exceeding the 60% industry benchmark.' },
-    { number: '92%', label: 'Participant Satisfaction', icon: Smile, description: 'Positive or highly positive experiences reported by students and families.' },
-    { number: '100+', label: 'Students on Waitlist', icon: BarChart, description: 'Demonstrating a high demand for the program in our community.' },
+    { number: 87, suffix: '%', label: 'Youth Retention Rate', icon: Award, description: 'Significantly exceeding the 60% industry benchmark.' },
+    { number: 92, suffix: '%', label: 'Participant Satisfaction', icon: Smile, description: 'Positive or highly positive experiences reported by students and families.' },
+    { number: 100, suffix: '+', label: 'Students on Waitlist', icon: BarChart, description: 'Demonstrating a high demand for the program in our community.' },
 ];
 
 const holisticSupports = [
@@ -149,7 +150,7 @@ export default function UpbeatPage() {
                         {impactStats.slice(0, 2).map(stat => (
                             <Card key={stat.label} className="transition-all duration-300 hover:shadow-lg hover:border-primary/50">
                                 <CardHeader className="flex flex-row items-center justify-between">
-                                    <p className="text-4xl font-bold text-primary">{stat.number}</p>
+                                    <AnimatedCounter target={stat.number} suffix={stat.suffix} className="text-4xl font-bold text-primary" />
                                     <div className="bg-accent text-accent-foreground p-3 rounded-full">
                                         <stat.icon className="w-5 h-5" />
                                     </div>
@@ -163,7 +164,7 @@ export default function UpbeatPage() {
                     </div>
                      <Card className="transition-all duration-300 hover:shadow-lg hover:border-primary/50">
                         <CardHeader className="flex flex-row items-center justify-between">
-                            <p className="text-4xl font-bold text-primary">{impactStats[2].number}</p>
+                            <AnimatedCounter target={impactStats[2].number} suffix={impactStats[2].suffix} className="text-4xl font-bold text-primary" />
                             <div className="bg-accent text-accent-foreground p-3 rounded-full">
                                 <impactStats[2].icon className="w-5 h-5" />
                             </div>
