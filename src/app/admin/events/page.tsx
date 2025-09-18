@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Pencil, Trash2, Download, Upload } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, Download, Upload, X } from "lucide-react";
 import Link from "next/link";
 import { getEvents } from "@/lib/events";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -48,10 +48,16 @@ export default function EventsAdminPage() {
     const { toast } = useToast();
     const [events, setEvents] = React.useState<Event[]>([]);
     const [csvFile, setCsvFile] = React.useState<File | null>(null);
+    const [editingEvent, setEditingEvent] = React.useState<Event | null>(null);
 
     React.useEffect(() => {
         setEvents(getEvents());
     }, []);
+    
+    const parseDate = (dateString: string) => {
+      // Dates in JSON are "YYYY-MM-DD". Using new Date(`${dateString}T00:00:00Z`) treats it as UTC midnight.
+      return new Date(`${dateString}T00:00:00Z`);
+    }
 
     const form = useForm<z.infer<typeof eventSchema>>({
         resolver: zodResolver(eventSchema),
@@ -64,25 +70,68 @@ export default function EventsAdminPage() {
         },
     });
 
-    function onSubmit(values: z.infer<typeof eventSchema>) {
-        const newEvent: Event = {
-          id: Math.max(...events.map(e => e.id), 0) + 1,
-          ...values,
-          date: format(values.date, 'yyyy-MM-dd'),
-        };
-        const updatedEvents = [...events, newEvent].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-        setEvents(updatedEvents);
-        toast({
-            title: "Event Created!",
-            description: "The new event has been saved.",
+    React.useEffect(() => {
+      if (editingEvent) {
+        form.reset({
+          name: editingEvent.name,
+          date: parseDate(editingEvent.date),
+          location: editingEvent.location || "",
+          time: editingEvent.time || "",
+          link: editingEvent.link || "",
+          type: editingEvent.type,
         });
+      } else {
+        form.reset({
+          name: "",
+          date: undefined,
+          location: "",
+          time: "",
+          link: "",
+          type: "normal",
+        });
+      }
+    }, [editingEvent, form, parseDate]);
+
+    function onSubmit(values: z.infer<typeof eventSchema>) {
+        if (editingEvent) {
+            // Update existing event
+            const updatedEvents = events.map(event => 
+                event.id === editingEvent.id 
+                    ? { ...event, ...values, date: format(values.date, 'yyyy-MM-dd') } 
+                    : event
+            );
+            setEvents(updatedEvents.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
+            toast({
+                title: "Event Updated!",
+                description: `"${values.name}" has been updated.`,
+            });
+            setEditingEvent(null);
+        } else {
+            // Create new event
+            const newEvent: Event = {
+            id: Math.max(...events.map(e => e.id), 0) + 1,
+            ...values,
+            date: format(values.date, 'yyyy-MM-dd'),
+            };
+            const updatedEvents = [...events, newEvent].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+            setEvents(updatedEvents);
+            toast({
+                title: "Event Created!",
+                description: "The new event has been saved.",
+            });
+        }
         form.reset();
     }
-    
-    const parseDate = (dateString: string) => {
-      // Dates in JSON are "YYYY-MM-DD". Using new Date(`${dateString}T00:00:00`) treats it as UTC midnight.
-      return new Date(`${dateString}T00:00:00`);
+
+    const handleEditClick = (event: Event) => {
+        setEditingEvent(event);
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
+
+    const handleCancelEdit = () => {
+        setEditingEvent(null);
+    }
+    
 
     const handleDownloadCsv = () => {
         const csvContent = "data:text/csv;charset=utf-8," 
@@ -196,7 +245,7 @@ export default function EventsAdminPage() {
                                         <Badge variant={event.type === 'special' ? 'default' : 'secondary'}>{event.type}</Badge>
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        <Button variant="ghost" size="icon">
+                                        <Button variant="ghost" size="icon" onClick={() => handleEditClick(event)}>
                                             <Pencil className="h-4 w-4" />
                                         </Button>
                                         <AlertDialog>
@@ -231,8 +280,8 @@ export default function EventsAdminPage() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline text-2xl">Create Event</CardTitle>
-                    <CardDescription>Fill out the form below to add a new event to the calendar.</CardDescription>
+                    <CardTitle className="font-headline text-2xl">{editingEvent ? "Edit Event" : "Create Event"}</CardTitle>
+                    <CardDescription>{editingEvent ? `Editing "${editingEvent.name}"` : "Fill out the form below to add a new event to the calendar."}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -366,7 +415,15 @@ export default function EventsAdminPage() {
                                     </FormItem>
                                 )}
                             />
-                            <Button type="submit">Create Event</Button>
+                            <div className="flex gap-4">
+                                <Button type="submit">{editingEvent ? "Update Event" : "Create Event"}</Button>
+                                {editingEvent && (
+                                    <Button variant="outline" onClick={handleCancelEdit}>
+                                        <X className="mr-2 h-4 w-4" />
+                                        Cancel Edit
+                                    </Button>
+                                )}
+                            </div>
                         </form>
                     </Form>
                 </CardContent>

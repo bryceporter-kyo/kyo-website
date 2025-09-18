@@ -43,9 +43,11 @@ const announcementSchema = z.object({
 export default function AnnouncementsAdminPage() {
     const { toast } = useToast();
     const [announcements, setAnnouncements] = React.useState<Announcement[]>([]);
+    const [isLoading, setIsLoading] = React.useState(true);
 
     React.useEffect(() => {
         setAnnouncements(getAnnouncements());
+        setIsLoading(false);
     }, []);
 
     const form = useForm<z.infer<typeof announcementSchema>>({
@@ -86,6 +88,26 @@ export default function AnnouncementsAdminPage() {
         });
     }
 
+    function handlePinToggle(announcementId: number) {
+        setAnnouncements(announcements.map(announcement => 
+            announcement.id === announcementId 
+            ? { ...announcement, pinned: !announcement.pinned } 
+            : announcement
+        ));
+        const toggledAnnouncement = announcements.find(a => a.id === announcementId);
+        if (toggledAnnouncement) {
+            toast({
+                title: "Announcement Updated",
+                description: `"${toggledAnnouncement.title}" pinning status changed.`,
+            });
+        }
+    }
+
+
+    if (isLoading) {
+        return <div className="container mx-auto py-12">Loading...</div>;
+    }
+
     return (
         <div className="container mx-auto py-12">
             <div className="mb-8">
@@ -118,6 +140,7 @@ export default function AnnouncementsAdminPage() {
                                     <TableCell className="text-center">
                                         <Switch
                                             checked={announcement.pinned}
+                                            onCheckedChange={() => handlePinToggle(announcement.id)}
                                             aria-label="Pin announcement"
                                         />
                                     </TableCell>

@@ -26,7 +26,7 @@ export default function InstructorCard({ name, title, bio, image }: InstructorCa
       <CardHeader>
         <div>
           <CardTitle className="font-headline text-2xl">{name}</CardTitle>
-          <CardDescription className="text-base">{title}</CardDescription>
+          <p className="text-base text-muted-foreground">{title}</p>
         </div>
       </CardHeader>
       <CardContent>

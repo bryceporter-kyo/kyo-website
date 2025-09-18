@@ -34,7 +34,7 @@ const memberSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters."),
   email: z.string().email("Please enter a valid email address."),
   bio: z.string().optional(),
-  image: z.any().optional(),
+  image: z.string().optional(),
   type: z.enum(["staff", "board"]),
 });
 
