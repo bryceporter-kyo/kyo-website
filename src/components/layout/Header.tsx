@@ -109,7 +109,7 @@ export default function Header() {
         >
           <NavigationMenuList>
             {navLinks.map((link) => (
-              <NavigationMenuItem key={link.name} value={link.name} onMouseEnter={() => link.subLinks && setActiveMenu(link.name)}>
+              <NavigationMenuItem key={link.name} onMouseEnter={() => setActiveMenu(link.name)}>
                 {link.subLinks ? (
                   <>
                     <NavigationMenuTrigger 
@@ -133,7 +133,7 @@ export default function Header() {
                   </>
                 ) : (
                    <Link href={link.href} legacyBehavior passHref>
-                     <NavigationMenuLink 
+                     <NavigationMenuLink
                         onMouseEnter={() => setActiveMenu(null)}
                         className={cn(navigationMenuTriggerStyle(), pathname === link.href ? 'font-bold' : '')}>
                         {link.name}
