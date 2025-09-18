@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -32,7 +31,7 @@ const programGoals = [
     {
         icon: Target,
         title: "Pathways to Progression",
-        description: "Preparing students for KYO’s Junior and Intermediate orchestras, aiming for RCM Grade 3 proficiency within their three-year UpBeat! trajectory."
+        description: "Preparing students for KYO's Junior and Intermediate orchestras, aiming for RCM Grade 3 proficiency within their three-year UpBeat! trajectory."
     }
 ];
 
@@ -60,12 +59,12 @@ export default function UpbeatPage() {
         image={headerImage}
       />
 
-      <section className="container mx-auto">
+      <section className="container mx-auto py-16">
         <div className="grid md:grid-cols-2 gap-16 items-center">
             <div className="space-y-6">
                 <h2 className="text-3xl font-headline font-bold">What is UpBeat!?</h2>
                 <p className="text-muted-foreground text-lg">
-                    UpBeat! is KYO’s innovative after-school music and social development program for youth aged 8–14 facing economic and systemic barriers. It offers fully subsidized string instruction, holistic social-emotional supports, nutritious food, and transportation—all at no cost to families.
+                    UpBeat! is KYO's innovative after-school music and social development program for youth aged 8–14 facing economic and systemic barriers. It offers fully subsidized string instruction, holistic social-emotional supports, nutritious food, and transportation—all at no cost to families.
                 </p>
                 <p className="text-muted-foreground text-lg">
                     More than just music lessons, UpBeat! creates a safe, joyful, and inclusive environment where young people experience belonging, build confidence, and develop lifelong skills. For many, it is their first meaningful experience with organized music—an opportunity that, without UpBeat!, would remain out of reach.
@@ -91,7 +90,7 @@ export default function UpbeatPage() {
         </div>
       </section>
 
-      <section className="bg-secondary">
+      <section className="bg-secondary py-16">
         <div className="container mx-auto">
                 <div className="text-center mb-12">
                 <h2 className="text-3xl font-headline font-bold">Our Mission: Music, Growth, and Opportunity</h2>
@@ -117,7 +116,7 @@ export default function UpbeatPage() {
         </div>
       </section>
 
-      <section>
+      <section className="py-16">
         <div className="container mx-auto">
              <div className="grid md:grid-cols-2 gap-12 items-center">
                 {kidsImage && (
@@ -170,7 +169,7 @@ export default function UpbeatPage() {
         </div>
       </section>
 
-      <section className="bg-secondary">
+      <section className="bg-secondary py-16">
         <div className="container mx-auto grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
                 <h2 className="text-3xl font-headline font-bold">How It Works</h2>
@@ -223,7 +222,7 @@ export default function UpbeatPage() {
         </div>
       </section>
 
-      <section id="support">
+      <section id="support" className="py-16">
           <div className="container mx-auto">
             <div className="rounded-lg bg-primary text-primary-foreground p-8 md:p-12 text-center">
                 <div className="w-fit mx-auto bg-primary-foreground/10 p-4 rounded-full mb-6">
