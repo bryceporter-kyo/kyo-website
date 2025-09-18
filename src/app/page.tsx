@@ -133,7 +133,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-dvh">
-      <main className="flex-1 relative z-10">
+      <main className="flex-1">
         <section className="relative h-[60vh] md:h-[80vh] w-full flex items-center justify-center text-center text-white p-0">
             {heroSlides.map((slide, index) => (
                 slide.image && (
@@ -269,17 +269,17 @@ export default function Home() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {testimonials.map((testimonial) => (
-                <Card key={testimonial.author} className="flex flex-col">
+                <Card key={testimonial.author} className="flex flex-col bg-primary text-primary-foreground">
                   <CardHeader>
-                    <Quote className="w-10 h-10 text-primary mb-4" />
+                    <Quote className="w-10 h-10 text-primary-foreground mb-4" />
                   </CardHeader>
                   <CardContent className="flex-grow">
-                    <blockquote className="text-muted-foreground italic text-lg">
+                    <blockquote className="text-primary-foreground/80 italic text-lg">
                       {testimonial.quote}
                     </blockquote>
                   </CardContent>
                   <CardFooter>
-                    <p className="font-bold w-full text-right">- {testimonial.author}, <span className="font-normal text-muted-foreground">{testimonial.role}</span></p>
+                    <p className="font-bold w-full text-right">- {testimonial.author}, <span className="font-normal text-primary-foreground/80">{testimonial.role}</span></p>
                   </CardFooter>
                 </Card>
               ))}
