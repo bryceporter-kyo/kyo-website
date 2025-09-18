@@ -274,7 +274,7 @@ export default function Home() {
                     <Quote className="w-10 h-10 text-primary-foreground mb-4" />
                   </CardHeader>
                   <CardContent className="flex-grow">
-                    <blockquote className="text-primary-foreground/80 italic text-lg">
+                    <blockquote className="text-primary-foreground text-lg">
                       {testimonial.quote}
                     </blockquote>
                   </CardContent>
@@ -406,3 +406,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
