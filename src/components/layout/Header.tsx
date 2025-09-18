@@ -11,11 +11,14 @@ import { Sheet, SheetContent, SheetTrigger as SheetTriggerPrimitive } from '@/co
 import { Logo } from '@/components/icons/Logo';
 import { cn } from '@/lib/utils';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu"
 import { getLinkById } from '@/lib/links';
 import type { ExternalLink } from '@/lib/links';
 
@@ -23,7 +26,6 @@ const navLinks = [
   { name: 'Home', href: '/' },
   {
     name: 'About Us',
-    href: '/about',
     subLinks: [
       { name: 'Our Story', href: '/about' },
       { name: 'Staff & Board', href: '/staff' },
@@ -31,7 +33,6 @@ const navLinks = [
   },
   {
     name: 'Programs',
-    href: '#',
     subLinks: [
       { name: 'The Orchestras', href: '/orchestras' },
       { name: 'Upbeat!', href: '/upbeat' },
@@ -41,7 +42,6 @@ const navLinks = [
   { name: 'Calendar', href: '/calendar' },
   {
     name: 'Support Us',
-    href: '/support',
     subLinks: [
         { name: 'Ways to Give', href: '/support' },
         { name: 'Donate', href: '/donate' },
@@ -51,20 +51,41 @@ const navLinks = [
   { name: 'Contact', href: '/contact' },
 ];
 
+const ListItem = React.forwardRef<
+  React.ElementRef<"a">,
+  React.ComponentPropsWithoutRef<"a">
+>(({ className, title, children, ...props }, ref) => {
+  return (
+    <li>
+      <NavigationMenuLink asChild>
+        <a
+          ref={ref}
+          className={cn(
+            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+            className
+          )}
+          {...props}
+        >
+          <div className="text-sm font-medium leading-none">{title}</div>
+          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+            {children}
+          </p>
+        </a>
+      </NavigationMenuLink>
+    </li>
+  )
+})
+ListItem.displayName = "ListItem"
+
+
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
-  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
   const [registrationLink, setRegistrationLink] = useState<ExternalLink | undefined>(undefined);
 
   useEffect(() => {
     setRegistrationLink(getLinkById('register'));
   }, []);
-
-
-  const handleMenuInteraction = (name: string, open: boolean) => {
-    setOpenMenus(prev => ({ ...prev, [name]: open }));
-  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm">
@@ -77,40 +98,38 @@ export default function Header() {
 
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-          {navLinks.map((link) => (
-            link.subLinks ? (
-              <DropdownMenu key={link.name} open={openMenus[link.name]} onOpenChange={(open) => handleMenuInteraction(link.name, open)}>
-                <DropdownMenuTrigger asChild>
-                  <div
-                    onMouseEnter={() => handleMenuInteraction(link.name, true)}
-                    className="flex items-center gap-1 cursor-default text-muted-foreground transition-colors hover:text-primary"
-                  >
-                    {link.name} <ChevronDown className="h-4 w-4" />
-                  </div>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent onMouseLeave={() => handleMenuInteraction(link.name, false)}>
-                  {link.subLinks.map(subLink => (
-                    <DropdownMenuItem key={subLink.name} asChild>
-                      <Link href={subLink.href} className={cn("cursor-pointer", pathname === subLink.href && "font-bold")}>{subLink.name}</Link>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Link
-                key={link.name}
-                href={link.href}
-                className={cn(
-                  'transition-colors hover:text-primary',
-                  pathname === link.href ? 'text-primary' : 'text-muted-foreground'
+        <NavigationMenu className="hidden md:flex">
+          <NavigationMenuList>
+            {navLinks.map((link) => (
+              <NavigationMenuItem key={link.name}>
+                {link.subLinks ? (
+                  <>
+                    <NavigationMenuTrigger>{link.name}</NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <ul className="grid w-[400px] gap-3 p-4 md:w-[200px] lg:w-[250px] ">
+                        {link.subLinks.map((subLink) => (
+                           <li key={subLink.name}>
+                            <Link href={subLink.href} legacyBehavior passHref>
+                              <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "font-normal", pathname === subLink.href && "font-bold")}>
+                                {subLink.name}
+                              </NavigationMenuLink>
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </NavigationMenuContent>
+                  </>
+                ) : (
+                  <Link href={link.href} legacyBehavior passHref>
+                    <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), pathname === link.href ? 'text-primary' : 'text-muted-foreground')}>
+                      {link.name}
+                    </NavigationMenuLink>
+                  </Link>
                 )}
-              >
-                {link.name}
-              </Link>
-            )
-          ))}
-        </nav>
+              </NavigationMenuItem>
+            ))}
+          </NavigationMenuList>
+        </NavigationMenu>
 
         <div className="hidden md:flex items-center gap-4">
           {registrationLink && (
