@@ -52,15 +52,12 @@ const navLinks = [
   { name: 'Contact', href: '/contact' },
 ];
 
-const ListItem = React.forwardRef<
-  React.ElementRef<"a">,
-  React.ComponentPropsWithoutRef<"a">
->(({ className, title, children, ...props }, ref) => {
+const ListItem = ({ className, title, children, href, ...props }: { className?: string, title: string, children: React.ReactNode, href: string }) => {
   return (
     <li>
       <NavigationMenuLink asChild>
-        <a
-          ref={ref}
+        <Link
+          href={href}
           className={cn(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
             className
@@ -71,11 +68,11 @@ const ListItem = React.forwardRef<
           <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
             {children}
           </p>
-        </a>
+        </Link>
       </NavigationMenuLink>
     </li>
   )
-})
+}
 ListItem.displayName = "ListItem"
 
 
@@ -130,12 +127,13 @@ export default function Header() {
                     </NavigationMenuContent>
                   </>
                 ) : (
-                  <NavigationMenuLink asChild onMouseEnter={() => setActiveMenu(null)}
-                  className={cn(pathname === link.href && 'text-primary font-bold')}>
-                    <Link href={link.href}>
-                      {link.name}
-                    </Link>
-                  </NavigationMenuLink>
+                   <Link href={link.href} passHref>
+                     <NavigationMenuLink 
+                        onMouseEnter={() => setActiveMenu(null)}
+                        className={cn(navigationMenuTriggerStyle(), pathname === link.href ? 'font-bold' : '')}>
+                        {link.name}
+                     </NavigationMenuLink>
+                   </Link>
                 )}
               </NavigationMenuItem>
             ))}
