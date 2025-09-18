@@ -68,7 +68,7 @@ export default function UpbeatPage() {
                     UpBeat! is KYO’s innovative after-school music and social development program for youth aged 8–14 facing economic and systemic barriers. It offers fully subsidized string instruction, holistic social-emotional supports, nutritious food, and transportation—all at no cost to families.
                 </p>
                 <p className="text-muted-foreground text-lg">
-                    More than just music lessons, UpBeat! create a safe, joyful, and inclusive environment where young people experience belonging, build confidence, and develop lifelong skills. For many, it is their first meaningful experience with organized music—an opportunity that, without UpBeat!, would remain out of reach.
+                    More than just music lessons, UpBeat! creates a safe, joyful, and inclusive environment where young people experience belonging, build confidence, and develop lifelong skills. For many, it is their first meaningful experience with organized music—an opportunity that, without UpBeat!, would remain out of reach.
                 </p>
                 {registrationLink && (
                   <Button asChild size="lg">
