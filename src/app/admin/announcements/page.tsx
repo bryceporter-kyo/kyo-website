@@ -63,14 +63,9 @@ export default function AnnouncementsAdminPage() {
     const imageField = form.register("imageUrl");
 
     function onSubmit(values: z.infer<typeof announcementSchema>) {
-        const newAnnouncement: Announcement = {
-            id: Math.max(0, ...announcements.map(a => a.id)) + 1,
-            ...values,
-            date: format(new Date(), 'yyyy-MM-dd'),
-            excerpt: values.content.substring(0, 100) + '...',
-        };
-        const announcementsWithNew = [newAnnouncement, ...announcements].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        setAnnouncements(announcementsWithNew);
+        const newAnnouncements = addAnnouncement(announcements, values);
+        setAnnouncements(newAnnouncements);
+
         toast({
             title: "Announcement Created!",
             description: "The new announcement has been saved.",
@@ -79,8 +74,8 @@ export default function AnnouncementsAdminPage() {
     }
 
     function handleDelete(announcementToDelete: Announcement) {
-        deleteAnnouncement(announcementToDelete.id);
-        setAnnouncements(getAnnouncements());
+        const newAnnouncements = deleteAnnouncement(announcements, announcementToDelete.id);
+        setAnnouncements(newAnnouncements);
         toast({
             title: "Announcement Deleted",
             description: `"${announcementToDelete.title}" has been deleted.`,
@@ -92,8 +87,8 @@ export default function AnnouncementsAdminPage() {
         const announcement = announcements.find(a => a.id === announcementId);
         if (announcement) {
             const updated = { ...announcement, pinned: !announcement.pinned };
-            updateAnnouncement(updated);
-            setAnnouncements(getAnnouncements());
+            const newAnnouncements = updateAnnouncement(announcements, updated);
+            setAnnouncements(newAnnouncements);
             toast({
                 title: "Announcement Updated",
                 description: `"${updated.title}" pinning status changed.`,

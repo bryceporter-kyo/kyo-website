@@ -1,8 +1,6 @@
 
 import data from './announcements.json';
 import { format } from 'date-fns';
-import { utcToZonedTime } from 'date-fns-tz';
-
 
 export type Announcement = {
   id: number;
@@ -13,44 +11,65 @@ export type Announcement = {
   content: string;
 };
 
-const announcements: Omit<Announcement, 'date'> & { date: string }[] = data.announcements as any;
+// Raw data from the JSON file
+const rawAnnouncements: Omit<Announcement, 'date' | 'excerpt'>[] = data.announcements as any;
 
-let processedAnnouncements: Announcement[] | null = null;
+// Helper to sort announcements
+const sortAnnouncements = (announcements: Announcement[]) => {
+    return announcements.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+};
 
+/**
+ * Gets all announcements, formats the date, and sorts them.
+ * This is a pure function with no side effects.
+ */
 export function getAnnouncements(): Announcement[] {
-  if (processedAnnouncements) {
-    return processedAnnouncements;
-  }
-  // Add pinned property for demo purposes and format date
-  const announcementsWithPinned = announcements.map((a, i) => ({
+  const processed = rawAnnouncements.map((a, i) => ({
     ...a,
-    // Dates in JSON are "YYYY-MM-DD". Using new Date() might have timezone issues.
-    // Let's format it consistently.
     date: format(new Date(`${a.date}T00:00:00`), 'MMMM d, yyyy'),
-    pinned: i === 0, // Pin the first announcement by default
+    pinned: i === 0, // Pin the first announcement by default for demo
   }));
-  
-  // Sort by original date descending
-  processedAnnouncements = announcementsWithPinned.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  return processedAnnouncements;
+  return sortAnnouncements(processed);
 }
 
-export function addAnnouncement(announcement: Omit<Announcement, 'id' | 'date'>) {
-    const newAnnouncement: Announcement = {
-        ...announcement,
-        id: Math.max(0, ...getAnnouncements().map(a => a.id)) + 1,
-        date: format(new Date(), 'MMMM d, yyyy'),
-    };
-    
-    processedAnnouncements = [newAnnouncement, ...getAnnouncements()].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    return newAnnouncement;
+/**
+ * Adds a new announcement to a given array of announcements.
+ * Returns a new sorted array.
+ */
+export function addAnnouncement(
+  currentAnnouncements: Announcement[],
+  newAnnouncementData: Omit<Announcement, 'id' | 'date' | 'excerpt'>
+): Announcement[] {
+  const newAnnouncement: Announcement = {
+    ...newAnnouncementData,
+    id: Math.max(0, ...currentAnnouncements.map(a => a.id)) + 1,
+    date: format(new Date(), 'yyyy-MM-dd'),
+    excerpt: newAnnouncementData.content.substring(0, 100) + '...',
+  };
+  return sortAnnouncements([newAnnouncement, ...currentAnnouncements]);
 }
 
-export function deleteAnnouncement(id: number) {
-    processedAnnouncements = getAnnouncements().filter(a => a.id !== id);
+/**
+ * Deletes an announcement from a given array by its ID.
+ * Returns a new array.
+ */
+export function deleteAnnouncement(
+  currentAnnouncements: Announcement[],
+  id: number
+): Announcement[] {
+  return currentAnnouncements.filter(a => a.id !== id);
 }
 
-export function updateAnnouncement(updatedAnnouncement: Announcement) {
-    const announcements = getAnnouncements().map(a => a.id === updatedAnnouncement.id ? updatedAnnouncement : a);
-    processedAnnouncements = announcements.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+/**
+ * Updates an announcement in a given array.
+ * Returns a new sorted array.
+ */
+export function updateAnnouncement(
+  currentAnnouncements: Announcement[],
+  updatedAnnouncement: Announcement
+): Announcement[] {
+  const updatedList = currentAnnouncements.map(a => 
+    a.id === updatedAnnouncement.id ? updatedAnnouncement : a
+  );
+  return sortAnnouncements(updatedList);
 }
