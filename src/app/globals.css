@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -76,5 +77,10 @@
     }
     .day-special-event {
         @apply bg-primary text-primary-foreground font-bold rounded-md;
+    }
+    
+    /* Fix for navigation menu dropdown alignment */
+    div[data-radix-navigation-menu-viewport] {
+        justify-content: flex-start !important;
     }
 }
