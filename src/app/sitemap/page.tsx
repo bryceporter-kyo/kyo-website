@@ -36,8 +36,6 @@ const mainSections = [
 
 const legalSections = [
     { name: 'Privacy & Cookie Policy', href: '/legal/privacy-policy' },
-    { name: 'Digital Terms of Use', href: '/legal/terms-of-use' },
-    { name: 'Hiring & EEO Policy', href: '/legal/hiring-policy' },
     { name: 'Terms & Conditions', href: '/legal/terms-and-conditions' },
     { name: 'Accessibility Policy', href: '/legal/accessibility-policy' },
     { name: 'Protection of Children and Vulnerable Persons Policy', href: '/legal/protection-of-children-and-vulnerable-persons-policy' },
