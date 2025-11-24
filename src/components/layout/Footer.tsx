@@ -17,17 +17,15 @@ const navLinks = [
   { name: 'Donate', href: '/donate' },
 ];
 
-const legalLinks = [
-  { name: 'Privacy & Cookie Policy', href: '/legal/privacy-policy' },
-  { name: 'Terms & Conditions', href: '/legal/terms-and-conditions' },
-  { name: 'Accessibility Policy', href: '/legal/accessibility-policy' },
-  { name: 'Protection Policy', href: '/legal/protection-of-children-and-vulnerable-persons-policy' },
-];
-
 type SocialLink = {
   name: string;
   link: ExternalLink | undefined;
   icon: React.ElementType;
+}
+
+type LegalLink = {
+    name: string;
+    href: string;
 }
 
 export default function Footer() {
@@ -37,6 +35,7 @@ export default function Footer() {
   const [phoneLink, setPhoneLink] = useState<ExternalLink | undefined>(undefined);
   const [emailLink, setEmailLink] = useState<ExternalLink | undefined>(undefined);
   const [registrationLink, setRegistrationLink] = useState<ExternalLink | undefined>(undefined);
+  const [legalLinks, setLegalLinks] = useState<LegalLink[]>([]);
 
   useEffect(() => {
     const facebookLink = getLinkById('social-facebook');
@@ -50,6 +49,12 @@ export default function Footer() {
     setPhoneLink(getLinkById('contact-phone'));
     setEmailLink(getLinkById('contact-main'));
     setRegistrationLink(getLinkById('register'));
+    setLegalLinks([
+        { name: 'Privacy & Cookie Policy', href: '/legal/privacy-policy' },
+        { name: 'Terms & Conditions', href: '/legal/terms-and-conditions' },
+        { name: 'Accessibility Policy', href: '/legal/accessibility-policy' },
+        { name: 'Protection Policy', href: '/legal/protection-of-children-and-vulnerable-persons-policy' },
+    ]);
   }, []);
 
   return (
