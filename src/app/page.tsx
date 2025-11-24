@@ -82,6 +82,7 @@ const impactStats = [
 
 const heroSlides = [
     {
+        id: 'slide1',
         title: "Nurturing the Next Generation of Musicians",
         subtitle: "The Kawartha Youth Orchestra provides exceptional music education and performance opportunities to young people, fostering artistic excellence, personal growth, and a lifelong love of music.",
         image: PlaceHolderImages.find(p => p.id === 'hero-concert'),
@@ -91,6 +92,7 @@ const heroSlides = [
         ]
     },
     {
+        id: 'slide2',
         title: "Your Support Creates Harmony",
         subtitle: "Your generosity empowers young musicians, funds scholarships, and sustains our vibrant programs. Help us keep the music playing for generations to come.",
         image: PlaceHolderImages.find(p => p.id === 'page-header-donate'),
@@ -100,12 +102,13 @@ const heroSlides = [
         ]
     },
     {
+        id: 'slide3',
         title: "Find Your Place on Stage",
         subtitle: "Auditions are open for our upcoming season. Join a community of passionate young musicians and take your skills to the next level.",
         image: PlaceHolderImages.find(p => p.id === 'orchestra-kids-playing'),
         buttons: [
-            { text: "Register Now", href: "/orchestras", variant: "default" as const, isExternal: true },
-            { text: "Explore Ensembles", href: "/orchestras", variant: "outline" as const }
+            { text: "Register for Orchestras", href: "", variant: "default" as const, isExternal: true, linkId: "register" },
+            { text: "Register for Upbeat!", href: "", variant: "default" as const, isExternal: true, linkId: "register-upbeat" },
         ]
     },
 ];
@@ -117,12 +120,11 @@ export default function Home() {
   const coreValuesImage = PlaceHolderImages.find(p => p.id === 'support-volunteer');
   const announcements = getAnnouncements().slice(0, 3);
   const [registrationLink, setRegistrationLink] = useState<ExternalLink | undefined>(undefined);
+  const [upbeatRegistrationLink, setUpbeatRegistrationLink] = useState<ExternalLink | undefined>(undefined);
 
   useEffect(() => {
-    const link = getLinkById('register');
-    if (link) {
-      setRegistrationLink(link);
-    }
+    setRegistrationLink(getLinkById('register'));
+    setUpbeatRegistrationLink(getLinkById('register-upbeat'));
   }, []);
 
   useEffect(() => {
@@ -153,7 +155,7 @@ export default function Home() {
             <div className="relative z-10 container mx-auto px-4 md:px-6">
                 {heroSlides.map((slide, index) => (
                 <div
-                    key={slide.title}
+                    key={slide.id}
                     className={`absolute inset-0 flex flex-col justify-center items-center transition-opacity duration-1000 ease-in-out ${index === activeIndex ? 'opacity-100' : 'opacity-0'}`}
                 >
                     <h1 className="text-4xl md:text-6xl lg:text-7xl font-headline font-bold tracking-tight">
@@ -164,16 +166,24 @@ export default function Home() {
                     </p>
                     <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
                         {slide.buttons.map((button) => {
-                        const href = button.isExternal && registrationLink ? registrationLink.url : button.href;
-                        if (!href) return null;
+                          let href = button.href;
+                          if (button.isExternal) {
+                            if (button.linkId === 'register' && registrationLink) {
+                                href = registrationLink.url;
+                            } else if (button.linkId === 'register-upbeat' && upbeatRegistrationLink) {
+                                href = upbeatRegistrationLink.url;
+                            }
+                          }
+
+                          if (!href) return null;
                         
-                        return (
-                            <Button key={button.text} asChild size="lg" variant={button.variant === 'outline' ? 'outline' : 'default'} className={button.variant === 'outline' ? "bg-transparent border-white text-white hover:bg-white hover:text-primary" : "font-bold"}>
-                            <Link href={href} target={button.isExternal ? "_blank" : "_self"} rel={button.isExternal ? "noopener noreferrer" : ""}>
-                                {button.text}
-                            </Link>
-                            </Button>
-                        )
+                          return (
+                              <Button key={button.text} asChild size="lg" variant={button.variant === 'outline' ? 'outline' : 'default'} className={button.variant === 'outline' ? "bg-transparent border-white text-white hover:bg-white hover:text-primary" : "font-bold"}>
+                              <Link href={href} target={button.isExternal ? "_blank" : "_self"} rel={button.isExternal ? "noopener noreferrer" : ""}>
+                                  {button.text}
+                              </Link>
+                              </Button>
+                          )
                         })}
                     </div>
                 </div>
@@ -412,5 +422,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
