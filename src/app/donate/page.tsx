@@ -66,6 +66,7 @@ export default function DonatePage() {
   const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-donate');
   const whyItMattersImage = PlaceHolderImages.find(p => p.id === 'donate-why-it-matters');
   const volunteerCtaImage = PlaceHolderImages.find(p => p.id === 'volunteer-cta');
+  const supporterLogos = PlaceHolderImages.filter(p => p.category === 'Supporter Logo');
 
   const oneTimeDonationLink = getLinkById('donate-stripe-one-time');
   const canadaHelpsGeneralLink = getLinkById('donate-canadahelps-general');
@@ -329,16 +330,16 @@ export default function DonatePage() {
                 Our work is only possible because of the tremendous generosity of our community, corporate, and government supporters. We are deeply grateful for your commitment to youth music education.
             </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-8 items-center max-w-4xl mx-auto">
-            {Array.from({ length: 9 }).map((_, index) => (
-              <div key={index} className="flex justify-center">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 items-center max-w-5xl mx-auto">
+            {supporterLogos.map((logo) => (
+              <div key={logo.id} className="flex justify-center">
                 <Image
-                  src={`https://picsum.photos/seed/logo${index}/240/120?grayscale`}
-                  alt={`Supporter Logo ${index + 1}`}
+                  src={logo.imageUrl}
+                  alt={logo.description}
                   width={200}
                   height={100}
                   className="object-contain"
-                  data-ai-hint="company logo"
+                  data-ai-hint={logo.imageHint}
                 />
               </div>
             ))}
