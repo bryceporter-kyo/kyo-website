@@ -1,4 +1,7 @@
 
+"use client";
+
+import { useState } from 'react';
 import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +10,15 @@ import { Heart, Handshake, Gift, Star, Ticket, Users, Camera, Wrench } from "luc
 import Image from "next/image";
 import Link from "next/link";
 import { getLinkById } from '@/lib/links';
+import buttonData from '@/lib/buttons.json';
+
+type ButtonConfig = {
+    id: string;
+    location: string;
+    text: string;
+    link: { type: 'internal' | 'external', value: string };
+    visible: boolean;
+};
 
 const volunteerRoles = [
     {
@@ -35,7 +47,26 @@ export default function VolunteerPage() {
     const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-volunteer');
     const volunteerImage = PlaceHolderImages.find(p => p.id === 'support-volunteer');
     const volunteerCtaImage = PlaceHolderImages.find(p => p.id === 'volunteer-cta');
-    const registrationLink = getLinkById('register');
+    const [buttons] = useState<ButtonConfig[]>(buttonData.buttons as ButtonConfig[]);
+
+    const getButtonProps = (buttonConfig?: ButtonConfig) => {
+        if (!buttonConfig || !buttonConfig.visible) return null;
+        let href = '#';
+        let target = '_self';
+        if (buttonConfig.link.type === 'external') {
+            const link = getLinkById(buttonConfig.link.value);
+            if (link) {
+                href = link.url;
+                target = '_blank';
+            }
+        } else {
+            href = buttonConfig.link.value;
+        }
+        return { href, target, text: buttonConfig.text };
+    };
+
+    const mainButton = getButtonProps(buttons.find(b => b.id === 'volunteer-signup'));
+    const secondaryButton = getButtonProps(buttons.find(b => b.id === 'volunteer-signup-secondary'));
 
     return (
         <div>
@@ -54,9 +85,9 @@ export default function VolunteerPage() {
                         <p className="text-muted-foreground text-lg">
                             By giving your time, you become a partner in our mission and a role model for our students. Whether you have specialized skills or simply a passion for music and community, there’s a place for you here.
                         </p>
-                         {registrationLink && (
+                         {mainButton && (
                            <Button asChild size="lg">
-                              <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Sign Up to Volunteer</Link>
+                              <Link href={mainButton.href} target={mainButton.target} rel={mainButton.target === '_blank' ? 'noopener noreferrer' : ''}>{mainButton.text}</Link>
                           </Button>
                          )}
                     </div>
@@ -110,9 +141,9 @@ export default function VolunteerPage() {
                                 Your contribution of time and expertise is one of the most valuable gifts you can give. Join our dedicated community and help us inspire the next generation of musicians.
                             </p>
                             <div className="mt-8 flex justify-center md:justify-start">
-                                {registrationLink && (
+                                {secondaryButton && (
                                   <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 font-bold">
-                                      <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Become a Volunteer Today</Link>
+                                      <Link href={secondaryButton.href} target={secondaryButton.target} rel={secondaryButton.target === '_blank' ? 'noopener noreferrer' : ''}>{secondaryButton.text}</Link>
                                   </Button>
                                 )}
                             </div>

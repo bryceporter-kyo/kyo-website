@@ -1,5 +1,7 @@
 
+"use client";
 
+import { useState, useEffect } from 'react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import PageHeader from '@/components/shared/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -8,6 +10,15 @@ import Link from 'next/link';
 import { Users, HandHeart, Music, Award, University, GraduationCap } from 'lucide-react';
 import Image from 'next/image';
 import { getLinkById } from '@/lib/links';
+import buttonData from '@/lib/buttons.json';
+
+type ButtonConfig = {
+    id: string;
+    location: string;
+    text: string;
+    link: { type: 'internal' | 'external', value: string };
+    visible: boolean;
+};
 
 const orchestras = [
   {
@@ -63,7 +74,30 @@ const scholarships = [
 export default function OrchestrasPage() {
   const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-orchestras');
   const joinImage = PlaceHolderImages.find(p => p.id === 'orchestra-kids-playing');
-  const registrationLink = getLinkById('register');
+  const [buttons] = useState<ButtonConfig[]>(buttonData.buttons as ButtonConfig[]);
+
+  const registerButtonConfig = buttons.find(b => b.id === 'orchestras-register');
+  const auditionButtonConfig = buttons.find(b => b.id === 'orchestras-audition');
+
+  const getButtonProps = (buttonConfig?: ButtonConfig) => {
+    if (!buttonConfig || !buttonConfig.visible) return null;
+    let href = '#';
+    let target = '_self';
+    if (buttonConfig.link.type === 'external') {
+      const link = getLinkById(buttonConfig.link.value);
+      if (link) {
+        href = link.url;
+        target = '_blank';
+      }
+    } else {
+      href = buttonConfig.link.value;
+    }
+    return { href, target, text: buttonConfig.text };
+  };
+
+  const registerButton = getButtonProps(registerButtonConfig);
+  const auditionButton = getButtonProps(auditionButtonConfig);
+
 
   return (
     <div>
@@ -84,15 +118,15 @@ export default function OrchestrasPage() {
                     To enhance their musical journey, we recommend that all KYO members pursue private lessons. Our team is ready to assist you with information on private instruction opportunities.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  {registrationLink && (
-                    <>
-                      <Button asChild size="lg">
-                          <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Register for 2025-2026</Link>
-                      </Button>
-                      <Button asChild size="lg" variant="outline">
-                          <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Sign Up for an Audition</Link>
-                      </Button>
-                    </>
+                  {registerButton && (
+                    <Button asChild size="lg">
+                        <Link href={registerButton.href} target={registerButton.target} rel={registerButton.target === '_blank' ? 'noopener noreferrer' : ''}>{registerButton.text}</Link>
+                    </Button>
+                  )}
+                  {auditionButton && (
+                    <Button asChild size="lg" variant="outline">
+                        <Link href={auditionButton.href} target={auditionButton.target} rel={auditionButton.target === '_blank' ? 'noopener noreferrer' : ''}>{auditionButton.text}</Link>
+                    </Button>
                   )}
                 </div>
             </div>
@@ -142,10 +176,10 @@ export default function OrchestrasPage() {
                             <CardContent className="space-y-4 flex-grow">
                                 <p className="text-muted-foreground">{item.description}</p>
                             </CardContent>
-                            {registrationLink && (
+                            {registerButton && (
                               <CardFooter>
                                 <Button asChild className="w-full">
-                                      <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Register Now</Link>
+                                      <Link href={registerButton.href} target={registerButton.target} rel={registerButton.target === '_blank' ? 'noopener noreferrer' : ''}>Register Now</Link>
                                   </Button>
                               </CardFooter>
                             )}
@@ -173,9 +207,9 @@ export default function OrchestrasPage() {
                 </CardHeader>
                 <CardContent className="text-center">
                     <p className="text-muted-foreground mb-6">Explore topics like Composition, Music Theory, Instrument Practice, and Film Scoring from the comfort of your home. These courses are designed to complement your ensemble experience and deepen your musical understanding.</p>
-                     {registrationLink && (
+                     {registerButton && (
                         <Button asChild size="lg">
-                          <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Register for a Course</Link>
+                          <Link href={registerButton.href} target={registerButton.target} rel={registerButton.target === '_blank' ? 'noopener noreferrer' : ''}>Register for a Course</Link>
                       </Button>
                      )}
                 </CardContent>
@@ -251,5 +285,3 @@ export default function OrchestrasPage() {
     </div>
   );
 }
-
-    

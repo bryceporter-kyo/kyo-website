@@ -10,11 +10,19 @@ import Link from 'next/link';
 import { Target, HeartHandshake, Users, Award, Smile, BarChart, Quote, HandCoins, BookOpen, Truck, LifeBuoy, UsersRound, Star, GitCommitHorizontal, Group, GraduationCap, Check, ShieldCheck, Heart, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
 import { getLinkById } from '@/lib/links';
-import type { ExternalLink } from '@/lib/links';
+import buttonData from '@/lib/buttons.json';
 import AnimatedCounter from '@/components/shared/AnimatedCounter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from '@/components/ui/badge';
+
+type ButtonConfig = {
+    id: string;
+    location: string;
+    text: string;
+    link: { type: 'internal' | 'external', value: string };
+    visible: boolean;
+};
 
 const programPillars = [
     {
@@ -105,11 +113,25 @@ export default function UpbeatPage() {
   const aboutImage = PlaceHolderImages.find(p => p.id === 'program-upbeat');
   const impactImage = PlaceHolderImages.find(p => p.id === 'upbeat-kids-smiling');
   const communityImage = PlaceHolderImages.find(p => p.id === 'support-volunteer');
-  const [registrationLink, setRegistrationLink] = useState<ExternalLink | undefined>(undefined);
+  const [buttons] = useState<ButtonConfig[]>(buttonData.buttons as ButtonConfig[]);
 
-  useEffect(() => {
-    setRegistrationLink(getLinkById('register'));
-  }, []);
+  const getButtonProps = (buttonConfig?: ButtonConfig) => {
+    if (!buttonConfig || !buttonConfig.visible) return null;
+    let href = '#';
+    let target = '_self';
+    if (buttonConfig.link.type === 'external') {
+      const link = getLinkById(buttonConfig.link.value);
+      if (link) {
+        href = link.url;
+        target = '_blank';
+      }
+    } else {
+      href = buttonConfig.link.value;
+    }
+    return { href, target, text: buttonConfig.text };
+  };
+
+  const enrollButton = getButtonProps(buttons.find(b => b.id === 'upbeat-enroll'));
 
   return (
     <div>
@@ -130,10 +152,10 @@ export default function UpbeatPage() {
                     <p className="text-muted-foreground text-lg">
                         More than just music lessons, UpBeat! creates a safe, joyful, and inclusive environment where young people experience belonging, build confidence, and develop lifelong skills. It is a model of how the arts can drive systemic change in the lives of young people and their communities.
                     </p>
-                    {registrationLink && (
-                    <Button asChild size="lg">
-                        <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Enroll in UpBeat!</Link>
-                    </Button>
+                    {enrollButton && (
+                      <Button asChild size="lg">
+                          <Link href={enrollButton.href} target={enrollButton.target} rel={enrollButton.target === '_blank' ? 'noopener noreferrer' : ''}>{enrollButton.text}</Link>
+                      </Button>
                     )}
                 </div>
                 {aboutImage && (

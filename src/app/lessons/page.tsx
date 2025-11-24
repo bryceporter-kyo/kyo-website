@@ -1,4 +1,7 @@
 
+"use client";
+
+import { useState, useEffect } from 'react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import PageHeader from '@/components/shared/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +10,15 @@ import Link from 'next/link';
 import { Check, Target, Users, GraduationCap, Music } from 'lucide-react';
 import Image from 'next/image';
 import { getLinkById } from '@/lib/links';
+import buttonData from '@/lib/buttons.json';
+
+type ButtonConfig = {
+    id: string;
+    location: string;
+    text: string;
+    link: { type: 'internal' | 'external', value: string };
+    visible: boolean;
+};
 
 const programGoals = [
     {
@@ -31,14 +43,35 @@ const instruments = [
   'Flute', 'Clarinet', 'Saxophone', 'Oboe', 'Bassoon',
   'Trumpet', 'French Horn', 'Trombone', 'Tuba',
   'Percussion', 'Guitar'
-]
+];
 
 export default function LessonsPage() {
   const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-lessons');
   const aboutImage = PlaceHolderImages.find(p => p.id === 'program-lessons');
   const studentImage = PlaceHolderImages.find(p => p.id === 'lessons-teacher-student');
-  const registrationLink = getLinkById('register');
+  const [buttons] = useState<ButtonConfig[]>(buttonData.buttons as ButtonConfig[]);
 
+  const mainButtonConfig = buttons.find(b => b.id === 'lessons-register-main');
+  const secondaryButtonConfig = buttons.find(b => b.id === 'lessons-register-secondary');
+
+  const getButtonProps = (buttonConfig?: ButtonConfig) => {
+    if (!buttonConfig || !buttonConfig.visible) return null;
+    let href = '#';
+    let target = '_self';
+    if (buttonConfig.link.type === 'external') {
+      const link = getLinkById(buttonConfig.link.value);
+      if (link) {
+        href = link.url;
+        target = '_blank';
+      }
+    } else {
+      href = buttonConfig.link.value;
+    }
+    return { href, target, text: buttonConfig.text };
+  };
+
+  const mainButton = getButtonProps(mainButtonConfig);
+  const secondaryButton = getButtonProps(secondaryButtonConfig);
 
   return (
     <div>
@@ -58,9 +91,9 @@ export default function LessonsPage() {
                 <p className="text-muted-foreground text-lg">
                     This initiative enables more youth to receive weekly, high-caliber music instruction delivered by professional and conservatory-trained teachers. We are deeply committed to making music education available, affordable, and inspiring for all youth, regardless of background or financial circumstances.
                 </p>
-                {registrationLink && (
+                {mainButton && (
                   <Button asChild size="lg">
-                      <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Start Your Musical Journey</Link>
+                      <Link href={mainButton.href} target={mainButton.target} rel={mainButton.target === '_blank' ? 'noopener noreferrer' : ''}>{mainButton.text}</Link>
                   </Button>
                 )}
             </div>
@@ -176,9 +209,9 @@ export default function LessonsPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">Ready to take the next step? Register today to be matched with an instructor and schedule your first lesson. No prior experience is required for many of our beginner programs!</p>
-                {registrationLink && (
+                {secondaryButton && (
                   <Button asChild className="mt-4 w-full">
-                    <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Register for Lessons</Link>
+                    <Link href={secondaryButton.href} target={secondaryButton.target} rel={secondaryButton.target === '_blank' ? 'noopener noreferrer' : ''}>{secondaryButton.text}</Link>
                   </Button>
                 )}
               </CardContent>

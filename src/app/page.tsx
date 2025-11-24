@@ -10,8 +10,17 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { getAnnouncements } from '@/lib/announcements';
 import { getLinkById } from '@/lib/links';
+import buttonData from '@/lib/buttons.json';
 import type { ExternalLink } from '@/lib/links';
 import AnimatedCounter from '@/components/shared/AnimatedCounter';
+
+type ButtonConfig = {
+    id: string;
+    location: string;
+    text: string;
+    link: { type: 'internal' | 'external', value: string };
+    visible: boolean;
+};
 
 const programs = [
   {
@@ -106,10 +115,7 @@ const heroSlides = [
         title: "Find Your Place on Stage",
         subtitle: "Auditions are open for our upcoming season. Join a community of passionate young musicians and take your skills to the next level.",
         image: PlaceHolderImages.find(p => p.id === 'orchestra-kids-playing'),
-        buttons: [
-            { text: "Register for Orchestras", href: "", variant: "default" as const, isExternal: true, linkId: "register" },
-            { text: "Register for Upbeat!", href: "", variant: "default" as const, isExternal: true, linkId: "register-upbeat" },
-        ]
+        buttons: [] // This will be populated dynamically
     },
 ];
 
@@ -119,13 +125,27 @@ export default function Home() {
   const financialAidImage = PlaceHolderImages.find(p => p.id === 'home-financial-aid');
   const coreValuesImage = PlaceHolderImages.find(p => p.id === 'support-volunteer');
   const announcements = getAnnouncements().slice(0, 3);
-  const [registrationLink, setRegistrationLink] = useState<ExternalLink | undefined>(undefined);
-  const [upbeatRegistrationLink, setUpbeatRegistrationLink] = useState<ExternalLink | undefined>(undefined);
+  const [buttons, setButtons] = useState<ButtonConfig[]>(buttonData.buttons as ButtonConfig[]);
 
-  useEffect(() => {
-    setRegistrationLink(getLinkById('register'));
-    setUpbeatRegistrationLink(getLinkById('register-upbeat'));
-  }, []);
+  const financialAidButton = buttons.find(b => b.id === 'home-financial-aid-register');
+  const heroOrchestraButton = buttons.find(b => b.id === 'hero-register-orchestra');
+  const heroUpbeatButton = buttons.find(b => b.id === 'hero-register-upbeat');
+
+  const getButtonProps = (buttonConfig?: ButtonConfig) => {
+    if (!buttonConfig || !buttonConfig.visible) return null;
+    let href = '#';
+    let target = '_self';
+    if (buttonConfig.link.type === 'external') {
+      const link = getLinkById(buttonConfig.link.value);
+      if (link) {
+        href = link.url;
+        target = '_blank';
+      }
+    } else {
+      href = buttonConfig.link.value;
+    }
+    return { href, target, text: buttonConfig.text };
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -133,6 +153,9 @@ export default function Home() {
     }, 7000); // Change slide every 7 seconds
     return () => clearInterval(interval);
   }, []);
+
+  const slide3Buttons = [getButtonProps(heroOrchestraButton), getButtonProps(heroUpbeatButton)].filter(Boolean);
+
 
   return (
     <div className="flex flex-col min-h-dvh">
@@ -165,21 +188,14 @@ export default function Home() {
                         {slide.subtitle}
                     </p>
                     <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                        {slide.buttons.map((button) => {
-                          let href = button.href;
-                          if (button.isExternal) {
-                            if (button.linkId === 'register' && registrationLink) {
-                                href = registrationLink.url;
-                            } else if (button.linkId === 'register-upbeat' && upbeatRegistrationLink) {
-                                href = upbeatRegistrationLink.url;
-                            }
-                          }
-
-                          if (!href) return null;
+                        {(index === 2 ? slide3Buttons : slide.buttons).map((button) => {
+                          if (!button) return null;
+                          const isExternal = 'target' in button && button.target === '_blank';
+                          const variant = 'variant' in button ? button.variant : 'default';
                         
                           return (
-                              <Button key={button.text} asChild size="lg" variant={button.variant === 'outline' ? 'outline' : 'default'} className={button.variant === 'outline' ? "bg-transparent border-white text-white hover:bg-white hover:text-primary" : "font-bold"}>
-                              <Link href={href} target={button.isExternal ? "_blank" : "_self"} rel={button.isExternal ? "noopener noreferrer" : ""}>
+                              <Button key={button.text} asChild size="lg" variant={variant === 'outline' ? 'outline' : 'default'} className={variant === 'outline' ? "bg-transparent border-white text-white hover:bg-white hover:text-primary" : "font-bold"}>
+                              <Link href={button.href} target={isExternal ? "_blank" : "_self"} rel={isExternal ? "noopener noreferrer" : ""}>
                                   {button.text}
                               </Link>
                               </Button>
@@ -365,11 +381,19 @@ export default function Home() {
                             <Button asChild>
                                 <Link href="/donate">Explore Aid</Link>
                             </Button>
-                            {registrationLink && (
-                            <Button asChild variant="outline">
-                                <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Register Now</Link>
-                            </Button>
-                            )}
+                            {(() => {
+                                const buttonProps = getButtonProps(financialAidButton);
+                                if (buttonProps) {
+                                    return (
+                                        <Button asChild variant="outline">
+                                            <Link href={buttonProps.href} target={buttonProps.target} rel={buttonProps.target === '_blank' ? 'noopener noreferrer' : ''}>
+                                                {buttonProps.text}
+                                            </Link>
+                                        </Button>
+                                    );
+                                }
+                                return null;
+                            })()}
                         </div>
                     </div>
                     {financialAidImage && (
