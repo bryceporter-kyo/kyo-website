@@ -14,10 +14,10 @@
       "linkId": "register-upbeat"
     },
     {
-        "id": "home-financial-aid-register",
-        "location": "Homepage Financial Aid Section",
-        "text": "Register Now",
-        "linkId": "register"
+      "id": "home-financial-aid-register",
+      "location": "Homepage Financial Aid Section",
+      "text": "Register Now",
+      "linkId": "register"
     },
     {
       "id": "orchestras-register",
@@ -32,22 +32,34 @@
       "linkId": "register"
     },
     {
-        "id": "lessons-register",
-        "location": "Lessons Page",
-        "text": "Start Your Musical Journey",
-        "linkId": "register"
+      "id": "lessons-register-main",
+      "location": "Lessons Page (Main CTA)",
+      "text": "Start Your Musical Journey",
+      "linkId": "register"
     },
     {
-        "id": "upbeat-enroll",
-        "location": "UpBeat! Page",
-        "text": "Enroll in UpBeat!",
-        "linkId": "register-upbeat"
+      "id": "lessons-register-secondary",
+      "location": "Lessons Page (Secondary CTA)",
+      "text": "Register for Lessons",
+      "linkId": "register"
     },
     {
-        "id": "volunteer-signup",
-        "location": "Volunteer Page",
-        "text": "Sign Up to Volunteer",
-        "linkId": "register"
+      "id": "upbeat-enroll",
+      "location": "UpBeat! Page",
+      "text": "Enroll in UpBeat!",
+      "linkId": "register-upbeat"
+    },
+    {
+      "id": "volunteer-signup",
+      "location": "Volunteer Page (Main CTA)",
+      "text": "Sign Up to Volunteer",
+      "linkId": "register"
+    },
+    {
+      "id": "volunteer-signup-secondary",
+      "location": "Volunteer Page (Secondary CTA)",
+      "text": "Become a Volunteer Today",
+      "linkId": "register"
     }
   ]
 }

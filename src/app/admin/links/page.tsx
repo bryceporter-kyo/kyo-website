@@ -91,7 +91,7 @@ export default function LinksAdminPage() {
                                 </TableHeader>
                                 <TableBody>
                                     {links.map((link) => (
-                                        <TableRow key={link.id}>
+                                        <TableRow key={link.id} id={link.id}>
                                             <TableCell className="font-medium">{link.name}</TableCell>
                                             <TableCell>
                                                 {isEditing(link.id) ? (
@@ -108,7 +108,7 @@ export default function LinksAdminPage() {
                                                         )}
                                                     />
                                                 ) : (
-                                                    <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-primary underline hover:text-primary/80">
+                                                    <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-primary underline hover:text-primary/80 break-all">
                                                         {link.url}
                                                     </a>
                                                 )}

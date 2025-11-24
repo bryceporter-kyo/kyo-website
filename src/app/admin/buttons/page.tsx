@@ -57,12 +57,12 @@ export default function ButtonsAdminPage() {
                             {buttons.map((button) => {
                                 const link = getLinkForButton(button.linkId);
                                 return (
-                                <TableRow key={button.id}>
+                                <TableRow key={button.id} id={button.id}>
                                     <TableCell className="font-medium">{button.location}</TableCell>
                                     <TableCell>{button.text}</TableCell>
                                     <TableCell>
                                         {link ? (
-                                             <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-primary underline hover:text-primary/80">
+                                             <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-primary underline hover:text-primary/80 break-all">
                                                 {link.url}
                                             </a>
                                         ) : (
