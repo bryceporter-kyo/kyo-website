@@ -68,8 +68,8 @@ export default function ButtonsAdminPage() {
                                 <TableHead>Location</TableHead>
                                 <TableHead>Button Text</TableHead>
                                 <TableHead>Current URL</TableHead>
-                                <TableHead className="w-[100px] text-center">Status</TableHead>
-                                <TableHead className="text-right w-[200px]">Actions</TableHead>
+                                <TableHead className="w-[180px]">Visibility</TableHead>
+                                <TableHead className="text-right w-[150px]">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -88,20 +88,20 @@ export default function ButtonsAdminPage() {
                                             <span className="text-muted-foreground">Link not found</span>
                                         )}
                                     </TableCell>
-                                    <TableCell className="text-center">
-                                         <Badge variant={button.visible ? 'default' : 'secondary'}>
-                                            {button.visible ? 'Visible' : 'Hidden'}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-right flex items-center justify-end gap-2">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-sm text-muted-foreground">Hide</span>
-                                                <Switch
-                                                    checked={!button.visible}
-                                                    onCheckedChange={(checked) => handleVisibilityChange(button.id, !checked)}
-                                                    aria-label={`Toggle visibility for ${button.text}`}
-                                                />
+                                    <TableCell>
+                                         <div className="flex items-center gap-2">
+                                            <Switch
+                                                id={`visibility-${button.id}`}
+                                                checked={button.visible}
+                                                onCheckedChange={(checked) => handleVisibilityChange(button.id, checked)}
+                                                aria-label={`Toggle visibility for ${button.text}`}
+                                            />
+                                            <Badge variant={button.visible ? 'default' : 'secondary'}>
+                                                {button.visible ? 'Visible' : 'Hidden'}
+                                            </Badge>
                                         </div>
+                                    </TableCell>
+                                    <TableCell className="text-right">
                                         <Button asChild variant="outline" size="sm">
                                             <Link href={`/admin/links#${button.linkId}`}>
                                                 <Edit className="mr-2 h-4 w-4"/>
