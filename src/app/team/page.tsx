@@ -14,16 +14,10 @@ export default function TeamPage() {
         <div>
             <PageHeader
                 title="Our Team"
-                subtitle="The dedicated individuals behind our mission."
+                subtitle="Meet the passionate individuals and leaders who make KYO a vibrant place for young musicians to grow. These individuals work tirelessly to inspire young musicians and enrich our community through music."
                 image={headerImage}
             />
             <section className="container mx-auto">
-                <div className="text-center mb-12">
-                    <h2 className="text-3xl font-headline font-bold">Meet the Team</h2>
-                    <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
-                        Meet the passionate educators and leaders who make KYO a vibrant place for young musicians to grow.
-                    </p>
-                </div>
                 <div className="space-y-16">
                     <div>
                         <h3 className="text-2xl font-headline font-bold mb-8 text-left">Teaching & Program Staff</h3>
