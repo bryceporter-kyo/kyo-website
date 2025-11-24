@@ -160,17 +160,13 @@ export default function Header() {
               </Button>
             </SheetTriggerPrimitive>
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-              <SheetHeader className="p-4 flex flex-row justify-between items-center space-y-0 mb-2">
+              <SheetHeader>
                 <SheetTitle className="sr-only">Mobile Navigation</SheetTitle>
                 <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>
                     <Logo />
                 </Link>
-                <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}>
-                    <X className="h-6 w-6" />
-                    <span className="sr-only">Close menu</span>
-                </Button>
               </SheetHeader>
-              <div className="p-4 pt-0">
+              <div className="p-4 pt-0 mt-4">
                 <nav className="flex flex-col gap-4">
                   {navLinks.map((link) => (
                      link.subLinks ? (
