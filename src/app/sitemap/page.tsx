@@ -1,9 +1,12 @@
 
+"use client";
+
 import PageHeader from "@/components/shared/PageHeader";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import { ChevronRight, ExternalLink } from "lucide-react";
+import { ChevronRight, ExternalLink, Gift, Heart, CreditCard, Mail, Car, Landmark, HandCoins } from "lucide-react";
+import { getLinkById } from "@/lib/links";
 
 const mainSections = [
     { name: 'Home', href: '/' },
@@ -50,6 +53,19 @@ const utilitySections = [
     { name: 'KYO Internal', href: '/internal' },
 ];
 
+const donationOptions = [
+    { name: 'One-Time Donation', linkId: 'donate-stripe-one-time', icon: Heart },
+    { name: 'Monthly Donation', href: '/donate', icon: Gift },
+    { name: 'Donate via CanadaHelps', linkId: 'donate-canadahelps-general', icon: CreditCard },
+    { name: 'Donate Securities', linkId: 'donate-canadahelps-securities', icon: Landmark },
+    { name: 'Donate by E-Transfer', linkId: 'donate-email', icon: Mail },
+    { name: 'Donate by Cheque', href: '/donate', icon: Mail },
+    { name: 'Donate to the Tenuto Trust', linkId: 'tenuto-trust', icon: Landmark },
+    { name: 'Donate an Instrument', linkId: 'contact-instrument-donation', icon: HandCoins },
+    { name: 'Donate a Car', linkId: 'donate-a-car', icon: Car },
+];
+
+
 export default function SitemapPage() {
     const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-conditions');
 
@@ -61,7 +77,7 @@ export default function SitemapPage() {
                 image={headerImage}
             />
             <section className="container mx-auto">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     <Card>
                         <CardHeader>
                             <CardTitle className="font-headline text-xl">Main Website</CardTitle>
@@ -161,6 +177,33 @@ export default function SitemapPage() {
                             </CardContent>
                         </Card>
                     </div>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="font-headline text-xl">Donation Options</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <ul className="space-y-2">
+                                {donationOptions.map(option => {
+                                    const link = option.linkId ? getLinkById(option.linkId) : null;
+                                    const href = link ? link.url : option.href;
+                                    if (!href) return null;
+
+                                    const isExternal = href.startsWith('http') || href.startsWith('mailto');
+                                    const Icon = isExternal ? ExternalLink : ChevronRight;
+
+                                    return (
+                                        <li key={option.name}>
+                                            <Link href={href} target={isExternal ? '_blank' : '_self'} rel={isExternal ? 'noopener noreferrer' : ''} className="flex items-start text-primary hover:underline">
+                                                <Icon className="w-4 h-4 mr-2 mt-1 flex-shrink-0" />
+                                                <span>{option.name}</span>
+                                            </Link>
+                                        </li>
+                                    )
+                                })}
+                            </ul>
+                        </CardContent>
+                    </Card>
                 </div>
             </section>
         </div>
