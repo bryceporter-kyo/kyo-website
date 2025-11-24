@@ -13,17 +13,20 @@ const orchestras = [
   {
     title: 'Junior KYO (JKYO)',
     description: 'For strings and flutes with basic instrument knowledge and experience.',
-    experience: 'Beginner Level'
+    experience: 'Beginner Level',
+    imageId: 'orchestra-junior'
   },
   {
     title: 'Intermediate KYO (IKYO)',
     description: 'For strings, woodwinds, brass, and percussion.',
-    experience: 'Typically 2+ years of ensemble experience'
+    experience: 'Typically 2+ years of ensemble experience',
+    imageId: 'orchestra-intermediate'
   },
   {
     title: 'Senior KYO (SKYO)',
     description: 'For advanced strings, woodwinds, brass, and percussion.',
-    experience: 'Typically 4+ years of ensemble experience'
+    experience: 'Typically 4+ years of ensemble experience',
+    imageId: 'orchestra-senior'
   },
 ];
 
@@ -32,13 +35,15 @@ const financialAidOptions = [
         icon: HandHeart,
         title: "Tuition Assistance",
         description: "We offer financial aid to help make our programs accessible to all families through tuition bursaries & multiple child discounts.",
-        linkId: "contact-info"
+        linkId: "contact-info",
+        imageId: "aid-tuition"
     },
     {
         icon: Music,
         title: "Instrument Loans",
         description: "The KYO has a limited number of instruments available for loan to registered musicians for the entire season, free of charge.",
-        linkId: "contact-info"
+        linkId: "contact-info",
+        imageId: "aid-instruments"
     }
 ]
 
@@ -115,24 +120,38 @@ export default function OrchestrasPage() {
                 </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {orchestras.map((item) => (
-                    <Card key={item.title} className="text-left flex flex-col transition-all duration-300 hover:shadow-lg hover:border-primary/50">
-                        <CardHeader>
-                            <CardTitle className="font-headline text-2xl">{item.title}</CardTitle>
-                            <CardDescription>{item.experience}</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4 flex-grow">
-                            <p className="text-muted-foreground">{item.description}</p>
-                        </CardContent>
-                        {registrationLink && (
-                          <CardFooter>
-                            <Button asChild className="w-full">
-                                  <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Register Now</Link>
-                              </Button>
-                          </CardFooter>
-                        )}
-                    </Card>
-                ))}
+                {orchestras.map((item) => {
+                    const image = PlaceHolderImages.find(p => p.id === item.imageId);
+                    return (
+                        <Card key={item.title} className="text-left flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-primary/50">
+                            {image && (
+                                <div className="relative aspect-video">
+                                    <Image
+                                        src={image.imageUrl}
+                                        alt={image.description}
+                                        fill
+                                        className="object-cover"
+                                        data-ai-hint={image.imageHint}
+                                    />
+                                </div>
+                            )}
+                            <CardHeader>
+                                <CardTitle className="font-headline text-2xl">{item.title}</CardTitle>
+                                <CardDescription>{item.experience}</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4 flex-grow">
+                                <p className="text-muted-foreground">{item.description}</p>
+                            </CardContent>
+                            {registrationLink && (
+                              <CardFooter>
+                                <Button asChild className="w-full">
+                                      <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer">Register Now</Link>
+                                  </Button>
+                              </CardFooter>
+                            )}
+                        </Card>
+                    )
+                })}
             </div>
         </div>
       </section>
@@ -178,8 +197,20 @@ export default function OrchestrasPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {financialAidOptions.map(option => {
                             const link = getLinkById(option.linkId);
+                            const image = PlaceHolderImages.find(p => p.id === option.imageId);
                             return (
-                                <Card key={option.title} className="transition-all duration-300 hover:shadow-lg hover:border-primary/50">
+                                <Card key={option.title} className="transition-all duration-300 hover:shadow-lg hover:border-primary/50 overflow-hidden">
+                                     {image && (
+                                        <div className="relative aspect-video">
+                                            <Image
+                                                src={image.imageUrl}
+                                                alt={image.description}
+                                                fill
+                                                className="object-cover"
+                                                data-ai-hint={image.imageHint}
+                                            />
+                                        </div>
+                                    )}
                                     <CardHeader className="flex flex-row items-center gap-4">
                                         <option.icon className="w-8 h-8 text-primary"/>
                                         <CardTitle className="font-headline text-xl">{option.title}</CardTitle>
@@ -220,3 +251,5 @@ export default function OrchestrasPage() {
     </div>
   );
 }
+
+    

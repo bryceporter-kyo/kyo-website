@@ -207,7 +207,7 @@
     {
       "id": "page-header-internal",
       "description": "A secure door with keycard access, symbolizing an internal area.",
-      "imageUrl": "https://images.unsplash.com/photo-1760815457815-9ee5b27efe7b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxzZWN1cmUlMjBhY2Nlc3N8ZW58MHx8fHwxNzYzOTcxNDk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1760815457815-9ee_b27efe7b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxzZWN1cmUlMjBhY2Nlc3N8ZW58MHx8fHwxNzYzOTcxNDk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "secure access"
     },
     {
@@ -221,6 +221,36 @@
       "description": "The official logo for the Kawartha Youth Orchestra.",
       "imageUrl": "https://images.unsplash.com/photo-1590054387835-ab72678fef01?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxvcmNoZXN0cmElMjBsb2dvfGVufDB8fHx8MTc2Mzk3MTQ5NHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "orchestra logo"
+    },
+    {
+      "id": "orchestra-junior",
+      "description": "A group of young children enthusiastically playing violins.",
+      "imageUrl": "https://images.unsplash.com/photo-1564047484562-8cb83111d26e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxjaGlsZHJlbiUyMHZpb2xpbnN8ZW58MHx8fHwxNzYzOTc1NTEyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "children violins"
+    },
+    {
+      "id": "orchestra-intermediate",
+      "description": "Teenage musicians playing a variety of instruments in an orchestra.",
+      "imageUrl": "https://images.unsplash.com/photo-1600443446566-c8a2e34c779b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHx0ZWVuJTIwb3JjaGVzdHJhfGVufDB8fHx8MTc2Mzk3NTUxMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "teen orchestra"
+    },
+    {
+      "id": "orchestra-senior",
+      "description": "A focused shot of a youth symphony orchestra during a performance.",
+      "imageUrl": "https://images.unsplash.com/photo-1595775556780-0c8afe6cd36f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxzeW1waG9ueSUyMHBlcmZvcm1hbmNlfGVufDB8fHx8MTc2Mzk3NTUxMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "symphony performance"
+    },
+    {
+      "id": "aid-tuition",
+      "description": "Hands holding a piggy bank, symbolizing savings and financial assistance.",
+      "imageUrl": "https://images.unsplash.com/photo-1551260627-fd1b6daa6224?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxmaW5hbmNpYWwlMjBhc3Npc3RhbmNlfGVufDB8fHx8MTc2Mzk3NTUxMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "financial assistance"
+    },
+    {
+      "id": "aid-instruments",
+      "description": "A collection of various orchestral instruments like violins, cellos, and flutes.",
+      "imageUrl": "https://images.unsplash.com/photo-1760706182454-b31ef2fb42d6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxvcmNoZXN0cmFsJTIwaW5zdHJ1bWVudHN8ZW58MHx8fHwxNzYzOTc1NTEyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "orchestral instruments"
     }
   ]
 }
