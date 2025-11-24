@@ -1,5 +1,4 @@
 
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Newspaper, Users, Image as ImageIcon, Calendar, UsersRound, Link2, Pointer } from "lucide-react";
 import Link from "next/link";
@@ -35,18 +34,6 @@ export default function AdminDashboardPage() {
             </Card>
           </Link>
         ))}
-      </div>
-
-       <div className="mt-12">
-         <Card>
-          <CardHeader>
-            <CardTitle>User Creation</CardTitle>
-            <CardDescription>Administer user accounts and permissions.</CardDescription>
-          </CardHeader>
-          <CardContent>
-             <p className="text-muted-foreground">This section is under construction. User authentication and roles will be managed here once Firebase Authentication is set up.</p>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
