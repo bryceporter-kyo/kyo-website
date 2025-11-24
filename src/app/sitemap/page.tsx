@@ -28,6 +28,7 @@ const mainSections = [
         subLinks: [
             { name: 'Ways to Give', href: '/support' },
             { name: 'Donate', href: '/donate' },
+            { name: 'Donation Options', href: '/donate' },
             { name: 'Volunteer', href: '/volunteer' },
         ]
     },
