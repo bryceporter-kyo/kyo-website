@@ -340,11 +340,11 @@ export default function Home() {
                         <h2 className="text-3xl font-headline font-bold">Financial Aid & Scholarships</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-center">
                             <div className="bg-secondary p-6 rounded-lg">
-                                <AnimatedCounter target={100000} prefix="$" suffix="k+" className="text-4xl font-bold text-primary" />
+                                <p className="text-4xl font-bold text-primary">$100k+</p>
                                 <p className="text-sm text-muted-foreground mt-1">In Annual Bursaries</p>
                             </div>
                             <div className="bg-secondary p-6 rounded-lg">
-                                <AnimatedCounter target={120} suffix="+" className="text-4xl font-bold text-primary" />
+                                <p className="text-4xl font-bold text-primary">120+</p>
                                 <p className="text-sm text-muted-foreground mt-1">Students Supported</p>
                             </div>
                         </div>
