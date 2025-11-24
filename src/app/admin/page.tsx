@@ -1,7 +1,7 @@
 
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Newspaper, Users, Image as ImageIcon, Calendar, UsersRound, Link2 } from "lucide-react";
+import { Newspaper, Users, Image as ImageIcon, Calendar, UsersRound, Link2, Pointer } from "lucide-react";
 import Link from "next/link";
 
 const adminTiles = [
@@ -11,6 +11,7 @@ const adminTiles = [
     { href: "/admin/users", label: "Users", icon: Users },
     { href: "/admin/staff", label: "Staff & Board", icon: UsersRound },
     { href: "/admin/links", label: "External Links", icon: Link2 },
+    { href: "/admin/buttons", label: "Buttons", icon: Pointer },
 ]
 
 export default function AdminDashboardPage() {

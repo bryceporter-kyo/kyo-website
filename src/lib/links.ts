@@ -1,3 +1,4 @@
+
 import data from './links.json';
 
 export type ExternalLink = {
@@ -6,7 +7,7 @@ export type ExternalLink = {
   url: string;
 };
 
-const links: ExternalLink[] = data.links;
+export const links: ExternalLink[] = data.links;
 
 export function getLinks(): ExternalLink[] {
   return links;

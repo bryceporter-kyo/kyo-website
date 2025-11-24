@@ -1,0 +1,53 @@
+
+{
+  "buttons": [
+    {
+      "id": "hero-register-orchestra",
+      "location": "Homepage Hero Carousel",
+      "text": "Register for Orchestras",
+      "linkId": "register"
+    },
+    {
+      "id": "hero-register-upbeat",
+      "location": "Homepage Hero Carousel",
+      "text": "Register for Upbeat!",
+      "linkId": "register-upbeat"
+    },
+    {
+        "id": "home-financial-aid-register",
+        "location": "Homepage Financial Aid Section",
+        "text": "Register Now",
+        "linkId": "register"
+    },
+    {
+      "id": "orchestras-register",
+      "location": "Orchestras Page",
+      "text": "Register for 2025-2026",
+      "linkId": "register"
+    },
+    {
+      "id": "orchestras-audition",
+      "location": "Orchestras Page",
+      "text": "Sign Up for an Audition",
+      "linkId": "register"
+    },
+    {
+        "id": "lessons-register",
+        "location": "Lessons Page",
+        "text": "Start Your Musical Journey",
+        "linkId": "register"
+    },
+    {
+        "id": "upbeat-enroll",
+        "location": "UpBeat! Page",
+        "text": "Enroll in UpBeat!",
+        "linkId": "register-upbeat"
+    },
+    {
+        "id": "volunteer-signup",
+        "location": "Volunteer Page",
+        "text": "Sign Up to Volunteer",
+        "linkId": "register"
+    }
+  ]
+}
