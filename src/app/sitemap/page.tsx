@@ -128,6 +128,12 @@ export default function SitemapPage() {
                                             </Link>
                                         </li>
                                     ))}
+                                    <li>
+                                        <Link href="/sitemap" className="flex items-center text-primary hover:underline">
+                                            <ChevronRight className="w-4 h-4 mr-2" />
+                                            <span>Sitemap</span>
+                                        </Link>
+                                    </li>
                                 </ul>
                             </CardContent>
                         </Card>
