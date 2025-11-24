@@ -10,6 +10,7 @@ export type Announcement = {
   pinned?: boolean;
   content: string;
   disappearsAt?: string;
+  unpinsAt?: string;
 };
 
 // Raw data from the JSON file
@@ -47,6 +48,7 @@ export function addAnnouncement(
     date: format(new Date(), 'yyyy-MM-dd'),
     excerpt: newAnnouncementData.content.substring(0, 100) + '...',
     disappearsAt: newAnnouncementData.disappearsAt ? format(new Date(newAnnouncementData.disappearsAt), 'yyyy-MM-dd') : undefined,
+    unpinsAt: newAnnouncementData.unpinsAt ? format(new Date(newAnnouncementData.unpinsAt), 'yyyy-MM-dd') : undefined,
   };
   return sortAnnouncements([newAnnouncement, ...currentAnnouncements]);
 }

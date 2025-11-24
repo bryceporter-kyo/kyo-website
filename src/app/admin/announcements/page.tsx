@@ -40,6 +40,7 @@ const announcementSchema = z.object({
   content: z.string().min(20, "Content must be at least 20 characters long."),
   imageUrl: z.any().optional(),
   pinned: z.boolean().default(false),
+  unpinsAt: z.date().optional(),
   disappearsAt: z.date().optional(),
 });
 
@@ -127,6 +128,7 @@ export default function AnnouncementsAdminPage() {
                             <TableRow>
                                 <TableHead>Title</TableHead>
                                 <TableHead className="w-[100px] text-center">Pinned</TableHead>
+                                <TableHead>Unpins At</TableHead>
                                 <TableHead>Expires</TableHead>
                                 <TableHead className="text-right w-[150px]">Actions</TableHead>
                             </TableRow>
@@ -141,6 +143,9 @@ export default function AnnouncementsAdminPage() {
                                             onCheckedChange={() => handlePinToggle(announcement.id)}
                                             aria-label="Pin announcement"
                                         />
+                                    </TableCell>
+                                     <TableCell>
+                                        {announcement.unpinsAt ? format(new Date(announcement.unpinsAt), "PPP") : 'Never'}
                                     </TableCell>
                                     <TableCell>
                                         {announcement.disappearsAt ? format(new Date(announcement.disappearsAt), "PPP") : 'Never'}
@@ -257,50 +262,96 @@ export default function AnnouncementsAdminPage() {
                                     </FormItem>
                                 )}
                             />
-                            <FormField
-                                control={form.control}
-                                name="disappearsAt"
-                                render={({ field }) => (
-                                <FormItem className="flex flex-col">
-                                    <FormLabel>Expiration Date</FormLabel>
-                                    <Popover>
-                                    <PopoverTrigger asChild>
-                                        <FormControl>
-                                        <Button
-                                            variant={"outline"}
-                                            className={cn(
-                                            "w-[240px] pl-3 text-left font-normal",
-                                            !field.value && "text-muted-foreground"
-                                            )}
-                                        >
-                                            {field.value ? (
-                                            format(field.value, "PPP")
-                                            ) : (
-                                            <span>Pick a date</span>
-                                            )}
-                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                        </Button>
-                                        </FormControl>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="start">
-                                        <Calendar
-                                            mode="single"
-                                            selected={field.value}
-                                            onSelect={field.onChange}
-                                            disabled={(date) =>
-                                                date < new Date()
-                                            }
-                                            initialFocus
-                                        />
-                                    </PopoverContent>
-                                    </Popover>
-                                    <FormDescription>
-                                        Set a date for this announcement to be unpinned or hidden. Leave blank for it to never expire.
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                                )}
-                            />
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <FormField
+                                    control={form.control}
+                                    name="unpinsAt"
+                                    render={({ field }) => (
+                                    <FormItem className="flex flex-col">
+                                        <FormLabel>Unpin Date</FormLabel>
+                                        <Popover>
+                                        <PopoverTrigger asChild>
+                                            <FormControl>
+                                            <Button
+                                                variant={"outline"}
+                                                className={cn(
+                                                "w-[240px] pl-3 text-left font-normal",
+                                                !field.value && "text-muted-foreground"
+                                                )}
+                                            >
+                                                {field.value ? (
+                                                format(field.value, "PPP")
+                                                ) : (
+                                                <span>Pick a date</span>
+                                                )}
+                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                            </Button>
+                                            </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                            <Calendar
+                                                mode="single"
+                                                selected={field.value}
+                                                onSelect={field.onChange}
+                                                disabled={(date) =>
+                                                    date < new Date()
+                                                }
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                        </Popover>
+                                        <FormDescription>
+                                            Set a date for this announcement to be automatically unpinned from the homepage.
+                                        </FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="disappearsAt"
+                                    render={({ field }) => (
+                                    <FormItem className="flex flex-col">
+                                        <FormLabel>Expiration Date</FormLabel>
+                                        <Popover>
+                                        <PopoverTrigger asChild>
+                                            <FormControl>
+                                            <Button
+                                                variant={"outline"}
+                                                className={cn(
+                                                "w-[240px] pl-3 text-left font-normal",
+                                                !field.value && "text-muted-foreground"
+                                                )}
+                                            >
+                                                {field.value ? (
+                                                format(field.value, "PPP")
+                                                ) : (
+                                                <span>Pick a date</span>
+                                                )}
+                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                            </Button>
+                                            </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                            <Calendar
+                                                mode="single"
+                                                selected={field.value}
+                                                onSelect={field.onChange}
+                                                disabled={(date) =>
+                                                    date < new Date()
+                                                }
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                        </Popover>
+                                        <FormDescription>
+                                            Set a date for this announcement to be hidden from the website entirely.
+                                        </FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
+                                />
+                            </div>
 
                              <Button type="submit">Create Announcement</Button>
                         </form>
