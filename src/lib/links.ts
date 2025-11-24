@@ -20,7 +20,7 @@ export const internalPages = [
     { id: '/support', name: 'Support Us' },
     { id: '/volunteer', name: 'Volunteer' },
     { id: '/contact', name: 'Contact' },
-    { id: '/staff', name: 'Staff & Board' },
+    { id: '/team', name: 'Team' },
     { id: '/internal', name: 'Internal' },
     { id: '/admin', name: 'Admin' },
 ];

@@ -8,7 +8,7 @@ const adminTiles = [
     { href: "/admin/images", label: "Images", icon: ImageIcon },
     { href: "/admin/events", label: "Events", icon: Calendar },
     { href: "/admin/users", label: "Users", icon: Users },
-    { href: "/admin/staff", label: "Staff & Board", icon: UsersRound },
+    { href: "/admin/team", label: "Team & Board", icon: UsersRound },
     { href: "/admin/links", label: "External Links", icon: Link2 },
     { href: "/admin/buttons", label: "Buttons", icon: Pointer },
 ]
