@@ -104,7 +104,7 @@ const heroSlides = [
         subtitle: "Auditions are open for our upcoming season. Join a community of passionate young musicians and take your skills to the next level.",
         image: PlaceHolderImages.find(p => p.id === 'orchestra-kids-playing'),
         buttons: [
-            { text: "Register Now", href: "/register", variant: "default" as const, isExternal: true },
+            { text: "Register Now", href: "/orchestras", variant: "default" as const, isExternal: true },
             { text: "Explore Ensembles", href: "/orchestras", variant: "outline" as const }
         ]
     },
@@ -340,11 +340,11 @@ export default function Home() {
                         <h2 className="text-3xl font-headline font-bold">Financial Aid & Scholarships</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-center">
                             <div className="bg-secondary p-6 rounded-lg">
-                                <p className="text-4xl font-bold text-primary">$100k+</p>
+                                <AnimatedCounter target={100000} prefix="$" suffix="k+" className="text-4xl font-bold text-primary" />
                                 <p className="text-sm text-muted-foreground mt-1">In Annual Bursaries</p>
                             </div>
                             <div className="bg-secondary p-6 rounded-lg">
-                                <p className="text-4xl font-bold text-primary">120+</p>
+                                <AnimatedCounter target={120} suffix="+" className="text-4xl font-bold text-primary" />
                                 <p className="text-sm text-muted-foreground mt-1">Students Supported</p>
                             </div>
                         </div>
@@ -412,3 +412,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
