@@ -1,221 +1,226 @@
-
 {
   "placeholderImages": [
     {
       "id": "hero-concert",
       "description": "A youth orchestra performing on a grand stage.",
-      "imageUrl": "https://picsum.photos/seed/100/1200/800",
+      "imageUrl": "https://images.unsplash.com/photo-1730636106465-5bf686631564?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx5b3V0aCUyMG9yY2hlc3RyYXxlbnwwfHx8fDE3NjM5NzE0OTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "youth orchestra"
     },
     {
       "id": "program-orchestra",
       "description": "Close-up of violinists in an orchestra.",
-      "imageUrl": "https://picsum.photos/seed/101/600/400",
+      "imageUrl": "https://images.unsplash.com/photo-1685954154829-5ebdf5956824?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxvcmNoZXN0cmElMjB2aW9saW5zfGVufDB8fHx8MTc2Mzk3MTQ5NHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "orchestra violins"
     },
     {
       "id": "program-upbeat",
       "description": "Young children laughing and playing with small percussion instruments.",
-      "imageUrl": "https://picsum.photos/seed/102/600/400",
+      "imageUrl": "https://images.unsplash.com/photo-1740995384593-3ad31accf950?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxjaGlsZHJlbiUyMG11c2ljfGVufDB8fHx8MTc2Mzk3MTQ5NHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "children music"
     },
     {
       "id": "program-lessons",
       "description": "A teacher guiding a student playing the piano.",
-      "imageUrl": "https://picsum.photos/seed/103/600/400",
+      "imageUrl": "https://images.unsplash.com/photo-1507838153414-b4b713384a76?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxtdXNpYyUyMGxlc3NvbnxlbnwwfHx8fDE3NjM5NzE0OTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "music lesson"
     },
     {
       "id": "support-volunteer",
       "description": "A group of smiling volunteers at an event.",
-      "imageUrl": "https://picsum.photos/seed/104/600/400",
+      "imageUrl": "https://images.unsplash.com/photo-1758599668337-58bfa42683ce?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8c21pbGluZyUyMHZvbHVudGVlcnN8ZW58MHx8fHwxNzYzOTcxNDk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "smiling volunteers"
     },
     {
       "id": "instructor-1",
       "description": "Professional headshot of instructor Kenji Tanaka.",
-      "imageUrl": "https://picsum.photos/seed/105/200/200",
+      "imageUrl": "https://images.unsplash.com/photo-1719977507164-932fcb300317?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxtYWxlJTIwbXVzaWNpYW58ZW58MHx8fHwxNzYzOTcxNDk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "male musician"
     },
     {
       "id": "instructor-2",
       "description": "Professional headshot of instructor Maria Rossi.",
-      "imageUrl": "https://picsum.photos/seed/106/200/200",
+      "imageUrl": "https://images.unsplash.com/photo-1698648898403-dca4521d8d0a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxmZW1hbGUlMjBjb25kdWN0b3J8ZW58MHx8fHwxNzYzOTcxNDk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "female conductor"
     },
     {
       "id": "instructor-3",
       "description": "Professional headshot of instructor David Chen.",
-      "imageUrl": "https://picsum.photos/seed/107/200/200",
+      "imageUrl": "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxtYWxlJTIwdGVhY2hlcnxlbnwwfHx8fDE3NjM5MjAxMDR8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "male teacher"
     },
     {
       "id": "board-1",
       "description": "Professional headshot of board member Eleanor Vance.",
-      "imageUrl": "https://picsum.photos/seed/131/200/200",
+      "imageUrl": "https://images.unsplash.com/photo-1600275669439-14e40452d20b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxmZW1hbGUlMjBwcm9mZXNzaW9uYWx8ZW58MHx8fHwxNzYzOTQyNTIwfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "female professional"
     },
     {
       "id": "board-2",
       "description": "Professional headshot of board member Samuel Jones.",
-      "imageUrl": "https://picsum.photos/seed/132/200/200",
+      "imageUrl": "https://images.unsplash.com/photo-1724340557729-e4bbb15c63c0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxtYWxlJTIwcHJvZmVzc2lvbmFsfGVufDB8fHx8MTc2MzkzNTMwOXww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "male professional"
     },
     {
       "id": "board-3",
       "description": "Professional headshot of board member Olivia Martinez.",
-      "imageUrl": "https://picsum.photos/seed/133/200/200",
+      "imageUrl": "https://images.unsplash.com/photo-1595475716260-0f2c35f5a40f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxmZW1hbGUlMjBsZWFkZXJ8ZW58MHx8fHwxNzYzOTcxNDk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "female leader"
     },
     {
       "id": "board-4",
       "description": "Professional headshot of board member Benjamin Carter.",
-      "imageUrl": "https://picsum.photos/seed/134/200/200",
+      "imageUrl": "https://images.unsplash.com/photo-1581961533041-ae40f3222c29?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtYWxlJTIwbGVhZGVyfGVufDB8fHx8MTc2Mzk3MTQ5NHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "male leader"
     },
-     {
+    {
       "id": "page-header-orchestras",
       "description": "Wide shot of an orchestra from behind the conductor.",
-      "imageUrl": "https://picsum.photos/seed/108/1200/400",
+      "imageUrl": "https://images.unsplash.com/photo-1732968452564-17a1983f8f71?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxvcmNoZXN0cmElMjBzdGFnZXxlbnwwfHx8fDE3NjM5NzE0OTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "orchestra stage"
     },
     {
       "id": "page-header-upbeat",
       "description": "Colorful abstract image representing sound and joy.",
-      "imageUrl": "https://picsum.photos/seed/109/1200/400",
+      "imageUrl": "https://images.unsplash.com/photo-1706638016791-91ea3646cc62?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjb2xvcmZ1bCUyMGFic3RyYWN0fGVufDB8fHx8MTc2Mzk3MDcxMnww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "colorful abstract"
     },
     {
       "id": "page-header-lessons",
       "description": "Close up on sheet music on a stand.",
-      "imageUrl": "https://picsum.photos/seed/110/1200/400",
+      "imageUrl": "https://images.unsplash.com/photo-1648461513491-c8dc79739211?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxzaGVldCUyMG11c2ljfGVufDB8fHx8MTc2Mzk2MDg2NXww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "sheet music"
     },
-     {
+    {
       "id": "page-header-donate",
       "description": "A person placing money into a donation jar.",
-      "imageUrl": "https://picsum.photos/seed/111/1200/400",
+      "imageUrl": "https://images.unsplash.com/photo-1622428051717-dcd8412959de?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxkb25hdGlvbiUyMGphcnxlbnwwfHx8fDE3NjM5NzE0OTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "donation jar"
     },
     {
       "id": "page-header-support",
       "description": "Hands of different people coming together.",
-      "imageUrl": "https://picsum.photos/seed/112/1200/400",
+      "imageUrl": "https://images.unsplash.com/photo-1704386651981-0729a60da579?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxoYW5kcyUyMHRvZ2V0aGVyfGVufDB8fHx8MTc2Mzk2MDgzMHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "hands together"
     },
     {
       "id": "page-header-register",
       "description": "A person filling out a form with a pen.",
-      "imageUrl": "https://picsum.photos/seed/113/1200/400",
+      "imageUrl": "https://images.unsplash.com/photo-1628181080699-0f81c68d9934?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx3cml0aW5nJTIwZm9ybXxlbnwwfHx8fDE3NjM5MTQzMDR8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "writing form"
     },
     {
       "id": "page-header-calendar",
       "description": "A stylish wall calendar with dates circled.",
-      "imageUrl": "https://picsum.photos/seed/114/1200/400",
+      "imageUrl": "https://images.unsplash.com/photo-1608228079968-c7681afb8f1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHx3YWxsJTIwY2FsZW5kYXJ8ZW58MHx8fHwxNzYzOTcxNDk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "wall calendar"
     },
     {
       "id": "page-header-volunteer",
       "description": "A group of people working together for a cause.",
-      "imageUrl": "https://picsum.photos/seed/115/1200/400",
+      "imageUrl": "https://images.unsplash.com/photo-1758599668234-68f52db62425?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHx2b2x1bnRlZXJzJTIwY29tbXVuaXR5fGVufDB8fHx8MTc2Mzg4NDUwMXww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "volunteers community"
     },
     {
       "id": "page-header-privacy",
       "description": "A padlock icon symbolizing security.",
-      "imageUrl": "https://picsum.photos/seed/116/1200/400",
+      "imageUrl": "https://images.unsplash.com/photo-1659353670522-674c7cc8a969?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxzZWN1cml0eSUyMHByaXZhY3l8ZW58MHx8fHwxNzYzOTcxNDk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "security privacy"
     },
     {
       "id": "page-header-terms",
       "description": "A document with a gavel, representing legal terms.",
-      "imageUrl": "https://picsum.photos/seed/117/1200/400",
+      "imageUrl": "https://images.unsplash.com/photo-1562564055-71e051d33c19?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxsZWdhbCUyMGRvY3VtZW50fGVufDB8fHx8MTc2Mzk1NDIxOXww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "legal document"
     },
     {
       "id": "page-header-hiring",
       "description": "People shaking hands in a professional setting.",
-      "imageUrl": "https://picsum.photos/seed/118/1200/400",
+      "imageUrl": "https://images.unsplash.com/photo-1745847768380-2caeadbb3b71?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwcm9mZXNzaW9uYWwlMjBoYW5kc2hha2V8ZW58MHx8fHwxNzYzOTcxNDk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "professional handshake"
     },
     {
       "id": "page-header-conditions",
       "description": "A magnifying glass over a document.",
-      "imageUrl": "https://picsum.photos/seed/119/1200/400",
+      "imageUrl": "https://images.unsplash.com/photo-1758519288372-045de3f65147?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxkb2N1bWVudCUyMHJldmlld3xlbnwwfHx8fDE3NjM5NzE0OTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "document review"
     },
     {
       "id": "orchestra-kids-playing",
       "description": "Young musicians playing various instruments in an orchestra.",
-      "imageUrl": "https://picsum.photos/seed/120/600/400",
+      "imageUrl": "https://images.unsplash.com/photo-1730636106465-5bf686631564?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHx5b3VuZyUyMG9yY2hlc3RyYXxlbnwwfHx8fDE3NjM5NzE0OTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "young orchestra"
     },
     {
       "id": "upbeat-kids-smiling",
       "description": "Happy children holding violins in a group.",
-      "imageUrl": "https://picsum.photos/seed/121/600/400",
+      "imageUrl": "https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxoYXBweSUyMGNoaWxkcmVufGVufDB8fHx8MTc2Mzk3MTQ5NHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "happy children"
     },
     {
       "id": "lessons-teacher-student",
       "description": "A teacher helping a young student with a cello.",
-      "imageUrl": "https://picsum.photos/seed/122/600/400",
+      "imageUrl": "https://images.unsplash.com/photo-1611597585711-62f80429a8fb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bXVzaWMlMjBsZXNzb258ZW58MHx8fHwxNzYzOTcxNDk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "music lesson"
     },
     {
       "id": "donate-why-it-matters",
       "description": "A close-up shot of a young student's hands playing the violin.",
-      "imageUrl": "https://picsum.photos/seed/123/600/400",
+      "imageUrl": "https://images.unsplash.com/photo-1638190559606-27646c25571f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Y2hpbGQlMjB2aW9saW58ZW58MHx8fHwxNzYzOTcxNDk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "child violin"
     },
     {
       "id": "volunteer-cta",
       "description": "A diverse group of volunteers smiling for a photo.",
-      "imageUrl": "https://picsum.photos/seed/124/600/400",
+      "imageUrl": "https://images.unsplash.com/photo-1743793174491-bcbdf1882ad5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxkaXZlcnNlJTIwdm9sdW50ZWVyc3xlbnwwfHx8fDE3NjM5NzE0OTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "diverse volunteers"
     },
     {
       "id": "support-cta",
       "description": "Audience applauding at a concert.",
-      "imageUrl": "https://picsum.photos/seed/125/600/400",
+      "imageUrl": "https://images.unsplash.com/photo-1669627137761-f7daba0d2a30?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxhdWRpZW5jZSUyMGFwcGxhdWRpbmd8ZW58MHx8fHwxNzYzOTcxNDk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "audience applauding"
     },
     {
       "id": "home-news",
       "description": "A newspaper open to the arts section.",
-      "imageUrl": "https://picsum.photos/seed/126/600/400",
+      "imageUrl": "https://images.unsplash.com/photo-1541613569553-332a2574a508?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxhcnRzJTIwbmV3c3BhcGVyfGVufDB8fHx8MTc2Mzk3MTQ5NHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "arts newspaper"
     },
     {
       "id": "home-financial-aid",
       "description": "A smiling student holding a violin case.",
-      "imageUrl": "https://picsum.photos/seed/127/600/400",
+      "imageUrl": "https://images.unsplash.com/photo-1599534512267-7f5999a8b579?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxzdHVkZW50JTIwdmlvbGlufGVufDB8fHx8MTc2Mzk3MTQ5NHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "student violin"
     },
     {
       "id": "page-header-accuracy",
       "description": "A dashboard with charts and graphs, representing data and metrics.",
-      "imageUrl": "https://picsum.photos/seed/128/1200/400",
+      "imageUrl": "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxkYXRhJTIwZGFzaGJvYXJkfGVufDB8fHx8MTc2MzkwNTE1N3ww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "data dashboard"
     },
     {
       "id": "page-header-accessibility",
       "description": "An icon representing universal access and inclusivity.",
-      "imageUrl": "https://picsum.photos/seed/129/1200/400",
+      "imageUrl": "https://images.unsplash.com/photo-1642480485642-63b9018eadc2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxhY2Nlc3NpYmlsaXR5JTIwaWNvbnxlbnwwfHx8fDE3NjM5NzE0OTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "accessibility icon"
     },
     {
       "id": "page-header-internal",
       "description": "A secure door with keycard access, symbolizing an internal area.",
-      "imageUrl": "https://picsum.photos/seed/130/1200/400",
+      "imageUrl": "https://images.unsplash.com/photo-1760815457815-9ee5b27efe7b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxzZWN1cmUlMjBhY2Nlc3N8ZW58MHx8fHwxNzYzOTcxNDk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "secure access"
     },
     {
       "id": "page-header-protection",
       "description": "A shield icon representing protection and safety.",
-      "imageUrl": "https://picsum.photos/seed/135/1200/400",
+      "imageUrl": "https://images.unsplash.com/photo-1702623945459-d2ebfec1ca31?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxzaGllbGQlMjBwcm90ZWN0aW9ufGVufDB8fHx8MTc2Mzk3MTQ5NHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "shield protection"
+    },
+    {
+      "id": "kyo-logo",
+      "description": "The official logo for the Kawartha Youth Orchestra.",
+      "imageUrl": "https://images.unsplash.com/photo-1590054387835-ab72678fef01?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxvcmNoZXN0cmElMjBsb2dvfGVufDB8fHx8MTc2Mzk3MTQ5NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "orchestra logo"
     }
   ]
 }
