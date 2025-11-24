@@ -9,6 +9,7 @@ export type Announcement = {
   excerpt: string;
   pinned?: boolean;
   content: string;
+  disappearsAt?: string;
 };
 
 // Raw data from the JSON file
@@ -45,6 +46,7 @@ export function addAnnouncement(
     id: Math.max(0, ...currentAnnouncements.map(a => a.id)) + 1,
     date: format(new Date(), 'yyyy-MM-dd'),
     excerpt: newAnnouncementData.content.substring(0, 100) + '...',
+    disappearsAt: newAnnouncementData.disappearsAt ? format(new Date(newAnnouncementData.disappearsAt), 'yyyy-MM-dd') : undefined,
   };
   return sortAnnouncements([newAnnouncement, ...currentAnnouncements]);
 }

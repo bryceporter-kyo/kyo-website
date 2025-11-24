@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, CalendarIcon } from "lucide-react";
 import Link from "next/link";
 import { getAnnouncements, addAnnouncement, deleteAnnouncement, updateAnnouncement } from "@/lib/announcements";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -31,12 +31,16 @@ import {
 import type { Announcement } from "@/lib/announcements";
 import React from "react";
 import { format } from "date-fns";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 
 const announcementSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters long."),
   content: z.string().min(20, "Content must be at least 20 characters long."),
   imageUrl: z.any().optional(),
   pinned: z.boolean().default(false),
+  disappearsAt: z.date().optional(),
 });
 
 export default function AnnouncementsAdminPage() {
@@ -123,6 +127,7 @@ export default function AnnouncementsAdminPage() {
                             <TableRow>
                                 <TableHead>Title</TableHead>
                                 <TableHead className="w-[100px] text-center">Pinned</TableHead>
+                                <TableHead>Expires</TableHead>
                                 <TableHead className="text-right w-[150px]">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -136,6 +141,9 @@ export default function AnnouncementsAdminPage() {
                                             onCheckedChange={() => handlePinToggle(announcement.id)}
                                             aria-label="Pin announcement"
                                         />
+                                    </TableCell>
+                                    <TableCell>
+                                        {announcement.disappearsAt ? format(new Date(announcement.disappearsAt), "PPP") : 'Never'}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <Button variant="ghost" size="icon">
@@ -247,6 +255,50 @@ export default function AnnouncementsAdminPage() {
                                             />
                                         </FormControl>
                                     </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="disappearsAt"
+                                render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                    <FormLabel>Expiration Date</FormLabel>
+                                    <Popover>
+                                    <PopoverTrigger asChild>
+                                        <FormControl>
+                                        <Button
+                                            variant={"outline"}
+                                            className={cn(
+                                            "w-[240px] pl-3 text-left font-normal",
+                                            !field.value && "text-muted-foreground"
+                                            )}
+                                        >
+                                            {field.value ? (
+                                            format(field.value, "PPP")
+                                            ) : (
+                                            <span>Pick a date</span>
+                                            )}
+                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                        </Button>
+                                        </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                        <Calendar
+                                            mode="single"
+                                            selected={field.value}
+                                            onSelect={field.onChange}
+                                            disabled={(date) =>
+                                                date < new Date()
+                                            }
+                                            initialFocus
+                                        />
+                                    </PopoverContent>
+                                    </Popover>
+                                    <FormDescription>
+                                        Set a date for this announcement to be unpinned or hidden. Leave blank for it to never expire.
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
                                 )}
                             />
 
