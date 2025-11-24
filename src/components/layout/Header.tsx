@@ -8,7 +8,7 @@ import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger as SheetTriggerPrimitive } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger as SheetTriggerPrimitive } from '@/components/ui/sheet';
 import { Logo } from '@/components/icons/Logo';
 import { cn } from '@/lib/utils';
 import {
@@ -160,16 +160,17 @@ export default function Header() {
               </Button>
             </SheetTriggerPrimitive>
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-              <div className="p-4">
-                <div className="flex justify-between items-center mb-6">
-                    <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>
-                        <Logo />
-                    </Link>
-                    <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}>
-                        <X className="h-6 w-6" />
-                        <span className="sr-only">Close menu</span>
-                    </Button>
-                </div>
+              <SheetHeader className="p-4 flex flex-row justify-between items-center space-y-0 mb-2">
+                <SheetTitle className="sr-only">Mobile Navigation</SheetTitle>
+                <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Logo />
+                </Link>
+                <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}>
+                    <X className="h-6 w-6" />
+                    <span className="sr-only">Close menu</span>
+                </Button>
+              </SheetHeader>
+              <div className="p-4 pt-0">
                 <nav className="flex flex-col gap-4">
                   {navLinks.map((link) => (
                      link.subLinks ? (
@@ -190,7 +191,7 @@ export default function Header() {
                         <Link
                             key={link.name}
                             href={link.href!}
-                            className="text-lg font-medium"
+                            className="text-lg font-medium px-4 py-2"
                             onClick={() => setIsMobileMenuOpen(false)}
                         >
                             {link.name}
