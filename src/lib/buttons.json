@@ -5,61 +5,71 @@
       "id": "hero-register-orchestra",
       "location": "Homepage Hero Carousel",
       "text": "Register for Orchestras",
-      "linkId": "register"
+      "linkId": "register",
+      "visible": true
     },
     {
       "id": "hero-register-upbeat",
       "location": "Homepage Hero Carousel",
       "text": "Register for Upbeat!",
-      "linkId": "register-upbeat"
+      "linkId": "register-upbeat",
+      "visible": true
     },
     {
       "id": "home-financial-aid-register",
       "location": "Homepage Financial Aid Section",
       "text": "Register Now",
-      "linkId": "register"
+      "linkId": "register",
+      "visible": true
     },
     {
       "id": "orchestras-register",
       "location": "Orchestras Page",
       "text": "Register for 2025-2026",
-      "linkId": "register"
+      "linkId": "register",
+      "visible": true
     },
     {
       "id": "orchestras-audition",
       "location": "Orchestras Page",
       "text": "Sign Up for an Audition",
-      "linkId": "register"
+      "linkId": "register",
+      "visible": true
     },
     {
       "id": "lessons-register-main",
       "location": "Lessons Page (Main CTA)",
       "text": "Start Your Musical Journey",
-      "linkId": "register"
+      "linkId": "register",
+      "visible": true
     },
     {
       "id": "lessons-register-secondary",
       "location": "Lessons Page (Secondary CTA)",
       "text": "Register for Lessons",
-      "linkId": "register"
+      "linkId": "register",
+      "visible": true
     },
     {
       "id": "upbeat-enroll",
       "location": "UpBeat! Page",
       "text": "Enroll in UpBeat!",
-      "linkId": "register-upbeat"
+      "linkId": "register-upbeat",
+      "visible": true
     },
     {
       "id": "volunteer-signup",
       "location": "Volunteer Page (Main CTA)",
       "text": "Sign Up to Volunteer",
-      "linkId": "register"
+      "linkId": "register",
+      "visible": true
     },
     {
       "id": "volunteer-signup-secondary",
       "location": "Volunteer Page (Secondary CTA)",
       "text": "Become a Volunteer Today",
-      "linkId": "register"
+      "linkId": "register",
+      "visible": true
     }
   ]
 }

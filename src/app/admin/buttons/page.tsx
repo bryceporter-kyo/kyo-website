@@ -1,6 +1,7 @@
 
 "use client";
 
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -9,20 +10,37 @@ import Link from "next/link";
 import buttonData from "@/lib/buttons.json";
 import { links as allLinks } from "@/lib/links";
 import type { ExternalLink } from "@/lib/links";
+import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 type ButtonInfo = {
     id: string;
     location: string;
     text: string;
     linkId: string;
+    visible: boolean;
 };
 
-const buttons: ButtonInfo[] = buttonData.buttons;
+const initialButtons: ButtonInfo[] = buttonData.buttons;
 
 export default function ButtonsAdminPage() {
+    const { toast } = useToast();
+    const [buttons, setButtons] = React.useState<ButtonInfo[]>(initialButtons);
     
     const getLinkForButton = (linkId: string): ExternalLink | undefined => {
         return allLinks.find(link => link.id === linkId);
+    }
+
+    const handleVisibilityChange = (buttonId: string, isVisible: boolean) => {
+        const updatedButtons = buttons.map(button => 
+            button.id === buttonId ? { ...button, visible: isVisible } : button
+        );
+        setButtons(updatedButtons);
+        toast({
+            title: "Button Visibility Updated",
+            description: `The button is now ${isVisible ? 'visible' : 'hidden'}.`,
+        });
     }
 
     return (
@@ -40,7 +58,7 @@ export default function ButtonsAdminPage() {
                 <CardHeader>
                     <CardTitle className="font-headline text-2xl">Manage Site Buttons</CardTitle>
                     <CardDescription>
-                        This page lists the primary call-to-action buttons across the website. The links for these buttons are managed in the "External Links" section. Click "Edit Link" to be taken to the appropriate link for editing.
+                        This page lists the primary call-to-action buttons across the website. Use the toggle to control their visibility on the site. The links for these buttons are managed in the "External Links" section.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -50,7 +68,8 @@ export default function ButtonsAdminPage() {
                                 <TableHead>Location</TableHead>
                                 <TableHead>Button Text</TableHead>
                                 <TableHead>Current URL</TableHead>
-                                <TableHead className="text-right w-[150px]">Actions</TableHead>
+                                <TableHead className="w-[100px] text-center">Status</TableHead>
+                                <TableHead className="text-right w-[200px]">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -69,7 +88,20 @@ export default function ButtonsAdminPage() {
                                             <span className="text-muted-foreground">Link not found</span>
                                         )}
                                     </TableCell>
-                                    <TableCell className="text-right">
+                                    <TableCell className="text-center">
+                                         <Badge variant={button.visible ? 'default' : 'secondary'}>
+                                            {button.visible ? 'Visible' : 'Hidden'}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell className="text-right flex items-center justify-end gap-2">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm text-muted-foreground">Hide</span>
+                                                <Switch
+                                                    checked={!button.visible}
+                                                    onCheckedChange={(checked) => handleVisibilityChange(button.id, !checked)}
+                                                    aria-label={`Toggle visibility for ${button.text}`}
+                                                />
+                                        </div>
                                         <Button asChild variant="outline" size="sm">
                                             <Link href={`/admin/links#${button.linkId}`}>
                                                 <Edit className="mr-2 h-4 w-4"/>
