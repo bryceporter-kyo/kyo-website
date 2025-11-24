@@ -70,8 +70,8 @@ export default function SitemapPage() {
                                 {mainSections.map(section => (
                                     <li key={section.name}>
                                         {section.href ? (
-                                            <Link href={section.href} className="flex items-center text-primary hover:underline">
-                                                <ChevronRight className="w-4 h-4 mr-2" />
+                                            <Link href={section.href} className="flex items-start text-primary hover:underline">
+                                                <ChevronRight className="w-4 h-4 mr-2 mt-1 flex-shrink-0" />
                                                 <span>{section.name}</span>
                                             </Link>
                                         ) : (
@@ -81,8 +81,8 @@ export default function SitemapPage() {
                                             <ul className="pl-6 mt-2 space-y-2 border-l ml-2">
                                                 {section.subLinks.map(subLink => (
                                                     <li key={subLink.name}>
-                                                        <Link href={subLink.href} className="flex items-center text-primary hover:underline">
-                                                            <ChevronRight className="w-4 h-4 mr-2" />
+                                                        <Link href={subLink.href} className="flex items-start text-primary hover:underline">
+                                                            <ChevronRight className="w-4 h-4 mr-2 mt-1 flex-shrink-0" />
                                                             <span>{subLink.name}</span>
                                                         </Link>
                                                     </li>
@@ -103,8 +103,8 @@ export default function SitemapPage() {
                             <ul className="space-y-2">
                                 {legalSections.map(link => (
                                     <li key={link.name}>
-                                        <Link href={link.href} className="flex items-center text-primary hover:underline">
-                                            <ChevronRight className="w-4 h-4 mr-2" />
+                                        <Link href={link.href} className="flex items-start text-primary hover:underline">
+                                            <ChevronRight className="w-4 h-4 mr-2 mt-1 flex-shrink-0" />
                                             <span>{link.name}</span>
                                         </Link>
                                     </li>
@@ -122,15 +122,15 @@ export default function SitemapPage() {
                                 <ul className="space-y-2">
                                     {utilitySections.map(link => (
                                         <li key={link.name}>
-                                            <Link href={link.href} className="flex items-center text-primary hover:underline">
-                                                <ChevronRight className="w-4 h-4 mr-2" />
+                                            <Link href={link.href} className="flex items-start text-primary hover:underline">
+                                                <ChevronRight className="w-4 h-4 mr-2 mt-1 flex-shrink-0" />
                                                 <span>{link.name}</span>
                                             </Link>
                                         </li>
                                     ))}
                                     <li>
-                                        <Link href="/sitemap" className="flex items-center text-primary hover:underline">
-                                            <ChevronRight className="w-4 h-4 mr-2" />
+                                        <Link href="/sitemap" className="flex items-start text-primary hover:underline">
+                                            <ChevronRight className="w-4 h-4 mr-2 mt-1 flex-shrink-0" />
                                             <span>Sitemap</span>
                                         </Link>
                                     </li>
@@ -145,14 +145,14 @@ export default function SitemapPage() {
                             <CardContent>
                                 <ul className="space-y-2">
                                      <li>
-                                        <a href="https://docs.google.com/forms/d/e/1FAIpQLSf3tGbfSdo8jdVtx85G7BbX0c4AVxTgRUviCLkhbBDbXia19A/viewform?usp=sf_link" target="_blank" rel="noopener noreferrer" className="flex items-center text-primary hover:underline">
-                                            <ExternalLink className="w-4 h-4 mr-2" />
+                                        <a href="https://docs.google.com/forms/d/e/1FAIpQLSf3tGbfSdo8jdVtx85G7BbX0c4AVxTgRUviCLkhbBDbXia19A/viewform?usp=sf_link" target="_blank" rel="noopener noreferrer" className="flex items-start text-primary hover:underline">
+                                            <ExternalLink className="w-4 h-4 mr-2 mt-1 flex-shrink-0" />
                                             <span>Main Registration Form</span>
                                         </a>
                                     </li>
                                      <li>
-                                        <a href="https://forms.gle/tUwncYLCnuALW8FT7" target="_blank" rel="noopener noreferrer" className="flex items-center text-primary hover:underline">
-                                            <ExternalLink className="w-4 h-4 mr-2" />
+                                        <a href="https://forms.gle/tUwncYLCnuALW8FT7" target="_blank" rel="noopener noreferrer" className="flex items-start text-primary hover:underline">
+                                            <ExternalLink className="w-4 h-4 mr-2 mt-1 flex-shrink-0" />
                                             <span>Upbeat! Registration Form</span>
                                         </a>
                                     </li>
