@@ -108,7 +108,7 @@ export default function Header() {
         >
           <NavigationMenuList>
             {navLinks.map((link) => (
-              <NavigationMenuItem key={link.name}>
+              <NavigationMenuItem key={link.name} value={link.name}>
                 {link.subLinks ? (
                   <>
                     <NavigationMenuTrigger>
