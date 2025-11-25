@@ -7,7 +7,7 @@ import PageHeader from '@/components/shared/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Users, HandHeart, Music, Award, University, GraduationCap, Briefcase, FileText, Cpu, Library, Star, Handshake } from 'lucide-react';
+import { Users, HandHeart, Music, Award, University, GraduationCap, Briefcase, FileText, Cpu, Library, Star, Handshake, School } from 'lucide-react';
 import Image from 'next/image';
 import { getLinkById } from '@/lib/links';
 import buttonData from '@/lib/buttons.json';
@@ -331,7 +331,7 @@ export default function OrchestrasPage() {
               <div className="text-center mb-12">
                 <h2 className="text-3xl font-headline font-bold">Financial Aid & Scholarships</h2>
                 <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
-                  We are committed to making music education accessible. All our programs operate on a two-tiered subsidy system: a universal subsidy keeps fees low for everyone, and additional income-based bursaries ensure no student is turned away due to financial need.
+                  We are committed to making music education accessible. Our two-tiered subsidy system, featuring a universal subsidy to keep fees low for everyone and additional income-based bursaries, ensures no student is turned away due to financial need.
                 </p>
             </div>
             <div className="max-w-4xl mx-auto space-y-12">
@@ -436,3 +436,5 @@ export default function OrchestrasPage() {
     </div>
   );
 }
+
+    
