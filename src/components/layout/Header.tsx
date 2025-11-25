@@ -1,25 +1,21 @@
-
 "use client";
 
 import * as React from "react";
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X } from 'lucide-react';
+import { Menu } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger as SheetTriggerPrimitive } from '@/components/ui/sheet';
 import { Logo } from '@/components/icons/Logo';
 import { cn } from '@/lib/utils';
 import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu"
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { getLinkById } from '@/lib/links';
 import type { ExternalLink } from '@/lib/links';
 
@@ -52,40 +48,15 @@ const navLinks = [
   { name: 'Contact', href: '/contact' },
 ];
 
-const ListItem = React.forwardRef<
-  React.ElementRef<"a">,
-  React.ComponentPropsWithoutRef<"a">
->(({ className, title, children, href, ...props }, ref) => {
-  return (
-    <li>
-      <NavigationMenuLink asChild>
-        <Link
-          href={href!}
-          ref={ref}
-          className={cn(
-            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-            className
-          )}
-          {...props}
-        >
-          <div className="text-sm font-medium leading-none">{title}</div>
-          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-            {children}
-          </p>
-        </Link>
-      </NavigationMenuLink>
-    </li>
-  )
-})
-ListItem.displayName = "ListItem"
-
-
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const pathname = usePathname();
   const [registrationLink, setRegistrationLink] = useState<ExternalLink | undefined>(undefined);
 
   useEffect(() => {
+    setIsMounted(true);
     const link = getLinkById('register');
     if (link) {
       setRegistrationLink(link);
@@ -101,41 +72,54 @@ export default function Header() {
             </Link>
         </div>
 
-
         {/* Desktop Navigation */}
-        <NavigationMenu
-          className="hidden md:flex"
-        >
-          <NavigationMenuList>
+        {isMounted && (
+          <nav className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
-              <NavigationMenuItem key={link.name} value={link.name}>
-                {link.subLinks ? (
-                  <>
-                    <NavigationMenuTrigger>
-                        {link.name}
-                    </NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <ul className="grid w-[400px] gap-3 p-4 md:w-[200px] lg:w-[250px] ">
-                        {link.subLinks.map((subLink) => (
-                           <ListItem key={subLink.name} href={subLink.href} title={subLink.name} />
-                        ))}
-                      </ul>
-                    </NavigationMenuContent>
-                  </>
-                ) : (
-                   <NavigationMenuLink asChild>
-                     <Link
-                      href={link.href!}
-                      className={cn(navigationMenuTriggerStyle(), pathname === link.href ? 'font-bold' : '')}
-                    >
+              link.subLinks ? (
+                <DropdownMenu 
+                  key={link.name}
+                  open={openDropdown === link.name}
+                  onOpenChange={(open) => setOpenDropdown(open ? link.name : null)}
+                >
+                  <DropdownMenuTrigger 
+                    asChild
+                    onPointerEnter={() => setOpenDropdown(link.name)}
+                    onPointerLeave={() => setOpenDropdown(null)}
+                  >
+                    <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 cursor-default">
                       {link.name}
-                    </Link>
-                   </NavigationMenuLink>
-                )}
-              </NavigationMenuItem>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent 
+                    align="start"
+                    onPointerEnter={() => setOpenDropdown(link.name)}
+                    onPointerLeave={() => setOpenDropdown(null)}
+                  >
+                    {link.subLinks.map((subLink) => (
+                      <DropdownMenuItem key={subLink.name} asChild>
+                        <Link href={subLink.href} className="cursor-pointer">
+                          {subLink.name}
+                        </Link>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Link
+                  key={link.name}
+                  href={link.href!}
+                  className={cn(
+                    "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2",
+                    pathname === link.href ? 'font-bold' : ''
+                  )}
+                >
+                  {link.name}
+                </Link>
+              )
             ))}
-          </NavigationMenuList>
-        </NavigationMenu>
+          </nav>
+        )}
 
         <div className="hidden md:flex items-center gap-4">
           {registrationLink && (

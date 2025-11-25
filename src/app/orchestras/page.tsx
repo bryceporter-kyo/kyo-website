@@ -7,10 +7,11 @@ import PageHeader from '@/components/shared/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Users, HandHeart, Music, Award, University, GraduationCap } from 'lucide-react';
+import { Users, HandHeart, Music, Award, University, GraduationCap, Briefcase, FileText, Cpu } from 'lucide-react';
 import Image from 'next/image';
 import { getLinkById } from '@/lib/links';
 import buttonData from '@/lib/buttons.json';
+import ProgramPathways from '@/components/shared/ProgramPathways';
 
 type ButtonConfig = {
     id: string;
@@ -70,6 +71,43 @@ const scholarships = [
         description: "Recognizes a KYO youth musician who demonstrates a high level of commitment, leadership, and support for music and the arts in the wider community."
     }
 ]
+
+const supplementaryEnsembles = [
+    {
+        title: "Junior Folk Ensemble",
+        description: "Explore Celtic and global folk traditions. Open to strings, flute, harp, guitar, percussion, voice, and more.",
+        icon: Users
+    },
+    {
+        title: "Senior Jazz Combo",
+        description: "Dive into swing, blues, and Latin music. Focus on improvisation and accompaniment in a small group setting.",
+        icon: Music
+    },
+    {
+        title: "Senior Chamber Music",
+        description: "Receive small ensemble coaching from professional musicians. For confident classical players, including piano and guitar.",
+        icon: University
+    }
+];
+
+const creativeCourses = [
+    {
+        title: "Digital Music Production",
+        description: "Learn to record, edit, and produce music in any genre using modern digital audio workstations (DAWs).",
+        icon: Cpu
+    },
+    {
+        title: "Music Theory",
+        description: "Go beyond the basics with courses on harmony, form, analysis, and musical styles from different eras.",
+        icon: FileText
+    },
+    {
+        title: "Composition",
+        description: "Write your own original music for soloists and chamber groups with guidance on score preparation and coaching.",
+        icon: Briefcase
+    }
+];
+
 
 export default function OrchestrasPage() {
   const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-orchestras');
@@ -189,35 +227,74 @@ export default function OrchestrasPage() {
             </div>
         </div>
       </section>
+      
+      <ProgramPathways />
 
-       <section>
+       <section className="bg-secondary">
         <div className="container mx-auto">
             <div className="text-center mb-12">
-                <h2 className="text-3xl font-headline font-bold">Supplemental Courses</h2>
+                <h2 className="text-3xl font-headline font-bold">Creative & Supplementary Programs</h2>
                 <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
-                    Broaden your musical horizons with our digital courses. These flexible online classes are available for all ages with no prior experience necessary.
+                    Broaden your musical horizons with our specialized ensembles and creative courses, available for all ages with no prior experience necessary for many.
                 </p>
             </div>
-            <Card className="max-w-3xl mx-auto transition-all duration-300 hover:shadow-lg hover:border-primary/50">
-                <CardHeader className="items-center text-center">
-                    <div className="bg-primary text-primary-foreground p-4 rounded-full w-fit">
-                        <University className="h-8 w-8" />
+            <div className="space-y-12">
+                 <div>
+                    <h3 className="text-2xl font-headline font-bold text-center mb-8">Supplementary Ensembles</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {supplementaryEnsembles.map((ensemble) => (
+                             <Card key={ensemble.title} className="text-center flex flex-col transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                                <CardHeader className="items-center">
+                                    <div className="bg-primary text-primary-foreground p-4 rounded-full">
+                                        <ensemble.icon className="h-8 w-8" />
+                                    </div>
+                                    <CardTitle className="font-headline text-xl pt-4">{ensemble.title}</CardTitle>
+                                </CardHeader>
+                                <CardContent className="flex-grow">
+                                    <p className="text-muted-foreground">{ensemble.description}</p>
+                                </CardContent>
+                                {registerButton && (
+                                    <CardFooter className="justify-center">
+                                         <Button asChild variant="outline">
+                                            <Link href={registerButton.href} target={registerButton.target} rel={registerButton.target === '_blank' ? 'noopener noreferrer' : ''}>Learn More & Register</Link>
+                                        </Button>
+                                    </CardFooter>
+                                )}
+                            </Card>
+                        ))}
                     </div>
-                    <CardTitle className="font-headline text-2xl pt-4">Digital Courses for All Ages</CardTitle>
-                </CardHeader>
-                <CardContent className="text-center">
-                    <p className="text-muted-foreground mb-6">Explore topics like Composition, Music Theory, Instrument Practice, and Film Scoring from the comfort of your home. These courses are designed to complement your ensemble experience and deepen your musical understanding.</p>
-                     {registerButton && (
-                        <Button asChild size="lg">
-                          <Link href={registerButton.href} target={registerButton.target} rel={registerButton.target === '_blank' ? 'noopener noreferrer' : ''}>Register for a Course</Link>
-                      </Button>
-                     )}
-                </CardContent>
-            </Card>
+                </div>
+
+                <div>
+                    <h3 className="text-2xl font-headline font-bold text-center mb-8">Creative Courses</h3>
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {creativeCourses.map((course) => (
+                             <Card key={course.title} className="text-center flex flex-col transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                                <CardHeader className="items-center">
+                                    <div className="bg-primary text-primary-foreground p-4 rounded-full">
+                                        <course.icon className="h-8 w-8" />
+                                    </div>
+                                    <CardTitle className="font-headline text-xl pt-4">{course.title}</CardTitle>
+                                </CardHeader>
+                                <CardContent className="flex-grow">
+                                    <p className="text-muted-foreground">{course.description}</p>
+                                </CardContent>
+                                {registerButton && (
+                                    <CardFooter className="justify-center">
+                                        <Button asChild variant="outline">
+                                            <Link href={registerButton.href} target={registerButton.target} rel={registerButton.target === '_blank' ? 'noopener noreferrer' : ''}>Enroll Now</Link>
+                                        </Button>
+                                    </CardFooter>
+                                )}
+                            </Card>
+                        ))}
+                    </div>
+                </div>
+            </div>
         </div>
       </section>
 
-      <section className="bg-secondary">
+      <section>
           <div className="container mx-auto">
               <div className="text-center mb-12">
                 <h2 className="text-3xl font-headline font-bold">Financial Aid & Scholarships</h2>
