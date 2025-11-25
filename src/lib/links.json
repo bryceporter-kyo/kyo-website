@@ -53,13 +53,13 @@
     },
     {
       "id": "contact-instrument-donation",
-      "name": "Contact - Instrument Donation Email",
-      "url": "mailto:contactus@thekyo.ca"
+      "name": "Contact - Instrument Donation",
+      "url": "/contact"
     },
     {
       "id": "contact-custom-donation",
-      "name": "Contact - Custom Donation Email",
-      "url": "mailto:contactus@thekyo.ca"
+      "name": "Contact - Custom Donation",
+      "url": "/contact"
     },
     {
       "id": "tenuto-trust",
@@ -179,7 +179,7 @@
     {
       "id": "contact-main",
       "name": "Contact - Main Email",
-      "url": "mailto:contactus@thekyo.ca"
+      "url": "/contact"
     },
     {
       "id": "contact-phone",

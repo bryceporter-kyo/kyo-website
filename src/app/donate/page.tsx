@@ -229,7 +229,7 @@ export default function DonatePage() {
                           <CardContent>
                               <p className="text-muted-foreground">{method.description}</p>
                               {methodLink ? (
-                                <Link href={methodLink.url} className="font-mono text-sm bg-muted p-2 rounded-md mt-4 block break-words hover:bg-muted/80">{method.details}</Link>
+                                <a href={methodLink.url} className="font-mono text-sm bg-muted p-2 rounded-md mt-4 block break-words hover:bg-muted/80">{method.details}</a>
                               ) : (
                                 <p className="font-mono text-sm bg-muted p-2 rounded-md mt-4 break-words">{method.details}</p>
                               )}
