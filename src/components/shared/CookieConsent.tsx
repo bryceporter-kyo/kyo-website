@@ -104,7 +104,7 @@ export default function CookieConsent() {
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="analytics">
-                        <AccordionTrigger asChild>
+                        <AccordionTrigger>
                             <div className="flex w-full items-center justify-between">
                                 <span className="font-bold py-4 hover:underline">Analytics Cookies</span>
                                  <Switch 
@@ -120,7 +120,7 @@ export default function CookieConsent() {
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="functional">
-                         <AccordionTrigger asChild>
+                         <AccordionTrigger>
                              <div className="flex w-full items-center justify-between">
                                 <span className="font-bold py-4 hover:underline">Functional Cookies</span>
                                  <Switch 
