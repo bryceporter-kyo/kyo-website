@@ -13,7 +13,6 @@ import ContactInfoCard from "@/components/shared/ContactInfoCard";
 export default function ContactPage() {
     const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-support');
     const phoneLink = getLinkById('contact-phone');
-    const emailLink = getLinkById('contact-main');
     const facebookLink = getLinkById('social-facebook');
     const instagramLink = getLinkById('social-instagram');
 
@@ -57,15 +56,13 @@ export default function ContactPage() {
                             </div>
                             <div className="flex items-center gap-4 text-lg">
                                 <Mail className="w-6 h-6 text-primary"/>
-                                 {emailLink ? <a href={emailLink.url} className="hover:text-primary">{emailLink.url.replace('mailto:', '')}</a> : "contactus@thekyo.ca"}
+                                 <a href="mailto:contactus@thekyo.ca" className="hover:text-primary">contactus@thekyo.ca</a>
                             </div>
                         </CardContent>
                         <div className="p-6 pt-0">
-                            {emailLink && (
-                                <Button asChild className="w-full">
-                                    <Link href={emailLink.url}>Send us an email</Link>
-                                </Button>
-                            )}
+                            <Button asChild className="w-full">
+                                <Link href="mailto:contactus@thekyo.ca">Send us an email</Link>
+                            </Button>
                         </div>
                     </Card>
                 </div>
