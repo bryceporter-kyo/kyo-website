@@ -84,7 +84,6 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const [registrationLink, setRegistrationLink] = useState<ExternalLink | undefined>(undefined);
-  const [activeMenu, setActiveMenu] = useState<string | null>(null);
 
   useEffect(() => {
     const link = getLinkById('register');
@@ -107,15 +106,14 @@ export default function Header() {
         <NavigationMenu
           className="hidden md:flex"
         >
-          <NavigationMenuList onMouseLeave={() => setActiveMenu(null)}>
+          <NavigationMenuList>
             {navLinks.map((link) => (
               <NavigationMenuItem key={link.name} value={link.name}>
                 {link.subLinks ? (
                   <>
                     <NavigationMenuTrigger
-                        onMouseEnter={() => setActiveMenu(link.name)}
                         onClick={(e) => e.preventDefault()}
-                        className={cn(navigationMenuTriggerStyle(), "cursor-default", activeMenu === link.name && "bg-accent/50")}
+                        className={cn(navigationMenuTriggerStyle(), "cursor-default")}
                     >
                         {link.name}
                     </NavigationMenuTrigger>
@@ -131,7 +129,6 @@ export default function Header() {
                    <NavigationMenuLink asChild>
                      <Link
                       href={link.href!}
-                      onMouseEnter={() => setActiveMenu(null)}
                       className={cn(navigationMenuTriggerStyle(), pathname === link.href ? 'font-bold' : '')}
                     >
                       {link.name}
