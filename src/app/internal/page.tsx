@@ -121,39 +121,41 @@ export default function InternalPage() {
             {internalSections.map(section => {
                 const driveLink = getLinkById(section.linkId);
                 return (
-                    <Card key={section.title} className="flex flex-col">
-                        <CardHeader className="h-28 flex flex-col justify-start">
-                            <div className="flex items-start gap-4">
-                                <section.icon className="w-8 h-8 text-primary flex-shrink-0" />
-                                <CardTitle className="font-headline text-xl">{section.title}</CardTitle>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="flex-grow space-y-2">
-                            <div>
-                                <p className="text-sm font-semibold text-muted-foreground">Managed by:</p>
-                                <p className="text-sm">{section.manager}</p>
-                                <a href={`mailto:${section.email}`} className="text-sm text-primary hover:underline">{section.email}</a>
-                            </div>
-                        </CardContent>
-                        <CardFooter className="flex gap-2">
-                            {driveLink && (
-                                <Button asChild variant="outline" className="w-full">
-                                    <Link href={driveLink.url} target="_blank" rel="noopener noreferrer">
-                                        <Folder className="mr-2"/>
-                                        View Drive Folder
-                                    </Link>
-                                </Button>
-                            )}
-                            {isSiteAdmin && driveLink && (
-                                <Button asChild variant="ghost" size="icon">
-                                    <Link href={`/admin/links?edit=${driveLink.id}`}>
-                                        <Pencil />
-                                        <span className="sr-only">Edit Link</span>
-                                    </Link>
-                                </Button>
-                            )}
-                        </CardFooter>
-                    </Card>
+                    <div key={section.title} className="relative">
+                        <Card className="flex flex-col h-full">
+                            <CardHeader className="h-28 flex flex-col justify-start">
+                                <div className="flex items-start gap-4">
+                                    <section.icon className="w-8 h-8 text-primary flex-shrink-0" />
+                                    <CardTitle className="font-headline text-xl">{section.title}</CardTitle>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="flex-grow space-y-2">
+                                <div>
+                                    <p className="text-sm font-semibold text-muted-foreground">Managed by:</p>
+                                    <p className="text-sm">{section.manager}</p>
+                                    <a href={`mailto:${section.email}`} className="text-sm text-primary hover:underline">{section.email}</a>
+                                </div>
+                            </CardContent>
+                            <CardFooter className="flex gap-2">
+                                {driveLink && (
+                                    <Button asChild variant="outline" className="w-full">
+                                        <Link href={driveLink.url} target="_blank" rel="noopener noreferrer">
+                                            <Folder className="mr-2"/>
+                                            View Drive Folder
+                                        </Link>
+                                    </Button>
+                                )}
+                            </CardFooter>
+                        </Card>
+                        {isSiteAdmin && driveLink && (
+                            <Button asChild variant="ghost" size="icon" className="absolute top-2 right-2">
+                                <Link href={`/admin/links?edit=${driveLink.id}`}>
+                                    <Pencil />
+                                    <span className="sr-only">Edit Link</span>
+                                </Link>
+                            </Button>
+                        )}
+                    </div>
                 )
             })}
         </div>
