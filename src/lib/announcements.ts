@@ -9,6 +9,7 @@ export type Announcement = {
   excerpt: string;
   pinned?: boolean;
   content: string;
+  imageUrl?: string;
   disappearsAt?: string;
   unpinsAt?: string;
 };

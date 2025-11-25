@@ -121,7 +121,6 @@ const heroSlides = [
 
 export default function Home() {
   const [activeIndex, setActiveIndex] = useState(0);
-  const newsImage = PlaceHolderImages.find(p => p.id === 'home-news');
   const financialAidImage = PlaceHolderImages.find(p => p.id === 'home-financial-aid');
   const coreValuesImage = PlaceHolderImages.find(p => p.id === 'support-volunteer');
   const announcements = getAnnouncements().slice(0, 3);
@@ -315,48 +314,48 @@ export default function Home() {
 
 
             <section id="news" className="bg-secondary">
-            <div className="container mx-auto">
-                <div className="text-center">
-                <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-4xl md:text-5xl">Latest News</h2>
-                <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mt-4">
-                    Stay up-to-date with the latest happenings at the Kawartha Youth Orchestra.
-                </p>
-                </div>
-                <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-                <div className="md:col-span-2 grid grid-cols-1 gap-8">
-                    {announcements.map((item) => (
-                        <Card key={item.id} className="flex flex-col transition-all duration-300 hover:shadow-lg hover:border-primary/50">
-                        <CardHeader>
-                            <CardTitle className="text-xl font-headline">{item.title}</CardTitle>
-                            <p className="text-sm text-muted-foreground">{item.date}</p>
-                        </CardHeader>
-                        <CardContent className="flex-grow">
-                            <p className="text-muted-foreground">{item.excerpt}</p>
-                        </CardContent>
-                        <div className="p-6 pt-0">
-                            <Button asChild variant="link" className="p-0 h-auto">
-                            <Link href="/calendar" className="flex items-center gap-2">
-                                Read More <ArrowRight className="w-4 h-4" />
-                            </Link>
-                            </Button>
-                        </div>
-                        </Card>
-                    ))}
-                </div>
-                {newsImage && (
-                    <div className="hidden md:block rounded-lg overflow-hidden shadow-lg aspect-[3/4]">
-                    <Image
-                        src={newsImage.imageUrl}
-                        alt={newsImage.description}
-                        width={600}
-                        height={800}
-                        className="object-cover w-full h-full"
-                        data-ai-hint={newsImage.imageHint}
-                        />
+                <div className="container mx-auto">
+                    <div className="text-center">
+                    <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-4xl md:text-5xl">Latest News</h2>
+                    <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mt-4">
+                        Stay up-to-date with the latest happenings at the Kawartha Youth Orchestra.
+                    </p>
                     </div>
-                )}
+                    <div className="mt-12 grid grid-cols-1 gap-8">
+                        {announcements.map((item) => (
+                            <Card key={item.id} className="w-full max-w-4xl mx-auto overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-primary/50">
+                                <div className={`grid ${item.imageUrl ? 'md:grid-cols-2' : 'grid-cols-1'}`}>
+                                    {item.imageUrl && (
+                                        <div className="relative aspect-video">
+                                            <Image
+                                                src={item.imageUrl}
+                                                alt={item.title}
+                                                fill
+                                                className="object-cover"
+                                            />
+                                        </div>
+                                    )}
+                                    <div className="flex flex-col">
+                                        <CardHeader>
+                                            <CardTitle className="text-xl font-headline">{item.title}</CardTitle>
+                                            <p className="text-sm text-muted-foreground">{item.date}</p>
+                                        </CardHeader>
+                                        <CardContent className="flex-grow">
+                                            <p className="text-muted-foreground">{item.excerpt}</p>
+                                        </CardContent>
+                                        <div className="p-6 pt-0">
+                                            <Button asChild variant="link" className="p-0 h-auto">
+                                                <Link href="/calendar" className="flex items-center gap-2">
+                                                    Read More <ArrowRight className="w-4 h-4" />
+                                                </Link>
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
                 </div>
-            </div>
             </section>
 
             <section className="bg-background">

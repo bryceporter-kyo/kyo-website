@@ -38,7 +38,7 @@ import { cn } from "@/lib/utils";
 const announcementSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters long."),
   content: z.string().min(20, "Content must be at least 20 characters long."),
-  imageUrl: z.any().optional(),
+  imageUrl: z.string().url().optional().or(z.literal('')),
   pinned: z.boolean().default(false),
   unpinsAt: z.date().optional(),
   disappearsAt: z.date().optional(),
@@ -65,7 +65,6 @@ export default function AnnouncementsAdminPage() {
     });
 
     const contentValue = form.watch("content");
-    const imageField = form.register("imageUrl");
     const isPinned = form.watch("pinned");
 
     function onSubmit(values: z.infer<typeof announcementSchema>) {
@@ -233,16 +232,22 @@ export default function AnnouncementsAdminPage() {
                                     </FormItem>
                                 )}
                             />
-                            <FormItem>
-                                <FormLabel>Image</FormLabel>
-                                <FormControl>
-                                    <Input type="file" {...imageField} />
-                                </FormControl>
-                                <FormDescription>
-                                    Upload an image for the announcement (optional).
-                                </FormDescription>
-                                <FormMessage />
-                            </FormItem>
+                            <FormField
+                                control={form.control}
+                                name="imageUrl"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Image URL (Optional)</FormLabel>
+                                        <FormControl>
+                                            <Input type="url" placeholder="https://example.com/image.jpg" {...field} />
+                                        </FormControl>
+                                        <FormDescription>
+                                            Add a URL for an image to display with the announcement.
+                                        </FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                             <FormField
                                 control={form.control}
                                 name="pinned"
