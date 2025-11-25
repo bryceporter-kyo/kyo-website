@@ -12,21 +12,26 @@ const pathways = [
         title: "Beginner Lessons & JKYO",
         level: "RCM Grades 1-2",
         description: "Starting their journey with foundational skills in group lessons or our Junior Orchestra.",
-        imageId: "orchestra-junior"
+        imageId: "orchestra-junior",
+        weight: 1
     },
     {
         title: "Intermediate KYO (IKYO)",
         level: "RCM Grades 3-5",
         description: "Developing ensemble skills with a full orchestra, playing classical and popular music.",
-        imageId: "orchestra-intermediate"
+        imageId: "orchestra-intermediate",
+        weight: 1.5 // Increased weight to make it "stickier"
     },
     {
         title: "Senior KYO (SKYO)",
         level: "RCM Grade 6+",
         description: "Performing advanced repertoire in our premier ensemble with professional-level training.",
-        imageId: "orchestra-senior"
+        imageId: "orchestra-senior",
+        weight: 1
     }
 ];
+
+const totalWeight = pathways.reduce((sum, p) => sum + p.weight, 0);
 
 export default function ProgramPathways() {
   const [activeIndex, setActiveIndex] = React.useState(0);
@@ -50,12 +55,21 @@ export default function ProgramPathways() {
       const viewportHeight = window.innerHeight;
       
       const scrollableAreaStart = containerTop - viewportHeight / 2 + 200;
-      const scrollProgress = scrollY - scrollableAreaStart;
-      const itemScrollSpace = (containerHeight - viewportHeight) / pathways.length;
+      const scrollableDistance = containerHeight - viewportHeight;
+      const scrollProgress = (scrollY - scrollableAreaStart) / scrollableDistance;
 
-      let newIndex = Math.floor(scrollProgress / itemScrollSpace);
-      newIndex = Math.max(0, Math.min(newIndex, pathways.length - 1));
+      let accumulatedWeight = 0;
+      let newIndex = 0;
+      for (let i = 0; i < pathways.length; i++) {
+          accumulatedWeight += pathways[i].weight / totalWeight;
+          if (scrollProgress < accumulatedWeight) {
+              newIndex = i;
+              break;
+          }
+          newIndex = pathways.length - 1;
+      }
       
+      newIndex = Math.max(0, Math.min(newIndex, pathways.length - 1));
       setActiveIndex(newIndex);
     };
 
@@ -70,7 +84,7 @@ export default function ProgramPathways() {
   }
 
   return (
-    <section className="py-12 md:py-24">
+    <section className="py-0 md:py-0">
         <div className="container mx-auto text-center mb-12">
             <h2 className="text-3xl font-headline font-bold">A Pathway for Growth</h2>
             <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
@@ -122,4 +136,3 @@ export default function ProgramPathways() {
     </section>
   );
 }
-
