@@ -58,6 +58,10 @@ export default function CookieConsent() {
         timestamp: new Date().toISOString()
       };
       localStorage.setItem('kyo_cookie_consent', JSON.stringify(consentState));
+      
+      // Dispatch a custom event to notify other parts of the app (like Analytics)
+      window.dispatchEvent(new CustomEvent('kyo_cookie_consent_change'));
+
       setIsVisible(false);
     } catch (error) {
       // localStorage is not available
@@ -105,11 +109,14 @@ export default function CookieConsent() {
                     </AccordionItem>
                     <AccordionItem value="analytics">
                         <div className="flex items-center justify-between py-4">
-                            <AccordionTrigger className="font-bold">Analytics Cookies</AccordionTrigger>
+                            <Label htmlFor="analytics-cookies" className="flex-1">
+                                <AccordionTrigger className="font-bold text-left">Analytics Cookies</AccordionTrigger>
+                            </Label>
                             <Switch 
                                 id="analytics-cookies" 
                                 checked={analyticsEnabled}
                                 onCheckedChange={setAnalyticsEnabled}
+                                className="ml-4"
                             />
                         </div>
                         <AccordionContent className="space-y-4 text-muted-foreground">
@@ -135,15 +142,18 @@ export default function CookieConsent() {
                     </AccordionItem>
                     <AccordionItem value="functional">
                         <div className="flex items-center justify-between py-4">
-                            <AccordionTrigger className="font-bold">Functional Cookies</AccordionTrigger>
+                            <Label htmlFor="functional-cookies" className="flex-1">
+                                <AccordionTrigger className="font-bold text-left">Functional Cookies</AccordionTrigger>
+                            </Label>
                             <Switch 
                                 id="functional-cookies" 
                                 checked={functionalEnabled}
                                 onCheckedChange={setFunctionalEnabled}
+                                className="ml-4"
                             />
                         </div>
                         <AccordionContent className="space-y-2 text-muted-foreground">
-                            <p>These support optional features that make browsing easier. These cookies do not track your behaviour for advertising.</p>
+                            <p>Support optional features that make browsing easier. These cookies do not track your behaviour for advertising.</p>
                             <ul className="list-disc list-outside pl-6">
                                 <li>Remember form progress</li>
                                 <li>Support embedded content (e.g., YouTube videos used for educational materials or program showcases)</li>
