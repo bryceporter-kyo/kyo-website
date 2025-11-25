@@ -29,7 +29,7 @@ const navLinks = [
     name: 'About Us',
     subLinks: [
       { name: 'Our Story', href: '/about' },
-      { name: 'Team', href: '/team' },
+      { name: 'Our Team & Directors', href: '/team' },
     ]
   },
   {
