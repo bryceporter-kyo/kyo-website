@@ -108,13 +108,10 @@ export default function Header() {
         >
           <NavigationMenuList>
             {navLinks.map((link) => (
-              <NavigationMenuItem key={link.name} value={link.name}>
+              <NavigationMenuItem key={link.name}>
                 {link.subLinks ? (
                   <>
-                    <NavigationMenuTrigger
-                        onClick={(e) => e.preventDefault()}
-                        className={cn(navigationMenuTriggerStyle(), "cursor-default")}
-                    >
+                    <NavigationMenuTrigger>
                         {link.name}
                     </NavigationMenuTrigger>
                     <NavigationMenuContent>
