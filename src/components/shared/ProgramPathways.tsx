@@ -2,9 +2,11 @@
 "use client";
 
 import * as React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { GraduationCap, School, Star } from "lucide-react";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
+import Image from "next/image";
 
 const pathways = [
     {
@@ -12,18 +14,21 @@ const pathways = [
         level: "RCM Grades 1-2",
         description: "Starting their journey with foundational skills in group lessons or our Junior Orchestra.",
         icon: GraduationCap,
+        imageId: "orchestra-junior"
     },
     {
         title: "Intermediate KYO (IKYO)",
         level: "RCM Grades 3-5",
         description: "Developing ensemble skills with a full orchestra, playing classical and popular music.",
         icon: School,
+        imageId: "orchestra-intermediate"
     },
     {
         title: "Senior KYO (SKYO)",
         level: "RCM Grade 6+",
         description: "Performing advanced repertoire in our premier ensemble with professional-level training.",
         icon: Star,
+        imageId: "orchestra-senior"
     }
 ];
 
@@ -78,10 +83,11 @@ export default function ProgramPathways() {
         </div>
         <div ref={containerRef} className="relative w-full" style={{ height: `${pathways.length * 100}vh` }}>
             <div className="sticky top-0 h-screen w-full flex flex-col items-center justify-center overflow-hidden">
-                <div className="relative w-full max-w-3xl" style={{ height: '400px' }}>
+                <div className="relative w-full max-w-3xl" style={{ height: '500px' }}>
                 {pathways.map((path, index) => {
                     const isActive = activeIndex === index;
                     const Icon = path.icon;
+                    const image = PlaceHolderImages.find(p => p.id === path.imageId);
 
                     return (
                     <div
@@ -91,16 +97,28 @@ export default function ProgramPathways() {
                             isActive ? "opacity-100" : "opacity-0 pointer-events-none",
                         )}
                     >
-                        <Card className="w-full h-full flex flex-col justify-center text-center">
-                            <CardHeader className="items-center">
-                                <div className="bg-primary text-primary-foreground p-4 rounded-full">
+                        <Card className="w-full h-full flex flex-col justify-center text-center overflow-hidden">
+                            {image && (
+                                <div className="relative h-48 w-full">
+                                    <Image
+                                        src={image.imageUrl}
+                                        alt={image.description}
+                                        fill
+                                        className="object-cover"
+                                        data-ai-hint={image.imageHint}
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+                                </div>
+                            )}
+                            <CardHeader className="items-center -mt-16 relative z-10 bg-background/50 backdrop-blur-sm rounded-t-lg">
+                                <div className="bg-primary text-primary-foreground p-4 rounded-full border-4 border-background">
                                     <Icon className="h-8 w-8" />
                                 </div>
-                                <CardTitle className="font-headline text-4xl md:text-5xl pt-4">{path.title}</CardTitle>
-                                <p className="text-xl font-bold text-muted-foreground">{path.level}</p>
+                                <CardTitle className="font-headline text-4xl pt-4">{path.title}</CardTitle>
+                                <CardDescription className="text-lg font-bold">{path.level}</CardDescription>
                             </CardHeader>
-                            <CardContent>
-                                <p className="text-muted-foreground leading-relaxed text-lg md:text-xl">{path.description}</p>
+                            <CardContent className="flex-grow">
+                                <p className="text-muted-foreground leading-relaxed text-lg">{path.description}</p>
                             </CardContent>
                         </Card>
                     </div>
