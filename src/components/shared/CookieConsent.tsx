@@ -85,7 +85,7 @@ export default function CookieConsent() {
           ) : (
              <div className="space-y-4">
                 <p className="text-muted-foreground">
-                    Some cookies are essential for the website to function. Others are optional and help us improve your experience. You can manage your preferences below.
+                    Some cookies are essential for the website to function. Others—such as analytics cookies—are optional and used to help us understand things like which pages are most visited, how visitors find us, and what devices people use. These optional cookies are turned on by default, but you can turn them off at any time.
                 </p>
                 <p className="text-muted-foreground">
                     You can learn more in our <Link href="/legal/privacy-policy" className="text-primary underline">Privacy and Cookie Policy</Link>.
@@ -105,28 +105,50 @@ export default function CookieConsent() {
                     </AccordionItem>
                     <AccordionItem value="analytics">
                         <div className="flex items-center justify-between py-4">
-                            <AccordionTrigger className="flex-1 text-left py-0 font-bold">Analytics Cookies</AccordionTrigger>
+                            <AccordionTrigger className="font-bold">Analytics Cookies</AccordionTrigger>
                             <Switch 
                                 id="analytics-cookies" 
                                 checked={analyticsEnabled}
                                 onCheckedChange={setAnalyticsEnabled}
                             />
                         </div>
-                        <AccordionContent className="space-y-2 text-muted-foreground">
-                           <p>Used by Google Analytics to help KYO understand how visitors use the site. These help us answer questions like which pages are being visited most, how visitors found our website, or if people are using mobile devices or desktops. Google Analytics does not provide KYO with your name or identity.</p>
+                        <AccordionContent className="space-y-4 text-muted-foreground">
+                           <p>Used by Google Analytics and Google Tag Manager to help KYO understand how visitors use the site. These help us answer questions like which pages are being visited most, how visitors found our website, or if people are using mobile devices or desktops. Google Analytics does not provide KYO with your name or identity.</p>
+                            <div>
+                                <h4 className="font-semibold text-foreground">Google Analytics Cookies</h4>
+                                <ul className="list-disc list-outside pl-6 mt-2">
+                                    <li><strong>_ga:</strong> Assigns a unique, randomly generated ID so we can count unique visitors and understand general traffic patterns.</li>
+                                    <li><strong>ga_&lt;container-id&gt;:</strong> Tracks page views, navigation paths, and event interactions.</li>
+                                    <li><strong>_gid:</strong> Tracks how visitors use the site over a single session.</li>
+                                    <li><strong>_gat or dc_gtm:</strong> Manages request rates so analytics data is collected smoothly.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-foreground">Google Tag Manager-Related Cookies</h4>
+                                <p>Tag Manager itself generally does not set cookies, but it loads and manages other Google tags. Through it, we may track common Google Analytics event types like button clicks, form submissions, outbound link clicks, scroll depth, and video engagement.</p>
+                            </div>
+                             <div>
+                                <h4 className="font-semibold text-foreground">Other Google Services</h4>
+                                <p>If used through Tag Manager or Analytics integrations, Google may also set cookies like NID or ANID to store basic preferences and support embedded Google services. KYO does not use advertising features or remarketing tags.</p>
+                            </div>
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="functional">
                         <div className="flex items-center justify-between py-4">
-                            <AccordionTrigger className="flex-1 text-left py-0 font-bold">Functional Cookies</AccordionTrigger>
+                            <AccordionTrigger className="font-bold">Functional Cookies</AccordionTrigger>
                             <Switch 
                                 id="functional-cookies" 
                                 checked={functionalEnabled}
                                 onCheckedChange={setFunctionalEnabled}
                             />
                         </div>
-                        <AccordionContent className="text-muted-foreground">
-                            <p>These support optional features that make browsing easier, such as remembering form progress or supporting embedded content like YouTube videos.</p>
+                        <AccordionContent className="space-y-2 text-muted-foreground">
+                            <p>These support optional features that make browsing easier. These cookies do not track your behaviour for advertising.</p>
+                            <ul className="list-disc list-outside pl-6">
+                                <li>Remember form progress</li>
+                                <li>Support embedded content (e.g., YouTube videos used for educational materials or program showcases)</li>
+                                <li>Save limited user preferences across sessions</li>
+                            </ul>
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
