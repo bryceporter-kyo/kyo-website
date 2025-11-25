@@ -1,11 +1,10 @@
 
-
 "use client";
 
 import { useState } from "react";
 import PageHeader from "@/components/shared/PageHeader";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Folder, ExternalLink, Pencil, ToggleLeft, ToggleRight, Users, DollarSign, Handshake, Cpu, Settings, Briefcase, FileText } from "lucide-react";
