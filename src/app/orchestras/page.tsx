@@ -236,7 +236,7 @@ export default function OrchestrasPage() {
             <div className="text-center mb-12">
               <h2 className="text-3xl font-headline font-bold">Our Philosophy</h2>
               <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
-                We believe in a holistic approach to music education that balances artistic rigor with a supportive and inspiring environment.
+                We believe in a holistic approach to music education that balances artistic achievement with a supportive and inspiring environment.
               </p>
             </div>
             <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -446,3 +446,4 @@ export default function OrchestrasPage() {
 }
 
     
+
