@@ -74,19 +74,19 @@ const scholarships = [
 
 const supplementaryEnsembles = [
     {
-        title: "Junior Folk Ensemble",
+        title: "Folk Ensemble",
         description: "Explore Celtic and global folk traditions. Open to strings, flute, harp, guitar, percussion, voice, and more.",
-        icon: Users
+        imageId: 'ensemble-folk'
     },
     {
-        title: "Senior Jazz Combo",
+        title: "Jazz Combo",
         description: "Dive into swing, blues, and Latin music. Focus on improvisation and accompaniment in a small group setting.",
-        icon: Music
+        imageId: 'ensemble-jazz'
     },
     {
-        title: "Senior Chamber Music",
+        title: "Chamber Music",
         description: "Receive small ensemble coaching from professional musicians. For confident classical players, including piano and guitar.",
-        icon: University
+        imageId: 'ensemble-chamber'
     }
 ];
 
@@ -274,26 +274,34 @@ export default function OrchestrasPage() {
                  <div>
                     <h3 className="text-2xl font-headline font-bold text-center mb-8">Supplementary Ensembles</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {supplementaryEnsembles.map((ensemble) => (
-                             <Card key={ensemble.title} className="text-center flex flex-col transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                                <CardHeader className="items-center">
-                                    <div className="bg-primary text-primary-foreground p-4 rounded-full">
-                                        <ensemble.icon className="h-8 w-8" />
+                        {supplementaryEnsembles.map((ensemble) => {
+                             const image = PlaceHolderImages.find(p => p.id === ensemble.imageId);
+                             return (
+                             <Card key={ensemble.title} className="text-center flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-primary/50">
+                                {image && (
+                                    <div className="relative aspect-video">
+                                        <Image
+                                            src={image.imageUrl}
+                                            alt={image.description}
+                                            fill
+                                            className="object-cover"
+                                            data-ai-hint={image.imageHint}
+                                        />
                                     </div>
-                                    <CardTitle className="font-headline text-xl pt-4">{ensemble.title}</CardTitle>
+                                )}
+                                <CardHeader className="items-center flex-grow">
+                                    <CardTitle className="font-headline text-2xl pt-4">{ensemble.title}</CardTitle>
+                                    <CardDescription className="pt-2">{ensemble.description}</CardDescription>
                                 </CardHeader>
-                                <CardContent className="flex-grow">
-                                    <p className="text-muted-foreground">{ensemble.description}</p>
-                                </CardContent>
                                 {registerButton && (
                                     <CardFooter className="justify-center">
                                          <Button asChild variant="outline">
-                                            <Link href={registerButton.href} target={registerButton.target} rel={registerButton.target === '_blank' ? 'noopener noreferrer' : ''}>Learn More & Register</Link>
+                                            <Link href={registerButton.href} target={registerButton.target} rel={registerButton.target === '_blank' ? 'noopener noreferrer' : ''}>Register</Link>
                                         </Button>
                                     </CardFooter>
                                 )}
                             </Card>
-                        ))}
+                        )})}
                     </div>
                 </div>
 
@@ -331,7 +339,7 @@ export default function OrchestrasPage() {
               <div className="text-center mb-12">
                 <h2 className="text-3xl font-headline font-bold">Financial Aid & Scholarships</h2>
                 <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
-                  We are committed to making music education accessible. Our two-tiered subsidy system, featuring a universal subsidy to keep fees low for everyone and additional income-based bursaries, ensures no student is turned away due to financial need.
+                    Our two-tiered subsidy system, featuring a universal subsidy and additional income-based bursaries, ensures no student is turned away due to financial need.
                 </p>
             </div>
             <div className="max-w-4xl mx-auto space-y-12">
