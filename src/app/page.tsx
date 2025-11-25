@@ -378,7 +378,7 @@ export default function Home() {
                         </p>
                         <div className="flex gap-4">
                             <Button asChild>
-                                <Link href="/donate">Explore Aid</Link>
+                                <Link href="/orchestras">Explore Aid</Link>
                             </Button>
                             {(() => {
                                 const buttonProps = getButtonProps(financialAidButton);
