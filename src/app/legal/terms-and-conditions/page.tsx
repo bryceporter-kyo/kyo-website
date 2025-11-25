@@ -155,7 +155,6 @@ export default function TermsAndConditionsPage() {
                     <p><strong>Volunteer Commitment and Scheduling:</strong> After the bursary application is submitted, the registrant will work with the KYO Operations or Program Manager to create a volunteer schedule that fits both the needs of the organization and the individual’s availability. Volunteer hours must be worked during KYO programming times and will be coordinated by the Operations or Program Manager to ensure that the hours align with KYO’s operational needs. Individuals receiving the volunteer bursary are expected to volunteer in a regular, scheduled capacity. This commitment ensures that KYO can rely on consistent support, and it allows the volunteer to meet their bursary obligations in a timely and structured manner.</p>
                     <p><strong>Non-Completion of Volunteer Hours:</strong> If a volunteer fails to meet their agreed-upon volunteer hours, they will be responsible for paying the entire or remaining balance of the program fees, as determined by the Operations Manager. The amount due will be calculated based on the number of hours worked so far. If only a portion of the volunteer hours has been completed, the remaining hours will be converted into a financial obligation. The volunteer bursary program is designed to help those in need while also ensuring that KYO receives the necessary support to keep its programs running smoothly. We encourage all volunteers to stay committed to their agreed schedules to avoid any financial penalties.</p>
 
-                    <p><strong>Award Disbursement:</strong> Direct Participant Bursaries are generally provided by cheque at a KYO concert or event, however, may be provided in other forms as determined by the Board of Directors, KYO policies or bylaws, contracts with the bursary providers, or applicable legislation. Fee Reduction Bursaries are applied directly to the recipient’s program fees, reducing the amount payable by the member.</p>
                 </CardContent>
             </Card>
 
@@ -345,16 +344,16 @@ export default function TermsAndConditionsPage() {
                         <li><strong>Respect and Courtesy:</strong> Treat fellow participants, instructors, and staff with kindness and respect. Listen attentively during rehearsals and follow the instructions of the instructors.</li>
                         <li><strong>Punctuality:</strong> Arrive on time for rehearsals, lessons, and performances. Notify the program attendance email ({attendanceLink ? <Link href={attendanceLink.url} className="text-primary underline">{attendanceLink.url.replace('mailto:', '')}</Link> : 'attendance@thekyo.ca'}) in advance if you are unable to attend a session.</li>
                         <li><strong>Instrument Care:</strong> Respect and care for program instruments and equipment. Report any damages promptly to the class instructor or program manager.</li>
-                        <li><strong>Personal Responsibility:</strong> Be responsible for your personal belongings. UpBeat staff will designate places for belongings to be kept when not in use.</li>
+                        <li><strong>Personal Responsibility:</strong> Be responsible for your personal belongings. Upbeat staff will designate places for belongings to be kept when not in use.</li>
                         <li><strong>Communication:</strong> Express concerns or questions to instructors in a constructive manner. Avoid disruptive behavior during lessons, rehearsals, and performances.</li>
                     </ul>
                     <h4 className="font-bold text-lg font-headline text-foreground">Behavior Management</h4>
                     <ul className="list-disc list-outside pl-6 space-y-1">
                         <li><strong>Discussion with the Student:</strong> If a participant exhibits inappropriate behavior, the instructor will have a private conversation with the student. The purpose is to address the issue, provide feedback, and encourage a positive change in behavior.</li>
-                        <li><strong>Discussion with Parents/Guardians:</strong> If the inappropriate behavior persists, the program manager will schedule a meeting with the parents/guardians. The goal is to discuss the concerns, collaborate on a resolution, and gain parental support for behavior improvement. Decisions concerning the parents of UpBeat participants are up to the discretion of the Youth Worker for the first behavioral violation, however, any further violations must result in a discussion with the parents held by a member of administrative staff or the program manager.</li>
+                        <li><strong>Discussion with Parents/Guardians:</strong> If the inappropriate behavior persists, the program manager will schedule a meeting with the parents/guardians. The goal is to discuss the concerns, collaborate on a resolution, and gain parental support for behavior improvement. Decisions concerning the parents of Upbeat participants are up to the discretion of the Youth Worker for the first behavioral violation, however, any further violations must result in a discussion with the parents held by a member of administrative staff or the program manager.</li>
                         <li><strong>Program Suspension:</strong> If the behavior continues despite previous interventions, the participant may face a temporary suspension from the program, as determined by the program manager. The duration of the suspension will be determined by the severity and recurrence of the behavior. Reinstatement will be contingent upon the participant’s commitment to improved behavior and adherence to the Code of Conduct.</li>
                     </ul>
-                    <p>We believe that these guidelines will contribute to a positive and enriching experience for everyone involved in UpBeat. Thank you for your cooperation and commitment to creating a supportive musical community.</p>
+                    <p>We believe that these guidelines will contribute to a positive and enriching experience for everyone involved in Upbeat!. Thank you for your cooperation and commitment to creating a supportive musical community.</p>
                 </CardContent>
             </Card>
 
@@ -433,7 +432,7 @@ export default function TermsAndConditionsPage() {
                     <CardTitle className="font-headline text-xl">Termination and Withdrawal Policy</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 text-muted-foreground">
-                    <p>This Termination and Withdrawal Policy outlines the procedures and guidelines for participants in any Kawartha Youth Orchestra programs, including UpBeat (“Program”) who wish to terminate their enrollment or withdraw from the Program. It also addresses the organization’s stance on refunds in accordance with the Not-for-Profit Corporations Act, 2010, S.O. 2010.</p>
+                    <p>This Termination and Withdrawal Policy outlines the procedures and guidelines for participants in any Kawartha Youth Orchestra programs, including Upbeat (“Program”) who wish to terminate their enrollment or withdraw from the Program. It also addresses the organization’s stance on refunds in accordance with the Not-for-Profit Corporations Act, 2010, S.O. 2010.</p>
                     <h4 className="font-bold text-lg font-headline text-foreground">Withdrawal from Programming</h4>
                     <p>Participants or their legal guardians must follow the outlined procedures below when terminating or withdrawing from the Program:</p>
                     <ul className="list-disc list-outside pl-6 space-y-1">
@@ -474,3 +473,5 @@ export default function TermsAndConditionsPage() {
     </div>
   );
 }
+
+    

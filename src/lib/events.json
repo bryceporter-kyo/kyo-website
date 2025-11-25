@@ -1,3 +1,4 @@
+
 {
   "events": [
     {
@@ -18,7 +19,7 @@
     {
       "id": 3,
       "date": "2024-11-05",
-      "name": "UpBeat! Fall Showcase",
+      "name": "Upbeat! Fall Showcase",
       "location": "George Street United Church",
       "time": "6:00 PM",
       "link": "/events/upbeat-fall",
@@ -35,3 +36,5 @@
     }
   ]
 }
+
+    

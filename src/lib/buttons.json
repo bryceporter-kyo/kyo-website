@@ -73,8 +73,8 @@
     },
     {
       "id": "upbeat-enroll",
-      "location": "UpBeat! Page",
-      "text": "Enroll in UpBeat!",
+      "location": "Upbeat! Page",
+      "text": "Enroll in Upbeat!",
       "link": {
         "type": "external",
         "value": "register-upbeat"
@@ -103,3 +103,5 @@
     }
   ]
 }
+
+    

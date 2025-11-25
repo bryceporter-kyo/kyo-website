@@ -98,10 +98,10 @@ const testimonials = [
   {
     quote: "My daughter LOVED the UPBEAT pilot program. She provided rave reviews on every ride home and would look forward to each and every session. Congratulations on such a successful pilot!!",
     author: "Jennifer",
-    role: "UpBeat! Parent"
+    role: "Upbeat! Parent"
   },
   {
-    quote: "UpBeat! isn’t just about music. It’s about creating a place where kids feel seen, supported, and inspired. For some, this is the first place where they’ve really felt they belonged.",
+    quote: "Upbeat! isn’t just about music. It’s about creating a place where kids feel seen, supported, and inspired. For some, this is the first place where they’ve really felt they belonged.",
     author: "Colin McMahon",
     role: "Program Manager"
   }
@@ -136,7 +136,7 @@ export default function UpbeatPage() {
   return (
     <div>
       <PageHeader
-        title="UpBeat!"
+        title="Upbeat!"
         subtitle="Removing Barriers, Building Futures: Music, Mentorship, and Equity for Youth"
         image={headerImage}
       />
@@ -147,10 +147,10 @@ export default function UpbeatPage() {
                 <div className="space-y-6">
                     <h2 className="text-3xl font-headline font-bold">A Symphony of Opportunity</h2>
                     <p className="text-muted-foreground text-lg">
-                        UpBeat! is the Kawartha Youth Orchestra’s fully subsidized after-school music and social development program for youth aged 8–14 who face barriers to accessing music education. Rooted in the transformative principles of El Sistema, UpBeat! combines ensemble string instruction, nutritional support, emotional wellness services, and free transportation—all provided at no cost to participants.
+                        Upbeat! is the Kawartha Youth Orchestra’s fully subsidized after-school music and social development program for youth aged 8–14 who face barriers to accessing music education. Rooted in the transformative principles of El Sistema, Upbeat! combines ensemble string instruction, nutritional support, emotional wellness services, and free transportation—all provided at no cost to participants.
                     </p>
                     <p className="text-muted-foreground text-lg">
-                        More than just music lessons, UpBeat! creates a safe, joyful, and inclusive environment where young people experience belonging, build confidence, and develop lifelong skills. It is a model of how the arts can drive systemic change in the lives of young people and their communities.
+                        More than just music lessons, Upbeat! creates a safe, joyful, and inclusive environment where young people experience belonging, build confidence, and develop lifelong skills. It is a model of how the arts can drive systemic change in the lives of young people and their communities.
                     </p>
                     {enrollButton && (
                       <Button asChild size="lg">
@@ -179,7 +179,7 @@ export default function UpbeatPage() {
             <div className="text-center mb-12">
                 <h2 className="text-3xl font-headline font-bold">Our Four Pillars</h2>
                 <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
-                    UpBeat! is built on four core principles that guide our mission to deliver artistic excellence and deep social impact.
+                    Upbeat! is built on four core principles that guide our mission to deliver artistic excellence and deep social impact.
                 </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -282,9 +282,9 @@ export default function UpbeatPage() {
      <section>
         <div className="container mx-auto">
             <div className="text-center mb-12">
-                <h2 className="text-3xl font-headline font-bold">How UpBeat! Works</h2>
+                <h2 className="text-3xl font-headline font-bold">How Upbeat! Works</h2>
                 <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
-                    UpBeat! runs twice weekly (Tuesdays and Thursdays, 3:30–5:30 p.m.) throughout the school year, providing a consistent, enriching, and supportive after-school experience.
+                    Upbeat! runs twice weekly (Tuesdays and Thursdays, 3:30–5:30 p.m.) throughout the school year, providing a consistent, enriching, and supportive after-school experience.
                 </p>
             </div>
             <div className="max-w-3xl mx-auto space-y-6">
@@ -332,7 +332,7 @@ export default function UpbeatPage() {
                              <CardHeader className="text-center">
                                 <CardTitle className="font-headline text-2xl">Community-Centered by Design</CardTitle>
                                 <CardDescription>
-                                    UpBeat! is shaped by the community it serves. We actively listen to students, families, and partners, evolving the program to meet their needs. This has led to key innovations.
+                                    Upbeat! is shaped by the community it serves. We actively listen to students, families, and partners, evolving the program to meet their needs. This has led to key innovations.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="grid md:grid-cols-2 gap-8 items-center">
@@ -397,7 +397,7 @@ export default function UpbeatPage() {
             <div className="container mx-auto text-center">
                  <h2 className="text-3xl font-headline font-bold">Our Partners & Supporters</h2>
                 <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4 mb-12">
-                   UpBeat! is made possible by a dedicated network of granting bodies, community partners, and individual donors. We are deeply grateful for their commitment.
+                   Upbeat! is made possible by a dedicated network of granting bodies, community partners, and individual donors. We are deeply grateful for their commitment.
                 </p>
                 <div className="flex flex-wrap justify-center items-center gap-x-8 gap-y-4 max-w-4xl mx-auto">
                     {supporters.map(name => (
@@ -418,7 +418,7 @@ export default function UpbeatPage() {
                 </CardHeader>
               <CardContent>
                 <p className="mt-4 max-w-3xl mx-auto text-lg text-primary-foreground/80">
-                    UpBeat! is a fully subsidized program that relies on the generosity of our community. Your donation directly funds instruments, instruction, and essential support for young musicians.
+                    Upbeat! is a fully subsidized program that relies on the generosity of our community. Your donation directly funds instruments, instruction, and essential support for young musicians.
                 </p>
               </CardContent>
               <CardFooter className="flex-col sm:flex-row gap-4 justify-center">
@@ -431,7 +431,7 @@ export default function UpbeatPage() {
               </CardFooter>
               <div className="mt-8 text-center text-primary-foreground/80">
                 <p>
-                    On behalf of the Kawartha Youth Orchestra Board of Directors, instructors, youth, and families, we thank you for your consideration of UpBeat!.
+                    On behalf of the Kawartha Youth Orchestra Board of Directors, instructors, youth, and families, we thank you for your consideration of Upbeat!.
                 </p>
                 <p className="mt-4 font-bold font-headline text-lg">Bryce Porter, Chair, Board of Directors</p>
               </div>
@@ -441,5 +441,7 @@ export default function UpbeatPage() {
     </div>
   );
 }
+
+    
 
     

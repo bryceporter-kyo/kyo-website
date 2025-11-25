@@ -28,8 +28,8 @@ const volunteerRoles = [
     },
     {
         icon: Users,
-        title: "Program Assistance (UpBeat!)",
-        description: "Lend a hand during our weekly UpBeat! program. Assist with student check-in, meal prep and service, and setup/teardown. Your presence helps create a safe and organized environment for our young musicians.",
+        title: "Program Assistance (Upbeat!)",
+        description: "Lend a hand during our weekly Upbeat! program. Assist with student check-in, meal prep and service, and setup/teardown. Your presence helps create a safe and organized environment for our young musicians.",
     },
     {
         icon: Wrench,
@@ -165,3 +165,5 @@ export default function VolunteerPage() {
         </div>
     )
 }
+
+    
