@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -13,24 +13,48 @@ import { Cookie } from 'lucide-react';
 export default function CookieConsent() {
   const [isVisible, setIsVisible] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
-  const [areNonEssentialCookiesEnabled, setAreNonEssentialCookiesEnabled] = useState(true);
+  const [analyticsEnabled, setAnalyticsEnabled] = useState(true);
+  const [functionalEnabled, setFunctionalEnabled] = useState(true);
 
-  useEffect(() => {
+  const getConsentState = () => {
     try {
       const consent = localStorage.getItem('kyo_cookie_consent');
-      if (consent === null) {
-        setIsVisible(true);
+      if (consent) {
+        return JSON.parse(consent);
       }
     } catch (error) {
-      // localStorage is not available
+      // localStorage is not available or error parsing
     }
+    return null;
+  };
+
+  useEffect(() => {
+    const consent = getConsentState();
+    if (consent === null) {
+      setIsVisible(true);
+    } else {
+      setAnalyticsEnabled(consent.analytics);
+      setFunctionalEnabled(consent.functional);
+    }
+    
+    const handleOpenSettings = () => {
+        setIsVisible(true);
+        setShowDetails(true);
+    };
+
+    window.addEventListener('openCookieSettings', handleOpenSettings);
+
+    return () => {
+        window.removeEventListener('openCookieSettings', handleOpenSettings);
+    };
   }, []);
 
-  const handleAccept = () => {
+  const handleSave = (acceptedAll = false) => {
     try {
       const consentState = {
         accepted: true,
-        nonEssential: areNonEssentialCookiesEnabled,
+        analytics: acceptedAll ? true : analyticsEnabled,
+        functional: acceptedAll ? true : functionalEnabled,
         timestamp: new Date().toISOString()
       };
       localStorage.setItem('kyo_cookie_consent', JSON.stringify(consentState));
@@ -38,10 +62,6 @@ export default function CookieConsent() {
     } catch (error) {
       // localStorage is not available
     }
-  };
-  
-  const handleSavePreferences = () => {
-    handleAccept(); // Same logic as accept for now
   };
 
   if (!isVisible) {
@@ -65,7 +85,7 @@ export default function CookieConsent() {
           ) : (
              <div className="space-y-4">
                 <p className="text-muted-foreground">
-                    Some cookies are essential for the website to function. Others—such as analytics cookies—are optional and used to help us understand things like which pages are most visited, how visitors find us, and what devices people use. These optional cookies are turned on by default, but you can turn them off at any time.
+                    Some cookies are essential for the website to function. Others are optional and help us improve your experience. You can manage your preferences below.
                 </p>
                 <p className="text-muted-foreground">
                     You can learn more in our <Link href="/legal/privacy-policy" className="text-primary underline">Privacy and Cookie Policy</Link>.
@@ -79,45 +99,57 @@ export default function CookieConsent() {
                              <ul className="list-disc list-outside pl-6">
                                 <li>Keep the site secure</li>
                                 <li>Load pages and features correctly</li>
-                                <li>Maintain your basic preferences (e.g., language or accessibility settings)</li>
+                                <li>Maintain your basic preferences (e.g., cookie consent)</li>
                             </ul>
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="analytics">
-                        <AccordionTrigger className="font-bold">Analytics Cookies</AccordionTrigger>
+                        <AccordionTrigger asChild>
+                            <div className="flex w-full items-center justify-between">
+                                <span className="font-bold py-4 hover:underline">Analytics Cookies</span>
+                                 <Switch 
+                                    id="analytics-cookies" 
+                                    checked={analyticsEnabled}
+                                    onCheckedChange={setAnalyticsEnabled}
+                                    onClick={(e) => e.stopPropagation()}
+                                />
+                            </div>
+                        </AccordionTrigger>
                         <AccordionContent className="space-y-2 text-muted-foreground">
-                           <p>Used by Google Analytics and Google Tag Manager to help KYO understand how visitors use the site. These help us answer questions like which pages are being visited most, how visitors found our website, or if people are using mobile devices or desktops. Google Analytics does not provide KYO with your name or identity.</p>
-                           <p>We may also track button clicks, form submissions, and video engagement to improve site usability. KYO does not use advertising features or remarketing tags.</p>
+                           <p>Used by Google Analytics to help KYO understand how visitors use the site. These help us answer questions like which pages are being visited most, how visitors found our website, or if people are using mobile devices or desktops. Google Analytics does not provide KYO with your name or identity.</p>
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="functional">
-                        <AccordionTrigger className="font-bold">Functional Cookies</AccordionTrigger>
+                         <AccordionTrigger asChild>
+                             <div className="flex w-full items-center justify-between">
+                                <span className="font-bold py-4 hover:underline">Functional Cookies</span>
+                                 <Switch 
+                                    id="functional-cookies" 
+                                    checked={functionalEnabled}
+                                    onCheckedChange={setFunctionalEnabled}
+                                    onClick={(e) => e.stopPropagation()}
+                                />
+                            </div>
+                        </AccordionTrigger>
                         <AccordionContent className="text-muted-foreground">
                             <p>These support optional features that make browsing easier, such as remembering form progress or supporting embedded content like YouTube videos.</p>
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
-                <div className="flex items-center space-x-2 pt-4">
-                    <Switch 
-                        id="non-essential-cookies" 
-                        checked={areNonEssentialCookiesEnabled}
-                        onCheckedChange={setAreNonEssentialCookiesEnabled}
-                    />
-                    <Label htmlFor="non-essential-cookies" className="font-semibold">Non-Essential Cookies (Analytics & Functional)</Label>
-                </div>
             </div>
           )}
         </CardContent>
         <CardFooter className="flex flex-col sm:flex-row gap-4">
-            <Button className="w-full sm:w-auto" onClick={handleAccept}>Accept All</Button>
-            {showDetails ? (
-                <Button className="w-full sm:w-auto" variant="outline" onClick={handleSavePreferences}>Save Preferences</Button>
+            {!showDetails ? (
+                <>
+                    <Button className="w-full sm:w-auto" onClick={() => handleSave(true)}>Accept All</Button>
+                    <Button className="w-full sm:w-auto" variant="outline" onClick={() => setShowDetails(true)}>Manage Cookies</Button>
+                </>
             ) : (
-                <Button className="w-full sm:w-auto" variant="outline" onClick={() => setShowDetails(true)}>Manage Cookies</Button>
+                <Button className="w-full sm:w-auto" onClick={() => handleSave()}>Save Preferences</Button>
             )}
         </CardFooter>
       </Card>
     </div>
   );
 }
-

@@ -4,7 +4,7 @@
 import { Logo } from "@/components/icons/Logo";
 import { Button } from "@/components/ui/button";
 import { getLinkById } from "@/lib/links";
-import { Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
+import { Facebook, Instagram, Mail, MapPin, Phone, Cookie } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from 'react';
 import type { ExternalLink } from '@/lib/links';
@@ -56,6 +56,11 @@ export default function Footer() {
     setEmailLink(getLinkById('contact-main'));
     setRegistrationLink(getLinkById('register'));
   }, []);
+
+  const openCookieSettings = () => {
+    const event = new CustomEvent('openCookieSettings');
+    window.dispatchEvent(event);
+  };
 
   return (
     <footer className="bg-secondary">
@@ -138,6 +143,7 @@ export default function Footer() {
                 <Link href="/admin" className="hover:text-primary">Admin Panel</Link>
                 <Link href="/internal" className="hover:text-primary">KYO Internal</Link>
                 <Link href="/sitemap" className="hover:text-primary">Sitemap</Link>
+                <button onClick={openCookieSettings} className="hover:text-primary flex items-center gap-1"><Cookie className="w-4 h-4"/>Cookie Settings</button>
             </div>
             <p className="text-sm text-muted-foreground text-center flex-1">
                 &copy; 2025 Kawartha Youth Orchestra. All rights reserved.
@@ -157,5 +163,3 @@ export default function Footer() {
     </footer>
   );
 }
-
-    
