@@ -37,7 +37,7 @@ const navLinks = [
     subLinks: [
       { name: 'The Orchestras', href: '/orchestras' },
       { name: 'Upbeat!', href: '/upbeat' },
-      { name: 'Lessons', href: '/lessons' },
+      { name: 'Instrumental Lessons', href: '/lessons' },
     ]
   },
   { name: 'Calendar', href: '/calendar' },
