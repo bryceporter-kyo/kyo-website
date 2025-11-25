@@ -104,33 +104,27 @@ export default function CookieConsent() {
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="analytics">
-                        <AccordionTrigger>
-                            <div className="flex w-full items-center justify-between">
-                                <span className="font-bold py-4 hover:underline">Analytics Cookies</span>
-                                 <Switch 
-                                    id="analytics-cookies" 
-                                    checked={analyticsEnabled}
-                                    onCheckedChange={setAnalyticsEnabled}
-                                    onClick={(e) => e.stopPropagation()}
-                                />
-                            </div>
-                        </AccordionTrigger>
+                        <div className="flex items-center justify-between py-4">
+                            <AccordionTrigger className="flex-1 text-left py-0 font-bold">Analytics Cookies</AccordionTrigger>
+                            <Switch 
+                                id="analytics-cookies" 
+                                checked={analyticsEnabled}
+                                onCheckedChange={setAnalyticsEnabled}
+                            />
+                        </div>
                         <AccordionContent className="space-y-2 text-muted-foreground">
                            <p>Used by Google Analytics to help KYO understand how visitors use the site. These help us answer questions like which pages are being visited most, how visitors found our website, or if people are using mobile devices or desktops. Google Analytics does not provide KYO with your name or identity.</p>
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="functional">
-                         <AccordionTrigger>
-                             <div className="flex w-full items-center justify-between">
-                                <span className="font-bold py-4 hover:underline">Functional Cookies</span>
-                                 <Switch 
-                                    id="functional-cookies" 
-                                    checked={functionalEnabled}
-                                    onCheckedChange={setFunctionalEnabled}
-                                    onClick={(e) => e.stopPropagation()}
-                                />
-                            </div>
-                        </AccordionTrigger>
+                        <div className="flex items-center justify-between py-4">
+                            <AccordionTrigger className="flex-1 text-left py-0 font-bold">Functional Cookies</AccordionTrigger>
+                            <Switch 
+                                id="functional-cookies" 
+                                checked={functionalEnabled}
+                                onCheckedChange={setFunctionalEnabled}
+                            />
+                        </div>
                         <AccordionContent className="text-muted-foreground">
                             <p>These support optional features that make browsing easier, such as remembering form progress or supporting embedded content like YouTube videos.</p>
                         </AccordionContent>
