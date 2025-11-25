@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Toaster } from "@/components/ui/toaster";
+import CookieConsent from '@/components/shared/CookieConsent';
 
 export default function RootLayout({
   children,
@@ -27,6 +28,7 @@ export default function RootLayout({
           <Footer />
         </div>
         <Toaster />
+        <CookieConsent />
       </body>
     </html>
   );
