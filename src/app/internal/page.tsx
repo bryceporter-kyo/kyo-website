@@ -1,14 +1,19 @@
 
 
+"use client";
+
+import { useState } from "react";
 import PageHeader from "@/components/shared/PageHeader";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Folder, Users, DollarSign, Handshake, Cpu, Settings, Briefcase, FileText, ExternalLink, Mail } from "lucide-react";
+import { Folder, Users, DollarSign, Handshake, Cpu, Settings, Briefcase, FileText, ExternalLink, Mail, Pencil, ToggleLeft, ToggleRight } from "lucide-react";
 import { getBoard, getStaff } from "@/lib/staff";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getLinkById } from "@/lib/links";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 const internalSections = [
     {
@@ -87,6 +92,9 @@ export default function InternalPage() {
   const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-internal');
   const staff = getStaff();
   const board = getBoard();
+  // Simulate admin state. Replace with actual authentication check.
+  const [isSiteAdmin, setIsSiteAdmin] = useState(true);
+
   return (
     <div>
       <PageHeader
@@ -94,7 +102,21 @@ export default function InternalPage() {
         subtitle="This section is for internal staff, board, and volunteer use."
         image={headerImage}
       />
-      <section className="container mx-auto">
+      <div className="container mx-auto py-4">
+        <div className="flex items-center space-x-2 bg-secondary p-4 rounded-lg my-4">
+            {isSiteAdmin ? <ToggleRight className="text-primary"/> : <ToggleLeft />}
+            <Label htmlFor="admin-mode" className={isSiteAdmin ? "font-bold text-primary" : ""}>
+                Site Admin View {isSiteAdmin ? "On" : "Off"}
+            </Label>
+            <Switch
+                id="admin-mode"
+                checked={isSiteAdmin}
+                onCheckedChange={setIsSiteAdmin}
+            />
+            <span className="text-sm text-muted-foreground">(This is a demo toggle. Replace with real auth.)</span>
+        </div>
+      </div>
+      <section className="container mx-auto pt-0">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {internalSections.map(section => {
                 const driveLink = getLinkById(section.linkId);
@@ -113,12 +135,20 @@ export default function InternalPage() {
                                 <a href={`mailto:${section.email}`} className="text-sm text-primary hover:underline">{section.email}</a>
                             </div>
                         </CardContent>
-                        <CardFooter>
+                        <CardFooter className="flex gap-2">
                             {driveLink && (
                                 <Button asChild variant="outline" className="w-full">
                                     <Link href={driveLink.url} target="_blank" rel="noopener noreferrer">
                                         <Folder className="mr-2"/>
                                         View Drive Folder
+                                    </Link>
+                                </Button>
+                            )}
+                            {isSiteAdmin && driveLink && (
+                                <Button asChild variant="ghost" size="icon">
+                                    <Link href={`/admin/links?edit=${driveLink.id}`}>
+                                        <Pencil />
+                                        <span className="sr-only">Edit Link</span>
                                     </Link>
                                 </Button>
                             )}
@@ -176,12 +206,22 @@ export default function InternalPage() {
                     {externalLinks.map(linkInfo => {
                         const link = getLinkById(linkInfo.linkId);
                         return link ? (
-                            <Button asChild variant="ghost" className="justify-start" key={link.id}>
-                                <Link href={link.url} target="_blank" rel="noopener noreferrer">
-                                    <ExternalLink className="mr-2"/>
-                                    {linkInfo.title}
-                                </Link>
-                            </Button>
+                            <div key={link.id} className="flex items-center">
+                                <Button asChild variant="ghost" className="justify-start flex-grow">
+                                    <Link href={link.url} target="_blank" rel="noopener noreferrer">
+                                        <ExternalLink className="mr-2"/>
+                                        {linkInfo.title}
+                                    </Link>
+                                </Button>
+                                {isSiteAdmin && (
+                                     <Button asChild variant="ghost" size="icon">
+                                        <Link href={`/admin/links?edit=${link.id}`}>
+                                            <Pencil />
+                                            <span className="sr-only">Edit Link</span>
+                                        </Link>
+                                    </Button>
+                                )}
+                            </div>
                         ) : null
                     })}
                 </div>

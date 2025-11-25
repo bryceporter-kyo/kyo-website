@@ -14,7 +14,8 @@ import Link from "next/link";
 import { getLinks } from "@/lib/links";
 import type { ExternalLink } from "@/lib/links";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import React from "react";
+import React, { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 const linkSchema = z.object({
   id: z.string(),
@@ -26,6 +27,9 @@ export default function LinksAdminPage() {
     const initialLinks = getLinks();
     const [links, setLinks] = React.useState<ExternalLink[]>(initialLinks);
     const [editingLinkId, setEditingLinkId] = React.useState<string | null>(null);
+    
+    const searchParams = useSearchParams();
+    const linkToEdit = searchParams.get('edit');
 
     const form = useForm<z.infer<typeof linkSchema>>({
         resolver: zodResolver(linkSchema),
@@ -34,6 +38,22 @@ export default function LinksAdminPage() {
             url: "",
         },
     });
+
+    useEffect(() => {
+        if (linkToEdit) {
+            const link = links.find(l => l.id === linkToEdit);
+            if (link) {
+                handleEditClick(link);
+                // Scroll to the element after a short delay to ensure it's in the DOM
+                setTimeout(() => {
+                    const element = document.getElementById(link.id);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 100);
+            }
+        }
+    }, [linkToEdit, links]);
     
     const handleEditClick = (link: ExternalLink) => {
         setEditingLinkId(link.id);
