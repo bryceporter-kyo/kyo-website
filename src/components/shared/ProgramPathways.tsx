@@ -1,8 +1,10 @@
 
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, GraduationCap, School, Star } from "lucide-react";
+import * as React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { GraduationCap, School, Star } from "lucide-react";
 
 const pathways = [
     {
@@ -23,38 +25,90 @@ const pathways = [
         description: "Performing advanced repertoire in our premier ensemble with professional-level training.",
         icon: Star,
     }
-]
+];
 
 export default function ProgramPathways() {
-    return (
-        <section className="container mx-auto">
-            <div className="text-center mb-12">
-                <h2 className="text-3xl font-headline font-bold">A Pathway for Growth</h2>
-                <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
-                    Our programs provide a clear and structured progression for musicians, from their very first notes to advanced performance.
-                </p>
-            </div>
-            <div className="flex flex-col md:flex-row items-stretch justify-center gap-4 md:gap-0">
-                {pathways.map((path, index) => (
-                     <div key={path.title} className="flex flex-col md:flex-row items-center w-full">
-                        <Card className="text-center flex flex-col flex-grow w-full transition-all duration-300 hover:shadow-lg hover:border-primary/50">
+  const [activeIndex, setActiveIndex] = React.useState(0);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [isClient, setIsClient] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
+  
+  React.useEffect(() => {
+    if (!isClient) return;
+
+    const handleScroll = () => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      const scrollY = window.scrollY;
+      const containerTop = container.offsetTop;
+      const containerHeight = container.offsetHeight;
+      const viewportHeight = window.innerHeight;
+      
+      const scrollableAreaStart = containerTop - viewportHeight / 2 + 200;
+      const scrollProgress = scrollY - scrollableAreaStart;
+      const itemScrollSpace = (containerHeight - viewportHeight) / pathways.length;
+
+      let newIndex = Math.floor(scrollProgress / itemScrollSpace);
+      newIndex = Math.max(0, Math.min(newIndex, pathways.length - 1));
+      
+      setActiveIndex(newIndex);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isClient]);
+
+  if (!isClient) {
+    return null;
+  }
+
+  return (
+    <section>
+        <div className="container mx-auto text-center mb-12">
+            <h2 className="text-3xl font-headline font-bold">A Pathway for Growth</h2>
+            <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
+                Our programs provide a clear and structured progression for musicians, from their very first notes to advanced performance.
+            </p>
+        </div>
+        <div ref={containerRef} className="relative w-full" style={{ height: `${pathways.length * 100}vh` }}>
+            <div className="sticky top-0 h-screen w-full flex flex-col items-center justify-center overflow-hidden">
+                <div className="relative w-full max-w-3xl" style={{ height: '400px' }}>
+                {pathways.map((path, index) => {
+                    const isActive = activeIndex === index;
+                    const Icon = path.icon;
+
+                    return (
+                    <div
+                        key={path.title}
+                        className={cn(
+                            "absolute inset-0 w-full h-full p-4 transition-opacity duration-500 ease-in-out",
+                            isActive ? "opacity-100" : "opacity-0 pointer-events-none",
+                        )}
+                    >
+                        <Card className="w-full h-full flex flex-col justify-center text-center">
                             <CardHeader className="items-center">
                                 <div className="bg-primary text-primary-foreground p-4 rounded-full">
-                                    <path.icon className="h-8 w-8" />
+                                    <Icon className="h-8 w-8" />
                                 </div>
-                                <CardTitle className="font-headline text-2xl pt-4">{path.title}</CardTitle>
-                                <CardDescription className="font-bold">{path.level}</CardDescription>
+                                <CardTitle className="font-headline text-4xl md:text-5xl pt-4">{path.title}</CardTitle>
+                                <p className="text-xl font-bold text-muted-foreground">{path.level}</p>
                             </CardHeader>
-                            <CardContent className="flex-grow">
-                                <p className="text-muted-foreground">{path.description}</p>
+                            <CardContent>
+                                <p className="text-muted-foreground leading-relaxed text-lg md:text-xl">{path.description}</p>
                             </CardContent>
                         </Card>
-                        {index < pathways.length - 1 && (
-                            <ArrowRight className="w-12 h-12 text-primary/30 mx-4 my-4 md:my-0 shrink-0 transform rotate-90 md:rotate-0" />
-                        )}
                     </div>
-                ))}
+                    );
+                })}
+                </div>
             </div>
-        </section>
-    );
+        </div>
+    </section>
+  );
 }
