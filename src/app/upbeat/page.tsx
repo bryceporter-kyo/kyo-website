@@ -227,8 +227,59 @@ export default function UpbeatPage() {
         </div>
       </section>
 
+      <section className="bg-secondary">
+          <div className="container mx-auto">
+              <div className="grid md:grid-cols-2 gap-16 items-center">
+                  {impactImage && (
+                      <div className="rounded-lg overflow-hidden shadow-xl aspect-video">
+                          <Image
+                              src={impactImage.imageUrl}
+                              alt={impactImage.description}
+                              width={600}
+                              height={400}
+                              className="object-cover w-full h-full"
+                              data-ai-hint={impactImage.imageHint}
+                          />
+                      </div>
+                  )}
+                  <div className="space-y-6">
+                      <h2 className="text-3xl font-headline font-bold">Who We Serve: A Commitment to Equity</h2>
+                      <p className="text-muted-foreground text-lg">
+                          Inclusivity and accessibility are central to KYO’s mission. We are proud to serve a participant base that reflects significantly greater diversity than our surrounding community.
+                      </p>
+                      <ul className="space-y-4">
+                          <li className="flex items-start gap-4">
+                              <Check className="w-6 h-6 text-accent flex-shrink-0 mt-1" />
+                              <div>
+                                  <h4 className="font-bold">Cultural Diversity</h4>
+                                  <p className="text-muted-foreground">Over 50% of participants identify as non-white in a region that is 93% white.</p>
+                              </div>
+                          </li>
+                           <li className="flex items-start gap-4">
+                              <Check className="w-6 h-6 text-accent flex-shrink-0 mt-1" />
+                              <div>
+                                  <h4 className="font-bold">Economic Diversity</h4>
+                                  <p className="text-muted-foreground">Average family household income is ~60% of the national average, with nearly 60% of families relying on subsidies.</p>
+                              </div>
+                          </li>
+                           <li className="flex items-start gap-4">
+                              <Check className="w-6 h-6 text-accent flex-shrink-0 mt-1" />
+                              <div>
+                                  <h4 className="font-bold">Inclusive Community</h4>
+                                  <p className="text-muted-foreground">Our students include Indigenous, newcomer, and neurodivergent youth, creating a rich and supportive learning environment for all.</p>
+                              </div>
+                          </li>
+                      </ul>
+                       <p className="text-muted-foreground text-sm italic">
+                          No other organization in the region offers orchestral training as affordably—or with greater subsidies for families in need.
+                      </p>
+                  </div>
+              </div>
+          </div>
+      </section>
 
-     <section className="bg-secondary">
+
+     <section>
         <div className="container mx-auto">
             <div className="text-center mb-12">
                 <h2 className="text-3xl font-headline font-bold">How UpBeat! Works</h2>
@@ -238,7 +289,7 @@ export default function UpbeatPage() {
             </div>
             <div className="max-w-3xl mx-auto space-y-6">
                 {coreActivities.map(activity => (
-                    <Card key={activity.title} className="bg-background transition-all duration-300 hover:shadow-md hover:border-primary/30">
+                    <Card key={activity.title} className="bg-secondary transition-all duration-300 hover:shadow-md hover:border-primary/30">
                         <CardHeader className="flex flex-row items-center gap-4">
                             <activity.icon className="w-8 h-8 text-primary flex-shrink-0" />
                             <CardTitle className="font-headline text-lg">{activity.title}</CardTitle>
@@ -253,7 +304,7 @@ export default function UpbeatPage() {
                 <Tabs defaultValue="quality" className="w-full">
                     <TabsList className="grid w-full grid-cols-2 mx-auto max-w-xl">
                         <TabsTrigger value="quality">Instructional Quality</TabsTrigger>
-                        <TabsTrigger value="participants">Who Participates</TabsTrigger>
+                        <TabsTrigger value="participants">Community-Centered Design</TabsTrigger>
                     </TabsList>
                     <TabsContent value="quality" className="mt-12">
                         <Card>
@@ -278,74 +329,42 @@ export default function UpbeatPage() {
                     </TabsContent>
                     <TabsContent value="participants" className="mt-12">
                         <Card>
-                            <CardHeader className="text-center">
-                                <CardTitle className="font-headline text-2xl">Who We Serve</CardTitle>
+                             <CardHeader className="text-center">
+                                <CardTitle className="font-headline text-2xl">Community-Centered by Design</CardTitle>
                                 <CardDescription>
-                                    UpBeat! is a social equity initiative designed for youth facing barriers to traditional music programs. No prior experience is required—just a passion for music.
+                                    UpBeat! is shaped by the community it serves. We actively listen to students, families, and partners, evolving the program to meet their needs. This has led to key innovations.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="grid md:grid-cols-2 gap-8 items-center">
-                                {impactImage && (
+                                {communityImage && (
                                     <div className="rounded-lg overflow-hidden shadow-lg aspect-video">
                                         <Image
-                                            src={impactImage.imageUrl}
-                                            alt={impactImage.description}
+                                            src={communityImage.imageUrl}
+                                            alt={communityImage.description}
                                             width={600}
                                             height={400}
                                             className="object-cover w-full h-full"
-                                            data-ai-hint={impactImage.imageHint}
+                                            data-ai-hint={communityImage.imageHint}
                                         />
                                     </div>
                                 )}
                                 <div className="space-y-4">
-                                    <h4 className="font-bold font-headline text-lg">2024-2025 Demographics</h4>
-                                    <ul className="space-y-3">
-                                        <li className="flex items-start gap-3"><Check className="w-5 h-5 text-accent flex-shrink-0 mt-1" /><p className="text-muted-foreground"><strong className="text-foreground">>50%</strong> of participants identify as non-white in a region that is 93% white.</p></li>
-                                        <li className="flex items-start gap-3"><Check className="w-5 h-5 text-accent flex-shrink-0 mt-1" /><p className="text-muted-foreground">Average family household income is <strong className="text-foreground">~60%</strong> of the national average.</p></li>
-                                        <li className="flex items-start gap-3"><Check className="w-5 h-5 text-accent flex-shrink-0 mt-1" /><p className="text-muted-foreground">Students include Indigenous, newcomer, and neurodivergent youth.</p></li>
-                                    </ul>
+                                     <Accordion type="single" collapsible className="w-full">
+                                        {challengesSolutions.map(item => (
+                                            <AccordionItem value={item.id} key={item.id}>
+                                                <AccordionTrigger>{item.challenge}</AccordionTrigger>
+                                                <AccordionContent>
+                                                {item.solution}
+                                                </AccordionContent>
+                                            </AccordionItem>
+                                        ))}
+                                    </Accordion>
                                 </div>
                             </CardContent>
                         </Card>
                     </TabsContent>
                 </Tabs>
             </div>
-        </div>
-      </section>
-
-      <section>
-        <div className="container mx-auto grid md:grid-cols-2 gap-16 items-center">
-            <div className="space-y-6">
-                <h2 className="text-3xl font-headline font-bold">Community-Centered by Design</h2>
-                 <p className="text-muted-foreground text-lg">
-                    UpBeat! is shaped by the community it serves. We actively listen to students, families, and partners, evolving the program to meet their needs. This responsive approach has led to key innovations like our nutrition program, flexible scheduling, and inclusive branding.
-                </p>
-                <div className="space-y-4">
-                    <h3 className="font-bold font-headline text-xl">Challenges & Solutions</h3>
-                     <Accordion type="single" collapsible className="w-full">
-                        {challengesSolutions.map(item => (
-                            <AccordionItem value={item.id} key={item.id}>
-                                <AccordionTrigger>{item.challenge}</AccordionTrigger>
-                                <AccordionContent>
-                                {item.solution}
-                                </AccordionContent>
-                            </AccordionItem>
-                        ))}
-                    </Accordion>
-                </div>
-            </div>
-             {communityImage && (
-                <div className="rounded-lg overflow-hidden shadow-xl aspect-video md:order-first">
-                     <Image
-                        src={communityImage.imageUrl}
-                        alt={communityImage.description}
-                        width={600}
-                        height={400}
-                        className="object-cover w-full h-full"
-                        data-ai-hint={communityImage.imageHint}
-                    />
-                </div>
-             )}
         </div>
       </section>
       
@@ -422,3 +441,5 @@ export default function UpbeatPage() {
     </div>
   );
 }
+
+    
