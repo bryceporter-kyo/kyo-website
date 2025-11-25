@@ -86,7 +86,6 @@ export default function ProgramPathways() {
                 <div className="relative w-full max-w-3xl" style={{ height: '500px' }}>
                 {pathways.map((path, index) => {
                     const isActive = activeIndex === index;
-                    const Icon = path.icon;
                     const image = PlaceHolderImages.find(p => p.id === path.imageId);
 
                     return (
@@ -97,9 +96,9 @@ export default function ProgramPathways() {
                             isActive ? "opacity-100" : "opacity-0 pointer-events-none",
                         )}
                     >
-                        <Card className="w-full h-full flex flex-col justify-center text-center overflow-hidden">
+                        <Card className="w-full h-full flex flex-col justify-end text-center overflow-hidden">
                             {image && (
-                                <div className="relative h-48 w-full">
+                                <div className="relative h-full w-full">
                                     <Image
                                         src={image.imageUrl}
                                         alt={image.description}
@@ -107,19 +106,16 @@ export default function ProgramPathways() {
                                         className="object-cover"
                                         data-ai-hint={image.imageHint}
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
                                 </div>
                             )}
-                            <CardHeader className="items-center -mt-16 relative z-10 bg-background/50 backdrop-blur-sm rounded-t-lg">
-                                <div className="bg-primary text-primary-foreground p-4 rounded-full border-4 border-background">
-                                    <Icon className="h-8 w-8" />
-                                </div>
+                            <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                                 <CardTitle className="font-headline text-4xl pt-4">{path.title}</CardTitle>
-                                <CardDescription className="text-lg font-bold">{path.level}</CardDescription>
-                            </CardHeader>
-                            <CardContent className="flex-grow">
-                                <p className="text-muted-foreground leading-relaxed text-lg">{path.description}</p>
-                            </CardContent>
+                                <CardDescription className="text-lg font-bold text-white/80">{path.level}</CardDescription>
+                                <CardContent className="p-0 pt-4">
+                                  <p className="leading-relaxed text-lg text-white/90">{path.description}</p>
+                                </CardContent>
+                            </div>
                         </Card>
                     </div>
                     );
