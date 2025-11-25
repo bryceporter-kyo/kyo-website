@@ -5,74 +5,27 @@
 import { useState } from "react";
 import PageHeader from "@/components/shared/PageHeader";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Folder, Users, DollarSign, Handshake, Cpu, Settings, Briefcase, FileText, ExternalLink, Mail, Pencil, ToggleLeft, ToggleRight } from "lucide-react";
+import { Folder, ExternalLink, Pencil, ToggleLeft, ToggleRight, Users, DollarSign, Handshake, Cpu, Settings, Briefcase, FileText } from "lucide-react";
 import { getBoard, getStaff } from "@/lib/staff";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getLinkById } from "@/lib/links";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import internalSectionsData from "@/lib/internal-sections.json";
+import type { InternalSection } from "@/lib/internal-sections";
 
-const internalSections = [
-    {
-        title: "Board of Directors",
-        icon: Users,
-        manager: "Bryce Porter",
-        email: "bryce.porter@thekyo.ca",
-        linkId: "internal-drive-board"
-    },
-    {
-        title: "Business & Finance",
-        icon: DollarSign,
-        manager: "Bryce Porter",
-        email: "bryce.porter@thekyo.ca",
-        linkId: "internal-drive-finance"
-    },
-    {
-        title: "Community Engagement",
-        icon: Handshake,
-        manager: "Joy Simmonds",
-        email: "joy.simmonds@thekyo.ca",
-        linkId: "internal-drive-community"
-    },
-    {
-        title: "IT and Data",
-        icon: Cpu,
-        manager: "IT Admin",
-        email: "it-admin@thekyo.ca",
-        linkId: "internal-drive-it"
-    },
-    {
-        title: "Operations",
-        icon: Settings,
-        manager: "Carolyn Hoy",
-        email: "carolyn.hoy@thekyo.ca",
-        linkId: "internal-drive-operations"
-    },
-    {
-        title: "Programming",
-        icon: Briefcase,
-        manager: "Colin McMahon",
-        email: "colin.mcmahon@thekyo.ca",
-        linkId: "internal-drive-programming"
-    },
-    {
-        title: "HR & Compliance",
-        icon: Users,
-        manager: "HR Committee",
-        email: "hr-committee@thekyo.ca",
-        linkId: "internal-drive-hr"
-    },
-    {
-        title: "Templates",
-        icon: FileText,
-        manager: "IT Admin",
-        email: "it-admin@thekyo.ca",
-        linkId: "internal-drive-templates"
-    }
-];
+const iconMap: { [key: string]: React.ElementType } = {
+    Users,
+    DollarSign,
+    Handshake,
+    Cpu,
+    Settings,
+    Briefcase,
+    FileText,
+};
 
 const externalLinks = [
     { title: "CEC One-time Donation", linkId: "internal-link-cec-onetime" },
@@ -92,6 +45,7 @@ export default function InternalPage() {
   const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-internal');
   const staff = getStaff();
   const board = getBoard();
+  const internalSections: InternalSection[] = internalSectionsData.sections;
   // Simulate admin state. Replace with actual authentication check.
   const [isSiteAdmin, setIsSiteAdmin] = useState(true);
 
@@ -120,14 +74,23 @@ export default function InternalPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {internalSections.map(section => {
                 const driveLink = getLinkById(section.linkId);
+                const Icon = iconMap[section.icon] || Folder;
                 return (
-                    <div key={section.title} className="relative">
+                    <div key={section.id} className="relative">
                         <Card className="flex flex-col h-full">
                             <CardHeader className="h-28 flex flex-col justify-start">
                                 <div className="flex items-start gap-4">
-                                    <section.icon className="w-8 h-8 text-primary flex-shrink-0" />
+                                    <Icon className="w-8 h-8 text-primary flex-shrink-0" />
                                     <CardTitle className="font-headline text-xl">{section.title}</CardTitle>
                                 </div>
+                                {isSiteAdmin && (
+                                    <Button asChild variant="ghost" size="icon" className="absolute top-2 right-2">
+                                        <Link href={`/admin/internal-sections?edit=${section.id}`}>
+                                            <Pencil />
+                                            <span className="sr-only">Edit Section</span>
+                                        </Link>
+                                    </Button>
+                                )}
                             </CardHeader>
                             <CardContent className="flex-grow space-y-2">
                                 <div>
@@ -147,14 +110,6 @@ export default function InternalPage() {
                                 )}
                             </CardFooter>
                         </Card>
-                        {isSiteAdmin && driveLink && (
-                            <Button asChild variant="ghost" size="icon" className="absolute top-2 right-2">
-                                <Link href={`/admin/links?edit=${driveLink.id}`}>
-                                    <Pencil />
-                                    <span className="sr-only">Edit Link</span>
-                                </Link>
-                            </Button>
-                        )}
                     </div>
                 )
             })}
@@ -208,17 +163,17 @@ export default function InternalPage() {
                     {externalLinks.map(linkInfo => {
                         const link = getLinkById(linkInfo.linkId);
                         return link ? (
-                            <div key={link.id} className="flex items-center">
-                                <Button asChild variant="ghost" className="justify-start flex-grow">
-                                    <Link href={link.url} target="_blank" rel="noopener noreferrer">
-                                        <ExternalLink className="mr-2"/>
-                                        {linkInfo.title}
+                            <div key={link.id} className="relative group">
+                                <Button asChild variant="ghost" className="justify-start w-full text-left">
+                                    <Link href={link.url} target="_blank" rel="noopener noreferrer" className="flex items-center">
+                                        <ExternalLink className="mr-2 h-4 w-4"/>
+                                        <span>{linkInfo.title}</span>
                                     </Link>
                                 </Button>
                                 {isSiteAdmin && (
-                                     <Button asChild variant="ghost" size="icon">
+                                     <Button asChild variant="ghost" size="icon" className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <Link href={`/admin/links?edit=${link.id}`}>
-                                            <Pencil />
+                                            <Pencil className="h-4 w-4" />
                                             <span className="sr-only">Edit Link</span>
                                         </Link>
                                     </Button>

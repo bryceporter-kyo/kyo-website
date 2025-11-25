@@ -1,0 +1,69 @@
+
+{
+    "sections": [
+        {
+            "id": "board-of-directors",
+            "icon": "Users",
+            "title": "Board of Directors",
+            "manager": "Bryce Porter",
+            "email": "bryce.porter@thekyo.ca",
+            "linkId": "internal-drive-board"
+        },
+        {
+            "id": "business-finance",
+            "icon": "DollarSign",
+            "title": "Business & Finance",
+            "manager": "Bryce Porter",
+            "email": "bryce.porter@thekyo.ca",
+            "linkId": "internal-drive-finance"
+        },
+        {
+            "id": "community-engagement",
+            "icon": "Handshake",
+            "title": "Community Engagement",
+            "manager": "Joy Simmonds",
+            "email": "joy.simmonds@thekyo.ca",
+            "linkId": "internal-drive-community"
+        },
+        {
+            "id": "it-data",
+            "icon": "Cpu",
+            "title": "IT and Data",
+            "manager": "IT Admin",
+            "email": "it-admin@thekyo.ca",
+            "linkId": "internal-drive-it"
+        },
+        {
+            "id": "operations",
+            "icon": "Settings",
+            "title": "Operations",
+            "manager": "Carolyn Hoy",
+            "email": "carolyn.hoy@thekyo.ca",
+            "linkId": "internal-drive-operations"
+        },
+        {
+            "id": "programming",
+            "icon": "Briefcase",
+            "title": "Programming",
+            "manager": "Colin McMahon",
+            "email": "colin.mcmahon@thekyo.ca",
+            "linkId": "internal-drive-programming"
+        },
+        {
+            "id": "hr-compliance",
+            "icon": "Users",
+            "title": "HR & Compliance",
+            "manager": "HR Committee",
+            "email": "hr-committee@thekyo.ca",
+            "linkId": "internal-drive-hr"
+        },
+        {
+            "id": "templates",
+            "icon": "FileText",
+            "title": "Templates",
+            "manager": "IT Admin",
+            "email": "it-admin@thekyo.ca",
+            "linkId": "internal-drive-templates"
+        }
+    ]
+}
