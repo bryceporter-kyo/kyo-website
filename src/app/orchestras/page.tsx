@@ -46,14 +46,14 @@ const financialAidOptions = [
         icon: HandHeart,
         title: "Tuition Assistance",
         description: "We offer financial aid to help make our programs accessible to all families through tuition bursaries & multiple child discounts.",
-        linkId: "contact-info",
+        linkId: "contact-main",
         imageId: "aid-tuition"
     },
     {
         icon: Music,
         title: "Instrument Loans",
         description: "The KYO has a limited number of instruments available for loan to registered musicians for the entire season, free of charge.",
-        linkId: "contact-info",
+        linkId: "contact-main",
         imageId: "aid-instruments"
     }
 ]

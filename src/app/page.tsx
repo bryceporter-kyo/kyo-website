@@ -129,6 +129,7 @@ export default function Home() {
   const financialAidButton = buttons.find(b => b.id === 'home-financial-aid-register');
   const heroOrchestraButton = buttons.find(b => b.id === 'hero-register-orchestra');
   const heroUpbeatButton = buttons.find(b => b.id === 'hero-register-upbeat');
+  const contactLink = getLinkById('contact-main');
 
   const getButtonProps = (buttonConfig?: ButtonConfig) => {
     if (!buttonConfig || !buttonConfig.visible) return null;
@@ -434,9 +435,11 @@ export default function Home() {
                         <Button asChild size="lg">
                             <Link href="/donate">Donate Now</Link>
                         </Button>
-                        <Button asChild size="lg" variant="outline">
-                            <Link href="/contact">Contact Us</Link>
-                        </Button>
+                        {contactLink && (
+                            <Button asChild size="lg" variant="outline">
+                                <Link href={contactLink.url}>Contact Us</Link>
+                            </Button>
+                        )}
                     </div>
                 </div>
             </section>
