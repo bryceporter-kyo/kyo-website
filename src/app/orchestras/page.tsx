@@ -7,7 +7,7 @@ import PageHeader from '@/components/shared/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Users, HandHeart, Music, Award, University, GraduationCap, Briefcase, FileText, Cpu } from 'lucide-react';
+import { Users, HandHeart, Music, Award, University, GraduationCap, Briefcase, FileText, Cpu, Library, Star, Handshake } from 'lucide-react';
 import Image from 'next/image';
 import { getLinkById } from '@/lib/links';
 import buttonData from '@/lib/buttons.json';
@@ -112,6 +112,7 @@ const creativeCourses = [
 export default function OrchestrasPage() {
   const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-orchestras');
   const joinImage = PlaceHolderImages.find(p => p.id === 'orchestra-kids-playing');
+  const communityImage = PlaceHolderImages.find(p => p.id === 'support-volunteer');
   const [buttons] = useState<ButtonConfig[]>(buttonData.buttons as ButtonConfig[]);
 
   const registerButtonConfig = buttons.find(b => b.id === 'orchestras-register');
@@ -230,6 +231,37 @@ export default function OrchestrasPage() {
       
       <ProgramPathways />
 
+       <section>
+          <div className="container mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-headline font-bold">Our Philosophy</h2>
+              <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
+                We believe in a holistic approach to music education that balances artistic rigor with a supportive and inspiring environment.
+              </p>
+            </div>
+            <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+              <Card>
+                <CardHeader className="flex flex-row items-center gap-4">
+                  <Library className="w-8 h-8 text-primary"/>
+                  <CardTitle className="font-headline text-xl">A Diverse Musical Approach</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">Our repertoire is anchored in the classical tradition but embraces a broad range of styles, including pop arrangements, film music, and works by Canadian and emerging composers.</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center gap-4">
+                  <Star className="w-8 h-8 text-primary"/>
+                  <CardTitle className="font-headline text-xl">Performance-Based Learning</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">Each orchestra performs in at least three public concerts per year. Public performance is key to building confidence, sharing progress, and connecting with our community.</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+       </section>
+
        <section className="bg-secondary">
         <div className="container mx-auto">
             <div className="text-center mb-12">
@@ -299,7 +331,7 @@ export default function OrchestrasPage() {
               <div className="text-center mb-12">
                 <h2 className="text-3xl font-headline font-bold">Financial Aid & Scholarships</h2>
                 <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
-                    We are committed to making music education accessible. Explore the financial support options available to our students.
+                  We are committed to making music education accessible. All our programs operate on a two-tiered subsidy system: a universal subsidy keeps fees low for everyone, and additional income-based bursaries ensure no student is turned away due to financial need.
                 </p>
             </div>
             <div className="max-w-4xl mx-auto space-y-12">
@@ -359,6 +391,48 @@ export default function OrchestrasPage() {
             </div>
           </div>
       </section>
+
+       <section className="bg-secondary">
+        <div className="container mx-auto">
+          <div className="grid md:grid-cols-2 gap-16 items-center">
+            <div className="space-y-6">
+              <h2 className="text-3xl font-headline font-bold">Equity & Community Partnerships</h2>
+              <p className="text-muted-foreground text-lg">
+                The KYO strives to be an inclusive, anti-discriminatory space that reflects the diversity of our broader community. We foster safe, positive environments for all students, including marginalized and underrepresented youth.
+              </p>
+              <ul className="space-y-4">
+                <li className="flex items-start gap-4">
+                  <Handshake className="w-8 h-8 text-primary flex-shrink-0" />
+                  <div>
+                    <h4 className="font-bold">New Canadians Centre Partnership</h4>
+                    <p className="text-muted-foreground">Offering improved access to KYO programs for newcomer youth and families.</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-4">
+                  <School className="w-8 h-8 text-primary flex-shrink-0" />
+                  <div>
+                    <h4 className="font-bold">School Outreach</h4>
+                    <p className="text-muted-foreground">Providing instrumental coaching, masterclasses, and access to our instrument lending library for local schools.</p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            {communityImage && (
+              <div className="rounded-lg overflow-hidden shadow-xl">
+                <Image
+                  src={communityImage.imageUrl}
+                  alt={communityImage.description}
+                  width={600}
+                  height={400}
+                  className="object-cover w-full h-full"
+                  data-ai-hint={communityImage.imageHint}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 }
