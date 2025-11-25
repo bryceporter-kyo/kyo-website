@@ -114,7 +114,8 @@ export default function Header() {
                   <>
                     <NavigationMenuTrigger
                         onMouseEnter={() => setActiveMenu(link.name)}
-                        className={cn(navigationMenuTriggerStyle(), activeMenu === link.name && "bg-accent/50")}
+                        onClick={(e) => e.preventDefault()}
+                        className={cn(navigationMenuTriggerStyle(), "cursor-default", activeMenu === link.name && "bg-accent/50")}
                     >
                         {link.name}
                     </NavigationMenuTrigger>
