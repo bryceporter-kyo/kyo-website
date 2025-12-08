@@ -1,0 +1,12 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /images/{allPaths=**} {
+      // Allow read access to everyone
+      allow read: if true;
+      
+      // Allow write access (for now, open - you can restrict later with auth)
+      allow write: if true;
+    }
+  }
+}
