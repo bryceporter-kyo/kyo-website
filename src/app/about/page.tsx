@@ -2,7 +2,7 @@
 "use client";
 
 import PageHeader from "@/components/shared/PageHeader";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { useImages } from "@/components/providers/ImageProvider";
 import { Award, Users, DollarSign, Group, GraduationCap, HeartHandshake, User, Briefcase } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -27,8 +27,9 @@ const communityRoles = [
 ]
 
 export default function AboutPage() {
-    const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-orchestras');
-    const aboutImage = PlaceHolderImages.find(p => p.id === 'program-orchestra');
+    const { getImage } = useImages();
+    const headerImage = getImage('page-header-orchestras');
+    const aboutImage = getImage('program-orchestra');
     const [seasonsOfExcellence, setSeasonsOfExcellence] = React.useState<number | null>(null);
 
     React.useEffect(() => {

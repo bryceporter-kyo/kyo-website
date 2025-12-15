@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Pencil, Save, X } from "lucide-react";
 import Link from "next/link";
-import { getLinks } from "@/lib/links";
+import { fetchLinksFromFirebase, updateLinkInFirebase } from "@/lib/links";
 import type { ExternalLink } from "@/lib/links";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import React, { useEffect } from "react";
@@ -24,12 +24,33 @@ const linkSchema = z.object({
 
 export default function LinksAdminPage() {
     const { toast } = useToast();
-    const initialLinks = getLinks();
-    const [links, setLinks] = React.useState<ExternalLink[]>(initialLinks);
+    const [links, setLinks] = React.useState<ExternalLink[]>([]);
     const [editingLinkId, setEditingLinkId] = React.useState<string | null>(null);
+    const [isLoading, setIsLoading] = React.useState(true);
+    const [isSaving, setIsSaving] = React.useState(false);
     
     const searchParams = useSearchParams();
     const linkToEdit = searchParams.get('edit');
+
+    // Load links from Firebase
+    useEffect(() => {
+        const loadLinks = async () => {
+            try {
+                const data = await fetchLinksFromFirebase();
+                setLinks(data);
+            } catch (error) {
+                console.error('Error loading links:', error);
+                toast({
+                    title: "Error",
+                    description: "Failed to load links from database.",
+                    variant: "destructive",
+                });
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        loadLinks();
+    }, [toast]);
 
     const form = useForm<z.infer<typeof linkSchema>>({
         resolver: zodResolver(linkSchema),
@@ -40,7 +61,7 @@ export default function LinksAdminPage() {
     });
 
     useEffect(() => {
-        if (linkToEdit) {
+        if (linkToEdit && links.length > 0) {
             const link = links.find(l => l.id === linkToEdit);
             if (link) {
                 handleEditClick(link);
@@ -65,22 +86,41 @@ export default function LinksAdminPage() {
         form.reset({ id: "", url: "" });
     };
 
-    function onSubmit(values: z.infer<typeof linkSchema>) {
-        // Update the link in the local state
-        setLinks(currentLinks => 
-            currentLinks.map(link => 
-                link.id === values.id ? { ...link, url: values.url } : link
-            )
-        );
+    async function onSubmit(values: z.infer<typeof linkSchema>) {
+        setIsSaving(true);
+        try {
+            // Update the link in Firebase
+            await updateLinkInFirebase(values.id, { url: values.url });
+            
+            // Update local state
+            setLinks(currentLinks => 
+                currentLinks.map(link => 
+                    link.id === values.id ? { ...link, url: values.url } : link
+                )
+            );
 
-        toast({
-            title: "Link Updated!",
-            description: `The link has been updated successfully.`,
-        });
-        setEditingLinkId(null);
+            toast({
+                title: "Link Updated!",
+                description: `The link has been saved to the database.`,
+            });
+            setEditingLinkId(null);
+        } catch (error) {
+            console.error('Error updating link:', error);
+            toast({
+                title: "Error",
+                description: "Failed to update link. Please try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsSaving(false);
+        }
     }
     
     const isEditing = (id: string) => editingLinkId === id;
+
+    if (isLoading) {
+        return <div className="container mx-auto py-12">Loading...</div>;
+    }
 
     return (
         <div className="container mx-auto py-12">
@@ -136,10 +176,10 @@ export default function LinksAdminPage() {
                                             <TableCell className="text-right">
                                                 {isEditing(link.id) ? (
                                                     <div className="flex gap-2 justify-end">
-                                                        <Button type="submit" size="icon">
+                                                        <Button type="submit" size="icon" disabled={isSaving}>
                                                             <Save className="h-4 w-4" />
                                                         </Button>
-                                                        <Button variant="ghost" size="icon" onClick={handleCancel}>
+                                                        <Button variant="ghost" size="icon" onClick={handleCancel} disabled={isSaving}>
                                                             <X className="h-4 w-4" />
                                                         </Button>
                                                     </div>

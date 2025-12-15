@@ -2,11 +2,11 @@
 import PageHeader from "@/components/shared/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getLinkById } from "@/lib/links";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { getImageById } from "@/lib/image-service-server";
 import Link from "next/link";
 
-export default function PrivacyPolicyPage() {
-  const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-privacy');
+export default async function PrivacyPolicyPage() {
+  const headerImage = await getImageById('page-header-privacy');
   const dpoLink = getLinkById('contact-dpo');
 
   return (

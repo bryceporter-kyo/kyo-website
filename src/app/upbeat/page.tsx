@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useImages } from '@/components/providers/ImageProvider';
 import PageHeader from '@/components/shared/PageHeader';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,19 +10,13 @@ import Link from 'next/link';
 import { Target, HeartHandshake, Users, Award, Smile, BarChart, Quote, HandCoins, BookOpen, Truck, LifeBuoy, UsersRound, Star, GitCommitHorizontal, Group, GraduationCap, Check, ShieldCheck, Heart, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
 import { getLinkById } from '@/lib/links';
-import buttonData from '@/lib/buttons.json';
+import { fetchButtonsFromFirebase, ButtonConfig } from '@/lib/buttons';
 import AnimatedCounter from '@/components/shared/AnimatedCounter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from '@/components/ui/badge';
 
-type ButtonConfig = {
-    id: string;
-    location: string;
-    text: string;
-    link: { type: 'internal' | 'external', value: string };
-    visible: boolean;
-};
+// ButtonConfig imported from @/lib/buttons
 
 const programPillars = [
     {
@@ -109,11 +103,20 @@ const testimonials = [
 
 
 export default function UpbeatPage() {
-  const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-upbeat');
-  const aboutImage = PlaceHolderImages.find(p => p.id === 'program-upbeat');
-  const impactImage = PlaceHolderImages.find(p => p.id === 'upbeat-kids-smiling');
-  const communityImage = PlaceHolderImages.find(p => p.id === 'support-volunteer');
-  const [buttons] = useState<ButtonConfig[]>(buttonData.buttons as ButtonConfig[]);
+  const { getImage } = useImages();
+  const headerImage = getImage('page-header-upbeat');
+  const aboutImage = getImage('program-upbeat');
+  const impactImage = getImage('upbeat-kids-smiling');
+  const communityImage = getImage('support-volunteer');
+  const [buttons, setButtons] = useState<ButtonConfig[]>([]);
+
+  useEffect(() => {
+    const loadButtons = async () => {
+      const data = await fetchButtonsFromFirebase();
+      setButtons(data);
+    };
+    loadButtons();
+  }, []);
 
   const getButtonProps = (buttonConfig?: ButtonConfig) => {
     if (!buttonConfig || !buttonConfig.visible) return null;

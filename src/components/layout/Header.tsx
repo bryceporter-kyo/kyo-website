@@ -17,8 +17,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { getLinkById } from '@/lib/links';
 import type { ExternalLink } from '@/lib/links';
+import { useData } from '@/components/providers/DataProvider';
 
 const navLinks = [
   { name: 'Home', href: '/' },
@@ -50,6 +50,7 @@ const navLinks = [
 ];
 
 export default function Header() {
+  const { getLink } = useData();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -58,11 +59,11 @@ export default function Header() {
 
   useEffect(() => {
     setIsMounted(true);
-    const link = getLinkById('register');
+    const link = getLink('register');
     if (link) {
       setRegistrationLink(link);
     }
-  }, []);
+  }, [getLink]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm">

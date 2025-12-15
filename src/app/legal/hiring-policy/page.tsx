@@ -2,11 +2,11 @@
 import PageHeader from "@/components/shared/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getLinkById } from "@/lib/links";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { getImageById } from "@/lib/image-service-server";
 import Link from "next/link";
 
-export default function HiringPolicyPage() {
-  const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-hiring');
+export default async function HiringPolicyPage() {
+  const headerImage = await getImageById('page-header-hiring');
   const hrCommitteeLink = getLinkById('contact-hiring-policy');
 
   return (

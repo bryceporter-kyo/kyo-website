@@ -1,10 +1,10 @@
 
 import PageHeader from "@/components/shared/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { getImageById } from "@/lib/image-service-server";
 
-export default function AccessibilityPolicyPage() {
-  const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-accessibility');
+export default async function AccessibilityPolicyPage() {
+  const headerImage = await getImageById('page-header-accessibility');
 
   return (
     <div>

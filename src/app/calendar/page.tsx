@@ -5,8 +5,8 @@ import { useState, useMemo, useEffect } from "react";
 import PageHeader from "@/components/shared/PageHeader";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { getEvents, Event } from "@/lib/events";
+import { useImages } from "@/components/providers/ImageProvider";
+import { fetchEventsFromFirebase, Event } from "@/lib/events";
 import { format, isSameMonth } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -17,10 +17,24 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function CalendarPage() {
     const [month, setMonth] = useState<Date | undefined>(undefined);
     const [allEvents, setAllEvents] = useState<Event[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     
     useEffect(() => {
         setMonth(new Date());
-        setAllEvents(getEvents());
+        
+        // Fetch events from Firebase
+        const loadEvents = async () => {
+            try {
+                const events = await fetchEventsFromFirebase();
+                setAllEvents(events);
+            } catch (error) {
+                console.error('Error loading events:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        
+        loadEvents();
     }, []);
 
     const parseDate = (dateString: string) => {
@@ -42,8 +56,8 @@ export default function CalendarPage() {
         return allEvents.filter(e => e.type === 'special').map(event => parseDate(event.date));
     }, [allEvents]);
 
-
-    const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-calendar');
+    const { getImage } = useImages();
+    const headerImage = getImage('page-header-calendar');
 
     return (
         <div>

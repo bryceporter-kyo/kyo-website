@@ -1,19 +1,21 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PageHeader from "@/components/shared/PageHeader";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { useImages } from "@/components/providers/ImageProvider";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Folder, ExternalLink, Pencil, ToggleLeft, ToggleRight, Users, DollarSign, Handshake, Cpu, Settings, Briefcase, FileText } from "lucide-react";
-import { getBoard, getStaff } from "@/lib/staff";
+import { Folder, ExternalLink as ExternalLinkIcon, Pencil, ToggleLeft, ToggleRight, Users, DollarSign, Handshake, Cpu, Settings, Briefcase, FileText, Loader2 } from "lucide-react";
+import { fetchStaffFromFirebase, fetchBoardFromFirebase } from "@/lib/staff";
+import type { StaffMember, BoardMember } from "@/lib/staff";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getLinkById } from "@/lib/links";
+import { fetchLinksFromFirebase } from "@/lib/links";
+import type { ExternalLink as LinkType } from "@/lib/links";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import internalSectionsData from "@/lib/internal-sections.json";
+import { fetchInternalSectionsFromFirebase } from "@/lib/internal-sections";
 import type { InternalSection } from "@/lib/internal-sections";
 
 const iconMap: { [key: string]: React.ElementType } = {
@@ -41,12 +43,43 @@ const externalLinks = [
 ]
 
 export default function InternalPage() {
-  const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-internal');
-  const staff = getStaff();
-  const board = getBoard();
-  const internalSections: InternalSection[] = internalSectionsData.sections;
+    const { getImage } = useImages();
+    const headerImage = getImage('page-header-internal');
+  const [staff, setStaff] = useState<StaffMember[]>([]);
+  const [board, setBoard] = useState<BoardMember[]>([]);
+  const [internalSections, setInternalSections] = useState<InternalSection[]>([]);
+  const [allLinks, setAllLinks] = useState<LinkType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   // Simulate admin state. Replace with actual authentication check.
   const [isSiteAdmin, setIsSiteAdmin] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      setIsLoading(true);
+      try {
+        const [sectionsData, staffData, boardData, linksData] = await Promise.all([
+          fetchInternalSectionsFromFirebase(),
+          fetchStaffFromFirebase(),
+          fetchBoardFromFirebase(),
+          fetchLinksFromFirebase()
+        ]);
+        setInternalSections(sectionsData);
+        setStaff(staffData);
+        setBoard(boardData);
+        setAllLinks(linksData);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  // Helper function to get link by ID
+  const getLinkById = (linkId: string): LinkType | undefined => {
+    return allLinks.find(link => link.id === linkId);
+  };
 
   return (
     <div>
@@ -70,6 +103,13 @@ export default function InternalPage() {
         </div>
       </div>
       <section className="container mx-auto pt-0">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <span className="ml-2">Loading...</span>
+          </div>
+        ) : (
+          <>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {internalSections.map(section => {
                 const driveLink = getLinkById(section.linkId);
@@ -165,7 +205,7 @@ export default function InternalPage() {
                             <div key={link.id} className="relative group">
                                 <Button asChild variant="ghost" className="justify-start w-full text-left">
                                     <Link href={link.url} target="_blank" rel="noopener noreferrer" className="flex items-center">
-                                        <ExternalLink className="mr-2 h-4 w-4"/>
+                                        <ExternalLinkIcon className="mr-2 h-4 w-4"/>
                                         <span>{linkInfo.title}</span>
                                     </Link>
                                 </Button>
@@ -183,6 +223,8 @@ export default function InternalPage() {
                 </div>
             </CardContent>
         </Card>
+          </>
+        )}
       </section>
     </div>
   );

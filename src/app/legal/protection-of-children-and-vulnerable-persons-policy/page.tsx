@@ -1,11 +1,11 @@
 
 import PageHeader from "@/components/shared/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { getImageById } from "@/lib/image-service-server";
 import Link from "next/link";
 
-export default function ProtectionPolicyPage() {
-  const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-protection');
+export default async function ProtectionPolicyPage() {
+  const headerImage = await getImageById('page-header-protection');
 
   return (
     <div>

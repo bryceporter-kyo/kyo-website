@@ -1,0 +1,17 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Placeholder images collection - allow read for everyone, write for authenticated users
+    match /placeholder-images/{imageId} {
+      allow read: if true;
+      allow write: if true; // For now open - you can restrict with: request.auth != null;
+    }
+    
+    // Add more collection rules as needed
+    match /{document=**} {
+      allow read: if true;
+      allow write: if true; // For now open - restrict later with authentication
+    }
+  }
+}

@@ -12,10 +12,16 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+// Log config for debugging (remove in production)
+console.log("[Firebase] Initializing with project:", firebaseConfig.projectId);
+
 // Initialize Firebase only if it hasn't been initialized
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
-export const db = getFirestore(app);
+export const db = getFirestore(app, 'default');
 export const storage = getStorage(app);
 export const auth = getAuth(app);
+
+console.log("[Firebase] Initialized successfully");
+
 export default app;

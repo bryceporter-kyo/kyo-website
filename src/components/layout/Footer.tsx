@@ -3,11 +3,11 @@
 
 import { Logo } from "@/components/icons/Logo";
 import { Button } from "@/components/ui/button";
-import { getLinkById } from "@/lib/links";
 import { Facebook, Instagram, Mail, MapPin, Phone, Cookie } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from 'react';
 import type { ExternalLink } from '@/lib/links';
+import { useData } from '@/components/providers/DataProvider';
 
 const navLinks = [
   { name: 'Home', href: '/' },
@@ -36,6 +36,7 @@ const legalLinks: LegalLink[] = [
 ];
 
 export default function Footer() {
+  const { getLink } = useData();
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [mailingAddressLink, setMailingAddressLink] = useState<ExternalLink | undefined>(undefined);
   const [physicalAddressLink, setPhysicalAddressLink] = useState<ExternalLink | undefined>(undefined);
@@ -44,18 +45,18 @@ export default function Footer() {
   const [registrationLink, setRegistrationLink] = useState<ExternalLink | undefined>(undefined);
 
   useEffect(() => {
-    const facebookLink = getLinkById('social-facebook');
-    const instagramLink = getLinkById('social-instagram');
+    const facebookLink = getLink('social-facebook');
+    const instagramLink = getLink('social-instagram');
     setSocialLinks([
       { name: 'Facebook', link: facebookLink, icon: Facebook },
       { name: 'Instagram', link: instagramLink, icon: Instagram },
     ]);
-    setMailingAddressLink(getLinkById('address-mailing'));
-    setPhysicalAddressLink(getLinkById('address-physical'));
-    setPhoneLink(getLinkById('contact-phone'));
-    setEmailLink(getLinkById('contact-main'));
-    setRegistrationLink(getLinkById('register'));
-  }, []);
+    setMailingAddressLink(getLink('address-mailing'));
+    setPhysicalAddressLink(getLink('address-physical'));
+    setPhoneLink(getLink('contact-phone'));
+    setEmailLink(getLink('contact-main'));
+    setRegistrationLink(getLink('register'));
+  }, [getLink]);
 
   const openCookieSettings = () => {
     const event = new CustomEvent('openCookieSettings');

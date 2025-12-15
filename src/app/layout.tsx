@@ -6,6 +6,8 @@ import Footer from '@/components/layout/Footer';
 import { Toaster } from "@/components/ui/toaster";
 import CookieConsent from '@/components/shared/CookieConsent';
 import Analytics from '@/components/shared/Analytics';
+import { ImageProvider } from '@/components/providers/ImageProvider';
+import { DataProvider } from '@/components/providers/DataProvider';
 
 export default function RootLayout({
   children,
@@ -22,15 +24,19 @@ export default function RootLayout({
       </head>
       <body className={cn('font-body antialiased', 'min-h-screen bg-background')}>
         <Analytics />
-        <div className="relative flex min-h-dvh flex-col bg-background">
-          <Header />
-          <main className="flex-1">
-            {children}
-          </main>
-          <Footer />
-        </div>
-        <Toaster />
-        <CookieConsent />
+        <DataProvider>
+          <ImageProvider>
+            <div className="relative flex min-h-dvh flex-col bg-background">
+              <Header />
+              <main className="flex-1">
+                {children}
+              </main>
+              <Footer />
+            </div>
+            <Toaster />
+            <CookieConsent />
+          </ImageProvider>
+        </DataProvider>
       </body>
     </html>
   );

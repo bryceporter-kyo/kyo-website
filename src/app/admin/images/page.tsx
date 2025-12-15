@@ -34,17 +34,21 @@ export default function AdminImagesPage() {
 
   // Load images from Firebase on mount
   const loadImages = useCallback(async () => {
+    console.log("[AdminImagesPage] loadImages started");
     setIsLoading(true);
     setError(null);
     try {
+      console.log("[AdminImagesPage] Calling getMergedImages...");
       const mergedImages = await getMergedImages(PlaceHolderImages);
+      console.log("[AdminImagesPage] getMergedImages completed", { count: mergedImages.length });
       setImages(mergedImages);
     } catch (err) {
-      console.error("Failed to load images:", err);
+      console.error("[AdminImagesPage] Failed to load images:", err);
       setError("Failed to load images from database. Using default images.");
       // Fallback to default images
       setImages(PlaceHolderImages.map(img => ({ ...img, originalUrl: img.imageUrl })));
     } finally {
+      console.log("[AdminImagesPage] loadImages finished");
       setIsLoading(false);
     }
   }, []);
@@ -99,16 +103,27 @@ export default function AdminImagesPage() {
     newImageUrl: string,
     metadata?: Partial<StoredImage>
   ) => {
+    console.log("[AdminImagesPage] handleSaveImage started", { 
+      imageId, 
+      isBase64: newImageUrl.startsWith("data:"),
+      urlLength: newImageUrl.length,
+      metadata 
+    });
     try {
       let finalImageUrl = newImageUrl;
 
       // If it's a base64 image, try to upload to Firebase Storage
       // If that fails (CORS), the function will return the base64 data directly
       if (newImageUrl.startsWith("data:")) {
+        console.log("[AdminImagesPage] Uploading base64 image to storage...");
         try {
           finalImageUrl = await uploadBase64Image(newImageUrl, imageId);
+          console.log("[AdminImagesPage] Base64 upload result:", { 
+            isStillBase64: finalImageUrl.startsWith("data:"),
+            resultLength: finalImageUrl.length 
+          });
         } catch (storageError) {
-          console.warn("Storage upload failed, using base64 directly:", storageError);
+          console.warn("[AdminImagesPage] Storage upload failed, using base64 directly:", storageError);
           // Keep the base64 data - it will be stored in Firestore
           finalImageUrl = newImageUrl;
         }
@@ -117,8 +132,10 @@ export default function AdminImagesPage() {
       // Find the original image data
       const originalImage = images.find((img) => img.id === imageId);
       if (!originalImage) {
+        console.error("[AdminImagesPage] Image not found:", imageId);
         throw new Error("Image not found");
       }
+      console.log("[AdminImagesPage] Original image found:", originalImage.id);
 
       // Save metadata to Firestore
       const updatedImage: StoredImage = {
@@ -128,19 +145,23 @@ export default function AdminImagesPage() {
         originalUrl: originalImage.originalUrl || originalImage.imageUrl,
       };
 
+      console.log("[AdminImagesPage] Saving image metadata to Firestore...");
       await saveImageMetadata(updatedImage);
+      console.log("[AdminImagesPage] Metadata saved successfully");
 
       // Update local state
       setImages((prev) =>
         prev.map((img) => (img.id === imageId ? updatedImage : img))
       );
+      console.log("[AdminImagesPage] Local state updated");
 
       toast({
         title: "Success",
         description: "Image updated successfully!",
       });
+      console.log("[AdminImagesPage] handleSaveImage completed successfully");
     } catch (err) {
-      console.error("Failed to save image:", err);
+      console.error("[AdminImagesPage] Failed to save image:", err);
       throw err;
     }
   };

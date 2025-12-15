@@ -1,11 +1,13 @@
 
 import InstructorCard from "@/components/shared/InstructorCard";
 import PageHeader from "@/components/shared/PageHeader";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { getImagesFromFirestore } from "@/lib/image-service-server";
 import { getBoard, getStaff } from "@/lib/staff";
 
-export default function StaffPage() {
-    const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-support');
+export default async function StaffPage() {
+    const images = await getImagesFromFirestore();
+    const getImage = (id: string) => images.find(img => img.id === id);
+    const headerImage = getImage('page-header-support');
     const staff = getStaff();
     const board = getBoard();
     const instructors = staff.filter(s => s.image)
@@ -34,7 +36,7 @@ export default function StaffPage() {
                                     name={instructor.name}
                                     title={instructor.title}
                                     bio={instructor.bio ?? ''}
-                                    image={PlaceHolderImages.find(p => p.id === instructor.image)}
+                                    image={getImage(instructor.image || '')}
                                 />
                             ))}
                         </div>
@@ -48,7 +50,7 @@ export default function StaffPage() {
                                     name={member.name}
                                     title={member.title}
                                     bio={member.bio ?? ''}
-                                    image={PlaceHolderImages.find(p => p.id === member.image)}
+                                    image={getImage(member.image || '')}
                                 />
                             ))}
                         </div>

@@ -12,7 +12,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Pencil, Trash2, Download, Upload, X } from "lucide-react";
 import Link from "next/link";
-import { getEvents } from "@/lib/events";
+import { fetchEventsFromFirebase, addEventToFirebase, updateEventInFirebase, deleteEventFromFirebase } from "@/lib/events";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -49,10 +49,28 @@ export default function EventsAdminPage() {
     const [events, setEvents] = React.useState<Event[]>([]);
     const [csvFile, setCsvFile] = React.useState<File | null>(null);
     const [editingEvent, setEditingEvent] = React.useState<Event | null>(null);
+    const [isLoading, setIsLoading] = React.useState(true);
+    const [isSaving, setIsSaving] = React.useState(false);
 
+    // Load events from Firebase
     React.useEffect(() => {
-        setEvents(getEvents());
-    }, []);
+        const loadEvents = async () => {
+            try {
+                const data = await fetchEventsFromFirebase();
+                setEvents(data);
+            } catch (error) {
+                console.error('Error loading events:', error);
+                toast({
+                    title: "Error",
+                    description: "Failed to load events from database.",
+                    variant: "destructive",
+                });
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        loadEvents();
+    }, [toast]);
     
     const parseDate = (dateString: string) => {
       // Dates in JSON are "YYYY-MM-DD". 
@@ -92,35 +110,54 @@ export default function EventsAdminPage() {
       }
     }, [editingEvent, form]);
 
-    function onSubmit(values: z.infer<typeof eventSchema>) {
-        if (editingEvent) {
-            // Update existing event
-            const updatedEvents = events.map(event => 
-                event.id === editingEvent.id 
-                    ? { ...event, ...values, date: format(values.date, 'yyyy-MM-dd') } 
-                    : event
-            );
-            setEvents(updatedEvents.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
+    async function onSubmit(values: z.infer<typeof eventSchema>) {
+        setIsSaving(true);
+        try {
+            if (editingEvent) {
+                // Update existing event in Firebase
+                const updatedEventData = {
+                    ...values,
+                    date: format(values.date, 'yyyy-MM-dd'),
+                };
+                await updateEventInFirebase(editingEvent.id, updatedEventData);
+                
+                const updatedEvents = events.map(event => 
+                    event.id === editingEvent.id 
+                        ? { ...event, ...updatedEventData } 
+                        : event
+                );
+                setEvents(updatedEvents.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
+                toast({
+                    title: "Event Updated!",
+                    description: `"${values.name}" has been updated.`,
+                });
+                setEditingEvent(null);
+            } else {
+                // Create new event in Firebase
+                const newEventData = {
+                    ...values,
+                    date: format(values.date, 'yyyy-MM-dd'),
+                };
+                const newEvent = await addEventToFirebase(newEventData);
+                
+                const updatedEvents = [...events, newEvent].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+                setEvents(updatedEvents);
+                toast({
+                    title: "Event Created!",
+                    description: "The new event has been saved to the database.",
+                });
+            }
+            form.reset();
+        } catch (error) {
+            console.error('Error saving event:', error);
             toast({
-                title: "Event Updated!",
-                description: `"${values.name}" has been updated.`,
+                title: "Error",
+                description: "Failed to save event. Please try again.",
+                variant: "destructive",
             });
-            setEditingEvent(null);
-        } else {
-            // Create new event
-            const newEvent: Event = {
-            id: Math.max(...events.map(e => e.id), 0) + 1,
-            ...values,
-            date: format(values.date, 'yyyy-MM-dd'),
-            };
-            const updatedEvents = [...events, newEvent].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-            setEvents(updatedEvents);
-            toast({
-                title: "Event Created!",
-                description: "The new event has been saved.",
-            });
+        } finally {
+            setIsSaving(false);
         }
-        form.reset();
     }
 
     const handleEditClick = (event: Event) => {
@@ -175,13 +212,23 @@ export default function EventsAdminPage() {
         reader.readAsText(csvFile);
     };
     
-    function handleDelete(eventToDelete: Event) {
-        setEvents(events.filter(event => event.id !== eventToDelete.id));
-        toast({
-            title: "Event Deleted",
-            description: `"${eventToDelete.name}" has been deleted.`,
-            variant: "destructive",
-        });
+    async function handleDelete(eventToDelete: Event) {
+        try {
+            await deleteEventFromFirebase(eventToDelete.id);
+            setEvents(events.filter(event => event.id !== eventToDelete.id));
+            toast({
+                title: "Event Deleted",
+                description: `"${eventToDelete.name}" has been deleted from the database.`,
+                variant: "destructive",
+            });
+        } catch (error) {
+            console.error('Error deleting event:', error);
+            toast({
+                title: "Error",
+                description: "Failed to delete event. Please try again.",
+                variant: "destructive",
+            });
+        }
     }
 
     return (
@@ -416,9 +463,11 @@ export default function EventsAdminPage() {
                                 )}
                             />
                             <div className="flex gap-4">
-                                <Button type="submit">{editingEvent ? "Update Event" : "Create Event"}</Button>
+                                <Button type="submit" disabled={isSaving}>
+                                    {isSaving ? "Saving..." : (editingEvent ? "Update Event" : "Create Event")}
+                                </Button>
                                 {editingEvent && (
-                                    <Button variant="outline" onClick={handleCancelEdit}>
+                                    <Button variant="outline" onClick={handleCancelEdit} disabled={isSaving}>
                                         <X className="mr-2 h-4 w-4" />
                                         Cancel Edit
                                     </Button>

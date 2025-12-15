@@ -1,7 +1,7 @@
 
 import ContactMap from "@/components/shared/ContactMap";
 import PageHeader from "@/components/shared/PageHeader";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { getImageById } from "@/lib/image-service-server";
 import { getLinkById } from "@/lib/links";
 import { Facebook, Instagram, Mail, Phone, Clock, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,8 +10,8 @@ import Link from "next/link";
 import ContactInfoCard from "@/components/shared/ContactInfoCard";
 
 
-export default function ContactPage() {
-    const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-support');
+export default async function ContactPage() {
+    const headerImage = await getImageById('page-header-support');
     const phoneLink = getLinkById('contact-phone');
     const facebookLink = getLinkById('social-facebook');
     const instagramLink = getLinkById('social-instagram');

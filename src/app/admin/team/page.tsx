@@ -11,7 +11,16 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Pencil, Trash2, UserPlus, X } from "lucide-react";
 import Link from "next/link";
-import { getBoard, getStaff } from "@/lib/staff";
+import { 
+    fetchStaffFromFirebase, 
+    fetchBoardFromFirebase,
+    addStaffToFirebase,
+    addBoardToFirebase,
+    updateStaffInFirebase,
+    updateBoardInFirebase,
+    deleteStaffFromFirebase,
+    deleteBoardFromFirebase
+} from "@/lib/staff";
 import type { StaffMember, BoardMember } from "@/lib/staff";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
@@ -42,14 +51,40 @@ type MemberWithId = (StaffMember | BoardMember) & { type: 'staff' | 'board' };
 
 export default function TeamAdminPage() {
     const { toast } = useToast();
-    const staff = getStaff();
-    const board = getBoard();
+    const [staff, setStaff] = React.useState<StaffMember[]>([]);
+    const [board, setBoard] = React.useState<BoardMember[]>([]);
+    const [isLoading, setIsLoading] = React.useState(true);
+    const [isSaving, setIsSaving] = React.useState(false);
+    const [editingMember, setEditingMember] = React.useState<MemberWithId | null>(null);
+
+    // Load data from Firebase
+    React.useEffect(() => {
+        const loadData = async () => {
+            try {
+                const [staffData, boardData] = await Promise.all([
+                    fetchStaffFromFirebase(),
+                    fetchBoardFromFirebase()
+                ]);
+                setStaff(staffData);
+                setBoard(boardData);
+            } catch (error) {
+                console.error('Error loading team data:', error);
+                toast({
+                    title: "Error",
+                    description: "Failed to load team data from database.",
+                    variant: "destructive",
+                });
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        loadData();
+    }, [toast]);
+
     const allMembers: MemberWithId[] = [
         ...staff.map(s => ({...s, type: 'staff' as const})), 
         ...board.map(b => ({...b, type: 'board' as const}))
     ];
-    
-    const [editingMember, setEditingMember] = React.useState<MemberWithId | null>(null);
 
     const form = useForm<z.infer<typeof memberSchema>>({
         resolver: zodResolver(memberSchema),
@@ -87,22 +122,80 @@ export default function TeamAdminPage() {
         }
     }, [editingMember, form]);
 
-    function onSubmit(values: z.infer<typeof memberSchema>) {
-        console.log(values);
-        toast({
-            title: editingMember ? "Member Updated!" : "Member Created!",
-            description: `The member "${values.name}" has been saved.`,
-        });
-        setEditingMember(null);
+    async function onSubmit(values: z.infer<typeof memberSchema>) {
+        setIsSaving(true);
+        try {
+            const memberData = {
+                name: values.name,
+                title: values.title,
+                email: values.email,
+                bio: values.bio || '',
+                image: values.image || '',
+            };
+
+            if (editingMember) {
+                // Update existing member
+                if (editingMember.type === 'staff') {
+                    await updateStaffInFirebase(editingMember.id, memberData);
+                    setStaff(staff.map(s => s.id === editingMember.id ? { ...s, ...memberData } : s));
+                } else {
+                    await updateBoardInFirebase(editingMember.id, memberData);
+                    setBoard(board.map(b => b.id === editingMember.id ? { ...b, ...memberData } : b));
+                }
+                toast({
+                    title: "Member Updated!",
+                    description: `"${values.name}" has been updated in the database.`,
+                });
+            } else {
+                // Create new member
+                if (values.type === 'staff') {
+                    const newStaff = await addStaffToFirebase(memberData);
+                    setStaff([...staff, newStaff]);
+                } else {
+                    const newBoard = await addBoardToFirebase(memberData);
+                    setBoard([...board, newBoard]);
+                }
+                toast({
+                    title: "Member Created!",
+                    description: `"${values.name}" has been added to the database.`,
+                });
+            }
+            setEditingMember(null);
+            form.reset();
+        } catch (error) {
+            console.error('Error saving member:', error);
+            toast({
+                title: "Error",
+                description: "Failed to save member. Please try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsSaving(false);
+        }
     }
     
-    function handleDelete(member: MemberWithId) {
-        console.log("Deleting member:", member.name);
-        toast({
-            title: "Member Deleted",
-            description: `"${member.name}" has been deleted. (This is a placeholder)`,
-            variant: "destructive",
-        });
+    async function handleDelete(member: MemberWithId) {
+        try {
+            if (member.type === 'staff') {
+                await deleteStaffFromFirebase(member.id);
+                setStaff(staff.filter(s => s.id !== member.id));
+            } else {
+                await deleteBoardFromFirebase(member.id);
+                setBoard(board.filter(b => b.id !== member.id));
+            }
+            toast({
+                title: "Member Deleted",
+                description: `"${member.name}" has been deleted from the database.`,
+                variant: "destructive",
+            });
+        } catch (error) {
+            console.error('Error deleting member:', error);
+            toast({
+                title: "Error",
+                description: "Failed to delete member. Please try again.",
+                variant: "destructive",
+            });
+        }
     }
 
     const handleEditClick = (member: MemberWithId) => {
@@ -268,12 +361,12 @@ export default function TeamAdminPage() {
                                 <FormMessage />
                             </FormItem>
                              <div className="flex gap-4">
-                                <Button type="submit">
+                                <Button type="submit" disabled={isSaving}>
                                     <UserPlus className="mr-2 h-4 w-4"/>
-                                    {editingMember ? 'Update Member' : 'Save Member'}
+                                    {isSaving ? 'Saving...' : (editingMember ? 'Update Member' : 'Save Member')}
                                 </Button>
                                 {editingMember && (
-                                    <Button variant="outline" onClick={() => setEditingMember(null)}>
+                                    <Button variant="outline" onClick={() => setEditingMember(null)} disabled={isSaving}>
                                         <X className="mr-2 h-4 w-4" />
                                         Cancel Edit
                                     </Button>

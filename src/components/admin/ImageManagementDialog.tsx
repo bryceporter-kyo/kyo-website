@@ -112,14 +112,21 @@ export function ImageManagementDialog({
   const handleSaveNewImage = async () => {
     if (!uploadedImage) return;
 
+    console.log("[ImageManagementDialog] handleSaveNewImage started", { imageId: image.id });
     setIsLoading(true);
     setError(null);
 
     try {
+      console.log("[ImageManagementDialog] Calling onSave...", { 
+        imageId: image.id, 
+        isBase64: uploadedImage.startsWith("data:"),
+        uploadedImageLength: uploadedImage.length 
+      });
       await onSave(image.id, uploadedImage, {
         description,
         imageHint,
       });
+      console.log("[ImageManagementDialog] onSave completed successfully");
       setSuccess(true);
       setTimeout(() => {
         onOpenChange(false);
@@ -127,29 +134,39 @@ export function ImageManagementDialog({
         setUploadedImage(null);
       }, 1000);
     } catch (err) {
+      console.error("[ImageManagementDialog] handleSaveNewImage failed:", err);
       setError(err instanceof Error ? err.message : "Failed to save image");
     } finally {
+      console.log("[ImageManagementDialog] handleSaveNewImage finished");
       setIsLoading(false);
     }
   };
 
   const handleEditorSave = async (editedImageData: string) => {
+    console.log("[ImageManagementDialog] handleEditorSave started", { 
+      imageId: image.id,
+      dataLength: editedImageData.length 
+    });
     setIsLoading(true);
     setError(null);
 
     try {
+      console.log("[ImageManagementDialog] Calling onSave from editor...");
       await onSave(image.id, editedImageData, {
         description,
         imageHint,
       });
+      console.log("[ImageManagementDialog] Editor save completed successfully");
       setSuccess(true);
       setTimeout(() => {
         onOpenChange(false);
         setSuccess(false);
       }, 1000);
     } catch (err) {
+      console.error("[ImageManagementDialog] handleEditorSave failed:", err);
       setError(err instanceof Error ? err.message : "Failed to save image");
     } finally {
+      console.log("[ImageManagementDialog] handleEditorSave finished");
       setIsLoading(false);
     }
   };

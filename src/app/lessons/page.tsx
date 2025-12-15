@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useImages } from '@/components/providers/ImageProvider';
 import PageHeader from '@/components/shared/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,15 +10,9 @@ import Link from 'next/link';
 import { Check, Target, Users, GraduationCap, Music } from 'lucide-react';
 import Image from 'next/image';
 import { getLinkById } from '@/lib/links';
-import buttonData from '@/lib/buttons.json';
+import { fetchButtonsFromFirebase, ButtonConfig } from '@/lib/buttons';
 
-type ButtonConfig = {
-    id: string;
-    location: string;
-    text: string;
-    link: { type: 'internal' | 'external', value: string };
-    visible: boolean;
-};
+// ButtonConfig imported from @/lib/buttons
 
 const programGoals = [
     {
@@ -46,10 +40,19 @@ const instruments = [
 ];
 
 export default function LessonsPage() {
-  const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-lessons');
-  const aboutImage = PlaceHolderImages.find(p => p.id === 'program-lessons');
-  const studentImage = PlaceHolderImages.find(p => p.id === 'lessons-teacher-student');
-  const [buttons] = useState<ButtonConfig[]>(buttonData.buttons as ButtonConfig[]);
+  const { getImage } = useImages();
+  const headerImage = getImage('page-header-lessons');
+  const aboutImage = getImage('program-lessons');
+  const studentImage = getImage('lessons-teacher-student');
+  const [buttons, setButtons] = useState<ButtonConfig[]>([]);
+
+  useEffect(() => {
+    const loadButtons = async () => {
+      const data = await fetchButtonsFromFirebase();
+      setButtons(data);
+    };
+    loadButtons();
+  }, []);
 
   const mainButtonConfig = buttons.find(b => b.id === 'lessons-register-main');
   const secondaryButtonConfig = buttons.find(b => b.id === 'lessons-register-secondary');

@@ -19,6 +19,18 @@ import type { ImagePlaceholder } from "./placeholder-images";
 
 const IMAGES_COLLECTION = "placeholder-images";
 
+/**
+ * Helper function to add timeout to promises
+ */
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, operation: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`${operation} timed out after ${timeoutMs}ms`)), timeoutMs)
+    ),
+  ]);
+}
+
 export interface StoredImage extends ImagePlaceholder {
   updatedAt?: string;
   originalUrl?: string; // Keep track of the original Unsplash URL
@@ -38,14 +50,24 @@ export async function uploadImage(
   file: File | Blob,
   imageId: string
 ): Promise<string> {
+  console.log("[ImageService] uploadImage started", { imageId, fileSize: file.size });
   const timestamp = Date.now();
   const extension = file instanceof File ? file.name.split(".").pop() : "png";
-  const storageRef = ref(storage, `images/${imageId}_${timestamp}.${extension}`);
+  const storagePath = `images/${imageId}_${timestamp}.${extension}`;
+  const storageRef = ref(storage, storagePath);
 
-  await uploadBytes(storageRef, file);
-  const downloadURL = await getDownloadURL(storageRef);
-
-  return downloadURL;
+  console.log("[ImageService] Uploading to Firebase Storage...", { path: storagePath });
+  
+  try {
+    await withTimeout(uploadBytes(storageRef, file), 30000, "Upload");
+    console.log("[ImageService] Upload complete, getting download URL...");
+    const downloadURL = await withTimeout(getDownloadURL(storageRef), 10000, "Get download URL");
+    console.log("[ImageService] Download URL obtained:", downloadURL);
+    return downloadURL;
+  } catch (error) {
+    console.error("[ImageService] uploadImage failed:", error);
+    throw error;
+  }
 }
 
 /**
@@ -56,6 +78,7 @@ export async function uploadBase64Image(
   base64Data: string,
   imageId: string
 ): Promise<string> {
+  console.log("[ImageService] uploadBase64Image started", { imageId, dataLength: base64Data.length });
   try {
     // Try to upload to Firebase Storage first
     const base64Content = base64Data.replace(/^data:image\/\w+;base64,/, "");
@@ -68,10 +91,13 @@ export async function uploadBase64Image(
 
     const byteArray = new Uint8Array(byteNumbers);
     const blob = new Blob([byteArray], { type: "image/png" });
+    console.log("[ImageService] Converted base64 to blob", { blobSize: blob.size });
 
-    return await uploadImage(blob, imageId);
+    const result = await uploadImage(blob, imageId);
+    console.log("[ImageService] uploadBase64Image completed successfully");
+    return result;
   } catch (error) {
-    console.warn("Firebase Storage upload failed, storing as base64 in Firestore:", error);
+    console.warn("[ImageService] Firebase Storage upload failed, storing as base64 in Firestore:", error);
     // Return the base64 data directly - it will be stored in Firestore
     return base64Data;
   }
@@ -81,11 +107,25 @@ export async function uploadBase64Image(
  * Save image metadata to Firestore
  */
 export async function saveImageMetadata(image: StoredImage): Promise<void> {
+  console.log("[ImageService] saveImageMetadata started", { imageId: image.id });
   const docRef = doc(db, IMAGES_COLLECTION, image.id);
-  await setDoc(docRef, {
-    ...image,
-    updatedAt: new Date().toISOString(),
-  });
+  console.log("[ImageService] Saving to Firestore collection:", IMAGES_COLLECTION);
+  
+  try {
+    // Save with 15 second timeout
+    await withTimeout(
+      setDoc(docRef, {
+        ...image,
+        updatedAt: new Date().toISOString(),
+      }),
+      15000,
+      "Firestore save"
+    );
+    console.log("[ImageService] saveImageMetadata completed successfully");
+  } catch (error) {
+    console.error("[ImageService] saveImageMetadata failed:", error);
+    throw error;
+  }
 }
 
 /**
@@ -94,29 +134,43 @@ export async function saveImageMetadata(image: StoredImage): Promise<void> {
 export async function getImageMetadata(
   imageId: string
 ): Promise<StoredImage | null> {
-  const docRef = doc(db, IMAGES_COLLECTION, imageId);
-  const docSnap = await getDoc(docRef);
+  console.log("[ImageService] getImageMetadata started", { imageId });
+  try {
+    const docRef = doc(db, IMAGES_COLLECTION, imageId);
+    const docSnap = await withTimeout(getDoc(docRef), 10000, "Get image metadata");
 
-  if (docSnap.exists()) {
-    return docSnap.data() as StoredImage;
+    if (docSnap.exists()) {
+      console.log("[ImageService] Image metadata found");
+      return docSnap.data() as StoredImage;
+    }
+    console.log("[ImageService] Image metadata not found");
+    return null;
+  } catch (error) {
+    console.error("[ImageService] getImageMetadata failed:", error);
+    return null; // Return null on error to allow fallback
   }
-
-  return null;
 }
 
 /**
  * Get all stored images from Firestore
  */
 export async function getAllStoredImages(): Promise<StoredImage[]> {
-  const q = query(collection(db, IMAGES_COLLECTION));
-  const querySnapshot = await getDocs(q);
+  console.log("[ImageService] getAllStoredImages started");
+  try {
+    const q = query(collection(db, IMAGES_COLLECTION));
+    const querySnapshot = await withTimeout(getDocs(q), 10000, "Get all images");
 
-  const images: StoredImage[] = [];
-  querySnapshot.forEach((doc) => {
-    images.push(doc.data() as StoredImage);
-  });
+    const images: StoredImage[] = [];
+    querySnapshot.forEach((doc) => {
+      images.push(doc.data() as StoredImage);
+    });
 
-  return images;
+    console.log("[ImageService] getAllStoredImages completed", { count: images.length });
+    return images;
+  } catch (error) {
+    console.error("[ImageService] getAllStoredImages failed:", error);
+    return []; // Return empty array on error to allow fallback to defaults
+  }
 }
 
 /**
@@ -167,20 +221,33 @@ export async function initializeImagesInFirestore(
 export async function getMergedImages(
   defaultImages: ImagePlaceholder[]
 ): Promise<StoredImage[]> {
-  const storedImages = await getAllStoredImages();
-  const storedImagesMap = new Map(storedImages.map((img) => [img.id, img]));
+  console.log("[ImageService] getMergedImages started", { defaultCount: defaultImages.length });
+  try {
+    const storedImages = await getAllStoredImages();
+    const storedImagesMap = new Map(storedImages.map((img) => [img.id, img]));
 
-  return defaultImages.map((defaultImg) => {
-    const storedImg = storedImagesMap.get(defaultImg.id);
-    if (storedImg) {
+    const result = defaultImages.map((defaultImg) => {
+      const storedImg = storedImagesMap.get(defaultImg.id);
+      if (storedImg) {
+        return {
+          ...defaultImg,
+          ...storedImg,
+        };
+      }
       return {
         ...defaultImg,
-        ...storedImg,
+        originalUrl: defaultImg.imageUrl,
       };
-    }
-    return {
-      ...defaultImg,
-      originalUrl: defaultImg.imageUrl,
-    };
-  });
+    });
+    
+    console.log("[ImageService] getMergedImages completed", { resultCount: result.length });
+    return result;
+  } catch (error) {
+    console.error("[ImageService] getMergedImages failed, using defaults:", error);
+    // Return defaults on error
+    return defaultImages.map((img) => ({
+      ...img,
+      originalUrl: img.imageUrl,
+    }));
+  }
 }

@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useImages } from '@/components/providers/ImageProvider';
 import PageHeader from '@/components/shared/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,16 +10,10 @@ import Link from 'next/link';
 import { Users, HandHeart, Music, Award, University, GraduationCap, Briefcase, FileText, Cpu, Library, Star, Handshake, School } from 'lucide-react';
 import Image from 'next/image';
 import { getLinkById } from '@/lib/links';
-import buttonData from '@/lib/buttons.json';
+import { fetchButtonsFromFirebase, ButtonConfig } from '@/lib/buttons';
 import ProgramPathways from '@/components/shared/ProgramPathways';
 
-type ButtonConfig = {
-    id: string;
-    location: string;
-    text: string;
-    link: { type: 'internal' | 'external', value: string };
-    visible: boolean;
-};
+// ButtonConfig imported from @/lib/buttons
 
 const orchestras = [
   {
@@ -110,10 +104,19 @@ const creativeCourses = [
 
 
 export default function OrchestrasPage() {
-  const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-orchestras');
-  const joinImage = PlaceHolderImages.find(p => p.id === 'orchestra-kids-playing');
-  const communityImage = PlaceHolderImages.find(p => p.id === 'support-volunteer');
-  const [buttons] = useState<ButtonConfig[]>(buttonData.buttons as ButtonConfig[]);
+  const { getImage } = useImages();
+  const headerImage = getImage('page-header-orchestras');
+  const joinImage = getImage('orchestra-kids-playing');
+  const communityImage = getImage('support-volunteer');
+  const [buttons, setButtons] = useState<ButtonConfig[]>([]);
+
+  useEffect(() => {
+    const loadButtons = async () => {
+      const data = await fetchButtonsFromFirebase();
+      setButtons(data);
+    };
+    loadButtons();
+  }, []);
 
   const registerButtonConfig = buttons.find(b => b.id === 'orchestras-register');
   const auditionButtonConfig = buttons.find(b => b.id === 'orchestras-audition');
@@ -194,7 +197,7 @@ export default function OrchestrasPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {orchestras.map((item) => {
-                    const image = PlaceHolderImages.find(p => p.id === item.imageId);
+                    const image = getImage(item.imageId);
                     return (
                         <Card key={item.title} className="text-left flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-primary/50">
                             {image && (
@@ -275,7 +278,7 @@ export default function OrchestrasPage() {
                     <h3 className="text-2xl font-headline font-bold text-center mb-8">Supplementary Ensembles</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {supplementaryEnsembles.map((ensemble) => {
-                             const image = PlaceHolderImages.find(p => p.id === ensemble.imageId);
+                             const image = getImage(ensemble.imageId);
                              return (
                              <Card key={ensemble.title} className="text-center flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-primary/50">
                                 {image && (
@@ -348,7 +351,7 @@ export default function OrchestrasPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {financialAidOptions.map(option => {
                             const link = getLinkById(option.linkId);
-                            const image = PlaceHolderImages.find(p => p.id === option.imageId);
+                            const image = getImage(option.imageId);
                             return (
                                 <Card key={option.title} className="transition-all duration-300 hover:shadow-lg hover:border-primary/50 overflow-hidden">
                                      {image && (

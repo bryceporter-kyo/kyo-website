@@ -2,7 +2,7 @@
 "use client";
 
 import PageHeader from "@/components/shared/PageHeader";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { useImages } from "@/components/providers/ImageProvider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { ChevronRight, ExternalLink, Gift, Heart, CreditCard, Mail, Car, Landmark, HandCoins } from "lucide-react";
@@ -67,7 +67,8 @@ const donationOptions = [
 
 
 export default function SitemapPage() {
-    const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-conditions');
+    const { getImage } = useImages();
+    const headerImage = getImage('page-header-conditions');
 
     return (
         <div>

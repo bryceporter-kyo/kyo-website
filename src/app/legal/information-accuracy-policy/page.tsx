@@ -1,7 +1,7 @@
 
 import PageHeader from "@/components/shared/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { getImageById } from "@/lib/image-service-server";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -9,8 +9,8 @@ export const metadata: Metadata = {
   robots: 'noindex, nofollow',
 };
 
-export default function InformationAccuracyPolicyPage() {
-  const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-accuracy');
+export default async function InformationAccuracyPolicyPage() {
+  const headerImage = await getImageById('page-header-accuracy');
 
   return (
     <div>

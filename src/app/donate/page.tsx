@@ -2,7 +2,7 @@
 import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { getImagesFromFirestore } from "@/lib/image-service-server";
 import { Check, Heart, Mail, Landmark, HandCoins, Guitar, ExternalLink, MessageCircle, Car, Calendar, Repeat, ShieldCheck, CreditCard } from "lucide-react";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -62,11 +62,13 @@ const otherDonationMethods = [
     }
 ]
 
-export default function DonatePage() {
-  const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-donate');
-  const whyItMattersImage = PlaceHolderImages.find(p => p.id === 'donate-why-it-matters');
-  const volunteerCtaImage = PlaceHolderImages.find(p => p.id === 'volunteer-cta');
-  const supporterLogos = PlaceHolderImages.filter(p => p.category === 'Supporter Logo');
+export default async function DonatePage() {
+  const images = await getImagesFromFirestore();
+  const getImage = (id: string) => images.find(img => img.id === id);
+  const headerImage = getImage('page-header-donate');
+  const whyItMattersImage = getImage('donate-why-it-matters');
+  const volunteerCtaImage = getImage('volunteer-cta');
+  const supporterLogos = images.filter(p => p.category === 'Supporter Logo');
 
   const oneTimeDonationLink = getLinkById('donate-stripe-one-time');
   const canadaHelpsGeneralLink = getLinkById('donate-canadahelps-general');

@@ -7,8 +7,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowLeft, Edit } from "lucide-react";
 import Link from "next/link";
-import buttonData from "@/lib/buttons.json";
-import { links as allLinks, internalPages, getLinkById, getInternalPageById } from "@/lib/links";
+import { 
+    fetchButtonsFromFirebase, 
+    updateButtonVisibilityInFirebase, 
+    updateButtonLinkInFirebase,
+    saveButtonToFirebase,
+    ButtonConfig,
+    LinkInfo
+} from "@/lib/buttons";
+import { fetchLinksFromFirebase, internalPages, getInternalPageById, updateLinkInFirebase } from "@/lib/links";
 import type { ExternalLink } from "@/lib/links";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
@@ -16,30 +23,44 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-
-type LinkInfo = {
-    type: 'internal' | 'external';
-    value: string;
-};
-
-type ButtonInfo = {
-    id: string;
-    location: string;
-    text: string;
-    link: LinkInfo;
-    visible: boolean;
-};
-
-const initialButtons: ButtonInfo[] = buttonData.buttons;
+import { Input } from "@/components/ui/input";
 
 export default function ButtonsAdminPage() {
     const { toast } = useToast();
-    const [buttons, setButtons] = React.useState<ButtonInfo[]>(initialButtons);
-    const [editingButton, setEditingButton] = React.useState<ButtonInfo | null>(null);
+    const [buttons, setButtons] = React.useState<ButtonConfig[]>([]);
+    const [allLinks, setAllLinks] = React.useState<ExternalLink[]>([]);
+    const [editingButton, setEditingButton] = React.useState<ButtonConfig | null>(null);
     const [linkType, setLinkType] = React.useState<'internal' | 'external'>('external');
     const [linkValue, setLinkValue] = React.useState<string>('');
+    const [linkUrl, setLinkUrl] = React.useState<string>('');
+    const [isLoading, setIsLoading] = React.useState(true);
+    const [isSaving, setIsSaving] = React.useState(false);
 
-    const getLinkDisplay = (button: ButtonInfo) => {
+    // Load buttons and links from Firebase
+    React.useEffect(() => {
+        const loadData = async () => {
+            try {
+                const [buttonsData, linksData] = await Promise.all([
+                    fetchButtonsFromFirebase(),
+                    fetchLinksFromFirebase()
+                ]);
+                setButtons(buttonsData);
+                setAllLinks(linksData);
+            } catch (error) {
+                console.error('Error loading data:', error);
+                toast({
+                    title: "Error",
+                    description: "Failed to load data from database.",
+                    variant: "destructive",
+                });
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        loadData();
+    }, [toast]);
+
+    const getLinkDisplay = (button: ButtonConfig) => {
         if (button.link.type === 'internal') {
             const page = getInternalPageById(button.link.value);
             return {
@@ -47,45 +68,129 @@ export default function ButtonsAdminPage() {
                 text: page?.name ? `Internal: ${page.name}` : 'Internal: Not Found'
             };
         }
-        const link = getLinkById(button.link.value);
+        const link = allLinks.find(l => l.id === button.link.value);
         return {
             url: link?.url || '#',
             text: link?.url || 'External: Link not found'
         };
     };
 
-    const handleVisibilityChange = (buttonId: string, isVisible: boolean) => {
-        const updatedButtons = buttons.map(button => 
-            button.id === buttonId ? { ...button, visible: isVisible } : button
-        );
-        setButtons(updatedButtons);
-        toast({
-            title: "Button Visibility Updated",
-            description: `The button is now ${isVisible ? 'visible' : 'hidden'}.`,
-        });
+    const handleVisibilityChange = async (buttonId: string, isVisible: boolean) => {
+        setIsSaving(true);
+        try {
+            // First try to update, if fails (doc doesn't exist), save the full button
+            const button = buttons.find(b => b.id === buttonId);
+            if (button) {
+                try {
+                    await updateButtonVisibilityInFirebase(buttonId, isVisible);
+                } catch {
+                    // Document doesn't exist, save the full button
+                    await saveButtonToFirebase({ ...button, visible: isVisible });
+                }
+            }
+            
+            const updatedButtons = buttons.map(button => 
+                button.id === buttonId ? { ...button, visible: isVisible } : button
+            );
+            setButtons(updatedButtons);
+            toast({
+                title: "Button Visibility Updated",
+                description: `The button is now ${isVisible ? 'visible' : 'hidden'}.`,
+            });
+        } catch (error) {
+            console.error('Error updating visibility:', error);
+            toast({
+                title: "Error",
+                description: "Failed to update button visibility.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsSaving(false);
+        }
     };
 
-    const handleEditClick = (button: ButtonInfo) => {
+    const handleEditClick = (button: ButtonConfig) => {
         setEditingButton(button);
         setLinkType(button.link.type);
         setLinkValue(button.link.value);
+        if (button.link.type === 'external') {
+            const link = allLinks.find(l => l.id === button.link.value);
+            setLinkUrl(link?.url || '');
+        } else {
+            setLinkUrl('');
+        }
     };
 
-    const handleSaveChanges = () => {
+    const handleLinkValueChange = (value: string) => {
+        setLinkValue(value);
+        if (linkType === 'external') {
+            const link = allLinks.find(l => l.id === value);
+            setLinkUrl(link?.url || '');
+        }
+    };
+
+    const handleSaveChanges = async () => {
         if (!editingButton) return;
 
-        const updatedButtons = buttons.map(b =>
-            b.id === editingButton.id
-                ? { ...b, link: { type: linkType, value: linkValue } }
-                : b
-        );
-        setButtons(updatedButtons);
-        setEditingButton(null);
-        toast({
-            title: "Button Updated!",
-            description: "The button link has been saved successfully.",
-        });
+        setIsSaving(true);
+        try {
+            // If external link and URL changed, update the link definition
+            if (linkType === 'external' && linkValue) {
+                const originalLink = allLinks.find(l => l.id === linkValue);
+                if (originalLink && originalLink.url !== linkUrl) {
+                    await updateLinkInFirebase(linkValue, { url: linkUrl });
+                    
+                    // Update local links state
+                    setAllLinks(allLinks.map(l => 
+                        l.id === linkValue ? { ...l, url: linkUrl } : l
+                    ));
+                    
+                    toast({
+                        title: "Link Updated",
+                        description: "The external link URL has been updated.",
+                    });
+                }
+            }
+
+            const newLink: LinkInfo = { type: linkType, value: linkValue };
+            
+            // First try to update, if fails, save the full button
+            const button = buttons.find(b => b.id === editingButton.id);
+            if (button) {
+                try {
+                    await updateButtonLinkInFirebase(editingButton.id, newLink);
+                } catch {
+                    // Document doesn't exist, save the full button
+                    await saveButtonToFirebase({ ...button, link: newLink });
+                }
+            }
+
+            const updatedButtons = buttons.map(b =>
+                b.id === editingButton.id
+                    ? { ...b, link: newLink }
+                    : b
+            );
+            setButtons(updatedButtons);
+            setEditingButton(null);
+            toast({
+                title: "Button Updated!",
+                description: "The button link has been saved to the database.",
+            });
+        } catch (error) {
+            console.error('Error updating button:', error);
+            toast({
+                title: "Error",
+                description: "Failed to update button. Please try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsSaving(false);
+        }
     };
+
+    if (isLoading) {
+        return <div className="container mx-auto py-12">Loading...</div>;
+    }
     
     return (
         <div className="container mx-auto py-12">
@@ -190,22 +295,41 @@ export default function ButtonsAdminPage() {
                                     </SelectContent>
                                 </Select>
                             ) : (
-                                <Select value={linkValue} onValueChange={setLinkValue}>
-                                     <SelectTrigger id="link-value">
-                                        <SelectValue placeholder="Select an external link" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {allLinks.map(link => (
-                                            <SelectItem key={link.id} value={link.id}>{link.name}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <div className="space-y-4">
+                                    <Select value={linkValue} onValueChange={handleLinkValueChange}>
+                                         <SelectTrigger id="link-value">
+                                            <SelectValue placeholder="Select an external link" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {allLinks.map(link => (
+                                                <SelectItem key={link.id} value={link.id}>{link.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    
+                                    {linkValue && (
+                                        <div className="space-y-2">
+                                            <Label htmlFor="link-url">Link URL</Label>
+                                            <Input 
+                                                id="link-url" 
+                                                value={linkUrl} 
+                                                onChange={(e) => setLinkUrl(e.target.value)}
+                                                placeholder="https://example.com"
+                                            />
+                                            <p className="text-xs text-muted-foreground">
+                                                Note: Changing this URL will update it for all buttons using this link.
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
                             )}
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setEditingButton(null)}>Cancel</Button>
-                        <Button onClick={handleSaveChanges}>Save Changes</Button>
+                        <Button variant="outline" onClick={() => setEditingButton(null)} disabled={isSaving}>Cancel</Button>
+                        <Button onClick={handleSaveChanges} disabled={isSaving}>
+                            {isSaving ? "Saving..." : "Save Changes"}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

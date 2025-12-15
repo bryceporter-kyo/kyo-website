@@ -1,7 +1,7 @@
 import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { getImagesByIds } from "@/lib/image-service-server";
 import { Gift, Handshake, Heart } from "lucide-react";
 import Image from "next/image";
 import Link from 'next/link';
@@ -27,10 +27,11 @@ const supportOptions = [
     }
 ]
 
-export default function SupportPage() {
-    const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-support');
-    const supportImage = PlaceHolderImages.find(p => p.id === 'support-volunteer');
-    const supportCtaImage = PlaceHolderImages.find(p => p.id === 'support-cta');
+export default async function SupportPage() {
+    const images = await getImagesByIds(['page-header-support', 'support-volunteer', 'support-cta']);
+    const headerImage = images.get('page-header-support');
+    const supportImage = images.get('support-volunteer');
+    const supportCtaImage = images.get('support-cta');
 
     return (
         <div>

@@ -11,9 +11,14 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Pencil, Trash2, CalendarIcon } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, CalendarIcon, X } from "lucide-react";
 import Link from "next/link";
-import { getAnnouncements, addAnnouncement, deleteAnnouncement, updateAnnouncement } from "@/lib/announcements";
+import { 
+    fetchAnnouncementsFromFirebase, 
+    addAnnouncementToFirebase, 
+    deleteAnnouncementFromFirebase, 
+    updateAnnouncementInFirebase 
+} from "@/lib/announcements";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -47,12 +52,29 @@ const announcementSchema = z.object({
 export default function AnnouncementsAdminPage() {
     const { toast } = useToast();
     const [announcements, setAnnouncements] = React.useState<Announcement[]>([]);
+    const [editingAnnouncement, setEditingAnnouncement] = React.useState<Announcement | null>(null);
     const [isLoading, setIsLoading] = React.useState(true);
+    const [isSaving, setIsSaving] = React.useState(false);
 
+    // Load announcements from Firebase
     React.useEffect(() => {
-        setAnnouncements(getAnnouncements());
-        setIsLoading(false);
-    }, []);
+        const loadAnnouncements = async () => {
+            try {
+                const data = await fetchAnnouncementsFromFirebase();
+                setAnnouncements(data);
+            } catch (error) {
+                console.error('Error loading announcements:', error);
+                toast({
+                    title: "Error",
+                    description: "Failed to load announcements from database.",
+                    variant: "destructive",
+                });
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        loadAnnouncements();
+    }, [toast]);
 
     const form = useForm<z.infer<typeof announcementSchema>>({
         resolver: zodResolver(announcementSchema),
@@ -64,41 +86,127 @@ export default function AnnouncementsAdminPage() {
         },
     });
 
+    React.useEffect(() => {
+        if (editingAnnouncement) {
+            form.reset({
+                title: editingAnnouncement.title,
+                content: editingAnnouncement.content,
+                imageUrl: editingAnnouncement.imageUrl || "",
+                pinned: editingAnnouncement.pinned,
+                unpinsAt: editingAnnouncement.unpinsAt ? new Date(editingAnnouncement.unpinsAt) : undefined,
+                disappearsAt: editingAnnouncement.disappearsAt ? new Date(editingAnnouncement.disappearsAt) : undefined,
+            });
+        } else {
+            form.reset({
+                title: "",
+                content: "",
+                imageUrl: "",
+                pinned: false,
+                unpinsAt: undefined,
+                disappearsAt: undefined,
+            });
+        }
+    }, [editingAnnouncement, form]);
+
     const contentValue = form.watch("content");
     const isPinned = form.watch("pinned");
 
-    function onSubmit(values: z.infer<typeof announcementSchema>) {
-        const newAnnouncements = addAnnouncement(announcements, values);
-        setAnnouncements(newAnnouncements);
-
-        toast({
-            title: "Announcement Created!",
-            description: "The new announcement has been saved.",
-        });
-        form.reset();
-    }
-
-    function handleDelete(announcementToDelete: Announcement) {
-        const newAnnouncements = deleteAnnouncement(announcements, announcementToDelete.id);
-        setAnnouncements(newAnnouncements);
-        toast({
-            title: "Announcement Deleted",
-            description: `"${announcementToDelete.title}" has been deleted.`,
-            variant: "destructive",
-        });
-    }
-
-    function handlePinToggle(announcementId: number) {
-        const announcement = announcements.find(a => a.id === announcementId);
-        if (announcement) {
-            const updated = { ...announcement, pinned: !announcement.pinned };
-            const newAnnouncements = updateAnnouncement(announcements, updated);
-            setAnnouncements(newAnnouncements);
+    async function onSubmit(values: z.infer<typeof announcementSchema>) {
+        setIsSaving(true);
+        try {
+            const announcementData = {
+                ...values,
+                date: format(new Date(), 'yyyy-MM-dd'),
+                excerpt: values.content.substring(0, 150) + (values.content.length > 150 ? '...' : ''),
+                unpinsAt: values.unpinsAt ? format(values.unpinsAt, 'yyyy-MM-dd') : undefined,
+                disappearsAt: values.disappearsAt ? format(values.disappearsAt, 'yyyy-MM-dd') : undefined,
+            };
+            
+            if (editingAnnouncement) {
+                await updateAnnouncementInFirebase(editingAnnouncement.id, announcementData);
+                const updatedAnnouncements = announcements.map(a => 
+                    a.id === editingAnnouncement.id ? { ...a, ...announcementData } : a
+                );
+                setAnnouncements(updatedAnnouncements);
+                toast({
+                    title: "Announcement Updated!",
+                    description: "The announcement has been updated.",
+                });
+                setEditingAnnouncement(null);
+            } else {
+                const newAnnouncement = await addAnnouncementToFirebase(announcementData);
+                setAnnouncements([newAnnouncement, ...announcements]);
+                toast({
+                    title: "Announcement Created!",
+                    description: "The new announcement has been saved to the database.",
+                });
+            }
+            form.reset();
+        } catch (error) {
+            console.error('Error saving announcement:', error);
             toast({
-                title: "Announcement Updated",
-                description: `"${updated.title}" pinning status changed.`,
+                title: "Error",
+                description: "Failed to save announcement. Please try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsSaving(false);
+        }
+    }
+
+    async function handleDelete(announcementToDelete: Announcement) {
+        try {
+            await deleteAnnouncementFromFirebase(announcementToDelete.id);
+            setAnnouncements(announcements.filter(a => a.id !== announcementToDelete.id));
+            toast({
+                title: "Announcement Deleted",
+                description: `"${announcementToDelete.title}" has been deleted from the database.`,
+                variant: "destructive",
+            });
+        } catch (error) {
+            console.error('Error deleting announcement:', error);
+            toast({
+                title: "Error",
+                description: "Failed to delete announcement. Please try again.",
+                variant: "destructive",
             });
         }
+    }
+
+    async function handlePinToggle(announcementId: string) {
+        const announcement = announcements.find(a => a.id === announcementId);
+        if (announcement) {
+            try {
+                const newPinnedStatus = !announcement.pinned;
+                await updateAnnouncementInFirebase(announcementId, { pinned: newPinnedStatus });
+                
+                const updatedAnnouncements = announcements.map(a => 
+                    a.id === announcementId ? { ...a, pinned: newPinnedStatus } : a
+                );
+                setAnnouncements(updatedAnnouncements);
+                
+                toast({
+                    title: "Announcement Updated",
+                    description: `"${announcement.title}" pinning status changed.`,
+                });
+            } catch (error) {
+                console.error('Error updating announcement:', error);
+                toast({
+                    title: "Error",
+                    description: "Failed to update announcement. Please try again.",
+                    variant: "destructive",
+                });
+            }
+        }
+    }
+
+    const handleEditClick = (announcement: Announcement) => {
+        setEditingAnnouncement(announcement);
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    const handleCancelEdit = () => {
+        setEditingAnnouncement(null);
     }
 
 
@@ -151,7 +259,7 @@ export default function AnnouncementsAdminPage() {
                                         {announcement.disappearsAt ? format(new Date(announcement.disappearsAt), "PPP") : 'Never'}
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        <Button variant="ghost" size="icon">
+                                        <Button variant="ghost" size="icon" onClick={() => handleEditClick(announcement)}>
                                             <Pencil className="h-4 w-4" />
                                         </Button>
                                         <AlertDialog>
@@ -185,9 +293,21 @@ export default function AnnouncementsAdminPage() {
             </Card>
             
             <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline text-2xl">Create Announcement</CardTitle>
-                    <CardDescription>Fill out the form below to add a new announcement.</CardDescription>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                        <CardTitle className="font-headline text-2xl">
+                            {editingAnnouncement ? "Edit Announcement" : "Create Announcement"}
+                        </CardTitle>
+                        <CardDescription>
+                            {editingAnnouncement ? "Update the details of the announcement." : "Fill out the form below to add a new announcement."}
+                        </CardDescription>
+                    </div>
+                    {editingAnnouncement && (
+                        <Button variant="ghost" onClick={handleCancelEdit}>
+                            <X className="mr-2 h-4 w-4" />
+                            Cancel Edit
+                        </Button>
+                    )}
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -361,7 +481,9 @@ export default function AnnouncementsAdminPage() {
                                 />
                             </div>
 
-                             <Button type="submit">Create Announcement</Button>
+                             <Button type="submit" disabled={isSaving}>
+                                {isSaving ? "Saving..." : (editingAnnouncement ? "Update Announcement" : "Create Announcement")}
+                             </Button>
                         </form>
                     </Form>
                 </CardContent>

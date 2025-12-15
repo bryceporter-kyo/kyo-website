@@ -1,24 +1,18 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { useImages } from "@/components/providers/ImageProvider";
 import { Heart, Handshake, Gift, Star, Ticket, Users, Camera, Wrench } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { getLinkById } from '@/lib/links';
-import buttonData from '@/lib/buttons.json';
+import { fetchButtonsFromFirebase, ButtonConfig } from '@/lib/buttons';
 
-type ButtonConfig = {
-    id: string;
-    location: string;
-    text: string;
-    link: { type: 'internal' | 'external', value: string };
-    visible: boolean;
-};
+// ButtonConfig imported from @/lib/buttons
 
 const volunteerRoles = [
     {
@@ -44,10 +38,19 @@ const volunteerRoles = [
 ]
 
 export default function VolunteerPage() {
-    const headerImage = PlaceHolderImages.find(p => p.id === 'page-header-volunteer');
-    const volunteerImage = PlaceHolderImages.find(p => p.id === 'support-volunteer');
-    const volunteerCtaImage = PlaceHolderImages.find(p => p.id === 'volunteer-cta');
-    const [buttons] = useState<ButtonConfig[]>(buttonData.buttons as ButtonConfig[]);
+    const { getImage } = useImages();
+    const headerImage = getImage('page-header-volunteer');
+    const volunteerImage = getImage('support-volunteer');
+    const volunteerCtaImage = getImage('volunteer-cta');
+    const [buttons, setButtons] = useState<ButtonConfig[]>([]);
+
+    useEffect(() => {
+        const loadButtons = async () => {
+            const data = await fetchButtonsFromFirebase();
+            setButtons(data);
+        };
+        loadButtons();
+    }, []);
 
     const getButtonProps = (buttonConfig?: ButtonConfig) => {
         if (!buttonConfig || !buttonConfig.visible) return null;

@@ -1,50 +1,20 @@
 
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useImages } from '@/components/providers/ImageProvider';
+import { useData } from '@/components/providers/DataProvider';
 import { ArrowRight, Music, Users, GraduationCap, Heart, Handshake, Eye, HandCoins, UserCheck, DollarSign, Group, Quote } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { getAnnouncements } from '@/lib/announcements';
-import { getLinkById } from '@/lib/links';
-import buttonData from '@/lib/buttons.json';
+import { fetchAnnouncementsFromFirebase, Announcement } from '@/lib/announcements';
+import { ButtonConfig } from '@/lib/buttons';
 import type { ExternalLink } from '@/lib/links';
 import AnimatedCounter from '@/components/shared/AnimatedCounter';
 
-type ButtonConfig = {
-    id: string;
-    location: string;
-    text: string;
-    link: { type: 'internal' | 'external', value: string };
-    visible: boolean;
-};
-
-const programs = [
-  {
-    title: 'Orchestras',
-    description: 'Our flagship program for dedicated young musicians to perform in a full orchestra setting.',
-    href: '/orchestras',
-    icon: Users,
-    image: PlaceHolderImages.find(p => p.id === 'program-orchestra')
-  },
-  {
-    title: 'Upbeat!',
-    description: 'An inclusive and fun introduction to orchestral music for younger students.',
-    href: '/upbeat',
-    icon: Music,
-    image: PlaceHolderImages.find(p => p.id === 'program-upbeat')
-  },
-  {
-    title: 'Lessons Program',
-    description: 'Individual and group lessons with our experienced instructors to hone your skills.',
-    href: '/lessons',
-    icon: GraduationCap,
-    image: PlaceHolderImages.find(p => p.id === 'program-lessons')
-  },
-];
+// ButtonConfig imported from @/lib/buttons
 
 const coreValues = [
     {
@@ -89,12 +59,48 @@ const impactStats = [
     { number: 70000, prefix: '$', label: 'Annual Subsidies Provided', icon: DollarSign },
 ];
 
-const heroSlides = [
+export default function Home() {
+  const { getImage } = useImages();
+  const { buttons, getLink } = useData();
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+
+  // Get images from context
+  const financialAidImage = getImage('home-financial-aid');
+  const coreValuesImage = getImage('support-volunteer');
+
+  // Build programs array with images from context
+  const programs = useMemo(() => [
+    {
+      title: 'Orchestras',
+      description: 'Our flagship program for dedicated young musicians to perform in a full orchestra setting.',
+      href: '/orchestras',
+      icon: Users,
+      image: getImage('program-orchestra')
+    },
+    {
+      title: 'Upbeat!',
+      description: 'An inclusive and fun introduction to orchestral music for younger students.',
+      href: '/upbeat',
+      icon: Music,
+      image: getImage('program-upbeat')
+    },
+    {
+      title: 'Lessons Program',
+      description: 'Individual and group lessons with our experienced instructors to hone your skills.',
+      href: '/lessons',
+      icon: GraduationCap,
+      image: getImage('program-lessons')
+    },
+  ], [getImage]);
+
+  // Build hero slides with images from context
+  const heroSlides = useMemo(() => [
     {
         id: 'slide1',
         title: "Nurturing the Next Generation of Musicians",
         subtitle: "The Kawartha Youth Orchestra provides exceptional music education and performance opportunities to young people, fostering artistic excellence, personal growth, and a lifelong love of music.",
-        image: PlaceHolderImages.find(p => p.id === 'hero-concert'),
+        image: getImage('hero-concert'),
         buttons: [
             { text: "Learn More", href: "/about", variant: "default" as const },
             { text: "See Our Programs", href: "/orchestras", variant: "outline" as const }
@@ -104,7 +110,7 @@ const heroSlides = [
         id: 'slide2',
         title: "Your Support Creates Harmony",
         subtitle: "Your generosity empowers young musicians, funds scholarships, and sustains our vibrant programs. Help us keep the music playing for generations to come.",
-        image: PlaceHolderImages.find(p => p.id === 'page-header-donate'),
+        image: getImage('page-header-donate'),
         buttons: [
             { text: "Donate Today", href: "/donate", variant: "default" as const },
             { text: "More Ways to Give", href: "/support", variant: "outline" as const }
@@ -114,29 +120,35 @@ const heroSlides = [
         id: 'slide3',
         title: "Find Your Place on Stage",
         subtitle: "Auditions are open for our upcoming season. Join a community of passionate young musicians and take your skills to the next level.",
-        image: PlaceHolderImages.find(p => p.id === 'orchestra-kids-playing'),
+        image: getImage('orchestra-kids-playing'),
         buttons: [] // This will be populated dynamically
     },
-];
-
-export default function Home() {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const financialAidImage = PlaceHolderImages.find(p => p.id === 'home-financial-aid');
-  const coreValuesImage = PlaceHolderImages.find(p => p.id === 'support-volunteer');
-  const announcements = getAnnouncements().slice(0, 3);
-  const [buttons, setButtons] = useState<ButtonConfig[]>(buttonData.buttons as ButtonConfig[]);
+  ], [getImage]);
 
   const financialAidButton = buttons.find(b => b.id === 'home-financial-aid-register');
   const heroOrchestraButton = buttons.find(b => b.id === 'hero-register-orchestra');
   const heroUpbeatButton = buttons.find(b => b.id === 'hero-register-upbeat');
-  const contactLink = getLinkById('contact-main');
+  const contactLink = getLink('contact-main');
+
+  // Fetch announcements from Firebase
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const announcementsData = await fetchAnnouncementsFromFirebase();
+        setAnnouncements(announcementsData.slice(0, 3));
+      } catch (error) {
+        console.error('Error loading data:', error);
+      }
+    };
+    loadData();
+  }, []);
 
   const getButtonProps = (buttonConfig?: ButtonConfig) => {
     if (!buttonConfig || !buttonConfig.visible) return null;
     let href = '#';
     let target = '_self';
     if (buttonConfig.link.type === 'external') {
-      const link = getLinkById(buttonConfig.link.value);
+      const link = getLink(buttonConfig.link.value);
       if (link) {
         href = link.url;
         target = '_blank';

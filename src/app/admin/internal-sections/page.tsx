@@ -9,14 +9,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Pencil, Save, X, FolderKanban } from "lucide-react";
+import { ArrowLeft, Pencil, Save, X, FolderKanban, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { getInternalSections } from "@/lib/internal-sections";
+import { fetchInternalSectionsFromFirebase, updateInternalSectionInFirebase } from "@/lib/internal-sections";
 import type { InternalSection } from "@/lib/internal-sections";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { links as allLinks } from "@/lib/links";
+import { fetchLinksFromFirebase } from "@/lib/links";
+import type { ExternalLink } from "@/lib/links";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 
@@ -30,12 +31,38 @@ const sectionSchema = z.object({
 
 export default function InternalSectionsAdminPage() {
     const { toast } = useToast();
-    const initialSections = getInternalSections();
-    const [sections, setSections] = React.useState<InternalSection[]>(initialSections);
-    const [editingSectionId, setEditingSectionId] = React.useState<string | null>(null);
+    const [sections, setSections] = useState<InternalSection[]>([]);
+    const [allLinks, setAllLinks] = useState<ExternalLink[]>([]);
+    const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
     
     const searchParams = useSearchParams();
     const sectionToEdit = searchParams.get('edit');
+
+    useEffect(() => {
+        async function loadData() {
+            setIsLoading(true);
+            try {
+                const [sectionsData, linksData] = await Promise.all([
+                    fetchInternalSectionsFromFirebase(),
+                    fetchLinksFromFirebase()
+                ]);
+                setSections(sectionsData);
+                setAllLinks(linksData);
+            } catch (error) {
+                console.error('Error loading data:', error);
+                toast({
+                    title: "Error",
+                    description: "Failed to load data from Firebase.",
+                    variant: "destructive"
+                });
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        loadData();
+    }, [toast]);
 
     const form = useForm<z.infer<typeof sectionSchema>>({
         resolver: zodResolver(sectionSchema),
@@ -79,18 +106,41 @@ export default function InternalSectionsAdminPage() {
         form.reset({ id: "", title: "", manager: "", email: "", linkId: "" });
     };
 
-    function onSubmit(values: z.infer<typeof sectionSchema>) {
-        setSections(currentSections => 
-            currentSections.map(section => 
-                section.id === values.id ? { ...section, ...values } : section
-            )
-        );
+    async function onSubmit(values: z.infer<typeof sectionSchema>) {
+        setIsSaving(true);
+        try {
+            const updatedSection: InternalSection = {
+                id: values.id,
+                icon: sections.find(s => s.id === values.id)?.icon || 'Folder',
+                title: values.title,
+                manager: values.manager,
+                email: values.email,
+                linkId: values.linkId
+            };
+            
+            await updateInternalSectionInFirebase(updatedSection);
+            
+            setSections(currentSections => 
+                currentSections.map(section => 
+                    section.id === values.id ? updatedSection : section
+                )
+            );
 
-        toast({
-            title: "Section Updated!",
-            description: `The "${values.title}" section has been updated successfully.`,
-        });
-        setEditingSectionId(null);
+            toast({
+                title: "Section Updated!",
+                description: `The "${values.title}" section has been updated successfully.`,
+            });
+            setEditingSectionId(null);
+        } catch (error) {
+            console.error('Error updating section:', error);
+            toast({
+                title: "Error",
+                description: "Failed to update section. Please try again.",
+                variant: "destructive"
+            });
+        } finally {
+            setIsSaving(false);
+        }
     }
     
     const isEditing = (id: string) => editingSectionId === id;
@@ -106,6 +156,14 @@ export default function InternalSectionsAdminPage() {
                 </Button>
             </div>
 
+            {isLoading ? (
+                <Card>
+                    <CardContent className="flex items-center justify-center py-12">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        <span className="ml-2">Loading sections...</span>
+                    </CardContent>
+                </Card>
+            ) : (
             <Card>
                 <CardHeader>
                     <CardTitle className="font-headline text-2xl flex items-center gap-2"><FolderKanban/> Manage Internal Sections</CardTitle>
@@ -182,10 +240,10 @@ export default function InternalSectionsAdminPage() {
                                             <TableCell className="text-right">
                                                 {isEditing(section.id) ? (
                                                     <div className="flex gap-2 justify-end">
-                                                        <Button type="submit" size="icon">
-                                                            <Save className="h-4 w-4" />
+                                                        <Button type="submit" size="icon" disabled={isSaving}>
+                                                            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                                                         </Button>
-                                                        <Button variant="ghost" size="icon" onClick={handleCancel}>
+                                                        <Button variant="ghost" size="icon" onClick={handleCancel} disabled={isSaving}>
                                                             <X className="h-4 w-4" />
                                                         </Button>
                                                     </div>
@@ -203,6 +261,7 @@ export default function InternalSectionsAdminPage() {
                     </Form>
                 </CardContent>
             </Card>
+            )}
         </div>
     );
 }
