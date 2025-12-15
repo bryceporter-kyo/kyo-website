@@ -55,6 +55,7 @@ export default function UpbeatPage() {
   const aboutImage = PlaceHolderImages.find(p => p.id === 'program-upbeat');
   const kidsImage = PlaceHolderImages.find(p => p.id === 'upbeat-kids-smiling');
   const [registrationLink, setRegistrationLink] = useState<ExternalLink | undefined>(undefined);
+  const ThirdIcon = impactStats[2].icon;
 
   useEffect(() => {
     setRegistrationLink(getLinkById('register'));
@@ -165,7 +166,7 @@ export default function UpbeatPage() {
                         <CardHeader className="flex flex-row items-center justify-between">
                             <p className="text-4xl font-bold text-primary">{impactStats[2].number}</p>
                             <div className="bg-accent text-accent-foreground p-3 rounded-full">
-                                <impactStats[2].icon className="w-5 h-5" />
+                                <ThirdIcon className="w-5 h-5" />
                             </div>
                         </CardHeader>
                         <CardContent>
