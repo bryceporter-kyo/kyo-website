@@ -5,6 +5,7 @@ import {
   User,
   onAuthStateChanged,
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
   sendPasswordResetEmail,
 } from "firebase/auth";
@@ -45,6 +46,27 @@ export function useAuth() {
     );
 
     return () => unsubscribe();
+  }, []);
+
+  const signUp = useCallback(async (email: string, password: string) => {
+    setAuthState((prev) => ({ ...prev, loading: true, error: null }));
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      setAuthState({
+        user: userCredential.user,
+        loading: false,
+        error: null,
+      });
+      return { success: true, user: userCredential.user };
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Sign up failed";
+      setAuthState((prev) => ({
+        ...prev,
+        loading: false,
+        error: errorMessage,
+      }));
+      return { success: false, error: errorMessage };
+    }
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
@@ -104,6 +126,7 @@ export function useAuth() {
     loading: authState.loading,
     error: authState.error,
     signIn,
+    signUp,
     signOut,
     resetPassword,
     isAuthenticated: !!authState.user,

@@ -9,6 +9,7 @@ interface AuthContextType {
   error: string | null;
   isAuthenticated: boolean;
   signIn: (email: string, password: string) => Promise<{ success: boolean; user?: AuthUser; error?: string }>;
+  signUp: (email: string, password: string) => Promise<{ success: boolean; user?: AuthUser; error?: string }>;
   signOut: () => Promise<{ success: boolean; error?: string }>;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
 }

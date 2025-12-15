@@ -9,9 +9,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Pencil, Trash2, User, Upload, Download } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, User, Upload, Download, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { getUsers } from "@/lib/users";
+import { fetchUsersFromFirebase, addUserToFirebase, deleteUserFromFirebase, updateUserInFirebase } from "@/lib/users";
 import type { User as UserType, UserRole } from "@/lib/users";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +29,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const roles: { id: UserRole; label: string }[] = [
     { id: 'Website Editor', label: 'Website Editor' },
@@ -46,8 +54,13 @@ const userSchema = z.object({
 
 export default function UsersAdminPage() {
     const { toast } = useToast();
-    const [users, setUsers] = React.useState<UserType[]>(getUsers());
+    const [users, setUsers] = React.useState<UserType[]>([]);
+    const [isLoading, setIsLoading] = React.useState(true);
     const [csvFile, setCsvFile] = React.useState<File | null>(null);
+    
+    // Edit state
+    const [editingUser, setEditingUser] = React.useState<UserType | null>(null);
+    const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
 
     const form = useForm<z.infer<typeof userSchema>>({
         resolver: zodResolver(userSchema),
@@ -58,19 +71,97 @@ export default function UsersAdminPage() {
         },
     });
 
-    function onSubmit(values: z.infer<typeof userSchema>) {
-        const newUser: UserType = {
-            id: Math.max(...users.map(u => u.id), 0) + 1,
-            name: values.name,
-            email: values.email,
-            roles: values.roles as UserRole[],
-        };
-        setUsers([...users, newUser]);
-        toast({
-            title: "User Created!",
-            description: "The new user has been saved.",
-        });
-        form.reset();
+    const editForm = useForm<z.infer<typeof userSchema>>({
+        resolver: zodResolver(userSchema),
+        defaultValues: {
+            name: "",
+            email: "",
+            roles: [],
+        },
+    });
+
+    React.useEffect(() => {
+        loadUsers();
+    }, []);
+
+    // Reset edit form when editingUser changes
+    React.useEffect(() => {
+        if (editingUser) {
+            editForm.reset({
+                name: editingUser.name,
+                email: editingUser.email,
+                roles: editingUser.roles,
+            });
+        }
+    }, [editingUser, editForm]);
+
+    async function loadUsers() {
+        setIsLoading(true);
+        try {
+            const data = await fetchUsersFromFirebase();
+            setUsers(data);
+        } catch (error) {
+            console.error(error);
+            toast({
+                title: "Error",
+                description: "Failed to load users.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    async function onSubmit(values: z.infer<typeof userSchema>) {
+        try {
+            const newUser = await addUserToFirebase({
+                name: values.name,
+                email: values.email,
+                roles: values.roles as UserRole[],
+            });
+            setUsers([...users, newUser]);
+            toast({
+                title: "User Created!",
+                description: "The new user has been saved.",
+            });
+            form.reset();
+        } catch (error) {
+            console.error(error);
+            toast({
+                title: "Error",
+                description: "Failed to create user.",
+                variant: "destructive",
+            });
+        }
+    }
+
+    async function onEditSubmit(values: z.infer<typeof userSchema>) {
+        if (!editingUser) return;
+        
+        try {
+            await updateUserInFirebase(editingUser.id, {
+                name: values.name,
+                email: values.email,
+                roles: values.roles as UserRole[],
+            });
+            
+            // Update local state
+            setUsers(users.map(u => u.id === editingUser.id ? { ...u, ...values, roles: values.roles as UserRole[] } : u));
+            
+            setIsEditDialogOpen(false);
+            setEditingUser(null);
+            toast({
+                title: "User Updated",
+                description: "The user details have been updated.",
+            });
+        } catch (error) {
+            console.error(error);
+            toast({
+                title: "Error",
+                description: "Failed to update user.",
+                variant: "destructive",
+            });
+        }
     }
 
     const handleDownloadCsv = () => {
@@ -115,13 +206,27 @@ export default function UsersAdminPage() {
         reader.readAsText(csvFile);
     };
     
-    function handleDelete(userToDelete: UserType) {
-        setUsers(users.filter(user => user.id !== userToDelete.id));
-        toast({
-            title: "User Deleted",
-            description: `"${userToDelete.name}" has been deleted. (This is a placeholder)`,
-            variant: "destructive",
-        });
+    async function handleDelete(userToDelete: UserType) {
+        try {
+            await deleteUserFromFirebase(userToDelete.id);
+            setUsers(users.filter(user => user.id !== userToDelete.id));
+            toast({
+                title: "User Deleted",
+                description: `"${userToDelete.name}" has been deleted.`,
+            });
+        } catch (error) {
+            console.error(error);
+            toast({
+                title: "Error",
+                description: "Failed to delete user.",
+                variant: "destructive",
+            });
+        }
+    }
+
+    function openEditDialog(user: UserType) {
+        setEditingUser(user);
+        setIsEditDialogOpen(true);
     }
 
     return (
@@ -169,58 +274,72 @@ export default function UsersAdminPage() {
                     <CardDescription>Manage user accounts and permissions.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Email</TableHead>
-                                <TableHead>Roles</TableHead>
-                                <TableHead className="text-right w-[150px]">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {users.map((user) => (
-                                <TableRow key={user.id}>
-                                    <TableCell className="font-medium">{user.name}</TableCell>
-                                    <TableCell>{user.email}</TableCell>
-                                    <TableCell>
-                                        <div className="flex flex-wrap gap-1">
-                                            {user.roles.map(role => (
-                                                <Badge key={role} variant="secondary">{role}</Badge>
-                                            ))}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <Button variant="ghost" size="icon">
-                                            <Pencil className="h-4 w-4" />
-                                        </Button>
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                <AlertDialogDescription>
-                                                    This action cannot be undone. This will permanently delete the user
-                                                    "{user.name}".
-                                                </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => handleDelete(user)}>
-                                                    Delete
-                                                </AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    </TableCell>
+                    {isLoading ? (
+                        <div className="flex justify-center py-8">
+                            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                        </div>
+                    ) : (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Name</TableHead>
+                                    <TableHead>Email</TableHead>
+                                    <TableHead>Roles</TableHead>
+                                    <TableHead className="text-right w-[150px]">Actions</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {users.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                                            No users found. Create one below.
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    users.map((user) => (
+                                        <TableRow key={user.id}>
+                                            <TableCell className="font-medium">{user.name}</TableCell>
+                                            <TableCell>{user.email}</TableCell>
+                                            <TableCell>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {user.roles.map(role => (
+                                                        <Badge key={role} variant="secondary">{role}</Badge>
+                                                    ))}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <Button variant="ghost" size="icon" onClick={() => openEditDialog(user)}>
+                                                    <Pencil className="h-4 w-4" />
+                                                </Button>
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            This action cannot be undone. This will permanently delete the user
+                                                            "{user.name}".
+                                                        </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => handleDelete(user)}>
+                                                            Delete
+                                                        </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    )}
                 </CardContent>
             </Card>
             
@@ -315,6 +434,93 @@ export default function UsersAdminPage() {
                     </Form>
                 </CardContent>
             </Card>
+
+            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Edit User</DialogTitle>
+                        <DialogDescription>
+                            Make changes to the user profile here. Click save when you're done.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <Form {...editForm}>
+                        <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4">
+                            <FormField
+                                control={editForm.control}
+                                name="name"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Name</FormLabel>
+                                        <FormControl>
+                                            <Input {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={editForm.control}
+                                name="email"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Email</FormLabel>
+                                        <FormControl>
+                                            <Input {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={editForm.control}
+                                name="roles"
+                                render={() => (
+                                    <FormItem>
+                                        <div className="mb-2">
+                                            <FormLabel>Roles</FormLabel>
+                                        </div>
+                                        {roles.map((item) => (
+                                            <FormField
+                                                key={item.id}
+                                                control={editForm.control}
+                                                name="roles"
+                                                render={({ field }) => (
+                                                    <FormItem
+                                                        key={item.id}
+                                                        className="flex flex-row items-start space-x-3 space-y-0 mb-2"
+                                                    >
+                                                        <FormControl>
+                                                            <Checkbox
+                                                                checked={field.value?.includes(item.id)}
+                                                                onCheckedChange={(checked) => {
+                                                                    return checked
+                                                                        ? field.onChange([...(field.value || []), item.id])
+                                                                        : field.onChange(
+                                                                            (field.value || []).filter(
+                                                                                (value) => value !== item.id
+                                                                            )
+                                                                        )
+                                                                }}
+                                                            />
+                                                        </FormControl>
+                                                        <FormLabel className="font-normal">
+                                                            {item.label}
+                                                        </FormLabel>
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        ))}
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <DialogFooter>
+                                <Button type="submit">Save changes</Button>
+                            </DialogFooter>
+                        </form>
+                    </Form>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
