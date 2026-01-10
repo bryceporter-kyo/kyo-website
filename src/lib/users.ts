@@ -2,6 +2,7 @@
 import { db } from './firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc, query, where } from 'firebase/firestore';
 import data from './users.json';
+import { sendUserAddedEmail } from './mail';
 
 export type UserRole = 'Website Editor' | 'Internal Editor' | 'Internal Viewer';
 
@@ -48,11 +49,21 @@ export async function fetchUsersFromFirebase(): Promise<User[]> {
 }
 
 /**
- * Add a new user to Firebase
+ * Add a new user to Firebase and send a welcome email
  */
 export async function addUserToFirebase(user: Omit<User, 'id'>): Promise<User> {
     const usersRef = collection(db, USERS_COLLECTION);
     const docRef = await addDoc(usersRef, user);
+    
+    // Send welcome email to the new user
+    try {
+        await sendUserAddedEmail(user.email, user.name, user.roles);
+        console.log('[Users] Welcome email sent to:', user.email);
+    } catch (error) {
+        console.error('[Users] Failed to send welcome email:', error);
+        // Don't throw - user was still created successfully
+    }
+    
     return { id: docRef.id, ...user };
 }
 
