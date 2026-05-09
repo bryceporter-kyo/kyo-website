@@ -90,9 +90,9 @@ export default function Header() {
     return (
         <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm shadow-sm transition-all duration-300">
             <div className="container mx-auto flex h-20 items-center justify-between px-6">
-                <div className="flex items-center gap-2">
-                    <Link href="/" className="flex items-center gap-2 group">
-                        <Logo variant="small" size={56} className="transition-transform group-hover:scale-105 duration-300" />
+                <div className="flex items-center gap-2 shrink-0">
+                    <Link href="/" className="flex items-center gap-2 group shrink-0">
+                        <Logo variant="small" size={56} className="transition-transform group-hover:scale-105 duration-300 shrink-0" />
                     </Link>
                 </div>
 

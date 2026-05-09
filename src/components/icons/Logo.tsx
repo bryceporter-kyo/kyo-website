@@ -18,7 +18,7 @@ export function Logo({ className, variant = "long", size = 40, fullWidth = false
   const logoAlt = logo?.description || "Kawartha Youth Orchestra";
 
   return (
-    <div className={cn("flex items-center", fullWidth && "w-full", className)}>
+    <div className={cn("flex items-center shrink-0", fullWidth && "w-full", className)}>
       <Image
         src={logoSrc}
         alt={logoAlt}
