@@ -126,7 +126,7 @@ export default function Footer() {
               </div>
 
               <div className="md:col-span-2">
-                <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase font-headline">Legal</h3>
+                <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase font-headline">Compliance</h3>
                 <ul className="mt-4 space-y-2">
                   {legalLinks.map((link) => (
                     <li key={link.name}>
@@ -147,12 +147,22 @@ export default function Footer() {
             </div>
 
             <div className="mt-12 pt-8 border-t border-primary/5 space-y-4">
-              <p className="text-[1.05rem] font-medium text-foreground leading-relaxed italic">
-                Nurturing the next generation of musicians.
+              <p className="text-[1.1rem] font-bold text-foreground leading-relaxed italic">
+                Every young musician belongs here.
               </p>
-              <p className="text-xs text-muted-foreground leading-relaxed max-w-3xl">
-                Kawartha Youth Orchestra (KYO) is a registered charitable nonprofit organization (CRA #89168 2700 RR 0001). We are grateful for the support of the Community Foundation of Greater Peterborough, Google Grants, NetSuite Social Impact, the City of Peterborough Community Investment Grant, the Lloyd Carr Harris Foundation, and the F.K. Morrow Foundation.
-              </p>
+              <div className="text-xs text-muted-foreground leading-relaxed max-w-4xl space-y-3">
+                <p>
+                  Kawartha Youth Orchestra (KYO) is a registered charitable nonprofit organization (CRA #89168 2700 RR 0001). 
+                  Our mission is to provide youth with access to high-quality music education and orchestral training in a safe, 
+                  welcoming community where they can develop artistry, build social connections, grow in confidence, and foster 
+                  a lifelong love of music.
+                </p>
+                <p>
+                  We are deeply grateful for the generous support of the Community Foundation of Greater Peterborough, Google Ads Grants, 
+                  NetSuite Social Impact, the City of Peterborough Community Investment Grant, the Lloyd Carr Harris Foundation, 
+                  the Aqueduct Foundation, and the F.K. Morrow Foundation. Your support makes this community possible.
+                </p>
+              </div>
             </div>
           </div>
         </div>
