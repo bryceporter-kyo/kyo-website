@@ -39,8 +39,8 @@ async function fetchImagesFromFirestore(): Promise<StoredImage[]> {
   const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
   
   if (!projectId) {
-    console.warn("[ImageProvider] No project ID, using static images");
-    return PlaceHolderImages.map(img => ({ ...img, originalUrl: img.imageUrl }));
+    console.warn("[ImageProvider] No project ID");
+    return [];
   }
 
   try {
@@ -53,15 +53,15 @@ async function fetchImagesFromFirestore(): Promise<StoredImage[]> {
     });
 
     if (!response.ok) {
-      console.warn("[ImageProvider] Firestore fetch failed, using static images");
-      return PlaceHolderImages.map(img => ({ ...img, originalUrl: img.imageUrl }));
+      console.warn("[ImageProvider] Firestore fetch failed");
+      return [];
     }
 
     const data = await response.json();
     
     if (!data.documents || data.documents.length === 0) {
-      console.log("[ImageProvider] No documents in Firestore, using static images");
-      return PlaceHolderImages.map(img => ({ ...img, originalUrl: img.imageUrl }));
+      console.log("[ImageProvider] No documents in Firestore");
+      return [];
     }
 
     // Parse Firestore documents
@@ -81,8 +81,12 @@ async function fetchImagesFromFirestore(): Promise<StoredImage[]> {
           ...storedImg,
         };
       }
+      // If no image in Firestore, return the default entry but with an EMPTY imageUrl 
+      // so it doesn't show the placeholder, unless we REALLY want a fallback.
+      // But the user said "load nothing first".
       return {
         ...defaultImg,
+        imageUrl: "", // Remove the hardcoded Unsplash URL
         originalUrl: defaultImg.imageUrl,
       };
     });
@@ -91,14 +95,12 @@ async function fetchImagesFromFirestore(): Promise<StoredImage[]> {
     return mergedImages;
   } catch (error) {
     console.error("[ImageProvider] Error fetching from Firestore:", error);
-    return PlaceHolderImages.map(img => ({ ...img, originalUrl: img.imageUrl }));
+    return [];
   }
 }
 
 export function ImageProvider({ children }: { children: React.ReactNode }) {
-  const [images, setImages] = useState<StoredImage[]>(() => 
-    PlaceHolderImages.map(img => ({ ...img, originalUrl: img.imageUrl }))
-  );
+  const [images, setImages] = useState<StoredImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshImages = useCallback(async () => {
