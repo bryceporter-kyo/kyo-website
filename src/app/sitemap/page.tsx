@@ -20,19 +20,19 @@ const mainSections = [
     {
         name: 'Programs',
         subLinks: [
-            { name: 'The Orchestras', href: '/orchestras' },
-            { name: 'Upbeat!', href: '/upbeat' },
-            { name: 'Lessons', href: '/lessons' },
+            { name: 'The Orchestras', href: '/programs/orchestras' },
+            { name: 'Upbeat!', href: '/programs/upbeat' },
+            { name: 'Lessons', href: '/programs/lessons' },
         ]
     },
-    { name: 'Calendar', href: '/calendar' },
+    { name: 'Calendar', href: '/programs/calendar' },
     {
         name: 'Support Us',
         subLinks: [
-            { name: 'Ways to Give', href: '/support' },
-            { name: 'Donate', href: '/donate' },
-            { name: 'Donation Options', href: '/donate' },
-            { name: 'Volunteer', href: '/volunteer' },
+            { name: 'Ways to Give', href: '/support-us/ways-to-give' },
+            { name: 'Donate', href: '/support-us/donate' },
+            { name: 'Donation Options', href: '/support-us/donate' },
+            { name: 'Volunteer', href: '/support-us/volunteer' },
         ]
     },
     { name: 'Contact', href: '/contact' },
@@ -55,11 +55,11 @@ const utilitySections = [
 
 const donationOptions = [
     { name: 'One-Time Donation', linkId: 'donate-stripe-one-time', icon: Heart },
-    { name: 'Monthly Donation', href: '/donate', icon: Gift },
+    { name: 'Monthly Donation', href: '/support-us/donate', icon: Gift },
     { name: 'Donate via CanadaHelps', linkId: 'donate-canadahelps-general', icon: CreditCard },
     { name: 'Donate Securities', linkId: 'donate-canadahelps-securities', icon: Landmark },
     { name: 'Donate by E-Transfer', linkId: 'donate-email', icon: Mail },
-    { name: 'Donate by Cheque', href: '/donate', icon: Mail },
+    { name: 'Donate by Cheque', href: '/support-us/donate', icon: Mail },
     { name: 'Donate to the Tenuto Trust', linkId: 'tenuto-trust', icon: Landmark },
     { name: 'Donate an Instrument', linkId: 'contact-instrument-donation', icon: HandCoins },
     { name: 'Donate a Car', linkId: 'donate-a-car', icon: Car },

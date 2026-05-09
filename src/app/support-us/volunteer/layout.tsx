@@ -2,11 +2,11 @@ import { fetchPageMetadata } from "@/lib/metadata";
 import { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const data = await fetchPageMetadata("/lessons");
+  const data = await fetchPageMetadata('/support-us/volunteer');
   
   if (!data) {
     return {
-      title: "Lessons | Kawartha Youth Orchestra",
+      title: "Volunteer | Kawartha Youth Orchestra",
     };
   }
 

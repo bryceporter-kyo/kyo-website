@@ -44,18 +44,18 @@ const navLinks = [
   {
     name: 'Programs',
     subLinks: [
-      { name: 'The Orchestras', href: '/orchestras' },
-      { name: 'Upbeat!', href: '/upbeat' },
-      { name: 'Instrumental Lessons', href: '/lessons' },
+      { name: 'The Orchestras', href: '/programs/orchestras' },
+      { name: 'Upbeat!', href: '/programs/upbeat' },
+      { name: 'Instrumental Lessons', href: '/programs/lessons' },
     ]
   },
-  { name: 'Calendar', href: '/calendar' },
+  { name: 'Calendar', href: '/programs/calendar' },
   {
     name: 'Support Us',
     subLinks: [
-        { name: 'Ways to Give', href: '/support' },
-        { name: 'Donate', href: '/donate' },
-        { name: 'Volunteer', href: '/volunteer' },
+        { name: 'Ways to Give', href: '/support-us/ways-to-give' },
+        { name: 'Donate', href: '/support-us/donate' },
+        { name: 'Volunteer', href: '/support-us/volunteer' },
     ]
   },
   { name: 'Contact', href: '/contact' },

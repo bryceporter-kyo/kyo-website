@@ -85,21 +85,21 @@ export default function Home() {
     {
       title: 'Orchestras',
       description: 'Our flagship program for dedicated young musicians to perform in a full orchestra setting.',
-      href: '/orchestras',
+      href: '/programs/orchestras',
       icon: Users,
       image: getImage('program-orchestra')
     },
     {
       title: 'Upbeat!',
       description: 'An inclusive and fun introduction to orchestral music for younger students.',
-      href: '/upbeat',
+      href: '/programs/upbeat',
       icon: Music,
       image: getImage('program-upbeat')
     },
     {
       title: 'Lessons Program',
       description: 'Individual and group lessons with our experienced instructors to hone your skills.',
-      href: '/lessons',
+      href: '/programs/lessons',
       icon: GraduationCap,
       image: getImage('program-lessons')
     },
@@ -114,7 +114,7 @@ export default function Home() {
         image: getImage('hero-concert'),
         buttons: [
             { text: "Learn More", href: "/about", variant: "default" as const },
-            { text: "See Our Programs", href: "/orchestras", variant: "outline" as const }
+            { text: "See Our Programs", href: '/programs/orchestras', variant: "outline" as const }
         ]
     },
     {
@@ -123,8 +123,8 @@ export default function Home() {
         subtitle: "Your generosity empowers young musicians, funds scholarships, and sustains our vibrant programs. Help us keep the music playing for generations to come.",
         image: getImage('page-header-donate'),
         buttons: [
-            { text: "Donate Today", href: "/donate", variant: "default" as const },
-            { text: "More Ways to Give", href: "/support", variant: "outline" as const }
+            { text: "Donate Today", href: '/support-us/donate', variant: "default" as const },
+            { text: "More Ways to Give", href: '/support-us/ways-to-give', variant: "outline" as const }
         ]
     },
     {
@@ -382,7 +382,7 @@ export default function Home() {
                                             </CardContent>
                                             <div className="p-6 pt-0">
                                                 <Button asChild variant="link" className="p-0 h-auto group-hover:text-primary transition-colors">
-                                                    <Link href="/calendar" className="flex items-center gap-2">
+                                                    <Link href='/programs/calendar' className="flex items-center gap-2">
                                                         Read More <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
                                                     </Link>
                                                 </Button>
@@ -416,7 +416,7 @@ export default function Home() {
                         </p>
                         <div className="flex gap-4">
                             <Button asChild className="transition-transform duration-300 hover:-translate-y-1">
-                                <Link href="/orchestras">Explore Aid</Link>
+                                <Link href='/programs/orchestras'>Explore Aid</Link>
                             </Button>
                             {(() => {
                                 const buttonProps = getButtonProps(financialAidButton);
@@ -470,7 +470,7 @@ export default function Home() {
                     </StaggerContainer>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
                         <Button asChild size="lg" className="transition-transform duration-300 hover:-translate-y-1">
-                            <Link href="/donate">Donate Now</Link>
+                            <Link href='/support-us/donate'>Donate Now</Link>
                         </Button>
                         {contactLink && (
                             <Button asChild size="lg" variant="outline" className="transition-transform duration-300 hover:-translate-y-1">

@@ -183,7 +183,7 @@ export default function LessonsPage() {
               </CardContent>
               <div className="p-6 pt-0">
                 <Button asChild variant="secondary">
-                  <Link href="/orchestras">Explore Our Ensembles</Link>
+                  <Link href='/programs/orchestras'>Explore Our Ensembles</Link>
                 </Button>
               </div>
             </Card>

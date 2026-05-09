@@ -34,17 +34,17 @@ const SITE_STRUCTURE: SitemapNode[] = [
     children: [
       { path: "/about", title: "About Us" },
       { path: "/team", title: "Our Team & Directors" },
-      { path: "/orchestras", title: "The Orchestras", children: [
+      { path: '/programs/orchestras', title: "The Orchestras", children: [
           { path: "/programs/orchestras/registration", title: "Orchestra Registration" }
       ]},
-      { path: "/upbeat", title: "Upbeat!", children: [
+      { path: '/programs/upbeat', title: "Upbeat!", children: [
           { path: "/programs/upbeat/registration", title: "Upbeat! Registration" }
       ]},
-      { path: "/lessons", title: "Instrumental Lessons" },
-      { path: "/calendar", title: "Calendar" },
-      { path: "/support", title: "Support Us" },
-      { path: "/donate", title: "Donate" },
-      { path: "/volunteer", title: "Volunteer" },
+      { path: '/programs/lessons', title: "Instrumental Lessons" },
+      { path: '/programs/calendar', title: "Calendar" },
+      { path: '/support-us/ways-to-give', title: "Support Us" },
+      { path: '/support-us/donate', title: "Donate" },
+      { path: '/support-us/volunteer', title: "Volunteer" },
       { path: "/contact", title: "Contact" },
       { path: "/internal", title: "Internal Resources" },
       { path: "/legal", title: "Legal & Policies", children: [

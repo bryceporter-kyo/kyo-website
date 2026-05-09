@@ -645,10 +645,10 @@ export default function UpbeatPage() {
                     </p>
                     <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
                         <Button asChild size="lg" className="bg-white text-[#0a3d2c] hover:bg-forest-50 px-12 py-8 rounded-full font-bold text-2xl shadow-2xl hover:scale-105 transition-all duration-300 w-full sm:w-auto">
-                            <Link href="/donate">Donate Today</Link>
+                            <Link href='/support-us/donate'>Donate Today</Link>
                         </Button>
                         <Button asChild variant="outline" size="lg" className="bg-transparent border-white/30 text-white hover:bg-white/10 px-12 py-8 rounded-full font-bold text-xl transition-all w-full sm:w-auto">
-                            <Link href="/support">More Ways to Give</Link>
+                            <Link href='/support-us/ways-to-give'>More Ways to Give</Link>
                         </Button>
                     </div>
                     

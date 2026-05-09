@@ -11,10 +11,10 @@ import { useData } from '@/components/providers/DataProvider';
 
 const navLinks = [
   { name: 'Home', href: '/' },
-  { name: 'Orchestras', href: '/orchestras' },
-  { name: 'Upbeat!', href: '/upbeat' },
-  { name: 'Lessons', href: '/lessons' },
-  { name: 'Donate', href: '/donate' },
+  { name: 'Orchestras', href: '/programs/orchestras' },
+  { name: 'Upbeat!', href: '/programs/upbeat' },
+  { name: 'Lessons', href: '/programs/lessons' },
+  { name: 'Donate', href: '/support-us/donate' },
 ];
 
 type SocialLink = {

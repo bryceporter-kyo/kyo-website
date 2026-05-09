@@ -726,7 +726,7 @@ export default function DonatePage() {
                                 </p>
                                 <div className="pt-4">
                                     <Button asChild size="lg" className="rounded-2xl px-12 py-8 bg-white text-primary hover:bg-white/90 text-lg font-bold shadow-xl transition-all hover:scale-105">
-                                        <Link href="/volunteer">
+                                        <Link href='/support-us/volunteer'>
                                             Learn About Volunteering
                                             <ArrowRight className="ml-2 w-5 h-5" />
                                         </Link>

@@ -136,7 +136,7 @@ export default function AboutPage() {
                         </div>
                         <div className="pt-4">
                             <Button asChild variant="outline" className="group">
-                                <Link href="/orchestras" className="flex items-center gap-2">
+                                <Link href='/programs/orchestras' className="flex items-center gap-2">
                                     Explore Our Programs <Music className="w-4 h-4 transition-transform group-hover:rotate-12" />
                                 </Link>
                             </Button>
@@ -246,10 +246,10 @@ export default function AboutPage() {
                             </p>
                             <div className="flex flex-col sm:flex-row gap-6 justify-center pt-4">
                                 <Button asChild size="xl" className="bg-white hover:bg-green-100 text-[#0a3d2c] font-bold h-14 px-10 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                                    <Link href="/donate">Donate Today</Link>
+                                    <Link href='/support-us/donate'>Donate Today</Link>
                                 </Button>
                                 <Button asChild size="xl" variant="outline" className="bg-transparent border-white/40 text-white hover:text-white hover:bg-white/10 h-14 px-10 rounded-full backdrop-blur-sm transition-all duration-300">
-                                    <Link href="/support">More Ways to Give</Link>
+                                    <Link href='/support-us/ways-to-give'>More Ways to Give</Link>
                                 </Button>
                             </div>
                         </div>
