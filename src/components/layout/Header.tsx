@@ -238,35 +238,34 @@ export default function Header() {
                 <span className="sr-only">Open menu</span>
               </Button>
             </SheetTriggerPrimitive>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-              <SheetHeader>
-                <SheetTitle className="sr-only">Mobile Navigation</SheetTitle>
-                <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="inline-block py-4">
-                    <Logo variant="small" size={64} />
-                </Link>
+            <SheetContent side="right" className="w-[300px] sm:w-[400px] flex flex-col p-0">
+              <SheetHeader className="px-6 pt-10 pb-2 border-b border-primary/5">
+                <SheetTitle className="text-left font-headline text-xl text-primary/60 uppercase tracking-widest">Menu</SheetTitle>
               </SheetHeader>
-              <div className="p-4 pt-0 mt-6">
-                <nav className="flex flex-col gap-5">
+              <div className="flex-1 overflow-y-auto px-6 py-4">
+                <nav className="flex flex-col gap-1">
                   {navLinks.map((link) => (
                      link.subLinks ? (
-                        <div key={link.name} className="space-y-3">
-                            <h3 className="font-bold text-muted-foreground px-4 py-2 text-sm uppercase tracking-widest">{link.name}</h3>
-                            {link.subLinks.map(subLink => (
-                                <Link
-                                    key={subLink.name}
-                                    href={subLink.href}
-                                    className="block px-8 py-3 text-[1.2rem] font-medium hover:text-primary transition-colors"
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                >
-                                    {subLink.name}
-                                </Link>
-                            ))}
+                        <div key={link.name} className="py-2 border-b border-primary/5 last:border-0">
+                            <h3 className="font-bold text-muted-foreground px-2 py-1 text-xs uppercase tracking-widest mb-1">{link.name}</h3>
+                            <div className="flex flex-col gap-0.5">
+                                {link.subLinks.map(subLink => (
+                                    <Link
+                                        key={subLink.name}
+                                        href={subLink.href}
+                                        className="block px-4 py-2 text-[1.05rem] font-medium hover:text-primary transition-colors rounded-lg hover:bg-primary/5"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                    >
+                                        {subLink.name}
+                                    </Link>
+                                ))}
+                            </div>
                         </div>
                      ) : (
                         <Link
                             key={link.name}
                             href={link.href!}
-                            className="text-[1.3rem] font-bold px-4 py-3 hover:text-primary transition-colors"
+                            className="text-[1.15rem] font-bold px-2 py-3 hover:text-primary transition-colors border-b border-primary/5 last:border-0 hover:bg-primary/5 rounded-lg"
                             onClick={() => setIsMobileMenuOpen(false)}
                         >
                             {link.name}
@@ -274,9 +273,11 @@ export default function Header() {
                      )
                   ))}
                 </nav>
+              </div>
+              <div className="p-6 border-t border-primary/5 bg-muted/5">
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button className="w-full mt-10 h-14 text-lg font-bold rounded-2xl">Register</Button>
+                    <Button className="w-full h-14 text-lg font-bold rounded-2xl">Register</Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[400px] p-4">
                     <DialogHeader>
