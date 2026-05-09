@@ -9,8 +9,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Pencil, Trash2, UserPlus, X, Loader2 } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, UserPlus, X, Loader2, Download, Upload } from "lucide-react";
 import Link from "next/link";
+import Papa from "papaparse";
 import { 
     fetchStaffFromFirebase, 
     fetchBoardFromFirebase,
@@ -23,6 +24,7 @@ import {
     sortTeamMembers
 } from "@/lib/staff";
 import type { StaffMember, BoardMember } from "@/lib/staff";
+import { addUserToFirebase, UserRole } from "@/lib/users";
 import { uploadImage } from "@/lib/image-service";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
@@ -270,9 +272,118 @@ export default function TeamAdminPage() {
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
 
+    const handleDownloadCsvTemplate = () => {
+        const headers = ["Name", "Type", "Title", "Email", "Permission Settings", "Biography", "Facebook", "Instagram", "LinkedIn", "YouTube", "Spotify", "Website"];
+        const exampleRow = ["Jane Doe", "staff", "Artistic Director", "jane.doe@thekyo.ca", "Website Editor", "Jane is a dedicated musician...", "https://facebook.com/jane", "", "https://linkedin.com/in/jane", "", "", "https://janedoe.com"];
+        const csvContent = "data:text/csv;charset=utf-8," 
+            + headers.join(",") + "\n"
+            + exampleRow.map(val => `"${val}"`).join(",");
+        
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "team_import_template.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const handleUploadCsv = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        setIsLoading(true);
+        Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: async (results) => {
+                let successCount = 0;
+                let errorCount = 0;
+
+                for (const row of results.data as any[]) {
+                    try {
+                        const name = row.Name || row.name;
+                        const type = (row.Type || row.type || "staff").toLowerCase();
+                        const title = row.Title || row.title;
+                        const email = row.Email || row.email;
+                        const permissions = row["Permission Settings"] || row.permissions;
+                        const bio = row.Biography || row.biography || row.bio;
+                        
+                        const links = {
+                            facebook: row.Facebook || row.facebook || "",
+                            instagram: row.Instagram || row.instagram || "",
+                            linkedin: row.LinkedIn || row.linkedin || "",
+                            youtube: row.YouTube || row.youtube || "",
+                            spotify: row.Spotify || row.spotify || "",
+                            website: row.Website || row.website || "",
+                        };
+
+                        if (!name || !title || !email) {
+                            console.error("Missing required fields for row:", row);
+                            errorCount++;
+                            continue;
+                        }
+
+                        const memberData = {
+                            name,
+                            title,
+                            email,
+                            bio: bio || "",
+                            image: "", // Placeholder, can be updated manually
+                            links,
+                        };
+
+                        // 1. Add to Staff or Board
+                        if (type === 'board') {
+                            const newBoard = await addBoardToFirebase(memberData);
+                            setBoard(prev => [...prev, newBoard]);
+                        } else {
+                            const newStaff = await addStaffToFirebase(memberData);
+                            setStaff(prev => [...prev, newStaff]);
+                        }
+
+                        // 2. Add to Users if permissions provided
+                        if (permissions) {
+                            const rolesArray = permissions.split(',').map((r: string) => r.trim()) as UserRole[];
+                            if (rolesArray.length > 0) {
+                                await addUserToFirebase({
+                                    name,
+                                    email,
+                                    roles: rolesArray
+                                });
+                            }
+                        }
+
+                        successCount++;
+                    } catch (error) {
+                        console.error("Error importing team member from CSV:", error);
+                        errorCount++;
+                    }
+                }
+
+                setIsLoading(false);
+                toast({
+                    title: "Import Complete",
+                    description: `Successfully imported ${successCount} members.${errorCount > 0 ? ` Failed to import ${errorCount} members.` : ""}`,
+                    variant: errorCount > 0 ? "destructive" : "default",
+                });
+                event.target.value = "";
+            },
+            error: (error) => {
+                console.error("CSV Parse Error:", error);
+                setIsLoading(false);
+                toast({
+                    title: "Import Failed",
+                    description: "Failed to parse CSV file.",
+                    variant: "destructive",
+                });
+            }
+        });
+    };
+
     return (
         <div className="container mx-auto py-12">
-            <div className="mb-8">
+            <div className="mb-8 flex justify-between items-center">
                 <Button asChild variant="outline">
                     <Link href="/admin">
                         <ArrowLeft className="mr-2 h-4 w-4" />
@@ -280,6 +391,38 @@ export default function TeamAdminPage() {
                     </Link>
                 </Button>
             </div>
+
+            <Card className="mb-12">
+                <CardHeader>
+                    <CardTitle className="font-headline text-xl">Bulk Team Management</CardTitle>
+                    <CardDescription>Upload or download a CSV to manage staff and board members in bulk.</CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="space-y-1">
+                        <p className="text-sm text-muted-foreground">Use the template to bulk-add members with bios and social links.</p>
+                        <p className="text-xs text-primary font-medium">Adding "Permission Settings" will also create an admin user account for the member.</p>
+                    </div>
+                    <div className="flex gap-3">
+                        <Button onClick={handleDownloadCsvTemplate} variant="outline" size="sm">
+                            <Download className="mr-2 h-4 w-4"/>
+                            CSV Template
+                        </Button>
+                        <div className="relative">
+                            <input
+                                type="file"
+                                accept=".csv"
+                                onChange={handleUploadCsv}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                title="Upload CSV"
+                            />
+                            <Button variant="outline" size="sm">
+                                <Upload className="mr-2 h-4 w-4"/>
+                                Upload CSV
+                            </Button>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
 
             <Card className="mb-12">
                 <CardHeader>
