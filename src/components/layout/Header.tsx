@@ -182,6 +182,10 @@ export default function Header() {
               <Button size="lg" className="rounded-xl h-11 px-8 text-[1.1rem] font-bold">Register</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[800px] p-0 overflow-hidden border-none bg-transparent">
+              <DialogHeader className="sr-only">
+                <DialogTitle>Select Registration Program</DialogTitle>
+                <DialogDescription>Choose between the Orchestras or Upbeat! program registration forms.</DialogDescription>
+              </DialogHeader>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
                 <Link href="/programs/orchestras/registration" onClick={() => setOpenDropdown(null)}>
                   <Card className="group relative overflow-hidden h-[300px] border-none hover:ring-2 hover:ring-primary transition-all duration-300">

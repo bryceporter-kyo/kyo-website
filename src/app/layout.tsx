@@ -8,6 +8,28 @@ import CookieConsent from '@/components/shared/CookieConsent';
 import Analytics from '@/components/shared/Analytics';
 import { ImageProvider } from '@/components/providers/ImageProvider';
 import { DataProvider } from '@/components/providers/DataProvider';
+import { fetchPageMetadata } from '@/lib/metadata';
+import { Metadata } from 'next';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const data = await fetchPageMetadata("/");
+  
+  if (!data) {
+    return {
+      title: "Kawartha Youth Orchestra",
+      description: "Nurturing the next generation of musicians.",
+    };
+  }
+
+  return {
+    title: data.title,
+    description: data.description,
+    robots: {
+      index: data.index,
+      follow: data.follow,
+    }
+  };
+}
 
 export default function RootLayout({
   children,
