@@ -10,8 +10,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Pencil, Trash2, Download, Upload, X } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, Download, Upload, X, Loader2 } from "lucide-react";
 import Link from "next/link";
+import Papa from "papaparse";
 import { fetchEventsFromFirebase, addEventToFirebase, updateEventInFirebase, deleteEventFromFirebase } from "@/lib/events";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +22,6 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import React from "react";
-import { Label } from "@/components/ui/label";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,6 +40,8 @@ const eventSchema = z.object({
   name: z.string().min(3, "Event name must be at least 3 characters long."),
   location: z.string().optional(),
   time: z.string().optional(),
+  endTime: z.string().optional(),
+  notes: z.string().optional(),
   link: z.string().optional(),
   type: z.enum(["special", "normal"], { required_error: "You need to select an event type." }),
 });
@@ -47,7 +49,6 @@ const eventSchema = z.object({
 export default function EventsAdminPage() {
     const { toast } = useToast();
     const [events, setEvents] = React.useState<Event[]>([]);
-    const [csvFile, setCsvFile] = React.useState<File | null>(null);
     const [editingEvent, setEditingEvent] = React.useState<Event | null>(null);
     const [isLoading, setIsLoading] = React.useState(true);
     const [isSaving, setIsSaving] = React.useState(false);
@@ -83,6 +84,8 @@ export default function EventsAdminPage() {
             name: "",
             location: "",
             time: "",
+            endTime: "",
+            notes: "",
             link: "",
             type: "normal",
         },
@@ -95,6 +98,8 @@ export default function EventsAdminPage() {
           date: parseDate(editingEvent.date),
           location: editingEvent.location || "",
           time: editingEvent.time || "",
+          endTime: editingEvent.endTime || "",
+          notes: editingEvent.notes || "",
           link: editingEvent.link || "",
           type: editingEvent.type,
         });
@@ -104,6 +109,8 @@ export default function EventsAdminPage() {
           date: undefined,
           location: "",
           time: "",
+          endTime: "",
+          notes: "",
           link: "",
           type: "normal",
         });
@@ -170,10 +177,12 @@ export default function EventsAdminPage() {
     }
     
 
+    
     const handleDownloadCsv = () => {
         const csvContent = "data:text/csv;charset=utf-8," 
-            + "date,name,location,time,link,type\n"
-            + "2025-01-15,Sample Event,Online,10:00 AM,/sample-event,normal";
+            + "date,name,location,time,endTime,notes,link,type\n"
+            + "2025-01-15,Sample Event,Showplace Performance Centre,7:30 PM,9:30 PM,Bring formal attire.,https://example.com,normal\n"
+            + "2025-06-20,Summer Concert,Showplace,7:30 PM,10:00 PM,Grand Finale.,,special";
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
@@ -183,35 +192,80 @@ export default function EventsAdminPage() {
         document.body.removeChild(link);
     };
 
-    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.files) {
-            setCsvFile(event.target.files[0]);
-        }
+    const handleUploadCsv = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        setIsLoading(true);
+        Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: async (results) => {
+                const newEvents: Event[] = [];
+                let successCount = 0;
+                let errorCount = 0;
+
+                for (const row of results.data as any[]) {
+                    try {
+                        const eventData = {
+                            date: row.date,
+                            name: row.name,
+                            location: row.location || "",
+                            time: row.time || "",
+                            endTime: row.endTime || "",
+                            notes: row.notes || "",
+                            link: row.link || "",
+                            type: (row.type === "special" ? "special" : "normal") as "special" | "normal",
+                        };
+
+                        // Basic validation
+                        if (!eventData.name || !eventData.date) {
+                            console.error("Invalid event data in CSV:", row);
+                            errorCount++;
+                            continue;
+                        }
+
+                        // Validate date format (YYYY-MM-DD)
+                        if (!/^\d{4}-\d{2}-\d{2}$/.test(eventData.date)) {
+                            console.error("Invalid date format in CSV (expected YYYY-MM-DD):", eventData.date);
+                            errorCount++;
+                            continue;
+                        }
+
+                        const newEvent = await addEventToFirebase(eventData);
+                        newEvents.push(newEvent);
+                        successCount++;
+                    } catch (error) {
+                        console.error("Error importing event from CSV:", error);
+                        errorCount++;
+                    }
+                }
+
+                const allEvents = [...events, ...newEvents].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+                setEvents(allEvents);
+                setIsLoading(false);
+                
+                toast({
+                    title: "Import Complete",
+                    description: `Successfully imported ${successCount} events.${errorCount > 0 ? ` Failed to import ${errorCount} events.` : ""}`,
+                    variant: errorCount > 0 ? "destructive" : "default",
+                });
+                
+                // Clear input
+                event.target.value = "";
+            },
+            error: (error) => {
+                console.error("CSV Parse Error:", error);
+                setIsLoading(false);
+                toast({
+                    title: "Import Failed",
+                    description: "Failed to parse CSV file.",
+                    variant: "destructive",
+                });
+            }
+        });
     };
 
-    const handleImportCsv = () => {
-        if (!csvFile) {
-            toast({
-                title: "No file selected",
-                description: "Please select a CSV file to upload.",
-                variant: "destructive",
-            });
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const text = e.target?.result;
-            console.log("Parsing CSV content:", text);
-            // In a real application, you would parse the CSV and send it to a server action
-            toast({
-                title: "CSV Uploaded",
-                description: "The event data is being processed. (This is a placeholder)",
-            });
-        };
-        reader.readAsText(csvFile);
-    };
-    
     async function handleDelete(eventToDelete: Event) {
         try {
             await deleteEventFromFirebase(eventToDelete.id);
@@ -245,25 +299,28 @@ export default function EventsAdminPage() {
              <Card className="mb-12">
                 <CardHeader>
                     <CardTitle className="font-headline text-xl">Bulk Event Management</CardTitle>
-                    <CardDescription>Download a template or upload a CSV to manage events in bulk.</CardDescription>
+                    <CardDescription>Upload or download a CSV to add events in bulk.</CardDescription>
                 </CardHeader>
-                <CardContent className="grid md:grid-cols-2 gap-6 items-end">
-                    <div>
-                        <Label className="text-sm font-medium">Import from CSV</Label>
-                        <p className="text-sm text-muted-foreground mb-2">Upload a CSV file to add multiple events at once.</p>
-                        <div className="flex gap-2">
-                            <Input type="file" accept=".csv" onChange={handleFileUpload} className="max-w-xs" />
-                            <Button onClick={handleImportCsv} disabled={!csvFile} size="sm">
-                                <Upload className="mr-2 h-4 w-4"/>
-                                Upload
-                            </Button>
-                        </div>
-                    </div>
-                     <div className="text-right">
+                <CardContent className="flex items-center justify-between gap-4">
+                    <p className="text-sm text-muted-foreground">Use the template to format your events correctly for bulk import.</p>
+                    <div className="flex gap-2">
                         <Button onClick={handleDownloadCsv} variant="outline" size="sm">
                             <Download className="mr-2 h-4 w-4"/>
-                            Download Template
+                            Template
                         </Button>
+                        <div className="relative">
+                            <input
+                                type="file"
+                                accept=".csv"
+                                onChange={handleUploadCsv}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                title="Upload CSV"
+                            />
+                            <Button variant="outline" size="sm">
+                                <Upload className="mr-2 h-4 w-4"/>
+                                Upload CSV
+                            </Button>
+                        </div>
                     </div>
                 </CardContent>
             </Card>
@@ -274,7 +331,12 @@ export default function EventsAdminPage() {
                     <CardDescription>Manage, edit, or delete existing events.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Table>
+                    {isLoading ? (
+                        <div className="flex justify-center py-8">
+                            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                        </div>
+                    ) : (
+                        <Table>
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Date</TableHead>
@@ -322,6 +384,7 @@ export default function EventsAdminPage() {
                             ))}
                         </TableBody>
                     </Table>
+                    )}
                 </CardContent>
             </Card>
 
@@ -406,7 +469,7 @@ export default function EventsAdminPage() {
                                     name="time"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Time (Optional)</FormLabel>
+                                            <FormLabel>Start Time (Optional)</FormLabel>
                                             <FormControl>
                                                 <Input placeholder="e.g., '7:30 PM'" {...field} />
                                             </FormControl>
@@ -414,7 +477,33 @@ export default function EventsAdminPage() {
                                         </FormItem>
                                     )}
                                 />
+                                <FormField
+                                    control={form.control}
+                                    name="endTime"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>End Time (Optional)</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="e.g., '9:30 PM'" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
                             </div>
+                            <FormField
+                                control={form.control}
+                                name="notes"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Notes / Details (Optional)</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="e.g., 'Bring a music stand and formal attire.'" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                             <FormField
                                 control={form.control}
                                 name="link"

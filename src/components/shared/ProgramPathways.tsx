@@ -4,133 +4,128 @@
 import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { useImages } from "@/components/providers/ImageProvider";
 import Image from "next/image";
+import { motion } from "framer-motion";
+import { ChevronRight, Music, Sparkles, Trophy } from "lucide-react";
 
 const pathways = [
     {
-        title: "Beginner Lessons & JKYO",
+        title: "Junior KYO (JKYO)",
         level: "RCM Grades 1-2",
-        description: "Starting their journey with foundational skills in group lessons or our Junior Orchestra.",
+        description: "Starting their journey with foundational skills in group lessons or our Junior Orchestra. We focus on building fundamental ensemble skills, rhythmic precision, and the joy of making music together.",
         imageId: "orchestra-junior",
-        weight: 1
+        icon: Music,
+        accent: "bg-blue-500/10 text-blue-600"
     },
     {
         title: "Intermediate KYO (IKYO)",
         level: "RCM Grades 3-5",
-        description: "Developing ensemble skills with a full orchestra, playing classical and popular music.",
+        description: "Developing ensemble skills with a full orchestra, playing classical and popular music. Musicians explore complex harmonies and a diverse range of musical styles while refining their technical proficiency.",
         imageId: "orchestra-intermediate",
-        weight: 1.5 // Increased weight to make it "stickier"
+        icon: Sparkles,
+        accent: "bg-amber-500/10 text-amber-600"
     },
     {
         title: "Senior KYO (SKYO)",
         level: "RCM Grade 6+",
-        description: "Performing advanced repertoire in our premier ensemble with professional-level training.",
+        description: "Performing advanced repertoire in our premier ensemble with professional-level training. Tackling major symphonic works and preparing for professional orchestral environments.",
         imageId: "orchestra-senior",
-        weight: 1
+        icon: Trophy,
+        accent: "bg-emerald-500/10 text-emerald-600"
     }
 ];
 
-const totalWeight = pathways.reduce((sum, p) => sum + p.weight, 0);
-
 export default function ProgramPathways() {
-  const [activeIndex, setActiveIndex] = React.useState(0);
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const [isClient, setIsClient] = React.useState(false);
-
-  React.useEffect(() => {
-    setIsClient(true);
-  }, []);
-  
-  React.useEffect(() => {
-    if (!isClient) return;
-
-    const handleScroll = () => {
-      const container = containerRef.current;
-      if (!container) return;
-
-      const scrollY = window.scrollY;
-      const containerTop = container.offsetTop;
-      const containerHeight = container.offsetHeight;
-      const viewportHeight = window.innerHeight;
-      
-      const scrollableAreaStart = containerTop - viewportHeight / 2 + 200;
-      const scrollableDistance = containerHeight - viewportHeight;
-      const scrollProgress = (scrollY - scrollableAreaStart) / scrollableDistance;
-
-      let accumulatedWeight = 0;
-      let newIndex = 0;
-      for (let i = 0; i < pathways.length; i++) {
-          accumulatedWeight += pathways[i].weight / totalWeight;
-          if (scrollProgress < accumulatedWeight) {
-              newIndex = i;
-              break;
-          }
-          newIndex = pathways.length - 1;
-      }
-      
-      newIndex = Math.max(0, Math.min(newIndex, pathways.length - 1));
-      setActiveIndex(newIndex);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isClient]);
-
-  if (!isClient) {
-    return null;
-  }
+  const { getImage } = useImages();
 
   return (
-    <section className="py-0 md:py-0">
-        <div className="container mx-auto text-center mb-12">
-            <h2 className="text-3xl font-headline font-bold">A Pathway for Growth</h2>
-            <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
-                Our programs provide a clear and structured progression for musicians, from their very first notes to advanced performance.
-            </p>
-        </div>
-        <div ref={containerRef} className="relative w-full" style={{ height: `${pathways.length * 100}vh` }}>
-            <div className="sticky top-0 h-screen w-full flex flex-col items-center justify-center overflow-hidden">
-                <div className="relative w-full max-w-4xl" style={{ height: '600px' }}>
+    <section className="py-24 px-4 relative overflow-hidden">
+        {/* Decorative Background Element */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(10,61,44,0.02),transparent)] pointer-events-none" />
+
+        <div className="container mx-auto">
+            <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="text-center mb-20"
+            >
+                <h2 className="text-4xl md:text-5xl font-headline font-bold mb-6">A Pathway for Growth</h2>
+                <p className="mx-auto max-w-3xl text-muted-foreground text-lg font-light leading-relaxed">
+                    Our programs provide a clear and structured progression for musicians, from their very first notes to advanced symphonic performance.
+                </p>
+            </motion.div>
+
+            <div className="relative space-y-32">
+                {/* Visual Path Line (Desktop Only) */}
+                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-primary/5 via-primary/20 to-primary/5 -translate-x-1/2 hidden lg:block" />
+
                 {pathways.map((path, index) => {
-                    const isActive = activeIndex === index;
-                    const image = PlaceHolderImages.find(p => p.id === path.imageId);
+                    const isEven = index % 2 === 0;
+                    const image = getImage(path.imageId);
+                    const Icon = path.icon;
 
                     return (
-                    <div
-                        key={path.title}
-                        className={cn(
-                            "absolute inset-0 w-full h-full p-4 transition-opacity duration-500 ease-in-out",
-                            isActive ? "opacity-100" : "opacity-0 pointer-events-none",
-                        )}
-                    >
-                        <Card className="w-full h-full flex flex-col justify-end text-center overflow-hidden">
-                            {image && (
-                                <div className="relative h-full w-full">
-                                    <Image
-                                        src={image.imageUrl}
-                                        alt={image.description}
-                                        fill
-                                        className="object-cover"
-                                        data-ai-hint={image.imageHint}
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
-                                </div>
-                            )}
-                            <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-                                <CardTitle className="font-headline text-5xl pt-4">{path.title}</CardTitle>
-                                <CardDescription className="text-xl font-bold text-white/80">{path.level}</CardDescription>
-                                <CardContent className="p-0 pt-4">
-                                  <p className="leading-relaxed text-xl text-white/90 max-w-2xl mx-auto">{path.description}</p>
-                                </CardContent>
+                        <div key={path.title} className="relative">
+                            {/* Step Number Badge */}
+                            <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 z-10 hidden lg:flex w-12 h-12 rounded-full bg-white border border-primary/10 items-center justify-center shadow-lg font-bold text-primary">
+                                {index + 1}
                             </div>
-                        </Card>
-                    </div>
+
+                            <div className={cn(
+                                "flex flex-col gap-12 items-center",
+                                isEven ? "lg:flex-row" : "lg:flex-row-reverse"
+                            )}>
+                                {/* Image Container */}
+                                <motion.div 
+                                    initial={{ opacity: 0, x: isEven ? -50 : 50 }}
+                                    whileInView={{ opacity: 1, x: 0 }}
+                                    viewport={{ once: true, margin: "-100px" }}
+                                    transition={{ duration: 0.8, ease: "easeOut" }}
+                                    className="w-full lg:w-1/2"
+                                >
+                                    <div className="relative aspect-[16/10] rounded-[2rem] overflow-hidden shadow-2xl group">
+                                        {image && (
+                                            <Image
+                                                src={image.imageUrl}
+                                                alt={path.title}
+                                                fill
+                                                className="object-cover transition-transform duration-1000 group-hover:scale-110"
+                                            />
+                                        )}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60" />
+                                        <div className="absolute bottom-6 left-6 flex items-center gap-3">
+                                            <div className={cn("p-2 rounded-lg backdrop-blur-md", path.accent)}>
+                                                <Icon className="w-5 h-5" />
+                                            </div>
+                                            <span className="text-white font-bold tracking-wider text-sm uppercase">{path.level}</span>
+                                        </div>
+                                    </div>
+                                </motion.div>
+
+                                {/* Content Container */}
+                                <motion.div 
+                                    initial={{ opacity: 0, x: isEven ? 50 : -50 }}
+                                    whileInView={{ opacity: 1, x: 0 }}
+                                    viewport={{ once: true, margin: "-100px" }}
+                                    transition={{ duration: 0.8, ease: "easeOut", delay: 0.1 }}
+                                    className="w-full lg:w-1/2 space-y-6 lg:px-12"
+                                >
+                                    <h3 className="text-3xl font-headline font-bold">{path.title}</h3>
+                                    <div className="h-1 w-12 bg-primary/20 rounded-full" />
+                                    <p className="text-muted-foreground text-lg leading-relaxed font-light italic font-serif">
+                                        "{path.description}"
+                                    </p>
+                                    <div className="flex items-center gap-2 text-primary font-bold group cursor-pointer pt-4">
+                                        <span>Discover more about {path.title}</span>
+                                        <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                    </div>
+                                </motion.div>
+                            </div>
+                        </div>
                     );
                 })}
-                </div>
             </div>
         </div>
     </section>

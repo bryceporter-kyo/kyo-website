@@ -179,7 +179,7 @@
     {
       "id": "contact-main",
       "name": "Contact - Main Email",
-      "url": "/contact"
+      "url": "mailto:Contactus@thekyo.ca"
     },
     {
       "id": "contact-phone",

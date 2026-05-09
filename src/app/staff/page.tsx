@@ -37,6 +37,7 @@ export default async function StaffPage() {
                                     title={instructor.title}
                                     bio={instructor.bio ?? ''}
                                     image={getImage(instructor.image || '')}
+                                    links={instructor.links}
                                 />
                             ))}
                         </div>
@@ -51,6 +52,7 @@ export default async function StaffPage() {
                                     title={member.title}
                                     bio={member.bio ?? ''}
                                     image={getImage(member.image || '')}
+                                    links={member.links}
                                 />
                             ))}
                         </div>

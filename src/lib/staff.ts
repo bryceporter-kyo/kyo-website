@@ -3,6 +3,15 @@ import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy 
 import data from './staff.json';
 import { sendStaffAddedEmail, sendBoardMemberAddedEmail } from './mail';
 
+export type TeamMemberLinks = {
+    facebook?: string;
+    instagram?: string;
+    linkedin?: string;
+    youtube?: string;
+    spotify?: string;
+    website?: string;
+}
+
 export type StaffMember = {
     id: string;
     name: string;
@@ -10,6 +19,8 @@ export type StaffMember = {
     bio?: string;
     image?: string;
     email: string;
+    links?: TeamMemberLinks;
+    order?: number;
 }
 
 export type BoardMember = {
@@ -19,6 +30,8 @@ export type BoardMember = {
     email: string;
     bio?: string;
     image?: string;
+    links?: TeamMemberLinks;
+    order?: number;
 }
 
 const legacyStaff: StaffMember[] = data.staff;
@@ -147,9 +160,19 @@ export async function deleteStaffFromFirebase(id: string): Promise<void> {
 }
 
 /**
- * Delete a board member from Firebase
+ * Sorts team members by order first (ascending), then by name (alphabetically)
  */
-export async function deleteBoardFromFirebase(id: string): Promise<void> {
-    const boardRef = doc(db, BOARD_COLLECTION, id);
-    await deleteDoc(boardRef);
+export function sortTeamMembers<T extends { name: string; order?: number }>(members: T[]): T[] {
+    return [...members].sort((a, b) => {
+        // If order is not set, treat it as very high (place at the end)
+        const orderA = a.order !== undefined && a.order !== null ? Number(a.order) : 999999;
+        const orderB = b.order !== undefined && b.order !== null ? Number(b.order) : 999999;
+        
+        if (orderA !== orderB) {
+            return orderA - orderB;
+        }
+        
+        // Secondary sort by name
+        return a.name.localeCompare(b.name);
+    });
 }

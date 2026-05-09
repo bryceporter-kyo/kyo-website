@@ -8,6 +8,9 @@ export type Event = {
   name: string;
   location?: string;
   time?: string;
+  endTime?: string;
+  notes?: string;
+  attachments?: { name: string; url: string }[];
   link?: string;
   type: 'special' | 'normal';
 };

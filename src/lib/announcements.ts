@@ -1,7 +1,5 @@
-
 import { db } from './firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
-import data from './announcements.json';
 import { format } from 'date-fns';
 
 export type Announcement = {
@@ -12,15 +10,12 @@ export type Announcement = {
   pinned?: boolean;
   content: string;
   imageUrl?: string;
+  location?: string;
+  link?: string;
+  attachments?: { name: string; url: string }[];
   disappearsAt?: string;
   unpinsAt?: string;
 };
-
-// Legacy type for JSON data
-type LegacyAnnouncement = Omit<Announcement, 'id'> & { id: number };
-
-// Raw data from the JSON file
-const rawAnnouncements: Omit<LegacyAnnouncement, 'date' | 'excerpt'>[] = data.announcements as any;
 
 // Firestore collection name
 const ANNOUNCEMENTS_COLLECTION = 'announcements';
@@ -35,6 +30,10 @@ const sortAnnouncements = (announcements: Announcement[]) => {
  * This is a pure function with no side effects.
  */
 export function getAnnouncements(): Announcement[] {
+  // Use require inside the function to avoid Turbopack HMR module pattern issues
+  const data = require('./announcements.json');
+  const rawAnnouncements = data.announcements as any[];
+  
   const processed = rawAnnouncements.map((a, i) => ({
     ...a,
     id: String(a.id || i + 1),

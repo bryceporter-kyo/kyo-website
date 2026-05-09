@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Newspaper, Users, Image as ImageIcon, Calendar, UsersRound, Link2, Pointer, FolderKanban } from "lucide-react";
+import { Newspaper, Users, Image as ImageIcon, Calendar, UsersRound, Link2, Pointer, FolderKanban, ClipboardList, Gavel } from "lucide-react";
 import Link from "next/link";
 
 const adminTiles = [
@@ -12,6 +12,8 @@ const adminTiles = [
     { href: "/admin/links", label: "External Links", icon: Link2 },
     { href: "/admin/buttons", label: "Buttons", icon: Pointer },
     { href: "/admin/internal-sections", label: "Internal Sections", icon: FolderKanban },
+    { href: "/admin/registrations", label: "Registration Forms", icon: ClipboardList },
+    { href: "/admin/legal", label: "Legal Pages", icon: Gavel },
 ]
 
 export default function AdminDashboardPage() {

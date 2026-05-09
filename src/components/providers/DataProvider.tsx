@@ -4,10 +4,12 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { fetchButtonsFromFirebase, ButtonConfig } from '@/lib/buttons';
 import { fetchLinksFromFirebase, ExternalLink, getLinks as getStaticLinks } from '@/lib/links';
 import { getButtons as getStaticButtons } from '@/lib/buttons';
+import { fetchLegalPages, LegalPage } from '@/lib/legal-pages';
 
 interface DataContextType {
   buttons: ButtonConfig[];
   links: ExternalLink[];
+  legalPages: LegalPage[];
   getLink: (id: string) => ExternalLink | undefined;
   getButton: (id: string) => ButtonConfig | undefined;
   isLoading: boolean;
@@ -19,16 +21,19 @@ const DataContext = createContext<DataContextType | undefined>(undefined);
 export function DataProvider({ children }: { children: React.ReactNode }) {
   const [buttons, setButtons] = useState<ButtonConfig[]>(getStaticButtons());
   const [links, setLinks] = useState<ExternalLink[]>(getStaticLinks());
+  const [legalPages, setLegalPages] = useState<LegalPage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshData = async () => {
     try {
-      const [fetchedButtons, fetchedLinks] = await Promise.all([
+      const [fetchedButtons, fetchedLinks, fetchedLegalPages] = await Promise.all([
         fetchButtonsFromFirebase(),
-        fetchLinksFromFirebase()
+        fetchLinksFromFirebase(),
+        fetchLegalPages()
       ]);
       setButtons(fetchedButtons);
       setLinks(fetchedLinks);
+      setLegalPages(fetchedLegalPages);
     } catch (error) {
       console.error("[DataProvider] Error fetching data:", error);
     } finally {
@@ -44,7 +49,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const getButton = (id: string) => buttons.find(b => b.id === id);
 
   return (
-    <DataContext.Provider value={{ buttons, links, getLink, getButton, isLoading, refreshData }}>
+    <DataContext.Provider value={{ buttons, links, legalPages, getLink, getButton, isLoading, refreshData }}>
       {children}
     </DataContext.Provider>
   );

@@ -29,14 +29,14 @@ type LegalLink = {
 }
 
 const legalLinks: LegalLink[] = [
-    { name: 'Privacy & Cookie Policy', href: '/legal/privacy-policy' },
-    { name: 'Terms & Conditions', href: '/legal/terms-and-conditions' },
-    { name: 'Accessibility Policy', href: '/legal/accessibility-policy' },
-    { name: 'Protection Policy', href: '/legal/protection-of-children-and-vulnerable-persons-policy' },
+    { name: 'Legal Overview', href: '/legal' },
+    { name: 'Privacy Policy', href: '/legal/privacy-policy' },
+    { name: 'Terms of Use', href: '/legal/terms-of-use' },
+    { name: 'Accessibility', href: '/legal/accessibility-policy' },
 ];
 
 export default function Footer() {
-  const { getLink } = useData();
+  const { getLink, legalPages } = useData();
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [mailingAddressLink, setMailingAddressLink] = useState<ExternalLink | undefined>(undefined);
   const [physicalAddressLink, setPhysicalAddressLink] = useState<ExternalLink | undefined>(undefined);
@@ -67,11 +67,11 @@ export default function Footer() {
     <footer className="bg-secondary">
       <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-          <div className="space-y-4 md:col-span-5">
-            <Link href="/">
-              <Logo />
+          <div className="space-y-6 md:col-span-5">
+            <Link href="/" className="block">
+              <Logo fullWidth={true} className="max-w-[400px] md:max-w-none" />
             </Link>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               Nurturing the next generation of musicians.
             </p>
             <p className="text-sm text-muted-foreground">
@@ -122,7 +122,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-5 h-5 shrink-0 text-primary" />
-                {emailLink && <a href={emailLink.url} className="hover:text-primary">{emailLink.url.replace('mailto:', '')}</a>}
+                <a href="mailto:Contactus@thekyo.ca" className="hover:text-primary">Contactus@thekyo.ca</a>
               </li>
             </ul>
           </div>
@@ -133,6 +133,13 @@ export default function Footer() {
                 <li key={link.name}>
                   <Link href={link.href} className="text-base text-muted-foreground hover:text-primary">
                     {link.name}
+                  </Link>
+                </li>
+              ))}
+              {legalPages.filter(p => p.showInFooter).map((page) => (
+                <li key={page.id}>
+                  <Link href={`/legal/${page.slug}`} className="text-base text-muted-foreground hover:text-primary">
+                    {page.title}
                   </Link>
                 </li>
               ))}

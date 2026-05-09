@@ -7,32 +7,50 @@ import PageHeader from '@/components/shared/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Users, HandHeart, Music, Award, University, GraduationCap, Briefcase, FileText, Cpu, Library, Star, Handshake, School } from 'lucide-react';
+import { 
+    Users, 
+    HandHeart, 
+    Music, 
+    Award, 
+    GraduationCap, 
+    Briefcase, 
+    FileText, 
+    Cpu, 
+    Star, 
+    Handshake, 
+    School,
+    ArrowRight,
+    Sparkles,
+    Trophy,
+    HeartHandshake
+} from 'lucide-react';
 import Image from 'next/image';
 import { getLinkById } from '@/lib/links';
 import { fetchButtonsFromFirebase, ButtonConfig } from '@/lib/buttons';
 import ProgramPathways from '@/components/shared/ProgramPathways';
-
-// ButtonConfig imported from @/lib/buttons
+import { motion } from 'framer-motion';
 
 const orchestras = [
   {
     title: 'Junior KYO (JKYO)',
-    description: 'For strings and flutes with basic instrument knowledge and experience.',
+    description: 'A welcoming introduction to orchestral playing. Focused on building fundamental ensemble skills, rhythmic precision, and the joy of making music together.',
     experience: 'Beginner Level',
-    imageId: 'orchestra-junior'
+    imageId: 'orchestra-junior',
+    icon: Music
   },
   {
     title: 'Intermediate KYO (IKYO)',
-    description: 'For strings, woodwinds, brass, and percussion.',
-    experience: 'Typically 2+ years of ensemble experience',
-    imageId: 'orchestra-intermediate'
+    description: 'Developing advanced techniques and expanding repertoire. Musicians explore complex harmonies and a diverse range of musical styles.',
+    experience: 'Typically 2+ years experience',
+    imageId: 'orchestra-intermediate',
+    icon: Sparkles
   },
   {
     title: 'Senior KYO (SKYO)',
-    description: 'For advanced strings, woodwinds, brass, and percussion.',
-    experience: 'Typically 4+ years of ensemble experience',
-    imageId: 'orchestra-senior'
+    description: 'Our flagship ensemble for advanced musicians. Tackling major symphonic works and professional-level repertoire with passion and precision.',
+    experience: 'Typically 4+ years experience',
+    imageId: 'orchestra-senior',
+    icon: Trophy
   },
 ];
 
@@ -57,19 +75,19 @@ const scholarships = [
     {
         icon: Award,
         title: "Bell Bassoons Ltd. Scholarship",
-        description: "Encourages and supports bassoonists in the KYO. The award is open to youth musicians from any of the KYO ensembles, and is provided to help support musician enrichment."
+        description: "Encourages and supports bassoonists in the KYO. Open to youth musicians from any ensemble to support musical enrichment."
     },
     {
         icon: GraduationCap,
         title: "Helen Ball Leadership Award",
-        description: "Recognizes a KYO youth musician who demonstrates a high level of commitment, leadership, and support for music and the arts in the wider community."
+        description: "Recognizes a KYO youth musician who demonstrates exceptional commitment, leadership, and community support."
     }
 ]
 
 const supplementaryEnsembles = [
     {
         title: "Folk Ensemble",
-        description: "Explore Celtic and global folk traditions. Open to strings, flute, harp, guitar, percussion, voice, and more.",
+        description: "Explore Celtic and global folk traditions. Open to strings, flute, harp, guitar, percussion, and more.",
         imageId: 'ensemble-folk'
     },
     {
@@ -79,29 +97,10 @@ const supplementaryEnsembles = [
     },
     {
         title: "Chamber Music",
-        description: "Receive small ensemble coaching from professional musicians. For confident classical players, including piano and guitar.",
+        description: "Receive small ensemble coaching from professional musicians for confident classical players.",
         imageId: 'ensemble-chamber'
     }
 ];
-
-const creativeCourses = [
-    {
-        title: "Digital Music Production",
-        description: "Learn to record, edit, and produce music in any genre using modern digital audio workstations (DAWs).",
-        icon: Cpu
-    },
-    {
-        title: "Music Theory",
-        description: "Go beyond the basics with courses on harmony, form, analysis, and musical styles from different eras.",
-        icon: FileText
-    },
-    {
-        title: "Composition",
-        description: "Write your own original music for soloists and chamber groups with guidance on score preparation and coaching.",
-        icon: Briefcase
-    }
-];
-
 
 export default function OrchestrasPage() {
   const { getImage } = useImages();
@@ -140,307 +139,440 @@ export default function OrchestrasPage() {
   const registerButton = getButtonProps(registerButtonConfig);
   const auditionButton = getButtonProps(auditionButtonConfig);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: { staggerChildren: 0.15 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 30, opacity: 0 },
+    visible: {
+        y: 0,
+        opacity: 1,
+        transition: { type: "spring", stiffness: 100, damping: 15 }
+    }
+  };
 
   return (
-    <div>
+    <div className="relative overflow-hidden bg-background">
+      {/* Ambient Background Elements */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
+          <div className="absolute top-[15%] -right-[5%] w-[35%] h-[35%] bg-primary/5 rounded-full blur-[100px]" />
+          <div className="absolute bottom-[20%] -left-[5%] w-[40%] h-[40%] bg-secondary/10 rounded-full blur-[120px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[url('/grid.svg')] opacity-[0.03]" />
+      </div>
+
       <PageHeader
         title="Find Your Ensemble"
         subtitle="Discover the orchestra or ensemble that’s the perfect fit for your passion and skill level."
         image={headerImage}
       />
 
-      <section className="container mx-auto">
-        <div className="grid md:grid-cols-2 gap-16 items-center">
-            <div className="space-y-6">
-                <h2 className="text-3xl font-headline font-bold">Join a Thriving Musical Community</h2>
-                <p className="text-muted-foreground text-lg">
-                    The Kawartha Youth Orchestra (KYO) welcomes students aged 8 to 28 from the Kawartha and Greater Peterborough areas. We offer a structured, progressive suite of ensembles designed to help young musicians advance their skills in a safe, inclusive environment.
+      {/* Intro Section */}
+      <section className="container mx-auto py-24 px-4 overflow-hidden">
+        <div className="grid md:grid-cols-2 gap-20 items-center">
+            <motion.div 
+                initial={{ x: -50, opacity: 0 }}
+                whileInView={{ x: 0, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+                className="space-y-8"
+            >
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest">
+                    <Music className="w-4 h-4" />
+                    Join the Legacy
+                </div>
+                <h2 className="text-4xl md:text-5xl font-headline font-bold leading-tight">Join a Thriving Musical Community</h2>
+                <p className="text-muted-foreground text-lg leading-relaxed">
+                    The Kawartha Youth Orchestra (KYO) welcomes students aged 8 to 28. We offer a structured, progressive suite of ensembles designed to help young musicians advance their skills in a safe, inclusive environment.
                 </p>
-                <p className="text-muted-foreground text-lg">
-                    To enhance their musical journey, we recommend that all KYO members pursue private lessons. Our team is ready to assist you with information on private instruction opportunities.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex flex-col sm:flex-row gap-5 pt-4">
                   {registerButton && (
-                    <Button asChild size="lg">
-                        <Link href={registerButton.href} target={registerButton.target} rel={registerButton.target === '_blank' ? 'noopener noreferrer' : ''}>{registerButton.text}</Link>
+                    <Button asChild size="lg" className="rounded-full px-8 py-7 text-lg shadow-lg hover:shadow-primary/20 transition-all hover:scale-105">
+                        <Link href={registerButton.href} target={registerButton.target}>{registerButton.text}</Link>
                     </Button>
                   )}
                   {auditionButton && (
-                    <Button asChild size="lg" variant="outline">
-                        <Link href={auditionButton.href} target={auditionButton.target} rel={auditionButton.target === '_blank' ? 'noopener noreferrer' : ''}>{auditionButton.text}</Link>
+                    <Button asChild size="lg" variant="outline" className="rounded-full px-8 py-7 text-lg border-primary/20 hover:bg-primary/5 transition-all">
+                        <Link href={auditionButton.href} target={auditionButton.target}>{auditionButton.text}</Link>
                     </Button>
                   )}
                 </div>
-            </div>
-             {joinImage && (
-                <div className="rounded-lg overflow-hidden shadow-xl">
-                    <Image
-                        src={joinImage.imageUrl}
-                        alt={joinImage.description}
-                        width={600}
-                        height={400}
-                        className="object-cover w-full h-full"
-                        data-ai-hint={joinImage.imageHint}
-                    />
-                </div>
-            )}
+            </motion.div>
+
+            <motion.div 
+                initial={{ x: 50, opacity: 0 }}
+                whileInView={{ x: 0, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+                className="relative"
+            >
+                {joinImage && (
+                    <div className="rounded-[2.5rem] overflow-hidden shadow-2xl group border-8 border-white">
+                        <Image
+                            src={joinImage.imageUrl}
+                            alt={joinImage.description}
+                            width={600}
+                            height={450}
+                            className="object-cover w-full aspect-[4/3] transition-transform duration-1000 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-primary/10 group-hover:bg-transparent transition-colors duration-500" />
+                    </div>
+                )}
+                {/* Decorative Element */}
+                <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-secondary/20 rounded-full blur-2xl -z-10" />
+            </motion.div>
         </div>
       </section>
 
-      <section className="bg-secondary">
+      {/* Main Orchestras */}
+      <section className="py-24 px-4 bg-primary/[0.02]">
         <div className="container mx-auto">
-            <div className="text-center mb-12">
-                <h2 className="text-3xl font-headline font-bold">Our Orchestras</h2>
-                <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
-                    Our three core orchestras provide a clear path for students to grow as musicians, from their first notes to advanced symphonies. Find your place and start your journey today.
-                </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <motion.div 
+                initial={{ y: 20, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                viewport={{ once: true }}
+                className="text-center mb-20"
+            >
+                <div className="flex flex-col items-center gap-3">
+                    <div className="p-3 bg-primary/10 rounded-2xl text-primary mb-2">
+                        <Users className="w-8 h-8" />
+                    </div>
+                    <h2 className="text-4xl md:text-5xl font-headline font-bold">Our Core Orchestras</h2>
+                    <p className="mx-auto max-w-3xl text-muted-foreground text-lg mt-4 font-light">
+                        A clear musical pathway from first notes to symphonic mastery.
+                    </p>
+                </div>
+            </motion.div>
+
+            <motion.div 
+                variants={containerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                className="grid grid-cols-1 lg:grid-cols-3 gap-10"
+            >
                 {orchestras.map((item) => {
                     const image = getImage(item.imageId);
+                    const Icon = item.icon;
                     return (
-                        <Card key={item.title} className="text-left flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-primary/50">
-                            {image && (
-                                <div className="relative aspect-video">
-                                    <Image
-                                        src={image.imageUrl}
-                                        alt={image.description}
-                                        fill
-                                        className="object-cover"
-                                        data-ai-hint={image.imageHint}
-                                    />
-                                </div>
-                            )}
-                            <CardHeader>
-                                <CardTitle className="font-headline text-2xl">{item.title}</CardTitle>
-                                <CardDescription>{item.experience}</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4 flex-grow">
-                                <p className="text-muted-foreground">{item.description}</p>
-                            </CardContent>
-                            {registerButton && (
-                              <CardFooter>
-                                <Button asChild className="w-full">
-                                      <Link href={registerButton.href} target={registerButton.target} rel={registerButton.target === '_blank' ? 'noopener noreferrer' : ''}>Register Now</Link>
-                                  </Button>
-                              </CardFooter>
-                            )}
-                        </Card>
+                        <motion.div key={item.title} variants={itemVariants}>
+                            <Card className="group relative flex flex-col h-full overflow-hidden transition-all duration-500 hover:shadow-[0_20px_50px_rgba(10,61,44,0.12)] border-primary/5 bg-white/70 backdrop-blur-md hover:-translate-y-3">
+                                {image && (
+                                    <div className="relative aspect-[16/10] overflow-hidden">
+                                        <Image
+                                            src={image.imageUrl}
+                                            alt={item.title}
+                                            fill
+                                            className="object-cover transition-transform duration-1000 group-hover:scale-110"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
+                                        <div className="absolute bottom-4 left-6 text-white">
+                                            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest bg-primary/80 px-3 py-1 rounded-full backdrop-blur-sm">
+                                                <Icon className="w-3 h-3" />
+                                                {item.experience}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                                <CardHeader className="pb-4">
+                                    <CardTitle className="font-headline text-2xl group-hover:text-primary transition-colors duration-300">{item.title}</CardTitle>
+                                </CardHeader>
+                                <CardContent className="flex-grow">
+                                    <p className="text-muted-foreground leading-relaxed italic font-serif">{item.description}</p>
+                                </CardContent>
+                                {registerButton && (
+                                  <CardFooter className="pt-6 border-t border-primary/5">
+                                    <Button asChild className="w-full rounded-full group-hover:scale-[1.02] transition-transform shadow-md">
+                                        <Link href={registerButton.href}>Register Now <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" /></Link>
+                                    </Button>
+                                  </CardFooter>
+                                )}
+                            </Card>
+                        </motion.div>
                     )
                 })}
-            </div>
+            </motion.div>
         </div>
       </section>
       
       <ProgramPathways />
 
-       <section>
+      {/* Philosophy Section */}
+      <section className="py-24 px-4">
           <div className="container mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-headline font-bold">Our Philosophy</h2>
-              <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
-                We believe in a holistic approach to music education that balances artistic achievement with a supportive and inspiring environment.
-              </p>
-            </div>
-            <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-              <Card>
-                <CardHeader className="flex flex-row items-center gap-4">
-                  <Library className="w-8 h-8 text-primary"/>
-                  <CardTitle className="font-headline text-xl">A Diverse Musical Approach</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">Our repertoire is anchored in the classical tradition but embraces a broad range of styles, including pop arrangements, film music, and works by Canadian and emerging composers.</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center gap-4">
-                  <Star className="w-8 h-8 text-primary"/>
-                  <CardTitle className="font-headline text-xl">Performance-Based Learning</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">Each orchestra performs in at least three public concerts per year. Public performance is key to building confidence, sharing progress, and connecting with our community.</p>
-                </CardContent>
-              </Card>
-            </div>
+            <motion.div 
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                className="grid lg:grid-cols-3 gap-12 items-center"
+            >
+                <div className="lg:col-span-1">
+                    <h2 className="text-4xl font-headline font-bold mb-6">Our Philosophy</h2>
+                    <p className="text-muted-foreground text-lg font-light leading-relaxed mb-8">
+                        We believe in a holistic approach to music education that balances artistic achievement with a supportive and inspiring environment.
+                    </p>
+                    <div className="h-1 w-20 bg-primary/20 rounded-full" />
+                </div>
+                <div className="lg:col-span-2 grid md:grid-cols-2 gap-8">
+                    <Card className="bg-white/50 backdrop-blur-sm border-primary/5 hover:border-primary/20 transition-all p-2 shadow-sm hover:shadow-md">
+                        <CardHeader className="flex flex-row items-center gap-5">
+                            <div className="p-3 bg-primary/10 rounded-xl text-primary">
+                                <Star className="w-6 h-6" />
+                            </div>
+                            <CardTitle className="font-headline text-xl">Diverse Approach</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-muted-foreground text-sm leading-relaxed">Our repertoire embraces a broad range of styles, including classical works, pop arrangements, and film music.</p>
+                        </CardContent>
+                    </Card>
+                    <Card className="bg-white/50 backdrop-blur-sm border-primary/5 hover:border-primary/20 transition-all p-2 shadow-sm hover:shadow-md">
+                        <CardHeader className="flex flex-row items-center gap-5">
+                            <div className="p-3 bg-primary/10 rounded-xl text-primary">
+                                <Award className="w-6 h-6" />
+                            </div>
+                            <CardTitle className="font-headline text-xl">Performance Based</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-muted-foreground text-sm leading-relaxed">Each orchestra performs in three public concerts per year, building confidence and community connection.</p>
+                        </CardContent>
+                    </Card>
+                </div>
+            </motion.div>
           </div>
        </section>
 
-       <section className="bg-secondary">
+      {/* Supplementary Ensembles */}
+       <section className="py-24 px-4 bg-secondary/30">
         <div className="container mx-auto">
-            <div className="text-center mb-12">
-                <h2 className="text-3xl font-headline font-bold">Creative & Supplementary Programs</h2>
-                <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
-                    Broaden your musical horizons with our specialized ensembles and creative courses, available for all ages with no prior experience necessary for many.
-                </p>
+            <div className="text-center mb-16">
+                <div className="flex flex-col items-center gap-3">
+                    <div className="p-3 bg-secondary/20 rounded-2xl text-secondary-foreground mb-2">
+                        <Sparkles className="w-8 h-8" />
+                    </div>
+                    <h2 className="text-4xl font-headline font-bold">Creative & Supplementary Programs</h2>
+                    <p className="mx-auto max-w-2xl text-muted-foreground text-lg mt-4 font-light leading-relaxed">
+                        Broaden your musical horizons with specialized training in diverse genres and modern techniques.
+                    </p>
+                </div>
             </div>
-            <div className="space-y-12">
-                 <div>
-                    <h3 className="text-2xl font-headline font-bold text-center mb-8">Supplementary Ensembles</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {supplementaryEnsembles.map((ensemble) => {
-                             const image = getImage(ensemble.imageId);
-                             return (
-                             <Card key={ensemble.title} className="text-center flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-primary/50">
+            
+            <motion.div 
+                variants={containerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                className="grid grid-cols-1 lg:grid-cols-3 gap-10"
+            >
+                {supplementaryEnsembles.map((ensemble) => {
+                    const image = getImage(ensemble.imageId);
+                    return (
+                        <motion.div key={ensemble.title} variants={itemVariants}>
+                            <Card className="group text-center flex flex-col h-full overflow-hidden transition-all duration-500 hover:shadow-xl border-primary/5 bg-white/80 backdrop-blur-sm hover:-translate-y-2">
                                 {image && (
-                                    <div className="relative aspect-video">
+                                    <div className="relative aspect-video overflow-hidden">
                                         <Image
                                             src={image.imageUrl}
-                                            alt={image.description}
+                                            alt={ensemble.title}
                                             fill
-                                            className="object-cover"
-                                            data-ai-hint={image.imageHint}
+                                            className="object-cover transition-transform duration-700 group-hover:scale-105"
                                         />
                                     </div>
                                 )}
                                 <CardHeader className="items-center flex-grow">
-                                    <CardTitle className="font-headline text-2xl pt-4">{ensemble.title}</CardTitle>
-                                    <CardDescription className="pt-2">{ensemble.description}</CardDescription>
+                                    <CardTitle className="font-headline text-2xl pt-2 group-hover:text-primary transition-colors">{ensemble.title}</CardTitle>
+                                    <CardDescription className="pt-2 italic line-clamp-3">{ensemble.description}</CardDescription>
                                 </CardHeader>
                                 {registerButton && (
-                                    <CardFooter className="justify-center">
-                                         <Button asChild variant="outline">
-                                            <Link href={registerButton.href} target={registerButton.target} rel={registerButton.target === '_blank' ? 'noopener noreferrer' : ''}>Register</Link>
+                                    <CardFooter className="justify-center pt-4 border-t border-primary/5">
+                                         <Button asChild variant="outline" className="rounded-full px-6 hover:bg-primary hover:text-white transition-all">
+                                            <Link href={registerButton.href}>Enroll Now</Link>
                                         </Button>
                                     </CardFooter>
                                 )}
                             </Card>
-                        )})}
-                    </div>
-                </div>
-
-                <div>
-                    <h3 className="text-2xl font-headline font-bold text-center mb-8">Creative Courses</h3>
-                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {creativeCourses.map((course) => (
-                             <Card key={course.title} className="text-center flex flex-col transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                                <CardHeader className="items-center">
-                                    <div className="bg-primary text-primary-foreground p-4 rounded-full">
-                                        <course.icon className="h-8 w-8" />
-                                    </div>
-                                    <CardTitle className="font-headline text-xl pt-4">{course.title}</CardTitle>
-                                </CardHeader>
-                                <CardContent className="flex-grow">
-                                    <p className="text-muted-foreground">{course.description}</p>
-                                </CardContent>
-                                {registerButton && (
-                                    <CardFooter className="justify-center">
-                                        <Button asChild variant="outline">
-                                            <Link href={registerButton.href} target={registerButton.target} rel={registerButton.target === '_blank' ? 'noopener noreferrer' : ''}>Enroll Now</Link>
-                                        </Button>
-                                    </CardFooter>
-                                )}
-                            </Card>
-                        ))}
-                    </div>
-                </div>
-            </div>
+                        </motion.div>
+                    )
+                })}
+            </motion.div>
         </div>
       </section>
 
-      <section>
+      {/* Aid Section */}
+       <section className="py-24 px-4">
           <div className="container mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl font-headline font-bold">Financial Aid & Scholarships</h2>
-                <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl mt-4">
-                    Our two-tiered subsidy system, featuring a universal subsidy and additional income-based bursaries, ensures no student is turned away due to financial need.
-                </p>
+            <div className="text-center mb-16">
+                <div className="flex flex-col items-center gap-3">
+                    <div className="p-3 bg-primary/10 rounded-2xl text-primary mb-2">
+                        <HeartHandshake className="w-8 h-8" />
+                    </div>
+                    <h2 className="text-4xl font-headline font-bold">Financial Aid & Scholarships</h2>
+                    <p className="mx-auto max-w-3xl text-muted-foreground text-lg mt-4 font-light">
+                        Ensuring no student is turned away due to financial need.
+                    </p>
+                </div>
             </div>
-            <div className="max-w-4xl mx-auto space-y-12">
-                <div>
-                    <h3 className="text-2xl font-headline font-bold text-center mb-8">Financial Support</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {financialAidOptions.map(option => {
-                            const link = getLinkById(option.linkId);
-                            const image = getImage(option.imageId);
-                            return (
-                                <Card key={option.title} className="transition-all duration-300 hover:shadow-lg hover:border-primary/50 overflow-hidden">
-                                     {image && (
-                                        <div className="relative aspect-video">
+
+            <div className="max-w-6xl mx-auto space-y-16">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    {financialAidOptions.map(option => {
+                        const link = getLinkById(option.linkId);
+                        const image = getImage(option.imageId);
+                        return (
+                            <motion.div 
+                                key={option.title}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                viewport={{ once: true }}
+                            >
+                                <Card className="h-full group transition-all duration-500 hover:shadow-2xl border-primary/5 overflow-hidden rounded-3xl">
+                                    {image && (
+                                        <div className="relative aspect-[16/9] overflow-hidden">
                                             <Image
                                                 src={image.imageUrl}
-                                                alt={image.description}
+                                                alt={option.title}
                                                 fill
-                                                className="object-cover"
-                                                data-ai-hint={image.imageHint}
+                                                className="object-cover transition-transform duration-700 group-hover:scale-105"
                                             />
+                                            <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-all" />
                                         </div>
                                     )}
-                                    <CardHeader className="flex flex-row items-center gap-4">
-                                        <option.icon className="w-8 h-8 text-primary"/>
-                                        <CardTitle className="font-headline text-xl">{option.title}</CardTitle>
+                                    <CardHeader className="flex flex-row items-center gap-5 pt-8">
+                                        <div className="p-3 bg-primary/10 rounded-2xl text-primary">
+                                            <option.icon className="w-6 h-6"/>
+                                        </div>
+                                        <CardTitle className="font-headline text-2xl">{option.title}</CardTitle>
                                     </CardHeader>
-                                    <CardContent>
-                                        <p className="text-muted-foreground">{option.description}</p>
+                                    <CardContent className="pb-8">
+                                        <p className="text-muted-foreground leading-relaxed">{option.description}</p>
                                         {link && (
-                                            <Button asChild variant="link" className="p-0 h-auto mt-4">
-                                                <Link href={link.url}>Contact us for more info</Link>
+                                            <Button asChild variant="link" className="p-0 h-auto mt-6 text-primary font-bold group-hover:translate-x-2 transition-transform">
+                                                <Link href={link.url}>Learn More <ArrowRight className="ml-2 w-4 h-4" /></Link>
                                             </Button>
                                         )}
                                     </CardContent>
                                 </Card>
-                            )
-                        })}
-                    </div>
+                            </motion.div>
+                        )
+                    })}
                 </div>
 
-                 <div>
-                    <h3 className="text-2xl font-headline font-bold text-center mb-8">Scholarship Opportunities</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {scholarships.map(scholarship => (
-                            <Card key={scholarship.title} className="transition-all duration-300 hover:shadow-lg hover:border-primary/50">
-                                <CardHeader className="flex flex-row items-center gap-4">
-                                    <scholarship.icon className="w-8 h-8 text-primary"/>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    {scholarships.map(scholarship => (
+                        <motion.div 
+                            key={scholarship.title}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                        >
+                            <Card className="h-full bg-white/50 backdrop-blur-sm border-primary/5 hover:border-primary/20 transition-all shadow-sm">
+                                <CardHeader className="flex flex-row items-center gap-5">
+                                    <div className="p-3 bg-secondary/20 rounded-xl text-secondary-foreground">
+                                        <scholarship.icon className="w-6 h-6"/>
+                                    </div>
                                     <CardTitle className="font-headline text-xl">{scholarship.title}</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <p className="text-muted-foreground">{scholarship.description}</p>
+                                    <p className="text-muted-foreground text-sm leading-relaxed">{scholarship.description}</p>
                                 </CardContent>
                             </Card>
-                        ))}
-                    </div>
+                        </motion.div>
+                    ))}
                 </div>
             </div>
           </div>
       </section>
 
-       <section className="bg-secondary">
+      {/* Community Section */}
+       <section className="py-24 px-4 bg-primary/5">
         <div className="container mx-auto">
-          <div className="grid md:grid-cols-2 gap-16 items-center">
-            <div className="space-y-6">
-              <h2 className="text-3xl font-headline font-bold">Equity & Community Partnerships</h2>
-              <p className="text-muted-foreground text-lg">
-                The KYO strives to be an inclusive, anti-discriminatory space that reflects the diversity of our broader community. We foster safe, positive environments for all students, including marginalized and underrepresented youth.
+          <div className="grid lg:grid-cols-2 gap-20 items-center">
+            <motion.div 
+                initial={{ x: -50, opacity: 0 }}
+                whileInView={{ x: 0, opacity: 1 }}
+                viewport={{ once: true }}
+                className="space-y-8"
+            >
+              <h2 className="text-4xl font-headline font-bold leading-tight">Equity & Community Partnerships</h2>
+              <p className="text-muted-foreground text-lg leading-relaxed font-light">
+                The KYO strives to be an inclusive, anti-discriminatory space that reflects the diversity of our broader community.
               </p>
-              <ul className="space-y-4">
-                <li className="flex items-start gap-4">
-                  <Handshake className="w-8 h-8 text-primary flex-shrink-0" />
+              <div className="space-y-6">
+                <div className="flex items-start gap-5 p-6 rounded-2xl bg-white/60 shadow-sm border border-white/40">
+                  <Handshake className="w-10 h-10 text-primary flex-shrink-0" />
                   <div>
-                    <h4 className="font-bold">New Canadians Centre Partnership</h4>
-                    <p className="text-muted-foreground">Offering improved access to KYO programs for newcomer youth and families.</p>
+                    <h4 className="font-bold text-lg mb-1">New Canadians Centre Partnership</h4>
+                    <p className="text-muted-foreground text-sm">Offering improved access to KYO programs for newcomer youth and families.</p>
                   </div>
-                </li>
-                <li className="flex items-start gap-4">
-                  <School className="w-8 h-8 text-primary flex-shrink-0" />
+                </div>
+                <div className="flex items-start gap-5 p-6 rounded-2xl bg-white/60 shadow-sm border border-white/40">
+                  <School className="w-10 h-10 text-primary flex-shrink-0" />
                   <div>
-                    <h4 className="font-bold">School Outreach</h4>
-                    <p className="text-muted-foreground">Providing instrumental coaching, masterclasses, and access to our instrument lending library for local schools.</p>
+                    <h4 className="font-bold text-lg mb-1">School Outreach</h4>
+                    <p className="text-muted-foreground text-sm">Providing instrumental coaching, masterclasses, and access to our instrument lending library for local schools.</p>
                   </div>
-                </li>
-              </ul>
-            </div>
-            {communityImage && (
-              <div className="rounded-lg overflow-hidden shadow-xl">
-                <Image
-                  src={communityImage.imageUrl}
-                  alt={communityImage.description}
-                  width={600}
-                  height={400}
-                  className="object-cover w-full h-full"
-                  data-ai-hint={communityImage.imageHint}
-                />
+                </div>
               </div>
-            )}
+            </motion.div>
+            
+            <motion.div 
+                initial={{ scale: 0.9, opacity: 0 }}
+                whileInView={{ scale: 1, opacity: 1 }}
+                viewport={{ once: true }}
+                className="relative"
+            >
+                {communityImage && (
+                    <div className="rounded-[3rem] overflow-hidden shadow-2xl group border-[12px] border-white/50">
+                        <Image
+                        src={communityImage.imageUrl}
+                        alt={communityImage.description}
+                        width={600}
+                        height={450}
+                        className="object-cover w-full aspect-[4/3] transition-transform duration-1000 group-hover:scale-105"
+                        />
+                    </div>
+                )}
+                {/* Decorative Elements */}
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl -z-10" />
+            </motion.div>
           </div>
+        </div>
+      </section>
+
+      {/* Join the Orchestra CTA */}
+      <section className="py-32 px-4 bg-background">
+        <div className="container mx-auto">
+            <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="p-16 rounded-[3rem] bg-[#0a3d2c] text-white text-center relative overflow-hidden group shadow-[0_30px_100px_rgba(10,61,44,0.3)] border border-white/10"
+            >
+                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.15),transparent)] z-0" />
+                <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-primary/20 rounded-full blur-[120px]" />
+                
+                <div className="relative z-10">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white/80 text-xs font-bold uppercase tracking-widest mb-8">
+                        <Sparkles className="w-4 h-4" />
+                        Start Your Journey
+                    </div>
+                    <h3 className="text-4xl md:text-6xl font-headline font-bold mb-8">Ready to Play With Us?</h3>
+                    <p className="text-xl text-white/70 max-w-2xl mx-auto mb-12 leading-relaxed font-light">
+                        Whether you're just starting out or ready for the big stage, there's a place for you in the KYO family.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-6 justify-center">
+                        <Button asChild size="lg" className="bg-white text-[#0a3d2c] hover:bg-forest-50 px-12 py-8 rounded-full font-bold text-xl shadow-2xl hover:scale-105 transition-all duration-300">
+                            <Link href="/contact">Apply to Join</Link>
+                        </Button>
+                        <Button asChild variant="outline" size="lg" className="bg-transparent border-white/30 text-white hover:bg-white/10 px-12 py-8 rounded-full font-bold text-xl transition-all">
+                            <Link href="/about">Learn More</Link>
+                        </Button>
+                    </div>
+                </div>
+            </motion.div>
         </div>
       </section>
 

@@ -13,6 +13,11 @@ import { fetchAnnouncementsFromFirebase, Announcement } from '@/lib/announcement
 import { ButtonConfig } from '@/lib/buttons';
 import type { ExternalLink } from '@/lib/links';
 import AnimatedCounter from '@/components/shared/AnimatedCounter';
+import FadeIn from '@/components/shared/animations/FadeIn';
+import SlideIn from '@/components/shared/animations/SlideIn';
+import { StaggerContainer, StaggerItem } from '@/components/shared/animations/Stagger';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { useRef } from 'react';
 
 // ButtonConfig imported from @/lib/buttons
 
@@ -56,7 +61,7 @@ const testimonials = [
 const impactStats = [
     { number: 700, suffix: '+', label: 'Musicians Supported', icon: Users },
     { number: 2700, suffix: '+', label: 'Community Members Impacted', icon: Group },
-    { number: 70000, prefix: '$', label: 'Annual Subsidies Provided', icon: DollarSign },
+    { number: 70000, prefix: '$', suffix: '+', label: 'Annual Subsidies Provided', icon: DollarSign },
 ];
 
 export default function Home() {
@@ -64,6 +69,12 @@ export default function Home() {
   const { buttons, getLink } = useData();
   const [activeIndex, setActiveIndex] = useState(0);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const heroRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"]
+  });
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
 
   // Get images from context
   const financialAidImage = getImage('home-financial-aid');
@@ -170,28 +181,33 @@ export default function Home() {
 
 
   return (
-    <div className="flex flex-col min-h-dvh">
+    <div className="flex flex-col min-h-dvh overflow-hidden">
       <main className="flex-1">
-        <section className="relative h-[60vh] md:h-[80vh] w-full flex items-center justify-center text-center text-white p-0">
+        <section ref={heroRef} className="relative h-[60vh] md:h-[80vh] w-full flex items-center justify-center text-center text-white p-0 overflow-hidden">
             {heroSlides.map((slide, index) => (
                 slide.image && (
-                <Image
+                <motion.div 
                     key={slide.image.id}
-                    src={slide.image.imageUrl}
-                    alt={slide.image.description}
-                    fill
-                    className={`object-cover transition-opacity duration-1000 ease-in-out ${index === activeIndex ? 'opacity-100' : 'opacity-0'}`}
-                    priority={index === 0}
-                    data-ai-hint={slide.image.imageHint}
-                />
+                    className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === activeIndex ? 'opacity-100 z-0' : 'opacity-0 -z-10'}`}
+                    style={{ y }}
+                >
+                    <Image
+                        src={slide.image.imageUrl}
+                        alt={slide.image.description}
+                        fill
+                        className="object-cover"
+                        priority={index === 0}
+                        data-ai-hint={slide.image.imageHint}
+                    />
+                </motion.div>
                 )
             ))}
-            <div className="absolute inset-0 bg-black/50" />
-            <div className="relative z-10 container mx-auto px-4 md:px-6">
+            <div className="absolute inset-0 bg-black/50 z-10" />
+            <div className="relative z-20 container mx-auto px-4 md:px-6">
                 {heroSlides.map((slide, index) => (
                 <div
                     key={slide.id}
-                    className={`absolute inset-0 flex flex-col justify-center items-center transition-opacity duration-1000 ease-in-out ${index === activeIndex ? 'opacity-100' : 'opacity-0'}`}
+                    className={`absolute inset-0 flex flex-col justify-center items-center transition-all duration-1000 ease-out ${index === activeIndex ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
                 >
                     <h1 className="text-4xl md:text-6xl lg:text-7xl font-headline font-bold tracking-tight">
                         {slide.title}
@@ -219,79 +235,84 @@ export default function Home() {
             </div>
         </section>
 
-        <main className="relative z-20 bg-background">
+        <main className="relative z-30 bg-background">
             <section id="programs" className="bg-background">
             <div className="container mx-auto">
-                <div className="text-center">
+                <FadeIn className="text-center">
                 <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-4xl md:text-5xl">Our Programs</h2>
                 <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mt-4">
                     We offer a range of programs designed to meet students where they are, from beginners to advanced performers.
                 </p>
-                </div>
-                <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                </FadeIn>
+                <StaggerContainer className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {programs.map((program) => (
-                    <Card key={program.title} className="flex flex-col overflow-hidden group transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                    {program.image && (
-                        <div className="aspect-video overflow-hidden">
-                        <Image
-                            src={program.image.imageUrl}
-                            alt={program.image.description}
-                            width={600}
-                            height={400}
-                            className="object-cover transition-transform duration-300 group-hover:scale-110"
-                            data-ai-hint={program.image.imageHint}
-                        />
+                    <StaggerItem key={program.title} direction="up">
+                        <Card className="flex flex-col h-full overflow-hidden group transform transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
+                        {program.image && (
+                            <div className="aspect-video overflow-hidden relative">
+                            <Image
+                                src={program.image.imageUrl}
+                                alt={program.image.description}
+                                fill
+                                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                data-ai-hint={program.image.imageHint}
+                            />
+                            </div>
+                        )}
+                        <CardHeader>
+                            <div className="flex items-center gap-4">
+                            <program.icon className="w-8 h-8 text-primary transition-transform duration-300 group-hover:scale-110" />
+                            <CardTitle className="font-headline text-2xl">{program.title}</CardTitle>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="flex-grow">
+                            <CardDescription>{program.description}</CardDescription>
+                        </CardContent>
+                        <div className="p-6 pt-0">
+                            <Button asChild variant="link" className="p-0 h-auto group-hover:text-primary transition-colors">
+                            <Link href={program.href} className="flex items-center gap-2">
+                                Learn More <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+                            </Link>
+                            </Button>
                         </div>
-                    )}
-                    <CardHeader>
-                        <div className="flex items-center gap-4">
-                        <program.icon className="w-8 h-8 text-primary" />
-                        <CardTitle className="font-headline text-2xl">{program.title}</CardTitle>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="flex-grow">
-                        <CardDescription>{program.description}</CardDescription>
-                    </CardContent>
-                    <div className="p-6 pt-0">
-                        <Button asChild variant="link" className="p-0 h-auto">
-                        <Link href={program.href} className="flex items-center gap-2">
-                            Learn More <ArrowRight className="w-4 h-4" />
-                        </Link>
-                        </Button>
-                    </div>
-                    </Card>
+                        </Card>
+                    </StaggerItem>
                 ))}
-                </div>
+                </StaggerContainer>
             </div>
             </section>
 
-        <section className="bg-secondary">
+        <section className="bg-secondary overflow-hidden">
                 <div className="container mx-auto">
                     <div className="grid md:grid-cols-2 gap-12 items-center">
-                        <div className="space-y-8">
+                        <SlideIn direction="right" className="space-y-8">
                             <h2 className="text-3xl font-headline font-bold text-center md:text-left">Our Core Values</h2>
-                            {coreValues.map(value => (
-                                <Card key={value.title} className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                                    <CardHeader className="flex flex-row items-center gap-4">
-                                        <value.icon className="w-8 h-8 text-primary"/>
-                                        <CardTitle className="font-headline text-xl">{value.title}</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <p className="text-muted-foreground">{value.description}</p>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
+                            <StaggerContainer>
+                                {coreValues.map(value => (
+                                    <StaggerItem key={value.title} direction="left" distance={20}>
+                                        <Card className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1 mb-4 border-l-4 border-l-transparent hover:border-l-primary">
+                                            <CardHeader className="flex flex-row items-center gap-4">
+                                                <value.icon className="w-8 h-8 text-primary"/>
+                                                <CardTitle className="font-headline text-xl">{value.title}</CardTitle>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <p className="text-muted-foreground">{value.description}</p>
+                                            </CardContent>
+                                        </Card>
+                                    </StaggerItem>
+                                ))}
+                            </StaggerContainer>
+                        </SlideIn>
                         {coreValuesImage && (
-                            <div className="rounded-lg overflow-hidden shadow-xl aspect-square relative">
+                            <SlideIn direction="left" className="rounded-lg overflow-hidden shadow-xl aspect-square relative group">
                                 <Image
                                     src={coreValuesImage.imageUrl}
                                     alt={coreValuesImage.description}
                                     fill
-                                    className="object-cover"
+                                    className="object-cover transition-transform duration-700 group-hover:scale-105"
                                     data-ai-hint={coreValuesImage.imageHint}
                                 />
-                            </div>
+                            </SlideIn>
                         )}
                     </div>
                 </div>
@@ -299,89 +320,93 @@ export default function Home() {
 
             <section>
             <div className="container mx-auto">
-                <div className="text-center mb-12">
+                <FadeIn className="text-center mb-12">
                 <h2 className="text-3xl font-headline font-bold">What Our Community is Saying</h2>
                 <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed mt-4">
                     We are proud to have the support of our incredible community of parents and students.
                 </p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                </FadeIn>
+                <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {testimonials.map((testimonial) => (
-                    <Card key={testimonial.author} className="flex flex-col bg-primary text-primary-foreground transition-all duration-300 hover:shadow-xl hover:scale-105">
-                    <CardHeader>
-                        <Quote className="w-10 h-10 text-primary-foreground/80 mb-4" />
-                    </CardHeader>
-                    <CardContent className="flex-grow">
-                        <blockquote className="text-primary-foreground/90 font-medium">
-                        {testimonial.quote}
-                        </blockquote>
-                    </CardContent>
-                    <CardFooter>
-                        <p className="font-bold w-full text-right">- {testimonial.author}, <span className="font-normal text-primary-foreground/80">{testimonial.role}</span></p>
-                    </CardFooter>
-                    </Card>
+                    <StaggerItem key={testimonial.author} direction="up">
+                        <Card className="flex flex-col h-full bg-primary text-primary-foreground transition-all duration-300 hover:shadow-2xl hover:-translate-y-2">
+                        <CardHeader>
+                            <Quote className="w-10 h-10 text-primary-foreground/80 mb-4" />
+                        </CardHeader>
+                        <CardContent className="flex-grow">
+                            <blockquote className="text-primary-foreground/90 font-medium">
+                            {testimonial.quote}
+                            </blockquote>
+                        </CardContent>
+                        <CardFooter>
+                            <p className="font-bold w-full text-right">- {testimonial.author}, <span className="font-normal text-primary-foreground/80">{testimonial.role}</span></p>
+                        </CardFooter>
+                        </Card>
+                    </StaggerItem>
                 ))}
-                </div>
+                </StaggerContainer>
             </div>
             </section>
 
 
             <section id="news" className="bg-secondary">
                 <div className="container mx-auto">
-                    <div className="text-center">
+                    <FadeIn className="text-center">
                     <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-4xl md:text-5xl">Latest News</h2>
                     <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mt-4">
                         Stay up-to-date with the latest happenings at the Kawartha Youth Orchestra.
                     </p>
-                    </div>
-                    <div className="mt-12 grid grid-cols-1 gap-8">
+                    </FadeIn>
+                    <StaggerContainer className="mt-12 grid grid-cols-1 gap-8">
                         {announcements.map((item) => (
-                            <Card key={item.id} className="w-full max-w-4xl mx-auto overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-primary/50">
-                                <div className={`grid ${item.imageUrl ? 'md:grid-cols-2' : 'grid-cols-1'}`}>
-                                    {item.imageUrl && (
-                                        <div className="relative aspect-video">
-                                            <Image
-                                                src={item.imageUrl}
-                                                alt={item.title}
-                                                fill
-                                                className="object-cover"
-                                            />
-                                        </div>
-                                    )}
-                                    <div className="flex flex-col">
-                                        <CardHeader>
-                                            <CardTitle className="text-xl font-headline">{item.title}</CardTitle>
-                                            <p className="text-sm text-muted-foreground">{item.date}</p>
-                                        </CardHeader>
-                                        <CardContent className="flex-grow">
-                                            <p className="text-muted-foreground">{item.excerpt}</p>
-                                        </CardContent>
-                                        <div className="p-6 pt-0">
-                                            <Button asChild variant="link" className="p-0 h-auto">
-                                                <Link href="/calendar" className="flex items-center gap-2">
-                                                    Read More <ArrowRight className="w-4 h-4" />
-                                                </Link>
-                                            </Button>
+                            <StaggerItem key={item.id} direction="up">
+                                <Card className="w-full max-w-4xl mx-auto overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-primary/50 group">
+                                    <div className={`grid ${item.imageUrl ? 'md:grid-cols-2' : 'grid-cols-1'}`}>
+                                        {item.imageUrl && (
+                                            <div className="relative aspect-video overflow-hidden">
+                                                <Image
+                                                    src={item.imageUrl}
+                                                    alt={item.title}
+                                                    fill
+                                                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                                />
+                                            </div>
+                                        )}
+                                        <div className="flex flex-col">
+                                            <CardHeader>
+                                                <CardTitle className="text-xl font-headline group-hover:text-primary transition-colors">{item.title}</CardTitle>
+                                                <p className="text-sm text-muted-foreground">{item.date}</p>
+                                            </CardHeader>
+                                            <CardContent className="flex-grow">
+                                                <p className="text-muted-foreground">{item.excerpt}</p>
+                                            </CardContent>
+                                            <div className="p-6 pt-0">
+                                                <Button asChild variant="link" className="p-0 h-auto group-hover:text-primary transition-colors">
+                                                    <Link href="/calendar" className="flex items-center gap-2">
+                                                        Read More <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+                                                    </Link>
+                                                </Button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </Card>
+                                </Card>
+                            </StaggerItem>
                         ))}
-                    </div>
+                    </StaggerContainer>
                 </div>
             </section>
 
-            <section className="bg-background">
+            <section className="bg-background overflow-hidden">
             <div className="container mx-auto">
                 <div className="grid md:grid-cols-2 gap-12 items-center">
-                    <div className="space-y-6">
+                    <SlideIn direction="right" className="space-y-6">
                         <h2 className="text-3xl font-headline font-bold">Financial Aid & Scholarships</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-center">
-                            <div className="bg-secondary p-6 rounded-lg">
+                            <div className="bg-secondary p-6 rounded-lg transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
                                 <AnimatedCounter target={100} prefix="$" suffix="K" className="text-4xl font-bold text-primary" />
                                 <p className="text-sm text-muted-foreground mt-1">In Annual Bursaries</p>
                             </div>
-                            <div className="bg-secondary p-6 rounded-lg">
+                            <div className="bg-secondary p-6 rounded-lg transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
                                 <AnimatedCounter target={100} suffix="+" className="text-4xl font-bold text-primary" />
                                 <p className="text-sm text-muted-foreground mt-1">Students Supported</p>
                             </div>
@@ -390,14 +415,14 @@ export default function Home() {
                             We believe in nurturing musical talent regardless of financial background. Our goal is to ensure no student misses the opportunity to grow due to economic constraints. Explore our scholarships and aid programs to join our community of passionate young artists.
                         </p>
                         <div className="flex gap-4">
-                            <Button asChild>
+                            <Button asChild className="transition-transform duration-300 hover:-translate-y-1">
                                 <Link href="/orchestras">Explore Aid</Link>
                             </Button>
                             {(() => {
                                 const buttonProps = getButtonProps(financialAidButton);
                                 if (buttonProps) {
                                     return (
-                                        <Button asChild variant="outline">
+                                        <Button asChild variant="outline" className="transition-transform duration-300 hover:-translate-y-1">
                                             <Link href={buttonProps.href} target={buttonProps.target} rel={buttonProps.target === '_blank' ? 'noopener noreferrer' : ''}>
                                                 {buttonProps.text}
                                             </Link>
@@ -407,53 +432,53 @@ export default function Home() {
                                 return null;
                             })()}
                         </div>
-                    </div>
+                    </SlideIn>
                     {financialAidImage && (
-                        <div className="rounded-lg overflow-hidden shadow-xl">
+                        <SlideIn direction="left" className="rounded-lg overflow-hidden shadow-xl group">
                             <Image
                                 src={financialAidImage.imageUrl}
                                 alt={financialAidImage.description}
                                 width={600}
                                 height={400}
-                                className="object-cover w-full h-full"
+                                className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
                                 data-ai-hint={financialAidImage.imageHint}
                             />
-                        </div>
+                        </SlideIn>
                     )}
                 </div>
             </div>
             </section>
 
             <section id="support" className="bg-secondary">
-                <div className="container mx-auto text-center">
+                <FadeIn className="container mx-auto text-center">
                     <h2 className="text-3xl font-headline font-bold">Support Kawartha Youth Orchestra</h2>
                     <p className="text-muted-foreground md:text-lg max-w-3xl mx-auto mt-4">
                         Your generosity empowers us to provide transformative musical experiences for young people. Help us continue our work by making a donation or learning about other ways to contribute.
                     </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center max-w-3xl mx-auto mt-8">
+                    <StaggerContainer className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center max-w-3xl mx-auto mt-8">
                         {impactStats.map(stat => (
-                            <div key={stat.label}>
+                            <StaggerItem direction="up" key={stat.label}>
                                 <AnimatedCounter 
                                     target={stat.number}
                                     prefix={stat.prefix}
-                                    suffix={stat.number === 70000 ? 'k+' : stat.suffix}
+                                    suffix={stat.suffix}
                                     className="text-4xl font-bold text-primary"
                                 />
                                 <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
-                            </div>
+                            </StaggerItem>
                         ))}
-                    </div>
+                    </StaggerContainer>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-                        <Button asChild size="lg">
+                        <Button asChild size="lg" className="transition-transform duration-300 hover:-translate-y-1">
                             <Link href="/donate">Donate Now</Link>
                         </Button>
                         {contactLink && (
-                            <Button asChild size="lg" variant="outline">
+                            <Button asChild size="lg" variant="outline" className="transition-transform duration-300 hover:-translate-y-1">
                                 <Link href={contactLink.url}>Contact Us</Link>
                             </Button>
                         )}
                     </div>
-                </div>
+                </FadeIn>
             </section>
         </main>
       </main>

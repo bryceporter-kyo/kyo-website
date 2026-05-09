@@ -9,15 +9,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Pencil, Trash2, User, Upload, Download, Loader2 } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, User, Download, Upload, Loader2 } from "lucide-react";
 import Link from "next/link";
+import Papa from "papaparse";
 import { fetchUsersFromFirebase, addUserToFirebase, deleteUserFromFirebase, updateUserInFirebase } from "@/lib/users";
 import type { User as UserType, UserRole } from "@/lib/users";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import React from "react";
-import { Label } from "@/components/ui/label";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,8 +56,6 @@ export default function UsersAdminPage() {
     const { toast } = useToast();
     const [users, setUsers] = React.useState<UserType[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
-    const [csvFile, setCsvFile] = React.useState<File | null>(null);
-    
     // Edit state
     const [editingUser, setEditingUser] = React.useState<UserType | null>(null);
     const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
@@ -112,6 +110,85 @@ export default function UsersAdminPage() {
         }
     }
 
+    const handleDownloadCsv = () => {
+        const csvContent = "data:text/csv;charset=utf-8," 
+            + "name,email,roles\n"
+            + "Jane Doe,jane.doe@example.com,\"Website Editor, Internal Editor\"\n"
+            + "John Smith,john@thekyo.ca,Internal Viewer";
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "users_template.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const handleUploadCsv = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        setIsLoading(true);
+        Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: async (results) => {
+                const newUsers: UserType[] = [];
+                let successCount = 0;
+                let errorCount = 0;
+
+                for (const row of results.data as any[]) {
+                    try {
+                        const rolesArray = row.roles 
+                            ? row.roles.split(',').map((r: string) => r.trim()) as UserRole[] 
+                            : [];
+                        
+                        const userData = {
+                            name: row.name,
+                            email: row.email,
+                            roles: rolesArray,
+                        };
+
+                        // Basic validation
+                        if (!userData.name || !userData.email || userData.roles.length === 0) {
+                            console.error("Invalid user data in CSV:", row);
+                            errorCount++;
+                            continue;
+                        }
+
+                        const newUser = await addUserToFirebase(userData);
+                        newUsers.push(newUser);
+                        successCount++;
+                    } catch (error) {
+                        console.error("Error importing user from CSV:", error);
+                        errorCount++;
+                    }
+                }
+
+                setUsers(prev => [...prev, ...newUsers]);
+                setIsLoading(false);
+                
+                toast({
+                    title: "Import Complete",
+                    description: `Successfully imported ${successCount} users.${errorCount > 0 ? ` Failed to import ${errorCount} users.` : ""}`,
+                    variant: errorCount > 0 ? "destructive" : "default",
+                });
+                
+                // Clear input
+                event.target.value = "";
+            },
+            error: (error) => {
+                console.error("CSV Parse Error:", error);
+                setIsLoading(false);
+                toast({
+                    title: "Import Failed",
+                    description: "Failed to parse CSV file.",
+                    variant: "destructive",
+                });
+            }
+        });
+    };
+
     async function onSubmit(values: z.infer<typeof userSchema>) {
         try {
             const newUser = await addUserToFirebase({
@@ -164,48 +241,7 @@ export default function UsersAdminPage() {
         }
     }
 
-    const handleDownloadCsv = () => {
-        const csvContent = "data:text/csv;charset=utf-8," 
-            + "name,email,roles\n"
-            + "Jane Doe,jane.doe@example.com,\"Website Editor,Internal Viewer\"";
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "users_template.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
 
-    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.files) {
-            setCsvFile(event.target.files[0]);
-        }
-    };
-
-    const handleImportCsv = () => {
-        if (!csvFile) {
-            toast({
-                title: "No file selected",
-                description: "Please select a CSV file to upload.",
-                variant: "destructive",
-            });
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const text = e.target?.result;
-            console.log("Parsing CSV content:", text);
-            // In a real application, you would parse the CSV and send it to a server action
-            toast({
-                title: "CSV Uploaded",
-                description: "The user data is being processed. (This is a placeholder)",
-            });
-        };
-        reader.readAsText(csvFile);
-    };
-    
     async function handleDelete(userToDelete: UserType) {
         try {
             await deleteUserFromFirebase(userToDelete.id);
@@ -243,27 +279,28 @@ export default function UsersAdminPage() {
              <Card className="mb-12">
                 <CardHeader>
                     <CardTitle className="font-headline text-xl">Bulk User Management</CardTitle>
-                    <CardDescription>Download a template or upload a CSV to manage users in bulk.</CardDescription>
+                    <CardDescription>Upload or download a CSV to manage users in bulk.</CardDescription>
                 </CardHeader>
-                <CardContent className="grid md:grid-cols-2 gap-6 items-end">
-                    <div>
-                        <Label className="text-sm font-medium">Import from CSV</Label>
-                        <p className="text-sm text-muted-foreground mb-2">Upload a CSV file to add multiple users at once.</p>
-                        <div className="flex gap-2">
-                            <Input type="file" accept=".csv" onChange={handleFileUpload} className="max-w-xs" />
-                            <Button onClick={handleImportCsv} disabled={!csvFile} size="sm">
-                                <Upload className="mr-2 h-4 w-4"/>
-                                Upload
-                            </Button>
-                        </div>
-                    </div>
-                     <div className="md:text-right">
-                        <p className="text-sm font-medium">Download Template</p>
-                        <p className="text-sm text-muted-foreground mb-2">Get a CSV template to ensure correct formatting.</p>
+                <CardContent className="flex items-center justify-between gap-4">
+                    <p className="text-sm text-muted-foreground">Use the template to ensure correct formatting for bulk import.</p>
+                    <div className="flex gap-2">
                         <Button onClick={handleDownloadCsv} variant="outline" size="sm">
                             <Download className="mr-2 h-4 w-4"/>
-                            Download Template
+                            Template
                         </Button>
+                        <div className="relative">
+                            <input
+                                type="file"
+                                accept=".csv"
+                                onChange={handleUploadCsv}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                title="Upload CSV"
+                            />
+                            <Button variant="outline" size="sm">
+                                <Upload className="mr-2 h-4 w-4"/>
+                                Upload CSV
+                            </Button>
+                        </div>
                     </div>
                 </CardContent>
             </Card>

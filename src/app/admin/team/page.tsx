@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Pencil, Trash2, UserPlus, X } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, UserPlus, X, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { 
     fetchStaffFromFirebase, 
@@ -19,9 +19,11 @@ import {
     updateStaffInFirebase,
     updateBoardInFirebase,
     deleteStaffFromFirebase,
-    deleteBoardFromFirebase
+    deleteBoardFromFirebase,
+    sortTeamMembers
 } from "@/lib/staff";
 import type { StaffMember, BoardMember } from "@/lib/staff";
+import { uploadImage } from "@/lib/image-service";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -42,9 +44,18 @@ const memberSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters."),
   title: z.string().min(3, "Title must be at least 3 characters."),
   email: z.string().email("Please enter a valid email address."),
+  order: z.preprocess((val) => (val === "" ? undefined : Number(val)), z.number().optional()),
   bio: z.string().optional(),
-  image: z.string().optional(),
+  image: z.any().optional(),
   type: z.enum(["staff", "board"]),
+  links: z.object({
+    facebook: z.string().optional(),
+    instagram: z.string().optional(),
+    linkedin: z.string().optional(),
+    youtube: z.string().optional(),
+    spotify: z.string().optional(),
+    website: z.string().optional(),
+  }).optional(),
 });
 
 type MemberWithId = (StaffMember | BoardMember) & { type: 'staff' | 'board' };
@@ -56,6 +67,7 @@ export default function TeamAdminPage() {
     const [isLoading, setIsLoading] = React.useState(true);
     const [isSaving, setIsSaving] = React.useState(false);
     const [editingMember, setEditingMember] = React.useState<MemberWithId | null>(null);
+    const [saveStatus, setSaveStatus] = React.useState<"idle" | "uploading" | "saving">("idle");
 
     // Load data from Firebase
     React.useEffect(() => {
@@ -81,9 +93,12 @@ export default function TeamAdminPage() {
         loadData();
     }, [toast]);
 
+    const sortedStaff = sortTeamMembers(staff);
+    const sortedBoard = sortTeamMembers(board);
+
     const allMembers: MemberWithId[] = [
-        ...staff.map(s => ({...s, type: 'staff' as const})), 
-        ...board.map(b => ({...b, type: 'board' as const}))
+        ...sortedStaff.map(s => ({...s, type: 'staff' as const})), 
+        ...sortedBoard.map(b => ({...b, type: 'board' as const}))
     ];
 
     const form = useForm<z.infer<typeof memberSchema>>({
@@ -92,9 +107,18 @@ export default function TeamAdminPage() {
             name: "",
             title: "",
             email: "",
+            order: undefined,
             bio: "",
             image: "",
             type: "staff",
+            links: {
+                facebook: "",
+                instagram: "",
+                linkedin: "",
+                youtube: "",
+                spotify: "",
+                website: "",
+            }
         },
     });
 
@@ -107,8 +131,17 @@ export default function TeamAdminPage() {
                 title: editingMember.title,
                 email: editingMember.email,
                 type: editingMember.type,
+                order: editingMember.order,
                 bio: 'bio' in editingMember ? editingMember.bio : '',
-                image: 'image' in editingMember ? editingMember.image : '',
+                image: undefined,
+                links: {
+                    facebook: editingMember.links?.facebook || "",
+                    instagram: editingMember.links?.instagram || "",
+                    linkedin: editingMember.links?.linkedin || "",
+                    youtube: editingMember.links?.youtube || "",
+                    spotify: editingMember.links?.spotify || "",
+                    website: editingMember.links?.website || "",
+                }
             });
         } else {
             form.reset({
@@ -116,21 +149,41 @@ export default function TeamAdminPage() {
                 title: "",
                 email: "",
                 bio: "",
-                image: "",
+                image: undefined,
                 type: "staff",
+                links: {
+                    facebook: "",
+                    instagram: "",
+                    linkedin: "",
+                    youtube: "",
+                    spotify: "",
+                    website: "",
+                }
             });
         }
     }, [editingMember, form]);
 
     async function onSubmit(values: z.infer<typeof memberSchema>) {
         setIsSaving(true);
+        setSaveStatus("uploading");
         try {
+            let imageUrl = editingMember && 'image' in editingMember ? editingMember.image : '';
+
+            if (values.image && values.image.length > 0 && values.image[0] instanceof File) {
+                const file = values.image[0];
+                const imageId = `team_${Date.now()}`;
+                imageUrl = await uploadImage(file, imageId);
+            }
+
+            setSaveStatus("saving");
             const memberData = {
                 name: values.name,
                 title: values.title,
                 email: values.email,
+                order: values.order,
                 bio: values.bio || '',
-                image: values.image || '',
+                image: imageUrl || '',
+                links: values.links,
             };
 
             if (editingMember) {
@@ -162,15 +215,29 @@ export default function TeamAdminPage() {
             }
             setEditingMember(null);
             form.reset();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error saving member:', error);
+            
+            let errorMessage = "Failed to save member. Please try again.";
+            
+            if (error?.code === 'storage/unauthorized') {
+                errorMessage = "You don't have permission to upload images. Please contact an administrator.";
+            } else if (error?.code === 'storage/quota-exceeded') {
+                errorMessage = "Storage quota exceeded. Cannot upload more images.";
+            } else if (error?.code === 'permission-denied') {
+                errorMessage = "You don't have permission to modify this data.";
+            } else if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+
             toast({
                 title: "Error",
-                description: "Failed to save member. Please try again.",
+                description: errorMessage,
                 variant: "destructive",
             });
         } finally {
             setIsSaving(false);
+            setSaveStatus("idle");
         }
     }
     
@@ -224,6 +291,7 @@ export default function TeamAdminPage() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Name</TableHead>
+                                <TableHead>Type</TableHead>
                                 <TableHead>Title</TableHead>
                                 <TableHead>Email</TableHead>
                                 <TableHead className="text-right w-[150px]">Actions</TableHead>
@@ -231,8 +299,15 @@ export default function TeamAdminPage() {
                         </TableHeader>
                         <TableBody>
                             {allMembers.map((member) => (
-                                <TableRow key={member.id}>
+                                <TableRow key={member.id} className="group/row">
                                     <TableCell className="font-medium">{member.name}</TableCell>
+                                    <TableCell>
+                                        <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                            member.type === 'staff' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+                                        }`}>
+                                            {member.type}
+                                        </span>
+                                    </TableCell>
                                     <TableCell>{member.title}</TableCell>
                                     <TableCell>{member.email}</TableCell>
                                     <TableCell className="text-right">
@@ -337,6 +412,22 @@ export default function TeamAdminPage() {
                                     </FormItem>
                                 )}
                             />
+                            <FormField
+                                control={form.control}
+                                name="order"
+                                render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel>Display Order (optional)</FormLabel>
+                                    <FormControl>
+                                        <Input type="number" placeholder="Lower numbers show first (e.g., 1, 2, 3)" {...field} />
+                                    </FormControl>
+                                    <FormDescription>
+                                        Use this to manually reorder members. If empty, they will be sorted alphabetically.
+                                    </FormDescription>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                              <FormField
                                 control={form.control}
                                 name="bio"
@@ -351,19 +442,97 @@ export default function TeamAdminPage() {
                                 )}
                             />
                             <FormItem>
-                                <FormLabel>Image (optional)</FormLabel>
+                                <FormLabel>Profile Photo (optional)</FormLabel>
                                 <FormControl>
                                     <Input type="file" {...imageField} />
                                 </FormControl>
-                                    <FormDescription>
+                                <FormDescription>
                                     Upload a profile picture for the member.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
+
+                            <div className="pt-4 border-t border-primary/10">
+                                <h3 className="text-lg font-headline font-bold mb-4">Social & Web Links</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <FormField
+                                        control={form.control}
+                                        name="links.website"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Custom Website</FormLabel>
+                                                <FormControl><Input placeholder="https://..." {...field} /></FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="links.linkedin"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>LinkedIn URL</FormLabel>
+                                                <FormControl><Input placeholder="https://linkedin.com/in/..." {...field} /></FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="links.facebook"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Facebook URL</FormLabel>
+                                                <FormControl><Input placeholder="https://facebook.com/..." {...field} /></FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="links.instagram"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Instagram URL</FormLabel>
+                                                <FormControl><Input placeholder="https://instagram.com/..." {...field} /></FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="links.youtube"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>YouTube Channel</FormLabel>
+                                                <FormControl><Input placeholder="https://youtube.com/@..." {...field} /></FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="links.spotify"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Spotify Artist URL</FormLabel>
+                                                <FormControl><Input placeholder="https://open.spotify.com/artist/..." {...field} /></FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                            </div>
                              <div className="flex gap-4">
                                 <Button type="submit" disabled={isSaving}>
-                                    <UserPlus className="mr-2 h-4 w-4"/>
-                                    {isSaving ? 'Saving...' : (editingMember ? 'Update Member' : 'Save Member')}
+                                    {isSaving ? (
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    ) : (
+                                        <UserPlus className="mr-2 h-4 w-4"/>
+                                    )}
+                                    {saveStatus === 'uploading' ? 'Uploading Image...' : 
+                                     saveStatus === 'saving' ? 'Saving Details...' : 
+                                     (editingMember ? 'Update Member' : 'Save Member')}
                                 </Button>
                                 {editingMember && (
                                     <Button variant="outline" onClick={() => setEditingMember(null)} disabled={isSaving}>
