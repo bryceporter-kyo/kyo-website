@@ -67,83 +67,93 @@ export default function Footer() {
     <footer className="bg-secondary">
       <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-          <div className="space-y-6 md:col-span-5">
+          <div className="md:col-span-4">
             <Link href="/" className="block">
               <Logo fullWidth={true} className="max-w-[400px] md:max-w-none" />
             </Link>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Nurturing the next generation of musicians.
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Kawartha Youth Orchestra (KYO) is a registered charitable nonprofit organization (CRA #89168 2700 RR 0001). We are grateful for the support of the Community Foundation of Greater Peterborough, Google Grants, NetSuite Social Impact, the City of Peterborough Community Investment Grant, the Lloyd Carr Harris Foundation, and the F.K. Morrow Foundation.
-            </p>
           </div>
-          <div className="md:col-span-2">
-            <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase">Quick Links</h3>
-            <ul className="mt-4 space-y-2">
-              {navLinks.slice(1).map((link) => (
-                <li key={link.name}>
-                  <Link href={link.href} className="text-base text-muted-foreground hover:text-primary">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-               <li>
-                {registrationLink && (
-                  <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer" className="text-base text-muted-foreground hover:text-primary">
-                    Register
-                  </Link>
-                )}
-              </li>
-            </ul>
-          </div>
-          <div className="md:col-span-3">
-            <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase">Contact Us</h3>
-            <ul className="mt-4 space-y-2 text-muted-foreground">
-               <li className="flex items-start gap-2">
-                <MapPin className="w-5 h-5 mt-1 shrink-0 text-primary" />
-                {mailingAddressLink && (
-                  <a href={mailingAddressLink.url} target="_blank" rel="noopener noreferrer" className="hover:text-primary">
-                      P.O. Box 53, 150 King Street<br/>Peterborough ON, K9J 6Y5
-                  </a>
-                )}
-              </li>
-              <li className="flex items-start gap-2">
-                <MapPin className="w-5 h-5 mt-1 shrink-0 text-primary" />
-                 {physicalAddressLink && (
-                  <a href={physicalAddressLink.url} target="_blank" rel="noopener noreferrer" className="hover:text-primary">
-                      221 Romaine Street<br/>Peterborough, ON, K9J 2C3
-                  </a>
-                 )}
-              </li>
-              <li className="flex items-center gap-2">
-                <Phone className="w-5 h-5 shrink-0 text-primary" />
-                {phoneLink && <a href={phoneLink.url} className="hover:text-primary">{phoneLink.url.replace('tel:', '')}</a>}
-              </li>
-              <li className="flex items-center gap-2">
-                <Mail className="w-5 h-5 shrink-0 text-primary" />
-                <a href="mailto:Contactus@thekyo.ca" className="hover:text-primary">Contactus@thekyo.ca</a>
-              </li>
-            </ul>
-          </div>
-           <div className="md:col-span-2">
-            <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase">Legal</h3>
-            <ul className="mt-4 space-y-2">
-              {legalLinks.map((link) => (
-                <li key={link.name}>
-                  <Link href={link.href} className="text-base text-muted-foreground hover:text-primary">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-              {legalPages.filter(p => p.showInFooter).map((page) => (
-                <li key={page.id}>
-                  <Link href={`/legal/${page.slug}`} className="text-base text-muted-foreground hover:text-primary">
-                    {page.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+
+          <div className="md:col-span-8">
+            <div className="grid grid-cols-1 md:grid-cols-7 gap-8">
+              <div className="md:col-span-2">
+                <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase font-headline">Quick Links</h3>
+                <ul className="mt-4 space-y-2">
+                  {navLinks.slice(1).map((link) => (
+                    <li key={link.name}>
+                      <Link href={link.href} className="text-base text-muted-foreground hover:text-primary transition-colors">
+                        {link.name}
+                      </Link>
+                    </li>
+                  ))}
+                  <li>
+                    {registrationLink && (
+                      <Link href={registrationLink.url} target="_blank" rel="noopener noreferrer" className="text-base text-muted-foreground hover:text-primary transition-colors">
+                        Register
+                      </Link>
+                    )}
+                  </li>
+                </ul>
+              </div>
+
+              <div className="md:col-span-3">
+                <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase font-headline">Contact Us</h3>
+                <ul className="mt-4 space-y-3 text-muted-foreground">
+                  <li className="flex items-start gap-2 group">
+                    <MapPin className="w-5 h-5 mt-0.5 shrink-0 text-primary group-hover:scale-110 transition-transform" />
+                    {mailingAddressLink && (
+                      <a href={mailingAddressLink.url} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors text-sm">
+                          P.O. Box 53, 150 King Street<br/>Peterborough ON, K9J 6Y5
+                      </a>
+                    )}
+                  </li>
+                  <li className="flex items-start gap-2 group">
+                    <MapPin className="w-5 h-5 mt-0.5 shrink-0 text-primary group-hover:scale-110 transition-transform" />
+                     {physicalAddressLink && (
+                      <a href={physicalAddressLink.url} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors text-sm">
+                          221 Romaine Street<br/>Peterborough, ON, K9J 2C3
+                      </a>
+                     )}
+                  </li>
+                  <li className="flex items-center gap-2 group">
+                    <Phone className="w-5 h-5 shrink-0 text-primary group-hover:scale-110 transition-transform" />
+                    {phoneLink && <a href={phoneLink.url} className="hover:text-primary transition-colors">{phoneLink.url.replace('tel:', '')}</a>}
+                  </li>
+                  <li className="flex items-center gap-2 group">
+                    <Mail className="w-5 h-5 shrink-0 text-primary group-hover:scale-110 transition-transform" />
+                    <a href="mailto:Contactus@thekyo.ca" className="hover:text-primary transition-colors">Contactus@thekyo.ca</a>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="md:col-span-2">
+                <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase font-headline">Legal</h3>
+                <ul className="mt-4 space-y-2">
+                  {legalLinks.map((link) => (
+                    <li key={link.name}>
+                      <Link href={link.href} className="text-base text-muted-foreground hover:text-primary transition-colors">
+                        {link.name}
+                      </Link>
+                    </li>
+                  ))}
+                  {legalPages.filter(p => p.showInFooter).map((page) => (
+                    <li key={page.id}>
+                      <Link href={`/legal/${page.slug}`} className="text-base text-muted-foreground hover:text-primary transition-colors">
+                        {page.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <div className="mt-12 pt-8 border-t border-primary/5 space-y-4">
+              <p className="text-[1.05rem] font-medium text-foreground leading-relaxed italic">
+                Nurturing the next generation of musicians.
+              </p>
+              <p className="text-xs text-muted-foreground leading-relaxed max-w-3xl">
+                Kawartha Youth Orchestra (KYO) is a registered charitable nonprofit organization (CRA #89168 2700 RR 0001). We are grateful for the support of the Community Foundation of Greater Peterborough, Google Grants, NetSuite Social Impact, the City of Peterborough Community Investment Grant, the Lloyd Carr Harris Foundation, and the F.K. Morrow Foundation.
+              </p>
+            </div>
           </div>
         </div>
         <div className="mt-8 border-t border-border pt-8 flex flex-col sm:flex-row items-center justify-between">
