@@ -10,6 +10,7 @@ import { ImageProvider } from '@/components/providers/ImageProvider';
 import { DataProvider } from '@/components/providers/DataProvider';
 import { fetchPageMetadata } from '@/lib/metadata';
 import { Metadata } from 'next';
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export async function generateMetadata(): Promise<Metadata> {
   const data = await fetchPageMetadata("/");
@@ -57,6 +58,7 @@ export default function RootLayout({
             </div>
             <Toaster />
             <CookieConsent />
+            <SpeedInsights />
           </ImageProvider>
         </DataProvider>
       </body>
