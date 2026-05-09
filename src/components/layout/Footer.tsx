@@ -150,7 +150,6 @@ export default function Footer() {
             <div className="text-sm text-muted-foreground flex items-center gap-4">
                 <Link href="/admin" className="hover:text-primary">Admin Panel</Link>
                 <Link href="/internal" className="hover:text-primary">KYO Internal</Link>
-                <Link href="/sitemap" className="hover:text-primary">Sitemap</Link>
                 <button onClick={openCookieSettings} className="hover:text-primary flex items-center gap-1"><Cookie className="w-4 h-4"/>Cookie Settings</button>
             </div>
             <p className="text-sm text-muted-foreground text-center flex-1">
