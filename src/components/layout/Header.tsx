@@ -98,7 +98,7 @@ export default function Header() {
 
                 {/* Desktop Navigation */}
                 {isMounted && (
-                    <nav className="hidden md:flex items-center gap-3">
+                    <nav className="hidden lg:flex items-center gap-3">
                         {navLinks.map((link) => {
                             const active = isActive(link);
                             
@@ -176,7 +176,7 @@ export default function Header() {
                     </nav>
                 )}
 
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden lg:flex items-center gap-4">
           <Dialog>
             <DialogTrigger asChild>
               <Button size="lg" className="rounded-xl h-11 px-8 text-[1.1rem] font-bold">Register</Button>
@@ -226,7 +226,7 @@ export default function Header() {
         </div>
 
         {/* Mobile Navigation */}
-        <div className="md:hidden">
+        <div className="lg:hidden">
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTriggerPrimitive asChild>
               <Button variant="ghost" size="icon" className="h-12 w-12">
