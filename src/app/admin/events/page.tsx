@@ -43,7 +43,7 @@ const eventSchema = z.object({
   endTime: z.string().optional(),
   notes: z.string().optional(),
   link: z.string().optional(),
-  type: z.enum(["special", "normal"], { required_error: "You need to select an event type." }),
+  type: z.string({ required_error: "You need to select an event type." }),
 });
 
 export default function EventsAdminPage() {

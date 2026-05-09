@@ -1,6 +1,7 @@
 
 import PageHeader from "@/components/shared/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar } from "lucide-react";
 import { getLinkById } from "@/lib/links";
 import { getImageById } from "@/lib/image-service-server";
 import Link from "next/link";
@@ -14,7 +15,7 @@ export default async function HiringPolicyPage() {
       <PageHeader
         title="Hiring & EEO Policy"
         subtitle="Committed to a fair and inclusive workplace."
-        image={headerImage}
+        image={headerImage || undefined}
       />
       <section className="container mx-auto">
         <div className="max-w-4xl mx-auto space-y-8">
@@ -26,7 +27,7 @@ export default async function HiringPolicyPage() {
                     <p>
                         The Kawartha Youth Orchestra is committed to recruiting and selecting candidates who best meet the requirements of available positions and contribute to the success of our organization. This policy outlines the KYO’s approach to fair and transparent hiring practices in accordance with industry standards and legal requirements. This hiring policy serves as a guide to promote transparency, fairness, and equal opportunity in all aspects of the KYO’s recruitment and selection practices.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -49,7 +50,7 @@ export default async function HiringPolicyPage() {
                     <p>
                         The KYO is committed to complying with all applicable laws and regulations concerning equal employment opportunities. This policy applies to all employees, including management, supervisors, and employees at all levels of the organization.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
             
             <Card>
@@ -118,7 +119,7 @@ export default async function HiringPolicyPage() {
                             For any inquiries regarding our hiring processes or to report potential violations of this policy, candidates are encouraged to contact us at {hrCommitteeLink ? <Link href={hrCommitteeLink.url} className="text-primary underline">{hrCommitteeLink.url.replace('mailto:', '')}</Link> : 'hr-committee@thekyo.ca'}. We are dedicated to upholding these standards and ensuring that all candidates are treated equitably throughout their interactions with the KYO.
                         </p>
                     </div>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -138,7 +139,7 @@ export default async function HiringPolicyPage() {
                             Upon joining the KYO, newly hired employees will embark on a thorough onboarding journey designed to immerse them in our organizational ethos, policies, and operational procedures. This comprehensive process ensures that each individual gains a clear understanding of the KYO’s mission, values, and workplace expectations. Throughout this onboarding experience, employees will receive essential training and ongoing support tailored to their roles, aiming to facilitate a seamless transition and enhance their effectiveness within the organization.
                         </p>
                     </div>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
             
             <Card>
@@ -158,7 +159,7 @@ export default async function HiringPolicyPage() {
                             Our hiring policy is designed to uphold the principles of transparency, fairness, and equal opportunity throughout our recruitment and selection processes. We are committed to regularly reviewing and updating this policy to ensure it aligns with the KYO’s strategic objectives and incorporates evolving best practices in the field of human resources. Feedback from hiring managers, candidates, and stakeholders is integral to this process, as it provides valuable insights that help us enhance the effectiveness and fairness of our hiring practices. By continuously refining our approach based on feedback and industry advancements, we aim to maintain a robust hiring framework that attracts top talent while promoting diversity, inclusivity, and organizational excellence.
                         </p>
                     </div>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
         </div>
       </section>

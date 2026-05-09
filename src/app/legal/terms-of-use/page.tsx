@@ -1,6 +1,7 @@
 
 import PageHeader from "@/components/shared/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar } from "lucide-react";
 import { getLinkById } from "@/lib/links";
 import { getImageById } from "@/lib/image-service-server";
 import Link from "next/link";
@@ -14,7 +15,7 @@ export default async function TermsOfUsePage() {
       <PageHeader
         title="Digital Terms of Use"
         subtitle="Last updated: October 26, 2023"
-        image={headerImage}
+        image={headerImage || undefined}
       />
       <section className="container mx-auto">
         <div className="max-w-4xl mx-auto space-y-8">
@@ -26,7 +27,7 @@ export default async function TermsOfUsePage() {
                     <p>
                     The Kawartha Youth Orchestra (“KYO”) provides the content on this website (the “Site”) subject to the following terms and conditions (the “Terms”). We may periodically change the Terms without notice to you, so please check back from time to time. Unless explicitly stated otherwise, any new features that augment or enhance the Site shall be subject to these Terms. By accessing and using this Site, you agree to these Terms.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
             
             <Card>
@@ -37,7 +38,7 @@ export default async function TermsOfUsePage() {
                     <p>
                         This Site provides a variety of resources and information for users to find, engage, and manage program services, financial, and donation resources (the “Services”). The Site does not provide medical, investment, or legal advice, and no special relationship is created between users of the Services and Kawartha Youth Orchestra or its licensors.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -48,7 +49,7 @@ export default async function TermsOfUsePage() {
                     <p>
                         Some of the content on this Site, including without limitation, the text, software, scripts, graphics, videos, and the like (“Site Content”) is created and developed by users and provided to Kawartha Youth Orchestra under license for dissemination over the internet (“User Content”). User Content includes, among other things, analyses, seminar workbooks, presentations, and biographical and employment information. Kawartha Youth Orchestra cannot guarantee and makes no representations as to the accuracy or quality of User Content, all of which is offered “as is.” The Kawartha Youth Orchestra does not own, develop, or endorse, and is not responsible for User Content. The use of a company or entity name in user biographical or employment information should not be construed as an express or implied endorsement by such company or entity of Kawartha Youth Orchestra or an express or implied endorsement by Kawartha Youth Orchestra of such company or entity. Users are not employees of or under the supervision of Kawartha Youth Orchestra. Users have agreed to be bound by these Terms and have represented, among other things, that they will not disclose information that is subject to a confidentiality obligation or participate in activities in violation of any agreements or duties owed to employers or other third parties. Kawartha Youth Orchestra relies on the accuracy of these representations of the users and does not necessarily seek independent verification.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -67,7 +68,7 @@ export default async function TermsOfUsePage() {
                     <p>
                         If you are compelled by the order of a court or other governmental or legal body or, have notice that such an order is being sought, to divulge any Confidential Information, you agree to promptly and diligently notify the Kawartha Youth Orchestra and cooperate fully with the Kawartha Youth Orchestra in protecting such information to the extent possible under applicable law.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -78,7 +79,7 @@ export default async function TermsOfUsePage() {
                     <p>
                         Site Content and the trademarks, service marks, and logos contained therein (“Marks”) are owned by or licensed to the Kawartha Youth Orchestra, subject to copyright and other intellectual property rights under United States and foreign laws and international conventions. Site Content may not be copied, reproduced, distributed, transmitted, broadcast, displayed, sold, licensed, uploaded, or otherwise exploited without the prior written consent of the respective owners.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -98,7 +99,7 @@ export default async function TermsOfUsePage() {
                         <a href="mailto:board-of-directors@thekyo.ca" className="text-primary underline">board-of-directors@thekyo.ca</a>
                         )}
                     </div>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
             
             <Card>
@@ -129,7 +130,7 @@ export default async function TermsOfUsePage() {
                         <a href="mailto:board-of-directors@thekyo.ca" className="text-primary underline">board-of-directors@thekyo.ca</a>
                         )}
                     </div>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -140,7 +141,7 @@ export default async function TermsOfUsePage() {
                     <p>
                         You understand that your access to the Site will result in the collection, use, and storage of your information which is subject to our Privacy Policy. Through your access to the Site, you consent to the collection, use, and storage of such information, which will be held in or across Google data centre locations and may be processed and stored by other Kawartha Youth Orchestra entities around the world. For an explanation of the Kawartha Youth Orchestra’s practices and policies related to the collection, use, and storage of our users’ information, please read our Privacy Policy.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
             
             <Card>
@@ -154,7 +155,7 @@ export default async function TermsOfUsePage() {
                     <p>
                         For more details on how information and success metrics are presented on our website, please refer to our <Link href="/legal/information-accuracy-policy" className="text-primary underline">Information Accuracy and Success Metrics Policy</Link>.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -170,7 +171,7 @@ export default async function TermsOfUsePage() {
                         <li>your use of the Site; or</li>
                         <li>your violation of the rights of any third party.</li>
                     </ul>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
             
             <Card>
@@ -181,7 +182,7 @@ export default async function TermsOfUsePage() {
                     <p>
                         We may provide links to third-party websites, and some of the content appearing to be on this Site is in fact supplied by third parties. The Kawartha Youth Orchestra does not endorse and has no responsibility for the availability or content of these third-party websites, which are governed by the Terms of Use and privacy policies, if any, of the applicable third-party content providers. The Kawartha Youth Orchestra shall have no liability or responsibility, directly or indirectly, for any damage or loss caused or alleged to be caused by the use or reliance on any content, goods, or services available on or through such sites.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
             
             <Card>
@@ -191,7 +192,7 @@ export default async function TermsOfUsePage() {
                 <CardContent className="space-y-4 text-muted-foreground">
                     <p><strong>Governing Law: Jurisdiction:</strong> These Terms are governed by the laws of the Province of Ontario without reference to the principles of conflicts of laws thereof. You agree to submit to the personal and exclusive jurisdiction of the courts located within the Province of Ontario, Canada with respect to all disputes arising out of or related to these Terms. If any part of these Terms is unlawful, void, or unenforceable, that part will be deemed severable and will not affect the validity and enforceability of the remaining provisions.</p>
                     <p><strong>Complete Agreement:</strong> These Terms set forth the entire understanding between you and the Kawartha Youth Orchestra and supersede all prior versions of the Terms. In addition, you may also be subject to additional terms and conditions when you use or access other Kawartha Youth Orchestra or Kawartha Youth Orchestra affiliate services or content. If any provision of these Terms is declared void or otherwise unenforceable, such provision shall be deemed to have been severed from these Terms, which shall otherwise remain in full force and effect.</p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
         </div>
       </section>

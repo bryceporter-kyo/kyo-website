@@ -72,10 +72,10 @@ const impactStats = [
 ];
 
 const coreActivities = [
-    { icon: GitCommitHorizontal, title: "String Instruction", description: "Students learn violin, viola, or cello in small group settings." },
-    { icon: BookOpen, title: "Music Literacy", description: "Activities in rhythm, theory, and listening foster musical fluency." },
-    { icon: LifeBuoy, title: "Wellness Support", description: "A full-time Wellness Coordinator offers guidance and mentoring." },
-    { icon: HandCoins, title: "Holistic Care", description: "Healthy snacks and free transportation from local schools." }
+    { icon: GitCommitHorizontal, title: "String Instruction", description: "Students learn violin, viola, or cello in small group settings.", imageId: "program-upbeat" },
+    { icon: BookOpen, title: "Music Literacy", description: "Activities in rhythm, theory, and listening foster musical fluency.", imageId: "upbeat-kids-smiling" },
+    { icon: LifeBuoy, title: "Wellness Support", description: "A full-time Wellness Coordinator offers guidance and mentoring.", imageId: "support-volunteer" },
+    { icon: HandCoins, title: "Holistic Care", description: "Healthy snacks and free transportation from local schools.", imageId: "support-cta" }
 ];
 
 const instructionalHighlights = [
@@ -208,7 +208,7 @@ export default function UpbeatPage() {
         opacity: 1,
         transition: { staggerChildren: 0.1 }
     }
-  };
+  } as const;
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
@@ -217,7 +217,7 @@ export default function UpbeatPage() {
         opacity: 1,
         transition: { type: "spring", stiffness: 100, damping: 15 }
     }
-  };
+  } as const;
 
   return (
     <div className="relative overflow-hidden bg-background">
@@ -231,7 +231,7 @@ export default function UpbeatPage() {
       <PageHeader
         title="Upbeat!"
         subtitle="Removing Barriers, Building Futures: Music, Mentorship, and Equity for Youth"
-        image={headerImage}
+        image={headerImage || undefined}
       />
 
       {/* Intro Section */}

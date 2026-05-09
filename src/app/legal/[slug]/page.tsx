@@ -3,6 +3,7 @@ import { fetchLegalPageBySlug } from "@/lib/legal-pages";
 import { notFound } from "next/navigation";
 import PageHeader from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar } from "lucide-react";
 import { getImageById } from "@/lib/image-service-server";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -49,7 +50,7 @@ export default async function DynamicLegalPage({ params }: LegalPageProps) {
       <PageHeader
         title={page.title}
         subtitle={`Last updated: ${format(new Date(page.lastUpdated), "MMMM d, yyyy")}`}
-        image={headerImage}
+        image={headerImage || undefined}
       />
       <section className="container mx-auto px-4 mt-12 pb-20">
         <div className="max-w-4xl mx-auto space-y-8">
@@ -77,7 +78,12 @@ export default async function DynamicLegalPage({ params }: LegalPageProps) {
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {content}
                   </ReactMarkdown>
-                </CardContent>
+                  
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                    <Calendar className="w-3 h-3" />
+                    Last updated: {format(new Date(page.lastUpdated), "MMMM d, yyyy")}
+                  </div>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
               </Card>
             );
           })}

@@ -160,6 +160,14 @@ export async function deleteStaffFromFirebase(id: string): Promise<void> {
 }
 
 /**
+ * Delete a board member from Firebase
+ */
+export async function deleteBoardFromFirebase(id: string): Promise<void> {
+    const boardRef = doc(db, BOARD_COLLECTION, id);
+    await deleteDoc(boardRef);
+}
+
+/**
  * Sorts team members by order first (ascending), then by name (alphabetically)
  */
 export function sortTeamMembers<T extends { name: string; order?: number }>(members: T[]): T[] {

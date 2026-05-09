@@ -1,6 +1,7 @@
 
 import PageHeader from "@/components/shared/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar } from "lucide-react";
 import { getImageById } from "@/lib/image-service-server";
 import Link from "next/link";
 
@@ -12,7 +13,7 @@ export default async function ProtectionPolicyPage() {
       <PageHeader
         title="Protection of Children and Vulnerable Persons Policy"
         subtitle="Our commitment to a safe and supportive environment."
-        image={headerImage}
+        image={headerImage || undefined}
       />
       <section className="container mx-auto">
         <div className="max-w-4xl mx-auto space-y-8">
@@ -24,7 +25,7 @@ export default async function ProtectionPolicyPage() {
                     <p>
                         The Kawartha Youth Orchestra (KYO), including the UpBeat! program, is committed to providing safe, supportive, and respectful environments for children and vulnerable persons. This policy outlines KYO’s duty of care, standards of conduct, and mandatory reporting responsibilities to ensure that all participants are protected from harm. By implementing this policy, KYO affirms its commitment to safeguarding every child and vulnerable person entrusted to its care.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -47,7 +48,7 @@ export default async function ProtectionPolicyPage() {
                         <li><strong>Neglect:</strong> Failure to provide adequate care, supervision, or basic needs.</li>
                         <li><strong>Financial Abuse:</strong> Exploitation or misuse of funds or assets belonging to a vulnerable person.</li>
                     </ul>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -58,7 +59,7 @@ export default async function ProtectionPolicyPage() {
                     <p>
                         The Kawartha Youth Orchestra acknowledges its legal and ethical duty to take all reasonable measures to protect participants from harm. Staff and volunteers are expected to act in the best interests of children and vulnerable persons at all times.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -74,7 +75,7 @@ export default async function ProtectionPolicyPage() {
                     <p>
                         Staff and volunteers must maintain valid and up-to-date clearance, and KYO reserves the right to request updated checks at regular intervals or when circumstances require.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -104,7 +105,7 @@ export default async function ProtectionPolicyPage() {
                         <li>Any form of abuse—physical, sexual, emotional, neglect, or financial.</li>
                         <li>Developing unsanctioned personal relationships with participants outside of KYO programming.</li>
                     </ul>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
             
             <Card>
@@ -127,7 +128,7 @@ export default async function ProtectionPolicyPage() {
                         <li>Avoid discussing the situation with parents, guardians, or colleagues not directly involved.</li>
                         <li>Document the incident and actions taken, in accordance with KYO procedures.</li>
                     </ul>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -138,7 +139,7 @@ export default async function ProtectionPolicyPage() {
                     <p>
                         All staff and volunteers must adhere to KYO’s Code of Conduct, which establishes expected standards of behavior, outlines best practices, and prohibits harmful practices. Breaches of this Code of Conduct will result in disciplinary action, up to and including termination of employment or volunteer engagement, and may also result in legal action.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -149,7 +150,7 @@ export default async function ProtectionPolicyPage() {
                     <p>
                         The Human Resources Committee is responsible for monitoring compliance with this policy. The policy will be reviewed by the KYO Board of Directors at least every two years, or sooner if required by changes in law or circumstance.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -160,7 +161,7 @@ export default async function ProtectionPolicyPage() {
                     <p>
                         The Kawartha Youth Orchestra is committed to maintaining safe, respectful, and caring environments where children and vulnerable persons are protected and supported. By upholding this policy, KYO ensures that all participants have the opportunity to grow, develop, and thrive in safety and dignity.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
         </div>
       </section>

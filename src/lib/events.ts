@@ -12,7 +12,7 @@ export type Event = {
   notes?: string;
   attachments?: { name: string; url: string }[];
   link?: string;
-  type: 'special' | 'normal';
+  type: 'special' | 'normal' | string;
 };
 
 // Legacy type for JSON data

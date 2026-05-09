@@ -2,14 +2,16 @@
 import PageHeader from "@/components/shared/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getImageById } from "@/lib/image-service-server";
-import { FileText, Shield, UserCheck, Accessibility, Info, Gavel, Scale, ExternalLink as ExternalLinkIcon, Briefcase } from "lucide-react";
+import { FileText, Shield, UserCheck, Accessibility, Info, Gavel, Scale, ExternalLink as ExternalLinkIcon, Briefcase, Calendar } from "lucide-react";
 import Link from "next/link";
+import { format } from "date-fns";
 
 import { fetchLegalPages } from "@/lib/legal-pages";
 
 export default async function LegalIndexPage() {
   const headerImage = await getImageById('page-header-terms');
   const managedPages = await fetchLegalPages();
+  const defaultUpdateDate = "2023-10-26";
 
   const staticPolicies = [
     {
@@ -17,52 +19,60 @@ export default async function LegalIndexPage() {
       description: "How we collect, use, and protect your personal data.",
       href: "/legal/privacy-policy",
       icon: Shield,
+      lastUpdated: "2023-10-26",
     },
     {
       title: "Terms of Use",
       description: "The rules for using our website and digital services.",
       href: "/legal/terms-of-use",
       icon: Gavel,
+      lastUpdated: "2023-10-26",
     },
     {
       title: "Terms and Conditions",
       description: "Standard legal agreement for program participants.",
       href: "/legal/terms-and-conditions",
       icon: Scale,
+      lastUpdated: "2023-10-26",
     },
     {
       title: "Accessibility Policy",
       description: "Our commitment to ensuring everyone can access KYO.",
       href: "/legal/accessibility-policy",
       icon: Accessibility,
+      lastUpdated: "2023-10-26",
     },
     {
       title: "Hiring Policy",
       description: "Guidelines and procedures for recruitment and employment.",
       href: "/legal/hiring-policy",
       icon: UserCheck,
+      lastUpdated: "2023-10-26",
     },
     {
       title: "Information Accuracy Policy",
       description: "How we ensure the integrity of the data we hold.",
       href: "/legal/information-accuracy-policy",
       icon: Info,
+      lastUpdated: "2023-10-26",
     },
     {
       title: "Protection of Children Policy",
       description: "Safeguarding procedures for children and vulnerable persons.",
       href: "/legal/protection-of-children-and-vulnerable-persons-policy",
       icon: FileText,
+      lastUpdated: "2023-10-26",
     },
   ];
 
-  const policies = [
+  const policies: { title: string; description: string; href: string; icon: any; lastUpdated: string }[] = [
     ...staticPolicies,
     ...managedPages.map(page => ({
       title: page.title,
       description: page.content.substring(0, 100).replace(/[#*`]/g, '') + '...',
       href: `/legal/${page.slug}`,
       icon: FileText,
+      lastUpdated: page.lastUpdated,
     }))
   ];
 
@@ -71,7 +81,7 @@ export default async function LegalIndexPage() {
       <PageHeader
         title="Legal & Policies"
         subtitle="The official legal documents and policies of the Kawartha Youth Orchestra."
-        image={headerImage}
+        image={headerImage || undefined}
       />
       
       <section className="container mx-auto px-4 mt-12">
@@ -80,14 +90,20 @@ export default async function LegalIndexPage() {
             {policies.map((policy) => (
               <Link key={policy.href} href={policy.href} className="group">
                 <Card className="h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-border/50 group-hover:border-primary/50">
-                  <CardHeader>
-                    <div className="mb-4 w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
-                      <policy.icon className="w-6 h-6" />
+                  <CardHeader className="pb-3">
+                    <div className="flex justify-between items-start mb-4">
+                        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
+                          <policy.icon className="w-6 h-6" />
+                        </div>
+                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-muted/50 px-2 py-1 rounded-md">
+                            <Calendar className="w-3 h-3" />
+                            {format(new Date(policy.lastUpdated), "MMM d, yyyy")}
+                        </div>
                     </div>
                     <CardTitle className="font-headline text-xl group-hover:text-primary transition-colors">
                       {policy.title}
                     </CardTitle>
-                    <CardDescription className="text-muted-foreground mt-2">
+                    <CardDescription className="text-muted-foreground mt-2 line-clamp-2">
                       {policy.description}
                     </CardDescription>
                   </CardHeader>
@@ -171,7 +187,7 @@ export default async function LegalIndexPage() {
           
           <Card className="mt-12 bg-muted/30 border-dashed">
             <CardContent className="py-8 text-center">
-              <h3 className="font-headline text-lg mb-2">Need legal assistance or have questions?</h3>
+              <h3 className="font-headline text-lg mb-2">Need assistance or have questions?</h3>
               <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
                 If you have questions about any of our policies or need clarification on specific terms, please reach out to our administration team.
               </p>

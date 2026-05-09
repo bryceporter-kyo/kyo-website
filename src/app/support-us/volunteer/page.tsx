@@ -160,10 +160,10 @@ const containerVariants = {
       staggerChildren: 0.1,
     },
   },
-};
+} as const;
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { y: 20, opacity: 0 },
   visible: {
     opacity: 1,
     y: 0,
@@ -172,7 +172,7 @@ const itemVariants = {
       ease: "easeOut",
     },
   },
-};
+} as const;
 
 export default function VolunteerPage() {
   const { getImage } = useImages();
@@ -249,7 +249,7 @@ export default function VolunteerPage() {
       <PageHeader
         title="Share Your Talent"
         subtitle="Join our community of dedicated volunteers and help us empower the next generation of musicians."
-        image={headerImage}
+        image={headerImage || undefined}
       />
 
       {/* 12:1 Ratio Banner */}

@@ -1,6 +1,7 @@
 
 import PageHeader from "@/components/shared/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar } from "lucide-react";
 import { getImageById } from "@/lib/image-service-server";
 
 export default async function AccessibilityPolicyPage() {
@@ -11,7 +12,7 @@ export default async function AccessibilityPolicyPage() {
       <PageHeader
         title="Accessibility Policy"
         subtitle="Our commitment to accessibility for all."
-        image={headerImage}
+        image={headerImage || undefined}
       />
       <section className="container mx-auto">
         <div className="max-w-4xl mx-auto space-y-8">
@@ -26,7 +27,7 @@ export default async function AccessibilityPolicyPage() {
                     <p>
                     We may update this Policy periodically to reflect changes in legislation, best practices, or KYO operations. Please review it from time to time to remain informed.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -37,7 +38,7 @@ export default async function AccessibilityPolicyPage() {
                     <p>
                         This Policy sets out how KYO identifies, removes, and prevents barriers to accessibility. It applies to staff, contractors, volunteers, program participants, visitors, donors, and members of the public interacting with KYO. KYO is committed to ensuring that all individuals can access our Services with dignity, independence, integration, and equal opportunity.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -54,7 +55,7 @@ export default async function AccessibilityPolicyPage() {
                         <li>Support persons may accompany individuals with disabilities; where fees apply, notice of applicable charges will be provided in advance.</li>
                         <li>Staff and volunteers receive training on how to interact respectfully with people with disabilities, including those using assistive devices, service animals, or support persons.</li>
                     </ul>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
             
             <Card>
@@ -68,7 +69,7 @@ export default async function AccessibilityPolicyPage() {
                     <p>
                         Our website and digital content will conform to the Web Content Accessibility Guidelines (“WCAG”) 2.0 Level AA as required by the IASR. KYO will make best efforts to ensure new content is accessible and to remediate inaccessible content when identified.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -85,7 +86,7 @@ export default async function AccessibilityPolicyPage() {
                         <li>Individual accommodation plans will be developed as required, including workplace emergency response information.</li>
                         <li>Accessibility will be considered in performance management, career development, and redeployment decisions.</li>
                     </ul>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -96,7 +97,7 @@ export default async function AccessibilityPolicyPage() {
                     <p>
                         When planning concerts, rehearsals, workshops, or other events, KYO will consider accessibility in venue selection, seating, washrooms, signage, and acoustics. Any renovations or new builds under KYO control will comply with applicable accessibility standards under the IASR.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -107,7 +108,7 @@ export default async function AccessibilityPolicyPage() {
                     <p>
                         When procuring goods, services, or facilities, KYO will include accessibility criteria and requirements wherever practicable. Third-party agreements for Services (including digital platforms and venues) must align with KYO’s accessibility commitments.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -126,7 +127,7 @@ export default async function AccessibilityPolicyPage() {
                     <p>
                         Training is provided as soon as practicable after engagement, upon policy updates, and on an ongoing basis as needed. Records of training will be maintained.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -137,7 +138,7 @@ export default async function AccessibilityPolicyPage() {
                     <p>
                         KYO welcomes feedback on the accessibility of its Services. Feedback, including complaints, may be submitted by email, phone, mail, or in person. KYO will acknowledge receipt within three business days and aim to provide a response or resolution within fifteen business days. Accessible feedback processes are available upon request.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -156,7 +157,7 @@ export default async function AccessibilityPolicyPage() {
                     <p>
                         The Plan will be provided in accessible formats upon request.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -167,7 +168,7 @@ export default async function AccessibilityPolicyPage() {
                     <p><strong>Legal Framework:</strong> This Policy is governed by the Accessibility for Ontarians with Disabilities Act, 2005, the Integrated Accessibility Standards Regulation, and the Ontario Human Rights Code.</p>
                     <p><strong>Relationship with the Human Rights Code:</strong> Where a conflict arises between this Policy and the Human Rights Code, the higher standard of accommodation will prevail.</p>
                     <p><strong>Complete Agreement:</strong> This Policy represents KYO’s current commitments under the AODA and related legislation. Additional terms may apply to specific Services or programs.</p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -187,7 +188,7 @@ export default async function AccessibilityPolicyPage() {
                     <p>
                         KYO will provide copies of this Policy, and other relevant documents, in accessible formats upon request.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
         </div>
       </section>

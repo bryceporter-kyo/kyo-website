@@ -49,7 +49,7 @@ export default function SupportPage() {
             opacity: 1,
             transition: { staggerChildren: 0.2 }
         }
-    };
+    } as const;
 
     const itemVariants = {
         hidden: { y: 30, opacity: 0 },
@@ -58,7 +58,7 @@ export default function SupportPage() {
             opacity: 1,
             transition: { type: "spring", stiffness: 100, damping: 20 }
         }
-    };
+    } as const;
 
     return (
         <div className="relative overflow-hidden bg-background min-h-screen">
@@ -72,7 +72,7 @@ export default function SupportPage() {
             <PageHeader
                 title="Support KYO"
                 subtitle="Join our community of supporters and help nurture the next generation of musical excellence."
-                image={headerImage}
+                image={headerImage || undefined}
             />
 
             {/* Narrative Section */}

@@ -26,7 +26,7 @@ export default async function ContactPage() {
             <PageHeader
                 title="Contact Us"
                 subtitle="Get in touch with KYO. We're here to answer your questions, hear your feedback, and explore how you can be part of our musical community."
-                image={headerImage}
+                image={headerImage || undefined}
             />
             <section className="container mx-auto py-12 md:py-16">
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

@@ -145,16 +145,16 @@ export default function OrchestrasPage() {
         opacity: 1,
         transition: { staggerChildren: 0.15 }
     }
-  };
+  } as const;
 
   const itemVariants = {
-    hidden: { y: 30, opacity: 0 },
+    hidden: { y: 20, opacity: 0 },
     visible: {
         y: 0,
         opacity: 1,
         transition: { type: "spring", stiffness: 100, damping: 15 }
     }
-  };
+  } as const;
 
   return (
     <div className="relative overflow-hidden bg-background">
@@ -168,7 +168,7 @@ export default function OrchestrasPage() {
       <PageHeader
         title="Find Your Ensemble"
         subtitle="Discover the orchestra or ensemble that’s the perfect fit for your passion and skill level."
-        image={headerImage}
+        image={headerImage || undefined}
       />
 
       {/* Intro Section */}
@@ -579,7 +579,3 @@ export default function OrchestrasPage() {
     </div>
   );
 }
-
-    
-
-    

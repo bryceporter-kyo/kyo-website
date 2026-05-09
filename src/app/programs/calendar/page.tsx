@@ -134,7 +134,7 @@ export default function CalendarPage() {
             opacity: 1,
             transition: { staggerChildren: 0.1 }
         }
-    };
+    } as const;
 
     const itemVariants = {
         hidden: { y: 20, opacity: 0 },
@@ -143,7 +143,7 @@ export default function CalendarPage() {
             opacity: 1,
             transition: { type: "spring", stiffness: 100, damping: 15 }
         }
-    };
+    } as const;
 
     return (
         <div className="relative overflow-hidden bg-background min-h-screen pb-24">
@@ -157,7 +157,7 @@ export default function CalendarPage() {
             <PageHeader
                 title="Events Calendar"
                 subtitle="Stay connected with our rehearsals, concerts, and community events."
-                image={headerImage}
+                image={headerImage || undefined}
             />
 
             <section className="py-24 px-4">

@@ -1,6 +1,7 @@
 
 import PageHeader from "@/components/shared/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar } from "lucide-react";
 import { getLinkById } from "@/lib/links";
 import { getImageById } from "@/lib/image-service-server";
 import Link from "next/link";
@@ -19,7 +20,7 @@ export default async function TermsAndConditionsPage() {
       <PageHeader
         title="Terms & Conditions"
         subtitle="Last updated: October 26, 2023"
-        image={headerImage}
+        image={headerImage || undefined}
       />
       <section className="container mx-auto">
         <div className="max-w-4xl mx-auto space-y-8">
@@ -29,7 +30,7 @@ export default async function TermsAndConditionsPage() {
                 </CardHeader>
                 <CardContent className="space-y-4 text-muted-foreground">
                     <p>Welcome to the Kawartha Youth Orchestra (KYO)! We are delighted to have you as a part of our vibrant musical community. Our mission is to ignite and foster a lifelong love for ensemble music among youth in a safe and supportive environment. The following Terms and Conditions are designed to ensure a clear understanding of the policies and procedures that govern our programs and activities.</p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -38,7 +39,7 @@ export default async function TermsAndConditionsPage() {
                 </CardHeader>
                 <CardContent className="text-muted-foreground">
                     <p>The purpose of these Terms and Conditions is to outline the rights and responsibilities of students, parents, teachers, volunteers, and staff involved with the KYO. By participating in our programs, you agree to adhere to these guidelines to help us maintain a harmonious and effective learning environment.</p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -60,7 +61,7 @@ export default async function TermsAndConditionsPage() {
                         <dd>A scaling program is a financial strategy in which operational costs to administer and finance the program increase proportionally with the number of participants or registrants. Scaling programs are identified by the Finance and Business Committee.</dd>
                         </div>
                     </dl>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
             
             <Card>
@@ -70,7 +71,7 @@ export default async function TermsAndConditionsPage() {
                 <CardContent className="space-y-4 text-muted-foreground">
                     <p>These Terms and Conditions apply to all participants in the KYO, including students, parents or guardians, teachers, volunteers, and staff. They cover a wide range of topics, including financial policies, interactions among youth, teachers, and volunteers, transportation guidelines, behavior expectations, governance, health and safety protocols, privacy and data protection, inclusivity, parental involvement, intellectual property, program-specific policies, complaint mechanisms, termination, and withdrawal procedures, and miscellaneous policies.</p>
                     <p>We believe that clear communication and mutual understanding are key to the success of our programs. We encourage you to read these Terms and Conditions carefully and to reach out to us with any questions or concerns. Together, we can ensure that the Kawartha Youth Orchestra remains a positive and enriching experience for all involved.</p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -95,7 +96,7 @@ export default async function TermsAndConditionsPage() {
 
                     <h4 className="font-bold text-lg font-headline text-foreground">Additional Applicable Legislation</h4>
                     <p>The KYO recognizes that other federal, provincial, and municipal laws may apply to its operations. The organization is committed to ongoing compliance with all relevant legislation to ensure its operations are lawful, ethical, and aligned with best practices.</p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
             
             <Card>
@@ -155,7 +156,7 @@ export default async function TermsAndConditionsPage() {
                     <p><strong>Volunteer Commitment and Scheduling:</strong> After the bursary application is submitted, the registrant will work with the KYO Operations or Program Manager to create a volunteer schedule that fits both the needs of the organization and the individual’s availability. Volunteer hours must be worked during KYO programming times and will be coordinated by the Operations or Program Manager to ensure that the hours align with KYO’s operational needs. Individuals receiving the volunteer bursary are expected to volunteer in a regular, scheduled capacity. This commitment ensures that KYO can rely on consistent support, and it allows the volunteer to meet their bursary obligations in a timely and structured manner.</p>
                     <p><strong>Non-Completion of Volunteer Hours:</strong> If a volunteer fails to meet their agreed-upon volunteer hours, they will be responsible for paying the entire or remaining balance of the program fees, as determined by the Operations Manager. The amount due will be calculated based on the number of hours worked so far. If only a portion of the volunteer hours has been completed, the remaining hours will be converted into a financial obligation. The volunteer bursary program is designed to help those in need while also ensuring that KYO receives the necessary support to keep its programs running smoothly. We encourage all volunteers to stay committed to their agreed schedules to avoid any financial penalties.</p>
 
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -190,7 +191,7 @@ export default async function TermsAndConditionsPage() {
                     <h4 className="font-bold text-lg font-headline text-foreground">Volunteer Engagement</h4>
                     <p><strong>Roles and Responsibilities:</strong> Volunteers must understand their roles and the expectations set forth by KYO, and adhere to all KYO policies and procedures. The KYO provides training for volunteers and ongoing support and resources to ensure volunteers can perform their duties effectively. Volunteers joining the organization from secondary schools requiring their hours to be registered and signed off on must be actively engaged for the entire duration of their volunteering. Hours will only be signed for at the end of the KYO semester.</p>
                     <p><strong>Recognition and Appreciation:</strong> KYO values the contributions of its volunteers and will recognize and appreciate volunteer efforts through regular acknowledgment and formal events. KYO volunteers receive a 100% bursary to any KYO programs they choose to participate in, for the duration of their time volunteering. See our Volunteer Bursaries for more information.</p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -221,7 +222,7 @@ export default async function TermsAndConditionsPage() {
                     <h4 className="font-bold text-lg font-headline text-foreground">Food Safety and Nutrition</h4>
                     <p><strong>Food Preparation:</strong> All food must be prepared and handled in accordance with food safety guidelines to prevent contamination and foodborne illnesses. One member of the KYO staff or volunteers must have their food handlers certificate at all times. The KYO follows all guidelines as set by Public Health Ontario.</p>
                     <p><strong>Allergy Management:</strong> Parents or guardians must inform KYO of any food allergies their child has. This information will be recorded and communicated to staff and volunteers. Efforts will be made to avoid providing snacks that contain common allergens, such as nuts, when students with allergies are present, however, for individuals with life-threatening allergies, the KYO can not guarantee the space will be allergen free, and we recommend parents or guardians visit the space and discuss with program staff before registering their children.</p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -291,7 +292,7 @@ export default async function TermsAndConditionsPage() {
                         <p>Address: P.O. Box 53, 150 King Street, Peterborough, Ontario, K9J 6Y5</p>
                         <p>Email: {itAdminLink ? <Link href={itAdminLink.url} className="text-primary underline">{itAdminLink.url.replace('mailto:', '')}</Link> : 'it-admin@thekyo.ca'}</p>
                     </div>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -309,7 +310,7 @@ export default async function TermsAndConditionsPage() {
                     <p>KYO recognizes the importance of cultural competency in creating an inclusive environment. We are committed to promoting cultural awareness, understanding, and sensitivity among our staff, volunteers, students, and families. The KYO makes reasonable efforts to ensure that our programs and services are culturally responsive and respectful of the diverse backgrounds and experiences of our participants. We encourage open dialogue and collaboration to foster a sense of belonging and mutual respect within our community.</p>
                     <h4 className="font-bold text-lg font-headline text-foreground">Compliance and Accountability</h4>
                     <p>All members of the KYO community are expected to uphold the principles of inclusivity and non-discrimination in their interactions and conduct. Violations of this policy will be promptly investigated, and appropriate corrective action will be taken, which may include education, counseling, disciplinary measures, or termination of enrollment or employment. The KYO is committed to fostering a culture of accountability and continuous improvement in support of our mission to provide equitable access to music education for all.</p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -330,7 +331,7 @@ export default async function TermsAndConditionsPage() {
                     <p>Members have the right to opt out of media release by submitting a written request. Although members can choose to opt out, such opt-outs may limit the member’s participation in certain KYO activities.</p>
                     <h4 className="font-bold text-lg font-headline text-foreground">Enforcement</h4>
                     <p>The KYO reserves the right to take legal action against any individual or entity found to have infringed upon its intellectual property rights. Any member found to have violated this Intellectual Property Policy may be subject to disciplinary action, up to and including termination of membership or legal proceedings.</p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -354,7 +355,7 @@ export default async function TermsAndConditionsPage() {
                         <li><strong>Program Suspension:</strong> If the behavior continues despite previous interventions, the participant may face a temporary suspension from the program, as determined by the program manager. The duration of the suspension will be determined by the severity and recurrence of the behavior. Reinstatement will be contingent upon the participant’s commitment to improved behavior and adherence to the Code of Conduct.</li>
                     </ul>
                     <p>We believe that these guidelines will contribute to a positive and enriching experience for everyone involved in Upbeat!. Thank you for your cooperation and commitment to creating a supportive musical community.</p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -370,7 +371,7 @@ export default async function TermsAndConditionsPage() {
                         <li><strong>Medical Consent:</strong> In the event of an emergency, the participant and their guardians authorize KYO and its representatives to secure medical treatment, including hospitalization, necessary for the participant’s health and safety. The participant and their guardians agree to assume responsibility for any medical costs incurred.</li>
                         <li><strong>Severability:</strong> If any provision of this waiver is found to be unenforceable or invalid, the remaining provisions shall remain in full force and effect.</li>
                     </ul>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -406,7 +407,7 @@ export default async function TermsAndConditionsPage() {
                     <h4 className="font-bold text-lg font-headline text-foreground">Disciplinary Action</h4>
                     <p>Failure to adhere to the guidelines outlined in this Anti-Bullying and Harassment Policy may lead to disciplinary measures, ranging from suspension or expulsion from participation in Kawartha Youth Orchestra programming, to the termination of volunteer or staff positions. The severity and frequency of the behavior will be considered in determining the appropriate course of action.</p>
                     <p>The KYO is committed to maintaining a positive and inclusive environment where everyone can participate and enjoy the benefits of music without fear of bullying or harassment. We believe that by fostering respect and understanding, we can create a vibrant and supportive community for all.</p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -424,7 +425,7 @@ export default async function TermsAndConditionsPage() {
                     <h4 className="font-bold text-lg font-headline text-foreground">Participant Rights</h4>
                     <p>Participation in KYO surveys is entirely voluntary. You may choose to opt out of any survey without affecting your child’s involvement in KYO programs. Additionally, you have the right to access, correct, or request the deletion of your personal data held by the KYO at any time. To exercise these rights, please contact our administrative office.</p>
                     <p>By registering your child in KYO programs, you acknowledge and agree to these terms regarding surveys and data collection. Your cooperation and feedback are invaluable in helping us provide high-quality, accessible music education and fostering a vibrant musical community.</p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -466,7 +467,7 @@ export default async function TermsAndConditionsPage() {
                     </ul>
                     <h4 className="font-bold text-lg font-headline text-foreground">Appeals</h4>
                     <p>A member who disputes the assumed withdrawal status may submit a written appeal to the program manager within 14 days of receiving the assumed withdrawal notification. The program manager will review the appeal and provide a written response within 30 days.</p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
         </div>
       </section>

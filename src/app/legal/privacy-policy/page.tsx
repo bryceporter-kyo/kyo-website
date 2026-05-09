@@ -1,6 +1,7 @@
 
 import PageHeader from "@/components/shared/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar } from "lucide-react";
 import { getLinkById } from "@/lib/links";
 import { getImageById } from "@/lib/image-service-server";
 import Link from "next/link";
@@ -14,7 +15,7 @@ export default async function PrivacyPolicyPage() {
       <PageHeader
         title="Privacy & Cookie Policy"
         subtitle="Last updated: October 26, 2023"
-        image={headerImage}
+        image={headerImage || undefined}
       />
       <section className="container mx-auto">
         <div className="max-w-4xl mx-auto space-y-8">
@@ -37,7 +38,7 @@ export default async function PrivacyPolicyPage() {
                     <p>
                         It is important that you read this Privacy & Cookie Policy together with any other privacy notice or fair processing notice we may provide on specific occasions when we are collecting or processing personal data about you, so that you are fully aware of how and why we are using your data. This Privacy & Cookie Policy supplements the other notices and is not intended to override them.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -69,7 +70,7 @@ export default async function PrivacyPolicyPage() {
                     <p>
                         Please note that if you participate in a survey facilitated by Kawartha Youth Orchestra, this survey may either be administered by us on behalf of a partner or programmed by a third party directly on behalf of that partner. This Privacy Policy will apply to the processing of your survey responses where Kawartha Youth Orchestra administers the survey. Where the survey is administered by a third party, Kawartha Youth Orchestra will not collect, store, or otherwise process your survey results, and the third party and/or partner organization will have in place separate privacy and data security practices that apply.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -117,7 +118,7 @@ export default async function PrivacyPolicyPage() {
                     <p>
                         Please note that this does not apply to the collection of biometric data provided by contractors or consultants in applicable jurisdictions for identity verification purposes. The provision of biometric data is voluntary and will not, in any way, impact our payment obligations to you. However, we may be unable to engage you in any further engagements with Kawartha Youth Orchestra without first completing our identity check.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -128,7 +129,7 @@ export default async function PrivacyPolicyPage() {
                     <p>
                         In accordance with the Personal Information Protection and Electronic Documents Act S.C. 2000, c. 5, we rely on a number of lawful bases to process your personal data.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -148,7 +149,7 @@ export default async function PrivacyPolicyPage() {
                     <p>
                         Your consent is entirely voluntary and failure to provide consent will not prevent us from fulfilling our contractual obligations to you.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -159,7 +160,7 @@ export default async function PrivacyPolicyPage() {
                     <p>
                         Our website uses cookies to enhance functionality and analyze site traffic. Cookies are small text files stored on your device. You can control cookie preferences through your browser settings. Disabling cookies may affect your experience on our site.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -179,7 +180,7 @@ export default async function PrivacyPolicyPage() {
                         <li><strong>Organizational Changes</strong>: In the unlikely event of a merger, dissolution, or transfer of programs to another charitable organization, relevant personal data may be included as part of the transition to ensure continuity of services.</li>
                         <li><strong>Technology Partners</strong>: Kawartha Youth Orchestra may use digital platforms, including tools that incorporate artificial intelligence (AI), to provide you with certain services such as online communications or survey analysis. Should you choose to use these technologies, any personal data provided by you may be shared with the underlying third-party technology provider in accordance with their privacy practices.</li>
                     </ul>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -190,7 +191,7 @@ export default async function PrivacyPolicyPage() {
                     <p>
                         Your personal data may be transferred to and stored by Kawartha Youth Orchestra online using Google infrastructure. Your personal data may also be used and accessed by members of our group, including those across Canada, the USA, and transferred to the third parties disclosed in Section 6 above who are internationally based. Accordingly, your personal data may be processed outside of your country or jurisdiction. If we transfer your personal data outside of your country or jurisdiction, we ensure that the recipient of your personal data has appropriate safeguards in place to protect your personal data.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -201,7 +202,7 @@ export default async function PrivacyPolicyPage() {
                     <p>
                         We have put in place appropriate organisational, technical and physical security measures to prevent your personal data from being accidentally lost, used, accessed in an unauthorised way, altered or disclosed. We limit access to your personal data to those employees, agents, contractors and other third parties who have a business need to know. We have also put in place procedures to deal with any suspected personal data breach and will notify you and any applicable regulator of a breach where we are legally required to do so.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -212,7 +213,7 @@ export default async function PrivacyPolicyPage() {
                     <p>
                         We will only retain your personal data for as long as we believe necessary to fulfil the purposes we collected it for, including for the purposes of satisfying any legal, accounting, reporting, or audit requirements. To determine the appropriate retention period for personal data, we consider the amount, nature, and sensitivity of the personal data, the potential risk of harm from unauthorised use or disclosure of your personal data, the purposes for which we process your personal data and whether we can achieve those purposes through other means, and the applicable legal requirements.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -240,7 +241,7 @@ export default async function PrivacyPolicyPage() {
                     <p>
                         We try to respond to all legitimate requests within one month. Occasionally, it may take us longer than a month if your request is particularly complex or you have made a number of requests.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
 
             <Card>
@@ -251,7 +252,7 @@ export default async function PrivacyPolicyPage() {
                     <p>
                         We hope we can satisfy any queries you may have about the way we process your personal data. If you have any concerns or would like to exercise any of your rights, contact our Data Protection Officer by email at {dpoLink ? <Link href={dpoLink.url} className="text-primary underline">{dpoLink.url.replace('mailto:', '')}</Link> : 'dpo@thekyo.ca'}. We are committed to working with you to obtain a fair resolution of any complaint or concern about your privacy.
                     </p>
-                </CardContent>
+                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
             </Card>
         </div>
       </section>

@@ -48,20 +48,16 @@ export default function TeamPage() {
                 staggerChildren: 0.1
             }
         }
-    };
+    } as const;
 
     const itemVariants = {
         hidden: { y: 20, opacity: 0 },
         visible: {
             y: 0,
             opacity: 1,
-            transition: {
-                type: "spring",
-                stiffness: 100,
-                damping: 15
-            }
+            transition: { type: "spring", stiffness: 100, damping: 15 }
         }
-    };
+    } as const;
 
     return (
         <div className="relative overflow-hidden bg-background">
@@ -74,7 +70,7 @@ export default function TeamPage() {
             <PageHeader
                 title="Our Team"
                 subtitle="Meet the passionate individuals and leaders who make KYO a vibrant place for young musicians to grow. These individuals work tirelessly to inspire young musicians and enrich our community through music."
-                image={headerImage}
+                image={headerImage || undefined}
             />
             <section className="container mx-auto py-20 px-4">
                 <div className="space-y-24">
