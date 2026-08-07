@@ -13,6 +13,7 @@ import { DataProvider } from '@/components/providers/DataProvider';
 import { fetchPageMetadata } from '@/lib/metadata';
 import { Metadata } from 'next';
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
 
 export async function generateMetadata(): Promise<Metadata> {
   const data = await fetchPageMetadata("/");
@@ -54,6 +55,7 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <Analytics />
         </Suspense>
+        <VercelAnalytics />
         <DataProvider>
           <ImageProvider>
             <div className="relative flex min-h-dvh flex-col bg-background">
