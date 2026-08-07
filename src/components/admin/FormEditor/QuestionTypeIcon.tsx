@@ -1,4 +1,3 @@
-
 "use client";
 
 import { QuestionType, QUESTION_TYPE_LABELS } from "@/lib/registration-form";
@@ -16,6 +15,8 @@ import {
   Star,
   Paperclip,
   Minus,
+  Clock,
+  CreditCard,
 } from "lucide-react";
 
 const QUESTION_TYPE_ICONS: Record<QuestionType, React.ReactNode> = {
@@ -25,6 +26,7 @@ const QUESTION_TYPE_ICONS: Record<QuestionType, React.ReactNode> = {
   phone: <Phone className="h-4 w-4" />,
   number: <Hash className="h-4 w-4" />,
   date: <Calendar className="h-4 w-4" />,
+  time: <Clock className="h-4 w-4" />,
   single_choice: <CircleDot className="h-4 w-4" />,
   multiple_choice: <CheckSquare className="h-4 w-4" />,
   dropdown: <ChevronDown className="h-4 w-4" />,
@@ -32,6 +34,7 @@ const QUESTION_TYPE_ICONS: Record<QuestionType, React.ReactNode> = {
   rating: <Star className="h-4 w-4" />,
   file_upload: <Paperclip className="h-4 w-4" />,
   section_header: <Minus className="h-4 w-4" />,
+  payment: <CreditCard className="h-4 w-4" />,
 };
 
 interface QuestionTypeIconProps {

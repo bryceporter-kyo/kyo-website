@@ -15,41 +15,74 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { getLinkById, ExternalLink as ExternalLinkType, fetchLinksFromFirebase } from "@/lib/links";
+import StripeDonationForm from "@/components/shared/StripeDonationForm";
 
 const monthlyTiers = [
-  {
-    title: 'Friend of KYO',
-    amount: '$10',
-    period: '/month',
-    description: 'Provides a student with a season\'s worth of sheet music, unlocking new pieces to learn and master.',
-    features: ['Supports core program needs'],
-    linkId: 'donate-stripe-friend',
-  },
-  {
-    title: 'Supporter',
-    amount: '$25',
-    period: '/month',
-    description: 'Funds a group sectional coaching, giving students direct mentorship from a professional musician.',
-    features: ['Enhances learning experiences', 'Provides expert instruction'],
-    linkId: 'donate-stripe-supporter',
-  },
-  {
-    title: 'Patron',
-    amount: '$50',
-    period: '/month',
-    description: 'Contributes to a partial scholarship, making music education accessible for a deserving student.',
-    features: ['Increases program accessibility', 'Empowers a young musician'],
-    popular: true,
-    linkId: 'donate-stripe-patron',
-  },
-  {
-    title: 'Benefactor',
-    amount: '$100+',
-    period: '/month',
-    description: 'Underwrites a full student scholarship for one year, transforming a young musician\'s life.',
-    features: ['Provides a full year of music', 'Creates a lasting impact'],
-    linkId: 'donate-stripe-benefactor',
-  },
+    {
+        title: 'Friend of KYO',
+        amount: '$10',
+        period: '/month',
+        description: 'Provides a student with a season\'s worth of sheet music, unlocking new pieces to learn and master.',
+        features: ['Supports core program needs'],
+        linkId: 'donate-stripe-friend',
+    },
+    {
+        title: 'Supporter',
+        amount: '$25',
+        period: '/month',
+        description: 'Funds a group sectional coaching, giving students direct mentorship from a professional musician.',
+        features: ['Enhances learning experiences', 'Provides expert instruction'],
+        linkId: 'donate-stripe-supporter',
+    },
+    {
+        title: 'Patron',
+        amount: '$50',
+        period: '/month',
+        description: 'Contributes to a partial scholarship, making music education accessible for a deserving student.',
+        features: ['Increases program accessibility', 'Empowers a young musician'],
+        popular: true,
+        linkId: 'donate-stripe-patron',
+    },
+    {
+        title: 'Benefactor',
+        amount: '$100+',
+        period: '/month',
+        description: 'Underwrites a full student scholarship for one year, transforming a young musician\'s life.',
+        features: ['Provides a full year of music', 'Creates a lasting impact'],
+        linkId: 'donate-stripe-benefactor',
+    },
+];
+
+const oneTimeTiers = [
+    {
+        title: 'Section Supporter',
+        amount: '$25',
+        period: 'one-time',
+        description: 'Covers the cost of printing clean, high-quality orchestrations for an entire section for the concert series.',
+        features: ['Supports section needs'],
+    },
+    {
+        title: 'Instrument Care Partner',
+        amount: '$50',
+        period: 'one-time',
+        description: 'Funds routine maintenance, new strings, or brass slide cleaning for an orchestra-owned instrument.',
+        features: ['Preserves instruments'],
+    },
+    {
+        title: 'Guest Artist Host',
+        amount: '$100',
+        period: 'one-time',
+        description: 'Helps subsidize visiting artists to host educational masterclasses and work with our students.',
+        features: ['Expert coaching access'],
+        popular: true,
+    },
+    {
+        title: 'Concert Patron',
+        amount: '$250',
+        period: 'one-time',
+        description: 'Directly sponsors venue rental and stage equipment setup fees for our seasonal showcase performance.',
+        features: ['Supports concert staging'],
+    },
 ];
 
 const otherDonationMethods = [
@@ -70,12 +103,21 @@ const otherDonationMethods = [
 export default function DonatePage() {
     const { getImage, images } = useImages();
     const [fetchedLinks, setFetchedLinks] = useState<ExternalLinkType[]>([]);
-    
+    const [donationState, setDonationState] = useState<{
+        frequency: 'one-time' | 'monthly';
+        activePresetIndex: number;
+        amount: number;
+    }>({
+        frequency: 'one-time',
+        activePresetIndex: 1,
+        amount: 50,
+    });
+
     const headerImage = getImage('page-header-donate');
     const whyItMattersImage = getImage('donate-why-it-matters');
     const volunteerCtaImage = getImage('volunteer-cta');
     const supporterLogos = images.filter(p => p.category === 'Supporter Logo');
-    
+
     // Special Fund Images - Using verified existing IDs
     const tenutoImage = getImage('hero-concert');
     const instrumentImage = getImage('aid-instruments');
@@ -111,7 +153,7 @@ export default function DonatePage() {
             <section className="py-32 px-4">
                 <div className="container mx-auto">
                     <div className="grid lg:grid-cols-2 gap-20 items-center">
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, x: -40 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
@@ -130,7 +172,7 @@ export default function DonatePage() {
                                     Your donation directly funds everything from sheet music and instrument repairs to scholarships and expert coaching, ensuring that every young person has the chance to experience the power of music.
                                 </p>
                             </div>
-                            
+
                             <div className="flex flex-wrap gap-4 pt-4">
                                 <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 border border-slate-100 text-xs font-medium text-slate-500">
                                     <Shield className="w-4 h-4 text-primary" />
@@ -143,7 +185,7 @@ export default function DonatePage() {
                             </div>
                         </motion.div>
 
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
@@ -167,111 +209,83 @@ export default function DonatePage() {
                 </div>
             </section>
 
-            {/* Donation Methods Tabs */}
+            {/* Donation Methods Section with Embedded Stripe Elements Checkout */}
             <section className="py-32 bg-primary/[0.02]">
                 <div className="container mx-auto px-4">
-                    <Tabs defaultValue="monthly" className="w-full">
-                        <div className="flex flex-col items-center mb-16 space-y-8">
-                            <div className="text-center space-y-4">
-                                <h2 className="text-5xl font-headline font-bold">Invest in a Student</h2>
-                                <p className="text-xl text-muted-foreground font-light max-w-2xl">
-                                    Choose the contribution level that resonates with your passion for youth music.
-                                </p>
-                            </div>
-                            
-                            <TabsList className="h-16 p-2 bg-white shadow-xl rounded-[2rem] border border-primary/10">
-                                <TabsTrigger value="monthly" className="rounded-full px-8 data-[state=active]:bg-primary data-[state=active]:text-white transition-all font-bold">
-                                    <Repeat className="w-4 h-4 mr-2" /> Monthly Support
-                                </TabsTrigger>
-                                <TabsTrigger value="one-time" className="rounded-full px-8 data-[state=active]:bg-primary data-[state=active]:text-white transition-all font-bold">
-                                    <Heart className="w-4 h-4 mr-2" /> One-Time Gift
-                                </TabsTrigger>
-                            </TabsList>
-                        </div>
+                    <div className="text-center mb-16 space-y-4">
+                        <h2 className="text-5xl font-headline font-bold">Invest in a Student</h2>
+                        <p className="text-xl text-muted-foreground font-light max-w-2xl mx-auto">
+                            Choose a contribution level that matches your passion, and complete your gift securely below.
+                        </p>
+                    </div>
 
-                        <TabsContent value="monthly">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                                {monthlyTiers.map((tier) => {
-                                    const tierLink = getLink(tier.linkId);
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start max-w-6xl mx-auto">
+
+                        {/* Preset Impact Details Tiers - Left Column (Stacked Vertically) */}
+                        <div className="lg:col-span-6 space-y-6">
+                            <h3 className="text-sm font-bold uppercase tracking-widest text-primary mb-4 flex items-center gap-2">
+                                <Sparkles className="w-4 h-4" />
+                                Donation Impact Tiers
+                            </h3>
+                            <div className="flex flex-col gap-6">
+                                {(donationState.frequency === 'monthly' ? monthlyTiers : oneTimeTiers).map((tier, index) => {
+                                    const isHighlighted = donationState.activePresetIndex === index;
                                     return (
-                                        <motion.div
-                                            key={tier.title}
-                                            initial={{ opacity: 0, y: 20 }}
-                                            whileInView={{ opacity: 1, y: 0 }}
-                                            viewport={{ once: true }}
+                                        <Card 
+                                            key={tier.title} 
+                                            className={cn(
+                                                "rounded-[2rem] border transition-all duration-300 bg-white p-6",
+                                                isHighlighted 
+                                                    ? "ring-2 ring-primary border-primary bg-primary/[0.02] shadow-lg scale-[1.01]" 
+                                                    : "border-primary/5 hover:shadow-md"
+                                            )}
                                         >
-                                            <Card className={cn(
-                                                "h-full flex flex-col rounded-[2.5rem] overflow-hidden transition-all duration-500 hover:shadow-2xl hover:border-primary/20",
-                                                tier.popular ? "border-primary ring-2 ring-primary/20 bg-primary/[0.01]" : "border-primary/5"
-                                            )}>
-                                                <CardHeader className="p-8 pb-4">
+                                            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                                                {/* Title & Amount (Left Side) */}
+                                                <div className="md:col-span-5 space-y-2">
                                                     {tier.popular && (
-                                                        <Badge className="w-fit mb-4 bg-primary text-white hover:bg-primary border-none">Most Impactful</Badge>
+                                                        <Badge className="w-fit bg-primary text-white border-none text-[9px] uppercase tracking-wider mb-1">Most Common</Badge>
                                                     )}
-                                                    <CardTitle className="text-xl font-headline font-bold">{tier.title}</CardTitle>
-                                                    <div className="flex items-baseline gap-1 pt-4">
-                                                        <span className="text-5xl font-headline font-bold text-primary">{tier.amount}</span>
-                                                        <span className="text-muted-foreground font-light">{tier.period}</span>
+                                                    <CardTitle className={cn(
+                                                        "text-xl font-headline font-bold transition-colors duration-150",
+                                                        isHighlighted ? "text-primary" : "text-slate-800"
+                                                    )}>
+                                                        {tier.title}
+                                                    </CardTitle>
+                                                    <div className="flex items-baseline gap-1">
+                                                        <span className="text-4xl font-headline font-bold text-primary">{tier.amount}</span>
+                                                        <span className="text-muted-foreground text-xs font-light">{tier.period}</span>
                                                     </div>
-                                                    <CardDescription className="pt-4 text-sm leading-relaxed min-h-[80px]">
+                                                </div>
+                                                
+                                                {/* Description (Right Side) */}
+                                                <div className={cn(
+                                                    "md:col-span-7 md:border-l md:pl-6 transition-colors duration-150",
+                                                    isHighlighted ? "border-primary/20" : "border-primary/5"
+                                                )}>
+                                                    <p className={cn(
+                                                        "text-sm md:text-base leading-relaxed font-light transition-colors duration-150",
+                                                        isHighlighted ? "text-slate-900 font-medium" : "text-muted-foreground"
+                                                    )}>
                                                         {tier.description}
-                                                    </CardDescription>
-                                                </CardHeader>
-                                                <CardContent className="px-8 pb-8 flex-grow">
-                                                    <div className="space-y-3 pt-6 border-t border-primary/5">
-                                                        {tier.features.map((feature) => (
-                                                            <div key={feature} className="flex items-start gap-3">
-                                                                <div className="mt-1 w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                                                    <Check className="w-3 h-3 text-primary" />
-                                                                </div>
-                                                                <span className="text-xs text-muted-foreground font-medium">{feature}</span>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </CardContent>
-                                                <CardFooter className="p-8 pt-0">
-                                                    {tierLink && (
-                                                        <Button asChild className="w-full rounded-2xl py-6 bg-primary hover:bg-primary/90 text-white font-bold shadow-lg">
-                                                            <Link href={tierLink.url} target="_blank" rel="noopener noreferrer">Donate Monthly</Link>
-                                                        </Button>
-                                                    )}
-                                                </CardFooter>
-                                            </Card>
-                                        </motion.div>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </Card>
                                     );
                                 })}
                             </div>
-                        </TabsContent>
+                        </div>
 
-                        <TabsContent value="one-time">
-                            <motion.div 
-                                initial={{ opacity: 0, scale: 0.98 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                className="max-w-3xl mx-auto"
-                            >
-                                <Card className="rounded-[3rem] border-primary/10 shadow-2xl overflow-hidden">
-                                    <div className="bg-primary p-12 text-center text-white relative">
-                                        <div className="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('/grid.svg')]" />
-                                        <Heart className="w-16 h-16 mx-auto mb-6 opacity-80" />
-                                        <CardTitle className="text-4xl font-headline font-bold mb-4">Support Our Season</CardTitle>
-                                        <p className="text-white/80 text-lg font-light max-w-xl mx-auto">
-                                            Every single donation, no matter the size, helps us provide essential musical opportunities to local youth.
-                                        </p>
-                                    </div>
-                                    <CardContent className="p-12 text-center space-y-8 bg-white">
-                                        <p className="text-muted-foreground text-lg">Your secure one-time gift will be put to work immediately supporting rehearsals, instrument repairs, and outreach.</p>
-                                        <Button asChild size="lg" className="rounded-2xl px-12 py-8 bg-primary hover:bg-primary/90 text-white text-xl font-bold shadow-xl transition-all hover:scale-105">
-                                            <Link href={getLink('donate-stripe-one-time')?.url || '#'} target="_blank" rel="noopener noreferrer">
-                                                Donate Today
-                                                <ArrowRight className="ml-2 w-6 h-6" />
-                                            </Link>
-                                        </Button>
-                                        <p className="text-sm text-slate-400">Donations over $20 qualify for a charitable tax receipt.</p>
-                                    </CardContent>
-                                </Card>
-                            </motion.div>
-                        </TabsContent>
-                    </Tabs>
+                        {/* Interactive Stripe Payment Element - Right Column */}
+                        <div className="lg:col-span-6 sticky top-28">
+                            <StripeDonationForm 
+                                onStateChange={(frequency, activePresetIndex, amount) => {
+                                    setDonationState({ frequency, activePresetIndex, amount });
+                                }}
+                            />
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -299,7 +313,7 @@ export default function DonatePage() {
                                     <Zap className="w-4 h-4 mr-2" /> Donate Securities
                                 </TabsTrigger>
                             </TabsList>
-                            
+
                             <TabsContent value="canadahelps" className="mt-8">
                                 <Card className="rounded-[2.5rem] border-primary/5 bg-white shadow-xl overflow-hidden group min-h-[400px] flex">
                                     <div className="grid md:grid-cols-12 items-stretch w-full">
@@ -419,29 +433,29 @@ export default function DonatePage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                         {[
-                            { 
-                                icon: Landmark, 
-                                title: "The Tenuto Trust", 
-                                desc: "Contribute to our legacy fund for dependable, long-term support.", 
+                            {
+                                icon: Landmark,
+                                title: "The Tenuto Trust",
+                                desc: "Contribute to our legacy endowment trust, providing reliable, long-term funding to sustain student orchestras for generations.",
                                 img: tenutoImage,
                                 action: (
-                                    <Button asChild variant="link" className="px-0 text-primary font-bold h-auto py-0 group-hover:translate-x-2 transition-transform">
+                                    <Button asChild className="w-full rounded-xl py-5 bg-primary/5 hover:bg-primary text-primary hover:text-white border border-primary/10 transition-all duration-150 font-bold text-xs uppercase tracking-wider">
                                         <Link href={tenutoTrustLink?.url || '#'} target="_blank" rel="noopener noreferrer">
-                                            Learn More <ArrowRight className="ml-2 w-4 h-4" />
+                                            Learn More <ArrowRight className="ml-2 w-4.5 h-4.5" />
                                         </Link>
                                     </Button>
                                 )
                             },
-                            { 
-                                icon: Guitar, 
-                                title: "Donate an Instrument", 
-                                desc: "Let your unused instrument inspire a young musician.", 
+                            {
+                                icon: Guitar,
+                                title: "Donate an Instrument",
+                                desc: "Clear your closet and pass along unused string, brass, or woodwind instruments to support students who cannot afford their own.",
                                 img: instrumentImage,
                                 action: (
                                     <Dialog>
                                         <DialogTrigger asChild>
-                                            <Button variant="link" className="px-0 text-primary font-bold h-auto py-0 group-hover:translate-x-2 transition-transform">
-                                                Learn More <ArrowRight className="ml-2 w-4 h-4" />
+                                            <Button className="w-full rounded-xl py-5 bg-primary/5 hover:bg-primary text-primary hover:text-white border border-primary/10 transition-all duration-150 font-bold text-xs uppercase tracking-wider">
+                                                Learn More <ArrowRight className="ml-2 w-4.5 h-4.5" />
                                             </Button>
                                         </DialogTrigger>
                                         <DialogContent className="max-w-2xl rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden">
@@ -494,8 +508,8 @@ export default function DonatePage() {
                                                     </Accordion>
                                                 </div>
 
-                                                <div className="pt-4 flex justify-end">
-                                                    <Button asChild className="rounded-xl bg-primary hover:bg-primary/90 text-white font-bold px-8 py-6 shadow-lg shadow-primary/20">
+                                                <div className="pt-4 flex justify-center w-full">
+                                                    <Button asChild className="rounded-xl bg-primary hover:bg-primary/90 text-white font-bold px-16 py-6 w-full sm:w-auto shadow-lg shadow-primary/20">
                                                         <Link href="/contact">Contact Our Team to Donate</Link>
                                                     </Button>
                                                 </div>
@@ -504,16 +518,16 @@ export default function DonatePage() {
                                     </Dialog>
                                 )
                             },
-                            { 
-                                icon: Car, 
-                                title: "Donate a Car", 
-                                desc: "Turn your vehicle into musical opportunities.", 
+                            {
+                                icon: Car,
+                                title: "Donate a Car",
+                                desc: "Turn your unused vehicle (car, truck, RV, or boat) into musical opportunities with free towing and a tax receipt.",
                                 img: carImage,
                                 action: (
                                     <Dialog>
                                         <DialogTrigger asChild>
-                                            <Button variant="link" className="px-0 text-primary font-bold h-auto py-0 group-hover:translate-x-2 transition-transform">
-                                                Learn More <ArrowRight className="ml-2 w-4 h-4" />
+                                            <Button className="w-full rounded-xl py-5 bg-primary/5 hover:bg-primary text-primary hover:text-white border border-primary/10 transition-all duration-150 font-bold text-xs uppercase tracking-wider">
+                                                Learn More <ArrowRight className="ml-2 w-4.5 h-4.5" />
                                             </Button>
                                         </DialogTrigger>
                                         <DialogContent className="max-w-2xl rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden">
@@ -539,13 +553,13 @@ export default function DonatePage() {
                                                         Donate a Car Canada will look after all the details to make it easy for the Kawartha Youth Orchestra to benefit. After your vehicle donation is complete, you will receive a tax receipt and we will put your gift to good use.
                                                     </p>
                                                 </div>
-                                                <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-end">
-                                                    <Button asChild variant="outline" className="rounded-xl font-bold border-primary/20">
+                                                <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-center items-center w-full">
+                                                    <Button asChild variant="outline" className="rounded-xl font-bold border-primary/20 px-12 py-6 w-full sm:w-auto">
                                                         <Link href="https://donatecar.ca/org/donate.php?charitypage=KawarthaYouthOrchestra" target="_blank" rel="noopener noreferrer">
-                                                            Learn More <ExternalLink className="ml-2 w-4 h-4" />
+                                                             Learn More <ExternalLink className="ml-2 w-4 h-4" />
                                                         </Link>
                                                     </Button>
-                                                    <Button asChild className="rounded-xl bg-primary hover:bg-primary/90 text-white font-bold shadow-lg shadow-primary/20">
+                                                    <Button asChild className="rounded-xl bg-primary hover:bg-primary/90 text-white font-bold px-12 py-6 w-full sm:w-auto shadow-lg shadow-primary/20">
                                                         <Link href="https://donatecar.ca/org/donate.php?charitypage=KawarthaYouthOrchestra" target="_blank" rel="noopener noreferrer">
                                                             Donate a Vehicle <ArrowRight className="ml-2 w-4 h-4" />
                                                         </Link>
@@ -556,16 +570,16 @@ export default function DonatePage() {
                                     </Dialog>
                                 )
                             },
-                            { 
-                                icon: MessageCircle, 
-                                title: "Custom Donation", 
-                                desc: "Have a specific way you'd like to contribute?", 
+                            {
+                                icon: MessageCircle,
+                                title: "Custom Donation",
+                                desc: "Partner with us through corporate sponsorship, sheet music donations, supply contributions, or professional trades.",
                                 img: customImage,
                                 action: (
                                     <Dialog>
                                         <DialogTrigger asChild>
-                                            <Button variant="link" className="px-0 text-primary font-bold h-auto py-0 group-hover:translate-x-2 transition-transform">
-                                                Contact Us <ArrowRight className="ml-2 w-4 h-4" />
+                                            <Button className="w-full rounded-xl py-5 bg-primary/5 hover:bg-primary text-primary hover:text-white border border-primary/10 transition-all duration-150 font-bold text-xs uppercase tracking-wider">
+                                                Contact Us <ArrowRight className="ml-2 w-4.5 h-4.5" />
                                             </Button>
                                         </DialogTrigger>
                                         <DialogContent className="max-w-2xl rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden">
@@ -617,8 +631,8 @@ export default function DonatePage() {
                                                     This list is just a starting point. We're always open to creative partnerships and in-kind support of all kinds. Contact us to discuss how your gift can make a difference.
                                                 </p>
 
-                                                <div className="pt-4 flex justify-end">
-                                                    <Button asChild className="rounded-xl bg-primary hover:bg-primary/90 text-white font-bold px-8 py-6 shadow-lg shadow-primary/20">
+                                                <div className="pt-4 flex justify-center w-full">
+                                                    <Button asChild className="rounded-xl bg-primary hover:bg-primary/90 text-white font-bold px-16 py-6 w-full sm:w-auto shadow-lg shadow-primary/20">
                                                         <Link href="/contact">Contact Our Team</Link>
                                                     </Button>
                                                 </div>
@@ -674,7 +688,7 @@ export default function DonatePage() {
                             Our work is only possible because of the tremendous generosity of our community, corporate, and government supporters.
                         </p>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-12 items-center max-w-5xl mx-auto grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-700">
                         {supporterLogos.map((logo) => (
                             <div key={logo.id} className="flex justify-center transition-transform hover:scale-110">
@@ -695,7 +709,7 @@ export default function DonatePage() {
             {/* Volunteer CTA */}
             <section className="py-32 px-4">
                 <div className="container mx-auto">
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, y: 40 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
@@ -714,24 +728,22 @@ export default function DonatePage() {
                         )}
                         <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/80 to-transparent" />
 
-                        <div className="relative z-10 grid md:grid-cols-2 gap-12 items-center">
-                            <div className="space-y-8 text-center md:text-left">
-                                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white border border-white/20 text-xs font-bold uppercase tracking-widest">
-                                    <Users className="w-3 h-3" />
-                                    <span>Nurture the Mission</span>
-                                </div>
-                                <h2 className="text-5xl font-headline font-bold leading-tight">Not Ready to Donate?</h2>
-                                <p className="text-xl text-white/80 font-light leading-relaxed max-w-xl mx-auto md:mx-0">
-                                    Your time and talent are just as valuable. Join our dedicated volunteer team and play a crucial role in our mission.
-                                </p>
-                                <div className="pt-4">
-                                    <Button asChild size="lg" className="rounded-2xl px-12 py-8 bg-white text-primary hover:bg-white/90 text-lg font-bold shadow-xl transition-all hover:scale-105">
-                                        <Link href='/support-us/volunteer'>
-                                            Learn About Volunteering
-                                            <ArrowRight className="ml-2 w-5 h-5" />
-                                        </Link>
-                                    </Button>
-                                </div>
+                        <div className="relative z-10 max-w-3xl mx-auto text-center space-y-8">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white border border-white/20 text-xs font-bold uppercase tracking-widest mx-auto">
+                                <Users className="w-3 h-3" />
+                                <span>Nurture the Mission</span>
+                            </div>
+                            <h2 className="text-4xl md:text-5xl font-headline font-bold leading-tight">Support Our Journey with Your Time</h2>
+                            <p className="text-lg md:text-xl text-neutral-100 font-light leading-relaxed max-w-2xl mx-auto">
+                                Your time and unique talents are just as valuable to our students as financial support. Join our dedicated volunteer team to coordinate concerts, assist with rehearsals, or support operations behind the scenes.
+                            </p>
+                            <div className="pt-4 flex justify-center">
+                                <Button asChild size="lg" className="rounded-2xl px-12 py-7 bg-white text-primary hover:bg-white/95 text-lg font-bold shadow-xl transition-all duration-150 hover:scale-105">
+                                    <Link href='/support-us/volunteer'>
+                                        Learn About Volunteering
+                                        <ArrowRight className="ml-2 w-5 h-5 text-primary" />
+                                    </Link>
+                                </Button>
                             </div>
                         </div>
                     </motion.div>

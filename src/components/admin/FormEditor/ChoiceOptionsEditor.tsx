@@ -5,30 +5,61 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2, GripVertical } from "lucide-react";
 
+import { Textarea } from "@/components/ui/textarea";
+
 interface ChoiceOptionsEditorProps {
   options: string[];
+  optionDescriptions?: Record<string, string>;
   allowOther: boolean;
   onChange: (options: string[]) => void;
+  onOptionDescriptionsChange?: (optionDescriptions: Record<string, string>) => void;
   onAllowOtherChange: (val: boolean) => void;
 }
 
 export function ChoiceOptionsEditor({
   options,
+  optionDescriptions = {},
   allowOther,
   onChange,
+  onOptionDescriptionsChange,
   onAllowOtherChange,
 }: ChoiceOptionsEditorProps) {
   const updateOption = (index: number, value: string) => {
     const next = [...options];
+    const oldVal = next[index];
     next[index] = value;
     onChange(next);
+    
+    if (onOptionDescriptionsChange && oldVal !== value && optionDescriptions[oldVal] !== undefined) {
+      const nextDesc = { ...optionDescriptions };
+      nextDesc[value] = nextDesc[oldVal];
+      delete nextDesc[oldVal];
+      onOptionDescriptionsChange(nextDesc);
+    }
+  };
+  
+  const updateDescription = (opt: string, desc: string) => {
+    if (!onOptionDescriptionsChange) return;
+    const nextDesc = { ...optionDescriptions };
+    if (!desc.trim()) {
+      delete nextDesc[opt];
+    } else {
+      nextDesc[opt] = desc;
+    }
+    onOptionDescriptionsChange(nextDesc);
   };
 
   const addOption = () => onChange([...options, `Option ${options.length + 1}`]);
 
   const removeOption = (index: number) => {
     if (options.length <= 1) return;
+    const removedOpt = options[index];
     onChange(options.filter((_, i) => i !== index));
+    if (onOptionDescriptionsChange && optionDescriptions[removedOpt] !== undefined) {
+      const nextDesc = { ...optionDescriptions };
+      delete nextDesc[removedOpt];
+      onOptionDescriptionsChange(nextDesc);
+    }
   };
 
   const moveOption = (from: number, to: number) => {
@@ -65,22 +96,32 @@ export function ChoiceOptionsEditor({
                 ▼
               </button>
             </div>
-            <Input
-              value={opt}
-              onChange={(e) => updateOption(i, e.target.value)}
-              placeholder={`Option ${i + 1}`}
-              className="h-8 text-sm flex-1"
-            />
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-destructive flex-shrink-0"
-              onClick={() => removeOption(i)}
-              disabled={options.length <= 1}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
+            <div className="flex-1 space-y-1">
+              <div className="flex items-center gap-2">
+                <Input
+                  value={opt}
+                  onChange={(e) => updateOption(i, e.target.value)}
+                  placeholder={`Option ${i + 1}`}
+                  className="h-8 text-sm flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-destructive flex-shrink-0"
+                  onClick={() => removeOption(i)}
+                  disabled={options.length <= 1}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+              <Textarea
+                value={optionDescriptions[opt] || ""}
+                onChange={(e) => updateDescription(opt, e.target.value)}
+                placeholder={`Markdown description for ${opt || 'this option'} (optional)...`}
+                className="min-h-[60px] text-xs resize-y"
+              />
+            </div>
           </div>
         ))}
       </div>

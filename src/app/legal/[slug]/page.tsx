@@ -12,13 +12,14 @@ import { Metadata } from "next";
 import { cn } from "@/lib/utils";
 
 interface LegalPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params }: LegalPageProps): Promise<Metadata> {
-  const page = await fetchLegalPageBySlug(params.slug);
+  const { slug } = await params;
+  const page = await fetchLegalPageBySlug(slug);
   
   if (!page) return { title: "Not Found" };
 
@@ -36,7 +37,7 @@ export async function generateMetadata({ params }: LegalPageProps): Promise<Meta
 }
 
 export default async function DynamicLegalPage({ params }: LegalPageProps) {
-  const { slug } = params;
+  const { slug } = await params;
   const page = await fetchLegalPageBySlug(slug);
 
   if (!page) {

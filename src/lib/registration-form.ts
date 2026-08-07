@@ -8,36 +8,53 @@ export type QuestionType =
   | 'phone'            // Phone number input
   | 'number'           // Numeric input
   | 'date'             // Date picker
+  | 'time'             // Time picker
   | 'single_choice'    // Radio buttons — pick one
   | 'multiple_choice'  // Checkboxes — pick many
   | 'dropdown'         // Select dropdown — pick one
   | 'true_false'       // Yes / No radio
   | 'rating'           // 1–5 star / number scale
   | 'file_upload'      // File attachment
-  | 'section_header';  // Visual divider, not a real input
+  | 'section_header'
+  | 'payment';  // Visual divider, not a real input
 
 export interface FormQuestion {
   id: string;
   type: QuestionType;
   label: string;
   helpText?: string;
+  tooltip?: string;
   placeholder?: string;
   required: boolean;
   order: number;
   // For choice-based types
   options?: string[];
+  optionDescriptions?: Record<string, string>;
   allowOther?: boolean;  // Adds an "Other (please specify)" option
   // For number / rating types
   min?: number;
   max?: number;
+  // For text types
+  minLength?: number;
+  maxLength?: number;
+  // For date types
+  minDate?: string;
+  maxDate?: string;
   // For file_upload types
   acceptedFileTypes?: string; // e.g. '.pdf,.doc,.docx'
   maxFileSizeMb?: number;
+  // For payment types
+  paymentAmount?: number;
   // For section_header types
   description?: string;
   // Attachments
   imageUrl?: string;
   links?: { label: string; url: string }[];
+  // Conditional Logic
+  showIf?: {
+    dependsOnId: string;
+    equalsValue: string;
+  };
 }
 
 // ─── Form Configuration ───────────────────────────────────────────────────────
@@ -63,6 +80,10 @@ export interface RegistrationFormConfig {
   questions: FormQuestion[];
   updatedAt?: string;
   updatedBy?: string;
+  // Export Tracking
+  lastExportedAt?: string;
+  lastExportedBy?: string;
+  submissionsSinceExport?: number;
 }
 
 // ─── Default / Factory Helpers ────────────────────────────────────────────────
@@ -90,6 +111,7 @@ export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
   phone: 'Phone Number',
   number: 'Number',
   date: 'Date',
+  time: 'Time',
   single_choice: 'Single Choice (Radio)',
   multiple_choice: 'Multiple Choice (Checkbox)',
   dropdown: 'Dropdown',
@@ -97,6 +119,7 @@ export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
   rating: 'Rating Scale',
   file_upload: 'File Upload',
   section_header: 'Section Header',
+  payment: 'Stripe Payment',
 };
 
 export const DEFAULT_ORCHESTRAS_FORM: RegistrationFormConfig = {
@@ -128,3 +151,24 @@ export const DEFAULT_UPBEAT_FORM: RegistrationFormConfig = {
   questions: [],
   updatedAt: new Date().toISOString(),
 };
+
+// ─── ID Generation Utility ────────────────────────────────────────────────────
+
+/**
+ * Generates a unique question ID in the format: [Program]_RRRR_YYMMDD
+ * R = random alphanumeric char
+ */
+export function generateQuestionId(program: string): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let rand = '';
+  for (let i = 0; i < 4; i++) {
+    rand += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  
+  const d = new Date();
+  const yy = String(d.getFullYear()).slice(-2);
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  
+  return `${program}_${rand}_${yy}${mm}${dd}`;
+}

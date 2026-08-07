@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -93,7 +92,7 @@ export default function TeamPage() {
                                 ))}
                             </div>
                         ) : (
-                            <motion.div 
+                            <motion.div
                                 variants={containerVariants}
                                 initial="hidden"
                                 whileInView="visible"
@@ -102,7 +101,7 @@ export default function TeamPage() {
                             >
                                 {instructors.map((instructor) => (
                                     <motion.div key={instructor.id} variants={itemVariants}>
-                                        <InstructorCard 
+                                        <InstructorCard
                                             name={instructor.name}
                                             title={instructor.title}
                                             bio={instructor.bio ?? ''}
@@ -133,16 +132,16 @@ export default function TeamPage() {
                                 ))}
                             </div>
                         ) : (
-                            <motion.div 
+                            <motion.div
                                 variants={containerVariants}
                                 initial="hidden"
                                 whileInView="visible"
                                 viewport={{ once: true, margin: "-100px" }}
                                 className="grid grid-cols-1 lg:grid-cols-3 gap-10"
                             >
-                               {sortedBoard.map((member) => (
+                                {sortedBoard.map((member) => (
                                     <motion.div key={member.id} variants={itemVariants}>
-                                        <InstructorCard 
+                                        <InstructorCard
                                             name={member.name}
                                             title={member.title}
                                             bio={member.bio ?? ''}
@@ -157,7 +156,7 @@ export default function TeamPage() {
                 </div>
 
                 {/* Join the Team CTA */}
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -166,7 +165,7 @@ export default function TeamPage() {
                     <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent)] z-0" />
                     <div className="relative z-10">
                         <h3 className="text-4xl md:text-5xl font-headline font-bold mb-6">Want to Join Our Mission?</h3>
-                        <p className="text-xl text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed font-light">
+                        <p className="text-xl text-neutral-100 max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
                             We're always looking for passionate educators and leaders to help us inspire the next generation of musicians.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-6 justify-center">

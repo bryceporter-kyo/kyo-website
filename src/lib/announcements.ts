@@ -15,6 +15,7 @@ export type Announcement = {
   attachments?: { name: string; url: string }[];
   disappearsAt?: string;
   unpinsAt?: string;
+  popupPage?: string;
 };
 
 // Firestore collection name
@@ -25,23 +26,6 @@ const sortAnnouncements = (announcements: Announcement[]) => {
     return announcements.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 };
 
-/**
- * Gets all announcements from local JSON (legacy fallback), formats the date, and sorts them.
- * This is a pure function with no side effects.
- */
-export function getAnnouncements(): Announcement[] {
-  // Use require inside the function to avoid Turbopack HMR module pattern issues
-  const data = require('./announcements.json');
-  const rawAnnouncements = data.announcements as any[];
-  
-  const processed = rawAnnouncements.map((a, i) => ({
-    ...a,
-    id: String(a.id || i + 1),
-    date: format(new Date(`${a.date}T00:00:00`), 'MMMM d, yyyy'),
-    pinned: i === 0, // Pin the first announcement by default for demo
-  }));
-  return sortAnnouncements(processed);
-}
 
 /**
  * Fetch all announcements from Firebase Firestore
@@ -53,9 +37,7 @@ export async function fetchAnnouncementsFromFirebase(): Promise<Announcement[]> 
     const snapshot = await getDocs(q);
     
     if (snapshot.empty) {
-      // If no announcements in Firebase, return legacy announcements
-      console.log('[Announcements] No announcements in Firebase, using legacy data');
-      return getAnnouncements();
+      return [];
     }
     
     const now = new Date();
@@ -85,8 +67,7 @@ export async function fetchAnnouncementsFromFirebase(): Promise<Announcement[]> 
       });
   } catch (error) {
     console.error('[Announcements] Error fetching from Firebase:', error);
-    // Fallback to legacy announcements
-    return getAnnouncements();
+    return [];
   }
 }
 

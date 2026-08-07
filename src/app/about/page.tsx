@@ -89,7 +89,7 @@ export default function AboutPage() {
     const [seasonsOfExcellence, setSeasonsOfExcellence] = React.useState<number | null>(null);
 
     React.useEffect(() => {
-        const startDate = new Date(2002, 8, 19); // September 19, 2002
+        const startDate = new Date(2002, 8, 2); // September 2, 2002
         const today = new Date();
         let diffYears = today.getFullYear() - startDate.getFullYear();
         

@@ -5,7 +5,7 @@ import { saveRegistrationSubmission } from '@/lib/registration-submission-servic
 
 export async function POST(req: Request) {
   try {
-    const { program, answers } = await req.json();
+    const { program, answers, uid } = await req.json();
 
     if (!program || !answers) {
       return NextResponse.json({ success: false, error: "Missing program or answers" }, { status: 400 });
@@ -23,20 +23,39 @@ export async function POST(req: Request) {
       formId: config.id,
       formTitle: config.title,
       answers,
+      uid,
     });
 
     // 3. Trigger Google Sheets Webhook if configured
     if (config.webhookUrl) {
       console.log(`[API] Triggering webhook for ${program}: ${config.webhookUrl}`);
       
-      // Flatten answers for easier consumption in Google Sheets
-      // We also include metadata
+      // Map answers from question.id to question.label for the Google Sheet
+      const humanReadableAnswers: Record<string, any> = {};
+      Object.entries(answers).forEach(([qId, val]) => {
+        const question = config.questions.find(q => q.id === qId);
+        if (question && question.type !== 'section_header') {
+          humanReadableAnswers[question.label] = val;
+        }
+      });
+
+      const orderedHeaders = [
+        "Submission_ID",
+        "Submitted_At",
+        "Form_Title",
+        "Program",
+        ...config.questions.filter(q => q.type !== 'section_header').map(q => q.label)
+      ];
+
       const payload = {
-        _submissionId: submissionId,
-        _submittedAt: new Date().toISOString(),
-        _formTitle: config.title,
-        _program: program,
-        ...answers
+        orderedHeaders,
+        data: {
+          Submission_ID: submissionId,
+          Submitted_At: new Date().toISOString(),
+          Form_Title: config.title,
+          Program: program,
+          ...humanReadableAnswers
+        }
       };
 
       try {

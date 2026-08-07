@@ -81,7 +81,7 @@ export default function CookieConsent() {
             <CardTitle className="font-headline text-2xl">We Use Cookies to Improve Your Experience</CardTitle>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="max-h-[60vh] overflow-y-auto pr-6">
           {!showDetails ? (
             <p className="text-muted-foreground">
               The Kawartha Youth Orchestra (KYO) uses cookies to help our website run smoothly and to understand how visitors use our site. This information helps us improve our programs, communications, and community outreach. We only collect data that supports our charitable mission, and we do not use cookies for advertising or commercial profiling.

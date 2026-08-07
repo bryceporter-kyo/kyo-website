@@ -255,7 +255,7 @@ export default function UpbeatPage() {
                     </p>
                     <div className="flex flex-col sm:flex-row gap-5">
                       {enrollButton && (
-                        <Button asChild size="lg" className="rounded-full px-10 py-7 text-lg shadow-xl hover:scale-105 transition-all">
+                        <Button asChild size="lg" className="rounded-full px-10 py-7 text-lg shadow-xl hover:scale-105 transition-all bg-primary text-primary-foreground hover:bg-primary/90 border border-primary/20 font-bold">
                             <Link href={enrollButton.href} target={enrollButton.target}>{enrollButton.text}</Link>
                         </Button>
                       )}
@@ -640,7 +640,7 @@ export default function UpbeatPage() {
                         Join the Mission
                     </div>
                     <h3 className="text-4xl md:text-6xl font-headline font-bold mb-8">Help Us Change Lives Through Music</h3>
-                    <p className="text-xl text-white/70 max-w-3xl mx-auto mb-16 leading-relaxed font-light">
+                    <p className="text-xl text-neutral-100 max-w-3xl mx-auto mb-16 leading-relaxed font-medium">
                         Upbeat! is a fully subsidized program that relies on the generosity of our community. Your gift directly funds instruments, professional instruction, and essential wellness support.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">

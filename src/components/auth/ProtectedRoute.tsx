@@ -15,13 +15,16 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Skip redirect if on login page
-    if (pathname === "/admin/login") {
-      return;
-    }
+    if (loading) return;
 
-    if (!loading && !isAuthenticated) {
-      router.push("/admin/login");
+    if (pathname === "/admin/login") {
+      if (isAuthenticated) {
+        router.push("/admin");
+      }
+    } else {
+      if (!isAuthenticated) {
+        router.push("/admin/login");
+      }
     }
   }, [loading, isAuthenticated, router, pathname]);
 
@@ -39,9 +42,8 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   // Allow access to login page without authentication
   if (pathname === "/admin/login") {
-    // If already authenticated, redirect to admin dashboard
+    // If already authenticated, redirecting state
     if (isAuthenticated) {
-      router.push("/admin");
       return (
         <div className="min-h-screen flex items-center justify-center">
           <div className="flex flex-col items-center gap-4">

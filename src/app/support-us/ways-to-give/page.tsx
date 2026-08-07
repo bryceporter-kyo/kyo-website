@@ -232,7 +232,7 @@ export default function SupportPage() {
                                     <span>Join the Legacy</span>
                                 </div>
                                 <h2 className="text-5xl font-headline font-bold leading-tight">Become a Benefactor</h2>
-                                <p className="text-xl text-white/80 font-light leading-relaxed max-w-xl">
+                                <p className="text-xl text-neutral-100 font-medium leading-relaxed max-w-xl">
                                     Your contribution, whether time, talent, or a donation, is an investment in the future of arts and culture in our community. Join us and make a lasting impact.
                                 </p>
                                 <div className="pt-4">

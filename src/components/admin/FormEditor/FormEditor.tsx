@@ -38,6 +38,8 @@ import {
   CheckCircle,
   Zap,
 } from "lucide-react";
+import { CsvManagerDialog } from "@/components/shared/CsvManagerDialog";
+import { generateQuestionId } from "@/lib/registration-form";
 import { cn } from "@/lib/utils";
 
 const TYPE_GROUPS: { label: string; types: QuestionType[] }[] = [
@@ -51,7 +53,7 @@ const TYPE_GROUPS: { label: string; types: QuestionType[] }[] = [
   },
   {
     label: "Other",
-    types: ["rating", "file_upload", "section_header"],
+    types: ["rating", "file_upload", "section_header", "payment"],
   },
 ];
 
@@ -67,6 +69,7 @@ export function FormEditor({ initialConfig, onSave, publicUrl }: FormEditorProps
   const [config, setConfig] = useState<RegistrationFormConfig>(initialConfig);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [expandedIds, setExpandedIds] = useState<string[]>([]);
 
   // ── Config-level helpers ────────────────────────────────────────────────────
 
@@ -81,6 +84,7 @@ export function FormEditor({ initialConfig, onSave, publicUrl }: FormEditorProps
       ...c,
       questions: [...c.questions, q],
     }));
+    setExpandedIds((prev) => [...prev, q.id]);
   };
 
   const updateQuestion = useCallback((updated: FormQuestion) => {
@@ -126,7 +130,140 @@ export function FormEditor({ initialConfig, onSave, publicUrl }: FormEditorProps
     }
   };
 
+
+  // ── CSV Import/Export ───────────────────────────────────────────────────────
+  
+  const generateSchemaExport = () => {
+    let currentSection = "";
+    
+    return config.questions.map(q => {
+      if (q.type === 'section_header') {
+        currentSection = q.label;
+      }
+      
+      const validationRules = [];
+      if (q.min !== undefined) validationRules.push(`min=${q.min}`);
+      if (q.max !== undefined) validationRules.push(`max=${q.max}`);
+      if (q.minLength !== undefined) validationRules.push(`minLength=${q.minLength}`);
+      if (q.maxLength !== undefined) validationRules.push(`maxLength=${q.maxLength}`);
+      if (q.minDate !== undefined) validationRules.push(`minDate=${q.minDate}`);
+      if (q.maxDate !== undefined) validationRules.push(`maxDate=${q.maxDate}`);
+      
+      let reqCond = q.required ? "TRUE" : "FALSE";
+      if (q.showIf) {
+        reqCond = `IF(${q.showIf.dependsOnId}=${q.showIf.equalsValue})`;
+      }
+      
+      return {
+        "Section": currentSection,
+        "Field Name": q.id,
+        "Question Title": q.label,
+        "Description": q.type === 'section_header' ? (q.description || "") : (q.helpText || ""),
+        "Tooltip": q.tooltip || "",
+        "Response Type": q.type,
+        "Required/Conditional": reqCond,
+        "Options": q.options ? q.options.map(opt => q.optionDescriptions?.[opt] ? `${opt}::${q.optionDescriptions[opt]}` : opt).join(" | ") : "",
+        "Validation Rules": validationRules.join(";")
+      };
+    });
+  };
+
+  const handleSchemaImport = async (data: any[]) => {
+    const newQuestions: FormQuestion[] = [];
+    let currentSectionTitle = "";
+    let order = 0;
+    
+    for (const row of data) {
+      const section = row["Section"]?.trim();
+      
+      // Auto-insert section header if section changes and it's not explicitly a section_header row
+      if (section && section !== currentSectionTitle && row["Response Type"] !== 'section_header') {
+        newQuestions.push({
+          id: generateQuestionId(config.id),
+          type: 'section_header',
+          label: section,
+          required: false,
+          order: order++
+        });
+        currentSectionTitle = section;
+      } else if (row["Response Type"] === 'section_header') {
+        currentSectionTitle = row["Question Title"]?.trim() || "";
+      }
+      
+      // Validation Parsing
+      let min, max, minLength, maxLength, minDate, maxDate;
+      const valString = row["Validation Rules"] || "";
+      valString.split(";").forEach((rule: string) => {
+        const [key, val] = rule.split("=");
+        if (!key || !val) return;
+        if (key.trim() === "min") min = Number(val);
+        if (key.trim() === "max") max = Number(val);
+        if (key.trim() === "minLength") minLength = Number(val);
+        if (key.trim() === "maxLength") maxLength = Number(val);
+        if (key.trim() === "minDate") minDate = val.trim();
+        if (key.trim() === "maxDate") maxDate = val.trim();
+      });
+      
+      // Required / Conditional Parsing
+      const reqStr = String(row["Required/Conditional"] || "").trim().toUpperCase();
+      let required = false;
+      let showIf = undefined;
+      
+      if (reqStr === "TRUE") required = true;
+      else if (reqStr.startsWith("IF(")) {
+        const match = reqStr.match(/IF\((.*?)=(.*?)\)/);
+        if (match) {
+          showIf = { dependsOnId: match[1], equalsValue: match[2] };
+        }
+      }
+      
+      let parsedOptions: string[] | undefined = undefined;
+      let parsedDescriptions: Record<string, string> | undefined = undefined;
+      
+      if (row["Options"]) {
+        parsedOptions = [];
+        parsedDescriptions = {};
+        row["Options"].split("|").forEach((o: string) => {
+          const trimmed = o.trim();
+          if (trimmed.includes("::")) {
+            const parts = trimmed.split("::");
+            const optName = parts[0].trim();
+            const optDesc = parts.slice(1).join("::").trim();
+            parsedOptions!.push(optName);
+            if (optDesc) parsedDescriptions![optName] = optDesc;
+          } else {
+            parsedOptions!.push(trimmed);
+          }
+        });
+        if (Object.keys(parsedDescriptions).length === 0) {
+          parsedDescriptions = undefined;
+        }
+      }
+
+      const q: any = {
+        id: row["Field Name"]?.trim() || generateQuestionId(config.id),
+        type: (row["Response Type"]?.trim() as QuestionType) || 'short_text',
+        label: row["Question Title"]?.trim() || "Untitled Question",
+        helpText: row["Response Type"] === 'section_header' ? undefined : row["Description"],
+        description: row["Response Type"] === 'section_header' ? row["Description"] : undefined,
+        tooltip: row["Tooltip"] || undefined,
+        required,
+        showIf,
+        options: parsedOptions,
+        optionDescriptions: parsedDescriptions,
+        min, max, minLength, maxLength, minDate, maxDate,
+        order: order++
+      };
+
+      Object.keys(q).forEach(key => q[key] === undefined && delete q[key]);
+      newQuestions.push(q as FormQuestion);
+    }
+    
+    setConfig(c => ({ ...c, questions: newQuestions }));
+  };
+
   // ── Render ──────────────────────────────────────────────────────────────────
+
 
   return (
     <div className="space-y-6">
@@ -169,8 +306,53 @@ export function FormEditor({ initialConfig, onSave, publicUrl }: FormEditorProps
           </Button>
         </div>
 
-        {/* Save Button */}
-        <Button
+
+        {/* CSV Tools & Save Button */}
+        <div className="flex items-center gap-2">
+          <CsvManagerDialog
+            title="Import/Export Questions"
+            description="Manage the form schema via CSV."
+            instructionText={`# Form Schema Import/Export Instructions
+
+This tool allows you to backup, restore, and bulk-edit your form's schema using a CSV file.
+
+## CSV Columns
+
+1. **Section:** The title of the section this question belongs to. If this changes, a new section will automatically be created.
+2. **Field Name:** A unique identifier for the field (e.g. \`first_name\`). If left blank, a unique one will be generated automatically.
+3. **Question Title:** The label displayed to the user. **Supports Markdown** (e.g., \`**Bold**\`, \`*Italics*\`).
+4. **Description:** The help text displayed below the question. **Supports Markdown**.
+5. **Tooltip:** Optional text shown when a user hovers over the info icon.
+6. **Response Type:** Must be one of the supported types:
+   - \`short_text\`, \`long_text\`, \`email\`, \`phone\`, \`number\`, \`date\`, \`time\`
+   - \`single_choice\`, \`multiple_choice\`, \`dropdown\`, \`true_false\`
+   - \`rating\`, \`file_upload\`, \`section_header\`
+7. **Required/Conditional:** 
+   - \`TRUE\` for required
+   - \`FALSE\` for optional
+   - \`IF(field_name=value)\` to show this question conditionally based on another field.
+8. **Options:** For choice-based questions, separate options with a pipe \`|\` (e.g. \`Option A | Option B\`).
+9. **Validation Rules:** Semicolon-separated rules.
+   - Text/Email/Phone: \`minLength=X;maxLength=Y\`
+   - Number: \`min=X;max=Y\`
+   - Date: \`minDate=YYYY-MM-DD;maxDate=YYYY-MM-DD\`
+
+## Markdown Rules
+
+Both the **Question Title** and **Description** fields support Markdown formatting. 
+- Use \`**text**\` for bold.
+- Use \`*text*\` for italics.
+- Use \`[link](https://example.com)\` for links.
+- Use \`- item\` for bulleted lists.
+- Include line breaks in your CSV cells by pressing Alt+Enter (or Option+Enter) in Excel/Google Sheets.`}
+            templateHeaders={["Section", "Field Name", "Question Title", "Description", "Tooltip", "Response Type", "Required/Conditional", "Options", "Validation Rules"]}
+            templateSampleRow={["Student Info", "", "First Name", "Enter your legal first name", "", "short_text", "TRUE", "", "minLength=2;maxLength=50"]}
+            existingData={generateSchemaExport()}
+            onUpload={(data, mode) => handleSchemaImport(data)}
+            triggerButtonText="Import / Export Schema"
+          />
+          <Button
+
           onClick={handleSave}
           disabled={saveStatus === "saving"}
           className="gap-2"
@@ -186,6 +368,7 @@ export function FormEditor({ initialConfig, onSave, publicUrl }: FormEditorProps
             <><Save className="h-4 w-4" /> Save Form</>
           )}
         </Button>
+        </div>
       </div>
 
       {/* Save Error */}
@@ -350,6 +533,20 @@ export function FormEditor({ initialConfig, onSave, publicUrl }: FormEditorProps
               ({config.questions.length})
             </span>
           </h2>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              if (expandedIds.length === config.questions.length && config.questions.length > 0) {
+                setExpandedIds([]);
+              } else {
+                setExpandedIds(config.questions.map(q => q.id));
+              }
+            }}
+            className="h-8 text-xs text-muted-foreground"
+          >
+            {expandedIds.length === config.questions.length && config.questions.length > 0 ? "Collapse All" : "Expand All"}
+          </Button>
         </div>
 
         {config.questions.length === 0 && (
@@ -360,16 +557,25 @@ export function FormEditor({ initialConfig, onSave, publicUrl }: FormEditorProps
         )}
 
         <div className="space-y-2">
-          {config.questions.map((q, i) => (
+          {config.questions.map((q, idx) => (
             <QuestionCard
               key={q.id}
               question={q}
-              index={i}
+              index={idx}
               total={config.questions.length}
+              allQuestions={config.questions}
               onChange={updateQuestion}
               onDelete={() => deleteQuestion(q.id)}
               onMoveUp={() => moveQuestion(q.id, "up")}
               onMoveDown={() => moveQuestion(q.id, "down")}
+              isExpanded={expandedIds.includes(q.id)}
+              onToggleExpand={(expanded) => {
+                if (expanded) {
+                  setExpandedIds((prev) => [...prev, q.id]);
+                } else {
+                  setExpandedIds((prev) => prev.filter(id => id !== q.id));
+                }
+              }}
             />
           ))}
         </div>
@@ -383,7 +589,7 @@ export function FormEditor({ initialConfig, onSave, publicUrl }: FormEditorProps
               <ChevronDown className="h-4 w-4 ml-auto" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-64" align="center">
+          <DropdownMenuContent className="w-64 max-h-[50vh] overflow-y-auto" align="center">
             {TYPE_GROUPS.map((group, gi) => (
               <DropdownMenuGroup key={group.label}>
                 {gi > 0 && <DropdownMenuSeparator />}

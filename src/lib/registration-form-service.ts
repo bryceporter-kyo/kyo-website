@@ -44,9 +44,13 @@ export async function saveRegistrationForm(
   updatedBy?: string
 ): Promise<void> {
   const { id, ...data } = config;
+  
+  // Firestore crashes if an object contains `undefined` values. Strip them out.
+  const cleanData = JSON.parse(JSON.stringify(data));
+
   const ref = doc(db, COLLECTION, id);
   await setDoc(ref, {
-    ...data,
+    ...cleanData,
     updatedAt: new Date().toISOString(),
     updatedBy: updatedBy ?? null,
   });

@@ -190,6 +190,8 @@ export default function Home() {
                     key={slide.image.id}
                     className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === activeIndex ? 'opacity-100 z-0' : 'opacity-0 -z-10'}`}
                     style={{ y }}
+                    animate={index === activeIndex ? { scale: [1.0, 1.08] } : { scale: 1.0 }}
+                    transition={{ duration: 7, ease: "linear" }}
                 >
                     <Image
                         src={slide.image.imageUrl}
@@ -203,33 +205,57 @@ export default function Home() {
                 )
             ))}
             <div className="absolute inset-0 bg-black/50 z-10" />
-            <div className="relative z-20 container mx-auto px-4 md:px-6">
+            <div className="relative z-20 container mx-auto px-4 md:px-6 w-full h-full">
                 {heroSlides.map((slide, index) => (
                 <div
                     key={slide.id}
-                    className={`absolute inset-0 flex flex-col justify-center items-center transition-all duration-1000 ease-out ${index === activeIndex ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
+                    className={`absolute inset-0 flex flex-col justify-center items-center px-4 ${index === activeIndex ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
                 >
-                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-headline font-bold tracking-tight">
+                    <motion.h1 
+                        className="text-4xl md:text-6xl lg:text-7xl font-headline font-bold tracking-tight"
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={index === activeIndex ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+                        transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+                    >
                         {slide.title}
-                    </h1>
-                    <p className="mt-4 max-w-3xl mx-auto text-lg md:text-xl text-neutral-200">
+                    </motion.h1>
+                    <motion.p 
+                        className="mt-6 max-w-3xl mx-auto text-lg md:text-xl/relaxed text-neutral-100 font-medium"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={index === activeIndex ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                        transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+                    >
                         {slide.subtitle}
-                    </p>
-                    <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+                    </motion.p>
+                    <motion.div 
+                        className="mt-8 flex flex-col sm:flex-row gap-4 justify-center"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={index === activeIndex ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                        transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
+                    >
                         {(index === 2 ? slide3Buttons : slide.buttons).map((button) => {
                           if (!button) return null;
                           const isExternal = 'target' in button && button.target === '_blank';
                           const variant = 'variant' in button ? button.variant : 'default';
                         
                           return (
-                              <Button key={button.text} asChild size="lg" variant={variant === 'outline' ? 'outline' : 'default'} className={variant === 'outline' ? "bg-transparent border-white text-white hover:bg-white hover:text-primary" : "font-bold"}>
+                              <Button 
+                                key={button.text} 
+                                asChild 
+                                size="lg" 
+                                variant={variant === 'outline' ? 'outline' : 'default'} 
+                                className={variant === 'outline' 
+                                  ? "bg-transparent border-white text-white hover:bg-white hover:text-primary hover:scale-105 transition-all duration-300 font-bold" 
+                                  : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-lg hover:scale-105 transition-all border border-primary/20 font-bold"
+                                }
+                              >
                               <Link href={button.href} target={isExternal ? "_blank" : "_self"} rel={isExternal ? "noopener noreferrer" : ""}>
                                   {button.text}
                               </Link>
                               </Button>
                           )
                         })}
-                    </div>
+                    </motion.div>
                 </div>
                 ))}
             </div>
@@ -261,7 +287,7 @@ export default function Home() {
                         )}
                         <CardHeader>
                             <div className="flex items-center gap-4">
-                            <program.icon className="w-8 h-8 text-primary transition-transform duration-300 group-hover:scale-110" />
+                            <program.icon className="w-8 h-8 text-primary transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 group-hover:text-primary" />
                             <CardTitle className="font-headline text-2xl">{program.title}</CardTitle>
                             </div>
                         </CardHeader>
@@ -290,9 +316,9 @@ export default function Home() {
                             <StaggerContainer>
                                 {coreValues.map(value => (
                                     <StaggerItem key={value.title} direction="left" distance={20}>
-                                        <Card className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1 mb-4 border-l-4 border-l-transparent hover:border-l-primary">
+                                        <Card className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1 mb-4 border-l-4 border-l-transparent hover:border-l-primary group">
                                             <CardHeader className="flex flex-row items-center gap-4">
-                                                <value.icon className="w-8 h-8 text-primary"/>
+                                                <value.icon className="w-8 h-8 text-primary transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 group-hover:text-primary"/>
                                                 <CardTitle className="font-headline text-xl">{value.title}</CardTitle>
                                             </CardHeader>
                                             <CardContent>
@@ -349,9 +375,10 @@ export default function Home() {
             </section>
 
 
-            <section id="news" className="bg-secondary">
-                <div className="container mx-auto">
-                    <FadeIn className="text-center">
+            {announcements.length > 0 && (
+                <section id="news" className="bg-secondary">
+                    <div className="container mx-auto">
+                        <FadeIn className="text-center">
                     <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-4xl md:text-5xl">Latest News</h2>
                     <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mt-4">
                         Stay up-to-date with the latest happenings at the Kawartha Youth Orchestra.
@@ -393,8 +420,9 @@ export default function Home() {
                             </StaggerItem>
                         ))}
                     </StaggerContainer>
-                </div>
-            </section>
+                    </div>
+                </section>
+            )}
 
             <section className="bg-background overflow-hidden">
             <div className="container mx-auto">
@@ -469,7 +497,7 @@ export default function Home() {
                         ))}
                     </StaggerContainer>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-                        <Button asChild size="lg" className="transition-transform duration-300 hover:-translate-y-1">
+                        <Button asChild size="lg" className="transition-transform duration-300 hover:-translate-y-1 bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-lg border border-primary/20 font-bold">
                             <Link href='/support-us/donate'>Donate Now</Link>
                         </Button>
                         {contactLink && (

@@ -28,7 +28,7 @@ import * as path from 'path';
 
 // Import JSON data
 import eventsData from '../src/lib/events.json';
-import announcementsData from '../src/lib/announcements.json';
+
 import staffData from '../src/lib/staff.json';
 import linksData from '../src/lib/links.json';
 import buttonsData from '../src/lib/buttons.json';
@@ -115,33 +115,6 @@ async function seedEvents(): Promise<SeedResult> {
   }
 }
 
-async function seedAnnouncements(): Promise<SeedResult> {
-  const collectionName = 'announcements';
-  try {
-    const isEmpty = await checkCollectionEmpty(collectionName);
-    if (!isEmpty) {
-      return { collection: collectionName, count: 0, status: 'skipped', message: 'Collection already has data' };
-    }
-
-    const batch = db.batch();
-    const announcements = announcementsData.announcements;
-    
-    for (const announcement of announcements) {
-      const docRef = db.collection(collectionName).doc(String(announcement.id));
-      batch.set(docRef, {
-        title: announcement.title,
-        date: announcement.date,
-        excerpt: announcement.excerpt,
-        expiryDate: null
-      });
-    }
-    
-    await batch.commit();
-    return { collection: collectionName, count: announcements.length, status: 'success' };
-  } catch (error) {
-    return { collection: collectionName, count: 0, status: 'error', message: String(error) };
-  }
-}
 
 async function seedStaff(): Promise<SeedResult> {
   const collectionName = 'staff';
@@ -323,8 +296,7 @@ async function main() {
   console.log('📅 Seeding events...');
   results.push(await seedEvents());
 
-  console.log('📢 Seeding announcements...');
-  results.push(await seedAnnouncements());
+
 
   console.log('👥 Seeding staff...');
   results.push(await seedStaff());

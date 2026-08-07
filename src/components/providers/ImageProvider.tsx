@@ -119,6 +119,26 @@ export function ImageProvider({ children }: { children: React.ReactNode }) {
     refreshImages();
   }, [refreshImages]);
 
+  // Pre-load and cache all images in the background once they are fetched
+  useEffect(() => {
+    if (images.length === 0) return;
+    
+    images.forEach(img => {
+      if (img.imageUrl) {
+        // 1. DOM Link preloading
+        const link = document.createElement('link');
+        link.rel = 'preload';
+        link.as = 'image';
+        link.href = img.imageUrl;
+        document.head.appendChild(link);
+        
+        // 2. Browser native Image object pre-caching
+        const cacheImg = new Image();
+        cacheImg.src = img.imageUrl;
+      }
+    });
+  }, [images]);
+
   const getImage = useCallback((id: string) => {
     return images.find(img => img.id === id);
   }, [images]);

@@ -34,11 +34,13 @@ export default function InstructorCard({ name, title, bio, image, links }: Instr
     if (!shouldTruncate) return text;
     
     const truncated = text.slice(0, charLimit);
+    // Find the last space to avoid cutting words in half
     const lastSpaceIndex = truncated.lastIndexOf(' ');
     
-    return lastSpaceIndex > 0 
-      ? truncated.slice(0, lastSpaceIndex) + '...'
-      : truncated + '...';
+    if (lastSpaceIndex > 0) {
+      return truncated.slice(0, lastSpaceIndex) + '...';
+    }
+    return truncated + '...';
   };
 
   const SocialLink = ({ href, icon: Icon, label }: { href?: string, icon: any, label: string }) => {
@@ -84,7 +86,7 @@ export default function InstructorCard({ name, title, bio, image, links }: Instr
       <CardContent className="flex-grow flex flex-col justify-between pt-2 relative z-10">
         <div className="space-y-6">
             <div className="relative text-center px-2">
-                <div className="prose prose-sm text-muted-foreground leading-relaxed max-w-none line-clamp-4 italic font-serif">
+                <div className="prose prose-sm text-muted-foreground leading-relaxed max-w-none italic font-serif">
                     <ReactMarkdown>
                         {getTruncatedBio(bio)}
                     </ReactMarkdown>

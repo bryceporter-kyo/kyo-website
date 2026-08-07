@@ -40,6 +40,17 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 
+import rehypeRaw from 'rehype-raw';
+import { uploadImage } from '@/lib/image-service';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+
 const announcementSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters long."),
   content: z.string().min(20, "Content must be at least 20 characters long."),
@@ -47,12 +58,14 @@ const announcementSchema = z.object({
   pinned: z.boolean().default(false),
   unpinsAt: z.date().optional(),
   disappearsAt: z.date().optional(),
+  popupPage: z.string().optional(),
 });
 
 export default function AnnouncementsAdminPage() {
     const { toast } = useToast();
     const [announcements, setAnnouncements] = React.useState<Announcement[]>([]);
     const [editingAnnouncement, setEditingAnnouncement] = React.useState<Announcement | null>(null);
+    const [imageFile, setImageFile] = React.useState<File | null>(null);
     const [isLoading, setIsLoading] = React.useState(true);
     const [isSaving, setIsSaving] = React.useState(false);
 
@@ -83,6 +96,7 @@ export default function AnnouncementsAdminPage() {
             content: "",
             imageUrl: "",
             pinned: false,
+            popupPage: "",
         },
     });
 
@@ -95,6 +109,7 @@ export default function AnnouncementsAdminPage() {
                 pinned: editingAnnouncement.pinned,
                 unpinsAt: editingAnnouncement.unpinsAt ? new Date(editingAnnouncement.unpinsAt) : undefined,
                 disappearsAt: editingAnnouncement.disappearsAt ? new Date(editingAnnouncement.disappearsAt) : undefined,
+                popupPage: editingAnnouncement.popupPage || "",
             });
         } else {
             form.reset({
@@ -102,9 +117,11 @@ export default function AnnouncementsAdminPage() {
                 content: "",
                 imageUrl: "",
                 pinned: false,
+                popupPage: "",
                 unpinsAt: undefined,
                 disappearsAt: undefined,
             });
+            setImageFile(null);
         }
     }, [editingAnnouncement, form]);
 
@@ -114,7 +131,14 @@ export default function AnnouncementsAdminPage() {
     async function onSubmit(values: z.infer<typeof announcementSchema>) {
         setIsSaving(true);
         try {
+            let finalImageUrl = values.imageUrl;
+            if (imageFile) {
+                finalImageUrl = await uploadImage(imageFile, `announcements/img_${Date.now()}`);
+            }
+
             const announcementData = {
+                ...values,
+                imageUrl: finalImageUrl,
                 ...values,
                 date: format(new Date(), 'yyyy-MM-dd'),
                 excerpt: values.content.substring(0, 150) + (values.content.length > 150 ? '...' : ''),
@@ -142,6 +166,7 @@ export default function AnnouncementsAdminPage() {
                 });
             }
             form.reset();
+            setImageFile(null);
         } catch (error) {
             console.error('Error saving announcement:', error);
             toast({
@@ -342,7 +367,7 @@ export default function AnnouncementsAdminPage() {
                                         <div className="rounded-md border bg-muted p-4 min-h-[300px]">
                                              <h4 className="text-sm font-medium mb-2 text-muted-foreground">Markdown Preview</h4>
                                             <article className="prose prose-sm dark:prose-invert max-w-none">
-                                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
                                                     {contentValue}
                                                 </ReactMarkdown>
                                             </article>
@@ -357,12 +382,40 @@ export default function AnnouncementsAdminPage() {
                                 name="imageUrl"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Image URL (Optional)</FormLabel>
+                                        <FormLabel>Image (Optional)</FormLabel>
                                         <FormControl>
-                                            <Input type="url" placeholder="https://example.com/image.jpg" {...field} />
+                                            <div className="flex flex-col gap-2">
+                                                {field.value && (
+                                                    <div className="relative h-32 w-48 rounded-md overflow-hidden border">
+                                                        <img src={field.value} className="object-cover w-full h-full" alt="Preview" />
+                                                        <Button 
+                                                            type="button" 
+                                                            variant="destructive" 
+                                                            size="icon" 
+                                                            className="absolute top-1 right-1 h-6 w-6 rounded-full"
+                                                            onClick={() => {
+                                                                field.onChange("");
+                                                                setImageFile(null);
+                                                            }}
+                                                        >
+                                                            <X className="h-3 w-3" />
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                                <Input 
+                                                    type="file" 
+                                                    accept="image/*" 
+                                                    onChange={(e) => {
+                                                        if (e.target.files && e.target.files[0]) {
+                                                            setImageFile(e.target.files[0]);
+                                                            field.onChange(URL.createObjectURL(e.target.files[0]));
+                                                        }
+                                                    }} 
+                                                />
+                                            </div>
                                         </FormControl>
                                         <FormDescription>
-                                            Add a URL for an image to display with the announcement.
+                                            Upload an image to display with the announcement.
                                         </FormDescription>
                                         <FormMessage />
                                     </FormItem>
@@ -477,6 +530,35 @@ export default function AnnouncementsAdminPage() {
                                         </FormDescription>
                                         <FormMessage />
                                     </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="popupPage"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Specific-Page Popup Path (Optional)</FormLabel>
+                                            <Select onValueChange={(val) => field.onChange(val === "none" ? "" : val)} value={field.value || "none"}>
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select a page to show popup on" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="none">None (Don't show as popup)</SelectItem>
+                                                    <SelectItem value="/">Home Page (/)</SelectItem>
+                                                    <SelectItem value="/about">About Us (/about)</SelectItem>
+                                                    <SelectItem value="/programs/orchestras">Orchestras (/programs/orchestras)</SelectItem>
+                                                    <SelectItem value="/programs/upbeat">UpBeat! (/programs/upbeat)</SelectItem>
+                                                    <SelectItem value="/auditions">Auditions (/auditions)</SelectItem>
+                                                    <SelectItem value="/support">Support Us (/support)</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <FormDescription>
+                                                Specify which page should trigger this announcement as a popup modal.
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
                                     )}
                                 />
                             </div>

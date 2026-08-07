@@ -10,11 +10,11 @@ import {
   Heart, Handshake, Gift, Star, Ticket, Users, Camera, Wrench,
   ShieldCheck, Sparkles, ArrowRight, CheckCircle2, MessageSquare,
   Music, Clock, MapPin, Award, BookOpen, Utensils, GraduationCap,
-  Briefcase, BarChart2, Megaphone, DollarSign, Building2, Calendar, HelpCircle
+  Briefcase, BarChart2, Megaphone, DollarSign, Building2, Calendar, HelpCircle, ChevronDown
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useScroll, useSpring } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { getLinkById } from "@/lib/links";
 import { fetchButtonsFromFirebase, ButtonConfig } from "@/lib/buttons";
@@ -179,6 +179,16 @@ export default function VolunteerPage() {
   const [buttons, setButtons] = useState<ButtonConfig[]>([]);
   const [activeRoleIndex, setActiveRoleIndex] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [openVolunteerFaq, setOpenVolunteerFaq] = useState<number | null>(null);
+  const [openBoardFaq, setOpenBoardFaq] = useState<number | null>(null);
+
+  const journeyRef = React.useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: journeyRef,
+    offset: ["start center", "end center"]
+  });
+  const scaleY = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
 
   const headerImage = getImage("page-header-volunteer");
   const impactImage = getImage("support-volunteer");
@@ -195,8 +205,10 @@ export default function VolunteerPage() {
     loadButtons();
   }, []);
 
-  // Auto-cycle logic
+  // Auto-cycle logic with pause-on-hover check
   useEffect(() => {
+    if (isPaused) return;
+
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) return 0;
@@ -205,7 +217,7 @@ export default function VolunteerPage() {
     }, PROGRESS_INTERVAL);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isPaused]);
 
   useEffect(() => {
     if (progress >= 100) {
@@ -266,7 +278,7 @@ export default function VolunteerPage() {
             <div className="text-[5rem] md:text-[7rem] font-headline font-bold text-white leading-none">
               12<span className="text-white/40">:</span>1
             </div>
-            <p className="text-white/70 font-light text-lg max-w-2xl mx-auto leading-relaxed">
+            <p className="text-neutral-100 font-medium text-lg max-w-2xl mx-auto leading-relaxed">
               For every paid hour at the KYO, our volunteers contribute twelve. The Kawartha Youth Orchestra exists because people choose to show up — not because they have to, but because they believe every child deserves music.
             </p>
           </motion.div>
@@ -386,7 +398,7 @@ export default function VolunteerPage() {
               <span className="text-xs font-bold uppercase tracking-widest text-white/80">Opportunity Awaits</span>
             </div>
             <h2 className="text-4xl font-headline font-bold text-white">How You Can Help</h2>
-            <p className="text-white/70 max-w-2xl mx-auto font-light">
+            <p className="text-neutral-100 max-w-2xl mx-auto font-medium">
               We have a variety of roles to match your skills, interests, and availability. Find the perfect fit and start making a difference today.
             </p>
           </motion.div>
@@ -431,7 +443,7 @@ export default function VolunteerPage() {
       </section>
 
       {/* The Journey Map */}
-      <section className="py-32 bg-white px-4 relative overflow-hidden">
+      <section ref={journeyRef} className="py-32 bg-white px-4 relative overflow-hidden">
         <div className="container mx-auto max-w-5xl">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -445,13 +457,12 @@ export default function VolunteerPage() {
 
           <div className="relative">
             {/* The Central Path Line */}
-            <motion.div 
-              initial={{ height: 0 }}
-              whileInView={{ height: "100%" }}
-              viewport={{ once: true }}
-              transition={{ duration: 1.5, ease: "easeInOut" }}
-              className="absolute left-1/2 top-0 w-1 bg-slate-100 -translate-x-1/2 hidden md:block origin-top" 
-            />
+            <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-slate-100 -translate-x-1/2 hidden md:block">
+              <motion.div 
+                className="absolute top-0 left-0 right-0 bg-primary origin-top" 
+                style={{ height: "100%", scaleY }}
+              />
+            </div>
 
             <div className="space-y-24 relative">
               {steps.map((step, idx) => (
@@ -533,26 +544,39 @@ export default function VolunteerPage() {
             viewport={{ once: true }}
             className="space-y-6"
           >
-            {volunteerFaqs.map((faq, idx) => (
-              <motion.div
-                key={idx}
-                variants={itemVariants}
-                whileHover={{ scale: 1.01, x: 5 }}
-                className="border border-border rounded-2xl p-8 bg-background shadow-sm hover:shadow-md transition-all duration-300 group"
-              >
-                <div className="flex gap-4">
-                  <div className="mt-1">
-                    <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                      <HelpCircle className="w-4 h-4" />
+            {volunteerFaqs.map((faq, idx) => {
+              const isOpen = openVolunteerFaq === idx;
+              return (
+                <motion.div
+                  key={idx}
+                  variants={itemVariants}
+                  whileHover={{ scale: 1.01, x: 5 }}
+                  onClick={() => setOpenVolunteerFaq(isOpen ? null : idx)}
+                  className="border border-border rounded-2xl p-6 bg-background shadow-sm hover:shadow-md cursor-pointer transition-all duration-300 group"
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className={cn(
+                        "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
+                        isOpen ? "bg-primary text-white" : "bg-primary/5 text-primary group-hover:bg-primary group-hover:text-white"
+                      )}>
+                        <HelpCircle className="w-4 h-4" />
+                      </div>
+                      <h3 className="font-headline font-bold text-base md:text-lg">{faq.q}</h3>
                     </div>
+                    <ChevronDown className={cn("w-5 h-5 text-slate-400 transition-transform duration-300", isOpen && "rotate-180")} />
                   </div>
-                  <div>
-                    <h3 className="font-headline font-bold text-lg mb-3">{faq.q}</h3>
-                    <p className="text-muted-foreground font-light leading-relaxed">{faq.a}</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+                  <motion.div
+                    initial={false}
+                    animate={{ height: isOpen ? "auto" : 0, opacity: isOpen ? 1 : 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="overflow-hidden"
+                  >
+                    <p className="text-muted-foreground font-light leading-relaxed mt-4 pl-12 text-sm md:text-base">{faq.a}</p>
+                  </motion.div>
+                </motion.div>
+              );
+            })}
           </motion.div>
         </div>
       </section>
@@ -618,7 +642,7 @@ export default function VolunteerPage() {
               <p className="text-muted-foreground font-light max-w-xl mx-auto text-lg">Select a role to explore detailed responsibilities and requirements.</p>
             </div>
 
-            <div className="grid lg:grid-cols-12 gap-12 items-start">
+            <div className="grid lg:grid-cols-12 gap-12 items-start" onMouseEnter={() => setIsPaused(true)} onMouseLeave={() => setIsPaused(false)}>
               {/* Role Selectors - Left Side */}
               <div className="lg:col-span-5 space-y-4">
                 {functionalRoles.map((role, idx) => (
@@ -717,19 +741,41 @@ export default function VolunteerPage() {
               <p className="text-muted-foreground font-light">Common questions about joining the KYO Board of Directors.</p>
             </div>
             <div className="space-y-6">
-              {boardFaqs.map((faq, idx) => (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.07 }}
-                  className="border border-border rounded-2xl p-8 bg-background"
-                >
-                  <h3 className="font-headline font-bold text-lg mb-3">{faq.q}</h3>
-                  <p className="text-muted-foreground font-light leading-relaxed">{faq.a}</p>
-                </motion.div>
-              ))}
+              {boardFaqs.map((faq, idx) => {
+                const isOpen = openBoardFaq === idx;
+                return (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: idx * 0.05 }}
+                    onClick={() => setOpenBoardFaq(isOpen ? null : idx)}
+                    className="border border-border rounded-2xl p-6 bg-background shadow-sm hover:shadow-md cursor-pointer transition-all duration-300 group"
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className={cn(
+                          "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
+                          isOpen ? "bg-primary text-white" : "bg-primary/5 text-primary group-hover:bg-primary group-hover:text-white"
+                        )}>
+                          <HelpCircle className="w-4 h-4" />
+                        </div>
+                        <h3 className="font-headline font-bold text-base md:text-lg">{faq.q}</h3>
+                      </div>
+                      <ChevronDown className={cn("w-5 h-5 text-slate-400 transition-transform duration-300", isOpen && "rotate-180")} />
+                    </div>
+                    <motion.div
+                      initial={false}
+                      animate={{ height: isOpen ? "auto" : 0, opacity: isOpen ? 1 : 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="overflow-hidden"
+                    >
+                      <p className="text-muted-foreground font-light leading-relaxed mt-4 pl-12 text-sm md:text-base">{faq.a}</p>
+                    </motion.div>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
 
@@ -794,7 +840,7 @@ export default function VolunteerPage() {
                   <span>Ready to Begin?</span>
                 </div>
                 <h2 className="text-5xl font-headline font-bold leading-tight">Your Talent is the Missing Note</h2>
-                <p className="text-xl text-white/80 font-light leading-relaxed max-w-xl mx-auto md:mx-0">
+                <p className="text-xl text-neutral-100 font-medium leading-relaxed max-w-xl mx-auto md:mx-0">
                   Whether you can spare a few hours or a few days, your presence makes a profound difference in the lives of our musicians.
                 </p>
                 <div className="pt-4 flex flex-wrap justify-center md:justify-start gap-4">

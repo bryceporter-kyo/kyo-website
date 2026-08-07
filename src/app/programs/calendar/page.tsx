@@ -7,10 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useImages } from "@/components/providers/ImageProvider";
 import { fetchEventsFromFirebase, Event } from "@/lib/events";
 import { fetchAnnouncementsFromFirebase, Announcement } from "@/lib/announcements";
+import { fetchCalendarSettings } from "@/lib/calendar-settings";
+import { fetchGoogleCalendarEvents } from "@/lib/google-calendar";
 import { format, isSameMonth, isSameDay } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { ArrowRight, Calendar as CalendarIcon, MapPin, Clock, ExternalLink, Sparkles, Info, FileText, Download, Share2, HelpCircle, CheckCircle2, Monitor, Smartphone, RefreshCw, Megaphone, Bell, Pin, X } from "lucide-react";
+import { ArrowRight, Calendar as CalendarIcon, MapPin, Clock, ExternalLink, Sparkles, Info, FileText, Download, Share2, HelpCircle, CheckCircle2, Monitor, Smartphone, RefreshCw, Bell, Pin, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
@@ -18,12 +20,13 @@ import { cn } from "@/lib/utils";
 import { downloadCalendar } from "@/lib/calendar-export";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
+
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Tooltip,
@@ -52,18 +55,63 @@ export default function CalendarPage() {
     const [isAnnouncementDialogOpen, setIsAnnouncementDialogOpen] = useState(false);
     const [origin, setOrigin] = useState("");
     
+    // Filters and search
+    const [categoryFilter, setCategoryFilter] = useState<'all' | 'orchestras' | 'upbeat' | 'lessons' | 'special'>('all');
+    const [searchQuery, setSearchQuery] = useState("");
+    const [selectedFeed, setSelectedFeed] = useState<'all' | 'orchestras' | 'upbeat' | 'lessons'>('all');
+
+    // Filter announcements: show all pinned + top 2 unpinned
+    const visibleAnnouncements = useMemo(() => {
+        const pinned = announcements.filter(a => a.pinned);
+        const unpinned = announcements.filter(a => !a.pinned);
+        return [...pinned, ...unpinned.slice(0, 2)];
+    }, [announcements]);
+
+    // Strip HTML helper for card excerpt
+    const stripHtml = (html: string): string => {
+        if (!html) return "";
+        return html.replace(/<[^>]*>/g, '');
+    };
+
     useEffect(() => {
         setMonth(new Date());
         setOrigin(window.location.origin);
         
         const loadData = async () => {
             try {
-                const [eventsData, announcementsData] = await Promise.all([
-                    fetchEventsFromFirebase(),
+                // 1. Fetch configurations & bulletins
+                const [settings, announcementsData] = await Promise.all([
+                    fetchCalendarSettings(),
                     fetchAnnouncementsFromFirebase()
                 ]);
-                setAllEvents(eventsData);
                 setAnnouncements(announcementsData);
+
+                // 2. Fetch events from Google Calendar channels or fallback to Firestore
+                const hasGoogleCalendars = 
+                  !!settings.upbeatCalendarId || 
+                  !!settings.lessonsCalendarId || 
+                  !!settings.orchestrasCalendarId;
+
+                let eventsData: Event[] = [];
+
+                if (hasGoogleCalendars) {
+                  const promises: Promise<Event[]>[] = [];
+                  if (settings.upbeatCalendarId) {
+                    promises.push(fetchGoogleCalendarEvents(settings.upbeatCalendarId, 'upbeat'));
+                  }
+                  if (settings.lessonsCalendarId) {
+                    promises.push(fetchGoogleCalendarEvents(settings.lessonsCalendarId, 'lessons'));
+                  }
+                  if (settings.orchestrasCalendarId) {
+                    promises.push(fetchGoogleCalendarEvents(settings.orchestrasCalendarId, 'orchestras'));
+                  }
+                  const results = await Promise.all(promises);
+                  eventsData = results.flat();
+                } else {
+                  eventsData = await fetchEventsFromFirebase();
+                }
+
+                setAllEvents(eventsData);
             } catch (error) {
                 console.error('Error loading calendar data:', error);
             } finally {
@@ -77,13 +125,27 @@ export default function CalendarPage() {
     const parseDate = (dateString: string) => {
         return new Date(`${dateString}T00:00:00`);
     }
-    
-    const eventsForMonth = useMemo(() => {
+
+    const filteredEventsForMonth = useMemo(() => {
         if (!month) return [];
         return allEvents
             .filter(event => isSameMonth(parseDate(event.date), month))
-            .filter(event => event.type === 'special');
-    }, [allEvents, month]);
+            .filter(event => {
+                if (categoryFilter === 'special') return event.type === 'special';
+                if (categoryFilter !== 'all' && event.type !== categoryFilter) return false;
+                return true;
+            })
+            .filter(event => {
+                if (!searchQuery) return true;
+                const query = searchQuery.toLowerCase();
+                return (
+                    event.name.toLowerCase().includes(query) ||
+                    (event.location && event.location.toLowerCase().includes(query)) ||
+                    (event.notes && event.notes.toLowerCase().includes(query))
+                );
+            })
+            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    }, [allEvents, month, categoryFilter, searchQuery]);
 
     const eventsForSelectedDay = useMemo(() => {
         if (!selectedDay) return [];
@@ -97,13 +159,11 @@ export default function CalendarPage() {
             });
     }, [allEvents, selectedDay]);
 
-    const eventDays = useMemo(() => {
-        return allEvents.map(event => parseDate(event.date));
-    }, [allEvents]);
-
-    const specialEventDays = useMemo(() => {
-        return allEvents.filter(e => e.type === 'special').map(event => parseDate(event.date));
-    }, [allEvents]);
+    // Calendar dot markers
+    const orchestrasDays = useMemo(() => allEvents.filter(e => e.type === 'orchestras').map(e => parseDate(e.date)), [allEvents]);
+    const upbeatDays = useMemo(() => allEvents.filter(e => e.type === 'upbeat').map(e => parseDate(e.date)), [allEvents]);
+    const lessonsDays = useMemo(() => allEvents.filter(e => e.type === 'lessons').map(e => parseDate(e.date)), [allEvents]);
+    const specialDays = useMemo(() => allEvents.filter(e => e.type === 'special').map(e => parseDate(e.date)), [allEvents]);
 
     const { getImage } = useImages();
     const headerImage = getImage('page-header-calendar');
@@ -119,12 +179,13 @@ export default function CalendarPage() {
         setIsAnnouncementDialogOpen(true);
     };
 
-    const feedUrl = `${origin}/api/calendar`;
+    // Subscriptions links compiled dynamically based on selectedFeed
+    const feedUrl = `${origin}/api/calendar${selectedFeed !== 'all' ? `?feed=${selectedFeed}` : ''}`;
     const encodedFeedUrl = encodeURIComponent(feedUrl);
 
     const syncLinks = {
         google: `https://calendar.google.com/calendar/render?cid=${encodedFeedUrl}`,
-        outlook: `https://outlook.live.com/calendar/0/addcalendar?url=${encodedFeedUrl}&name=KYO%20Events`,
+        outlook: `https://outlook.live.com/calendar/0/addcalendar?url=${encodedFeedUrl}&name=KYO%20${selectedFeed === 'all' ? 'Events' : selectedFeed.toUpperCase()}`,
         apple: feedUrl.replace(/^https?:\/\//, 'webcal://')
     };
 
@@ -132,12 +193,12 @@ export default function CalendarPage() {
         hidden: { opacity: 0 },
         visible: {
             opacity: 1,
-            transition: { staggerChildren: 0.1 }
+            transition: { staggerChildren: 0.05 }
         }
     } as const;
 
     const itemVariants = {
-        hidden: { y: 20, opacity: 0 },
+        hidden: { y: 15, opacity: 0 },
         visible: {
             y: 0,
             opacity: 1,
@@ -151,7 +212,6 @@ export default function CalendarPage() {
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
                 <div className="absolute top-[10%] -left-[5%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[100px]" />
                 <div className="absolute bottom-[10%] -right-[5%] w-[40%] h-[40%] bg-secondary/10 rounded-full blur-[120px]" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[url('/grid.svg')] opacity-[0.02]" />
             </div>
 
             <PageHeader
@@ -165,7 +225,7 @@ export default function CalendarPage() {
                     
                     {/* Announcements Section */}
                     <AnimatePresence>
-                        {announcements.length > 0 && (
+                        {visibleAnnouncements.length > 0 && (
                             <motion.div 
                                 initial={{ opacity: 0, y: -20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -180,11 +240,11 @@ export default function CalendarPage() {
                                 
                                 <div className={cn(
                                     "grid gap-6",
-                                    announcements.length % 2 === 0 
+                                    visibleAnnouncements.length % 2 === 0 
                                         ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-4" 
                                         : "grid-cols-1 max-w-4xl mx-auto"
                                 )}>
-                                    {announcements.map((announcement) => (
+                                    {visibleAnnouncements.map((announcement) => (
                                         <motion.div
                                             key={announcement.id}
                                             whileHover={{ y: -5 }}
@@ -211,7 +271,7 @@ export default function CalendarPage() {
                                                 </CardHeader>
                                                 <CardContent>
                                                     <p className="text-muted-foreground text-xs leading-relaxed font-light line-clamp-3">
-                                                        {announcement.excerpt || announcement.content.substring(0, 100) + '...'}
+                                                        {announcement.excerpt || stripHtml(announcement.content).substring(0, 100) + '...'}
                                                     </p>
                                                     <Button variant="link" className="px-0 mt-4 text-primary font-bold h-auto py-0 text-xs">
                                                         Read More <ArrowRight className="ml-2 w-3 h-3 group-hover:translate-x-1 transition-transform" />
@@ -266,7 +326,7 @@ export default function CalendarPage() {
                                                 head_cell: "text-muted-foreground rounded-md w-full font-normal text-[0.8rem] uppercase tracking-tighter mb-2",
                                                 row: "flex w-full mt-2",
                                                 cell: "text-center text-sm p-0 relative focus-within:relative focus-within:z-20 w-full",
-                                                day: "h-10 w-10 p-0 font-normal aria-selected:opacity-100 hover:bg-primary/10 rounded-full transition-all flex items-center justify-center mx-auto cursor-pointer",
+                                                day: "h-10 w-10 p-0 font-normal aria-selected:opacity-100 hover:bg-primary/10 rounded-full transition-all flex items-center justify-center mx-auto cursor-pointer relative",
                                                 day_today: "bg-accent text-accent-foreground font-bold",
                                                 day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
                                                 day_outside: "text-muted-foreground opacity-50",
@@ -275,12 +335,16 @@ export default function CalendarPage() {
                                                 day_hidden: "invisible",
                                             }}
                                             modifiers={{
-                                                event: eventDays,
-                                                special: specialEventDays,
+                                                orchestras: orchestrasDays,
+                                                upbeat: upbeatDays,
+                                                lessons: lessonsDays,
+                                                special: specialDays,
                                             }}
                                             modifiersClassNames={{
-                                                event: "after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:bg-primary after:rounded-full",
-                                                special: "after:bg-rose-500 font-bold text-primary",
+                                                orchestras: "after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:bg-primary after:rounded-full font-semibold text-primary",
+                                                upbeat: "after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:bg-sky-500 after:rounded-full font-semibold text-sky-600",
+                                                lessons: "after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:bg-violet-500 after:rounded-full font-semibold text-violet-600",
+                                                special: "after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:bg-rose-500 after:rounded-full font-bold text-rose-600",
                                             }}
                                         />
                                     ) : (
@@ -290,7 +354,15 @@ export default function CalendarPage() {
                                     <div className="mt-8 px-4 pb-4 space-y-3 border-t border-primary/5 pt-6">
                                         <div className="flex items-center gap-3 text-sm">
                                             <div className="w-2.5 h-2.5 rounded-full bg-primary" />
-                                            <span className="text-muted-foreground">Standard Rehearsal</span>
+                                            <span className="text-muted-foreground font-medium">Orchestras</span>
+                                        </div>
+                                        <div className="flex items-center gap-3 text-sm">
+                                            <div className="w-2.5 h-2.5 rounded-full bg-sky-500" />
+                                            <span className="text-muted-foreground font-medium">Upbeat! Program</span>
+                                        </div>
+                                        <div className="flex items-center gap-3 text-sm">
+                                            <div className="w-2.5 h-2.5 rounded-full bg-violet-500" />
+                                            <span className="text-muted-foreground font-medium">Lessons</span>
                                         </div>
                                         <div className="flex items-center gap-3 text-sm">
                                             <div className="w-2.5 h-2.5 rounded-full bg-rose-500" />
@@ -305,12 +377,37 @@ export default function CalendarPage() {
                                                             className="w-full rounded-2xl border-primary/20 hover:bg-primary hover:text-white transition-all py-6"
                                                         >
                                                             <Share2 className="mr-2 h-4 w-4" />
-                                                            Sync to Personal Calendar
+                                                            Subscribe to Live Calendar
                                                         </Button>
                                                     </DropdownMenuTrigger>
-                                                    <DropdownMenuContent className="w-[300px] rounded-2xl p-2 shadow-2xl border-primary/10">
-                                                        <DropdownMenuLabel className="font-headline text-sm font-bold px-3 py-2">Select Your Calendar Service</DropdownMenuLabel>
+                                                    <DropdownMenuContent className="w-[320px] rounded-2xl p-3 shadow-2xl border-primary/10">
+                                                        <DropdownMenuLabel className="font-headline text-sm font-bold px-3 py-2">Select Calendar Feed</DropdownMenuLabel>
                                                         <DropdownMenuSeparator className="bg-primary/5" />
+                                                        
+                                                        {/* Feed Type Filter Buttons */}
+                                                        <div className="px-3 py-2 space-y-3">
+                                                            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Feed Channel:</p>
+                                                            <div className="grid grid-cols-2 gap-1 bg-slate-50 p-1 rounded-xl border border-slate-100">
+                                                                {(['all', 'orchestras', 'upbeat', 'lessons'] as const).map((feedType) => (
+                                                                    <button
+                                                                        key={feedType}
+                                                                        onClick={() => setSelectedFeed(feedType)}
+                                                                        className={cn(
+                                                                            "text-[10px] font-bold py-1.5 px-2 rounded-lg capitalize transition-all",
+                                                                            selectedFeed === feedType 
+                                                                                ? "bg-primary text-primary-foreground shadow-sm" 
+                                                                                : "text-muted-foreground hover:bg-slate-200"
+                                                                        )}
+                                                                    >
+                                                                        {feedType === 'all' ? 'All Events' : feedType}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+
+                                                        <DropdownMenuSeparator className="bg-primary/5" />
+                                                        <DropdownMenuLabel className="font-headline text-[10px] uppercase tracking-wider px-3 py-1 text-muted-foreground">Subscribe live:</DropdownMenuLabel>
+                                                        
                                                         <DropdownMenuItem asChild className="rounded-xl py-3 cursor-pointer">
                                                             <Link href={syncLinks.google} target="_blank" className="flex items-center gap-3">
                                                                 <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
@@ -347,10 +444,10 @@ export default function CalendarPage() {
                                                         <DropdownMenuSeparator className="bg-primary/5" />
                                                         <DropdownMenuItem 
                                                             className="rounded-xl py-3 cursor-pointer text-primary font-bold justify-center"
-                                                            onClick={() => downloadCalendar(allEvents)}
+                                                            onClick={() => downloadCalendar(filteredEventsForMonth)}
                                                         >
                                                             <Download className="mr-2 h-4 w-4" />
-                                                            Download Offline Copy (.ics)
+                                                            Download (.ics)
                                                         </DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
@@ -383,8 +480,46 @@ export default function CalendarPage() {
                         </motion.div>
 
                         {/* Event Feed */}
-                        <div className="lg:col-span-8 space-y-12">
-                            <div className="flex items-end justify-between border-b border-primary/10 pb-8">
+                        <div className="lg:col-span-8 space-y-8">
+                            
+                            {/* Search & Filter Bar */}
+                            <div className="bg-white/70 backdrop-blur-xl border border-primary/10 rounded-[2rem] p-6 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
+                                {/* Category Tabs */}
+                                <div className="flex flex-wrap gap-2 w-full md:w-auto">
+                                    {(['all', 'orchestras', 'upbeat', 'lessons', 'special'] as const).map((filter) => (
+                                        <button
+                                            key={filter}
+                                            onClick={() => setCategoryFilter(filter)}
+                                            className={cn(
+                                                "px-4 py-2 rounded-full text-xs font-bold capitalize transition-all border border-transparent",
+                                                categoryFilter === filter
+                                                    ? filter === 'all' ? "bg-primary text-white" :
+                                                      filter === 'orchestras' ? "bg-primary text-white" :
+                                                      filter === 'upbeat' ? "bg-sky-500 text-white" :
+                                                      filter === 'lessons' ? "bg-violet-500 text-white" :
+                                                      "bg-rose-500 text-white"
+                                                    : "bg-slate-50 text-muted-foreground hover:bg-slate-100 hover:text-slate-900"
+                                            )}
+                                        >
+                                            {filter === 'all' ? 'All events' : filter === 'upbeat' ? 'Upbeat!' : filter}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Text Search Input */}
+                                <div className="relative w-full md:w-[240px] shrink-0">
+                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search events..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="w-full pl-10 pr-4 py-2 rounded-full text-sm bg-slate-50 border border-slate-100 focus:outline-none focus:ring-1 focus:ring-primary/35 focus:bg-white transition-all font-light"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex items-end justify-between border-b border-primary/10 pb-8 pt-4">
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2 text-primary">
                                         <Sparkles className="w-4 h-4" />
@@ -396,14 +531,14 @@ export default function CalendarPage() {
                                 </div>
                                 <div className="hidden md:block">
                                     <Badge variant="outline" className="px-4 py-1.5 text-sm rounded-full border-primary/20 text-primary bg-primary/5">
-                                        {eventsForMonth.length} {eventsForMonth.length === 1 ? 'Event' : 'Events'} Scheduled
+                                        {filteredEventsForMonth.length} {filteredEventsForMonth.length === 1 ? 'Event' : 'Events'} listed
                                     </Badge>
                                 </div>
                             </div>
 
                             <AnimatePresence mode="wait">
                                 <motion.div 
-                                    key={month?.toISOString()}
+                                    key={`${month?.toISOString()}-${categoryFilter}-${searchQuery}`}
                                     variants={containerVariants}
                                     initial="hidden"
                                     animate="visible"
@@ -411,23 +546,29 @@ export default function CalendarPage() {
                                 >
                                     {isLoading ? (
                                         [1, 2, 3].map(i => <Skeleton key={i} className="w-full h-32 rounded-3xl" />)
-                                    ) : eventsForMonth.length > 0 ? (
-                                        eventsForMonth.map(event => (
+                                    ) : filteredEventsForMonth.length > 0 ? (
+                                        filteredEventsForMonth.map(event => (
                                             <motion.div key={event.id} variants={itemVariants}>
                                                 <Card className="group relative overflow-hidden border-primary/5 bg-white transition-all duration-500 hover:shadow-2xl hover:border-primary/20 rounded-[2rem] cursor-pointer" onClick={() => handleDayClick(parseDate(event.date))}>
                                                     <div className={cn(
                                                         "absolute top-0 left-0 w-1.5 h-full transition-colors",
-                                                        event.type === 'special' ? "bg-rose-500" : "bg-primary/20 group-hover:bg-primary"
+                                                        event.type === 'special' ? "bg-rose-500" :
+                                                        event.type === 'orchestras' ? "bg-primary" :
+                                                        event.type === 'upbeat' ? "bg-sky-500" :
+                                                        event.type === 'lessons' ? "bg-violet-500" :
+                                                        "bg-slate-300"
                                                     )} />
                                                     
                                                     <CardContent className="p-8">
                                                         <div className="flex flex-col md:flex-row gap-8 items-center">
-                                                            {/* Date Badge */}
-                                                            <div className={cn(
+                                                             {/* Date Circle Badge */}
+                                                             <div className={cn(
                                                                 "flex flex-col items-center justify-center w-24 h-24 rounded-3xl border transition-all duration-500 flex-shrink-0 shadow-sm",
-                                                                event.type === 'special' 
-                                                                    ? "bg-rose-500 text-white border-rose-600" 
-                                                                    : "bg-primary/5 text-primary border-primary/10 group-hover:bg-primary group-hover:text-white"
+                                                                event.type === 'special' ? "bg-rose-500 text-white border-rose-600" :
+                                                                event.type === 'orchestras' ? "bg-primary/5 text-primary border-primary/10 group-hover:bg-primary group-hover:text-white" :
+                                                                event.type === 'upbeat' ? "bg-sky-500/5 text-sky-600 border-sky-500/10 group-hover:bg-sky-500 group-hover:text-white" :
+                                                                event.type === 'lessons' ? "bg-violet-500/5 text-violet-600 border-violet-500/10 group-hover:bg-violet-500 group-hover:text-white" :
+                                                                "bg-slate-50 text-slate-700"
                                                             )}>
                                                                 <span className="text-3xl font-bold font-headline">{format(parseDate(event.date), 'dd')}</span>
                                                                 <span className="text-xs font-bold uppercase tracking-widest">{format(parseDate(event.date), 'EEE')}</span>
@@ -436,9 +577,13 @@ export default function CalendarPage() {
                                                             {/* Event Details */}
                                                             <div className="flex-grow space-y-4 text-center md:text-left">
                                                                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                                                                    <Badge variant={event.type === 'special' ? 'default' : 'secondary'} className={cn(
-                                                                        "px-3 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-widest",
-                                                                        event.type === 'special' && "bg-rose-500 hover:bg-rose-600 text-white"
+                                                                    <Badge className={cn(
+                                                                        "px-3 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-widest border-none text-white",
+                                                                        event.type === 'special' ? "bg-rose-500 hover:bg-rose-600" :
+                                                                        event.type === 'orchestras' ? "bg-primary hover:bg-primary/95" :
+                                                                        event.type === 'upbeat' ? "bg-sky-500 hover:bg-sky-600" :
+                                                                        event.type === 'lessons' ? "bg-violet-500 hover:bg-violet-600" :
+                                                                        "bg-slate-400"
                                                                     )}>
                                                                         {event.type}
                                                                     </Badge>
@@ -449,7 +594,7 @@ export default function CalendarPage() {
                                                                     {event.time && (
                                                                         <div className="flex items-center gap-2">
                                                                             <Clock className="w-4 h-4 text-primary/60" />
-                                                                            <span>{event.time}</span>
+                                                                            <span>{event.time}{event.endTime && ` — ${event.endTime}`}</span>
                                                                         </div>
                                                                     )}
                                                                     {event.location && (
@@ -478,9 +623,9 @@ export default function CalendarPage() {
                                             className="text-center py-20 px-8 rounded-[3rem] border-2 border-dashed border-primary/10 bg-primary/[0.02]"
                                         >
                                             <CalendarIcon className="w-12 h-12 text-primary/20 mx-auto mb-4" />
-                                            <p className="text-muted-foreground text-lg font-light">No special events scheduled for {month ? format(month, 'MMMM yyyy') : 'this month'}.</p>
-                                            <Button variant="link" onClick={() => setMonth(new Date())} className="mt-4 text-primary font-bold">
-                                                View Current Month
+                                            <p className="text-muted-foreground text-lg font-light">No events match your criteria for {month ? format(month, 'MMMM yyyy') : 'this month'}.</p>
+                                            <Button variant="link" onClick={() => { setCategoryFilter('all'); setSearchQuery(""); }} className="mt-4 text-primary font-bold">
+                                                Clear Filters & Search
                                             </Button>
                                         </motion.div>
                                     )}
@@ -527,8 +672,10 @@ export default function CalendarPage() {
                                             </div>
                                         )}
                                         
-                                        <div className="prose prose-slate max-w-none prose-headings:font-headline prose-headings:font-bold prose-p:font-light prose-p:leading-relaxed prose-a:text-primary prose-a:font-bold">
-                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                        <div 
+                                            className="prose prose-slate max-w-none prose-headings:font-headline prose-headings:font-bold prose-p:font-light prose-p:leading-relaxed prose-a:text-primary prose-a:font-bold"
+                                        >
+                                            <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
                                                 {selectedAnnouncement.content}
                                             </ReactMarkdown>
                                         </div>
@@ -674,9 +821,13 @@ export default function CalendarPage() {
                                     )}>
                                         <div className="flex items-start justify-between gap-4">
                                             <div className="space-y-1">
-                                                <Badge variant={event.type === 'special' ? 'default' : 'secondary'} className={cn(
-                                                    "mb-2",
-                                                    event.type === 'special' && "bg-rose-500 hover:bg-rose-600"
+                                                <Badge className={cn(
+                                                    "mb-2 text-white border-none",
+                                                    event.type === 'special' ? "bg-rose-500 hover:bg-rose-600" :
+                                                    event.type === 'orchestras' ? "bg-primary hover:bg-primary/95" :
+                                                    event.type === 'upbeat' ? "bg-sky-500 hover:bg-sky-600" :
+                                                    event.type === 'lessons' ? "bg-violet-500 hover:bg-violet-600" :
+                                                    "bg-slate-400"
                                                 )}>
                                                     {event.type}
                                                 </Badge>

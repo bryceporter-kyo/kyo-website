@@ -560,7 +560,7 @@ export default function OrchestrasPage() {
                         Start Your Journey
                     </div>
                     <h3 className="text-4xl md:text-6xl font-headline font-bold mb-8">Ready to Play With Us?</h3>
-                    <p className="text-xl text-white/70 max-w-2xl mx-auto mb-12 leading-relaxed font-light">
+                    <p className="text-xl text-neutral-100 max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
                         Whether you're just starting out or ready for the big stage, there's a place for you in the KYO family.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-6 justify-center">

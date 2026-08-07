@@ -1,4 +1,3 @@
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,7 +10,6 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Pencil, Trash2, UserPlus, X, Loader2, Download, Upload } from "lucide-react";
 import Link from "next/link";
-import Papa from "papaparse";
 import { 
     fetchStaffFromFirebase, 
     fetchBoardFromFirebase,
@@ -29,7 +27,7 @@ import { uploadImage } from "@/lib/image-service";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import React from "react";
+import React, { useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,7 +38,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { CsvManagerDialog } from "@/components/shared/CsvManagerDialog";
 
 const memberSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters."),
@@ -69,6 +69,7 @@ export default function TeamAdminPage() {
     const [isLoading, setIsLoading] = React.useState(true);
     const [isSaving, setIsSaving] = React.useState(false);
     const [editingMember, setEditingMember] = React.useState<MemberWithId | null>(null);
+    const [isDialogOpen, setIsDialogOpen] = React.useState(false);
     const [saveStatus, setSaveStatus] = React.useState<"idle" | "uploading" | "saving">("idle");
 
     // Load data from Firebase
@@ -216,6 +217,7 @@ export default function TeamAdminPage() {
                 });
             }
             setEditingMember(null);
+            setIsDialogOpen(false);
             form.reset();
         } catch (error: any) {
             console.error('Error saving member:', error);
@@ -269,160 +271,111 @@ export default function TeamAdminPage() {
 
     const handleEditClick = (member: MemberWithId) => {
         setEditingMember(member);
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        setIsDialogOpen(true);
     }
 
-    const handleDownloadCsvTemplate = () => {
-        const headers = ["Name", "Type", "Title", "Email", "Permission Settings", "Biography", "Facebook", "Instagram", "LinkedIn", "YouTube", "Spotify", "Website"];
-        const exampleRow = ["Jane Doe", "staff", "Artistic Director", "jane.doe@thekyo.ca", "Website Editor", "Jane is a dedicated musician...", "https://facebook.com/jane", "", "https://linkedin.com/in/jane", "", "", "https://janedoe.com"];
-        const csvContent = "data:text/csv;charset=utf-8," 
-            + headers.join(",") + "\n"
-            + exampleRow.map(val => `"${val}"`).join(",");
-        
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "team_import_template.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
+    const handleAddClick = () => {
+        setEditingMember(null);
+        setIsDialogOpen(true);
+    }
 
-    const handleUploadCsv = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
+    const handleCsvUpload = async (data: any[], mode: 'append' | 'overwrite') => {
+        let successCount = 0;
+        let errorCount = 0;
 
-        setIsLoading(true);
-        Papa.parse(file, {
-            header: true,
-            skipEmptyLines: true,
-            complete: async (results) => {
-                let successCount = 0;
-                let errorCount = 0;
+        for (const row of data) {
+            try {
+                const name = row.Name || row.name;
+                const type = (row.Type || row.type || "staff").toLowerCase();
+                const title = row.Title || row.title;
+                const email = row.Email || row.email;
+                const permissions = row["Permission Settings"] || row.permissions || row.Permissions;
+                const bio = row.Biography || row.biography || row.bio || row.Bio;
+                
+                const links = {
+                    facebook: row.Facebook || row.facebook || "",
+                    instagram: row.Instagram || row.instagram || "",
+                    linkedin: row.LinkedIn || row.linkedin || row.Linkedin || "",
+                    youtube: row.YouTube || row.youtube || row.Youtube || "",
+                    spotify: row.Spotify || row.spotify || "",
+                    website: row.Website || row.website || "",
+                };
 
-                for (const row of results.data as any[]) {
-                    try {
-                        const name = row.Name || row.name;
-                        const type = (row.Type || row.type || "staff").toLowerCase();
-                        const title = row.Title || row.title;
-                        const email = row.Email || row.email;
-                        const permissions = row["Permission Settings"] || row.permissions;
-                        const bio = row.Biography || row.biography || row.bio;
-                        
-                        const links = {
-                            facebook: row.Facebook || row.facebook || "",
-                            instagram: row.Instagram || row.instagram || "",
-                            linkedin: row.LinkedIn || row.linkedin || "",
-                            youtube: row.YouTube || row.youtube || "",
-                            spotify: row.Spotify || row.spotify || "",
-                            website: row.Website || row.website || "",
-                        };
+                if (!name || !title || !email) {
+                    console.error("Missing required fields for row:", row);
+                    errorCount++;
+                    continue;
+                }
 
-                        if (!name || !title || !email) {
-                            console.error("Missing required fields for row:", row);
-                            errorCount++;
-                            continue;
-                        }
+                const memberData = {
+                    name,
+                    title,
+                    email,
+                    bio: bio || "",
+                    image: "", // Placeholder, can be updated manually
+                    links,
+                };
 
-                        const memberData = {
+                // 1. Add to Staff or Board
+                if (type === 'board') {
+                    const newBoard = await addBoardToFirebase(memberData);
+                    setBoard(prev => [...prev, newBoard]);
+                } else {
+                    const newStaff = await addStaffToFirebase(memberData);
+                    setStaff(prev => [...prev, newStaff]);
+                }
+
+                // 2. Add to Users if permissions provided
+                if (permissions) {
+                    const rolesArray = permissions.split(',').map((r: string) => r.trim()) as UserRole[];
+                    if (rolesArray.length > 0) {
+                        await addUserToFirebase({
                             name,
-                            title,
                             email,
-                            bio: bio || "",
-                            image: "", // Placeholder, can be updated manually
-                            links,
-                        };
-
-                        // 1. Add to Staff or Board
-                        if (type === 'board') {
-                            const newBoard = await addBoardToFirebase(memberData);
-                            setBoard(prev => [...prev, newBoard]);
-                        } else {
-                            const newStaff = await addStaffToFirebase(memberData);
-                            setStaff(prev => [...prev, newStaff]);
-                        }
-
-                        // 2. Add to Users if permissions provided
-                        if (permissions) {
-                            const rolesArray = permissions.split(',').map((r: string) => r.trim()) as UserRole[];
-                            if (rolesArray.length > 0) {
-                                await addUserToFirebase({
-                                    name,
-                                    email,
-                                    roles: rolesArray
-                                });
-                            }
-                        }
-
-                        successCount++;
-                    } catch (error) {
-                        console.error("Error importing team member from CSV:", error);
-                        errorCount++;
+                            roles: rolesArray
+                        });
                     }
                 }
 
-                setIsLoading(false);
-                toast({
-                    title: "Import Complete",
-                    description: `Successfully imported ${successCount} members.${errorCount > 0 ? ` Failed to import ${errorCount} members.` : ""}`,
-                    variant: errorCount > 0 ? "destructive" : "default",
-                });
-                event.target.value = "";
-            },
-            error: (error) => {
-                console.error("CSV Parse Error:", error);
-                setIsLoading(false);
-                toast({
-                    title: "Import Failed",
-                    description: "Failed to parse CSV file.",
-                    variant: "destructive",
-                });
+                successCount++;
+            } catch (error) {
+                console.error("Error importing team member from CSV:", error);
+                errorCount++;
             }
+        }
+
+        toast({
+            title: "Import Complete",
+            description: `Successfully imported ${successCount} members.${errorCount > 0 ? ` Failed to import ${errorCount} members.` : ""}`,
+            variant: errorCount > 0 ? "destructive" : "default",
         });
     };
 
     return (
         <div className="container mx-auto py-12">
-            <div className="mb-8 flex justify-between items-center">
+            <div className="mb-8 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                 <Button asChild variant="outline">
                     <Link href="/admin">
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         Back to Admin
                     </Link>
                 </Button>
+                <div className="flex flex-wrap gap-3">
+                    <CsvManagerDialog
+                        title="Import Team Data"
+                        description="Upload a CSV file to add or update staff and board members."
+                        triggerButtonText="Import Members"
+                        templateHeaders={["Name", "Type", "Title", "Email", "Permissions", "Bio", "Facebook", "Instagram", "LinkedIn", "YouTube", "Spotify", "Website"]}
+                        templateSampleRow={["Jane Doe", "staff", "Artistic Director", "jane.doe@thekyo.ca", "Website Editor", "Jane is a dedicated musician...", "https://facebook.com/jane", "", "https://linkedin.com/in/jane", "", "", "https://janedoe.com"]}
+                        instructionText="Use the template to bulk-add members with bios and social links. Valid values for 'Type' are 'staff' or 'board'. Adding 'Permissions' (comma separated) will also create an admin user account for the member."
+                        onUpload={handleCsvUpload}
+                    />
+                    <Button onClick={handleAddClick}>
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        Add Member
+                    </Button>
+                </div>
             </div>
-
-            <Card className="mb-12">
-                <CardHeader>
-                    <CardTitle className="font-headline text-xl">Bulk Team Management</CardTitle>
-                    <CardDescription>Upload or download a CSV to manage staff and board members in bulk.</CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div className="space-y-1">
-                        <p className="text-sm text-muted-foreground">Use the template to bulk-add members with bios and social links.</p>
-                        <p className="text-xs text-primary font-medium">Adding "Permission Settings" will also create an admin user account for the member.</p>
-                    </div>
-                    <div className="flex gap-3">
-                        <Button onClick={handleDownloadCsvTemplate} variant="outline" size="sm">
-                            <Download className="mr-2 h-4 w-4"/>
-                            CSV Template
-                        </Button>
-                        <div className="relative">
-                            <input
-                                type="file"
-                                accept=".csv"
-                                onChange={handleUploadCsv}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                title="Upload CSV"
-                            />
-                            <Button variant="outline" size="sm">
-                                <Upload className="mr-2 h-4 w-4"/>
-                                Upload CSV
-                            </Button>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
 
             <Card className="mb-12">
                 <CardHeader>
@@ -486,16 +439,16 @@ export default function TeamAdminPage() {
                     </Table>
                 </CardContent>
             </Card>
-            
-            <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline text-2xl">{editingMember ? 'Edit Member' : 'Add Member'}</CardTitle>
-                    <CardDescription>{editingMember ? `Editing details for ${editingMember.name}` : 'Fill out the form below to add a new staff or board member.'}</CardDescription>
-                </CardHeader>
-                <CardContent>
+
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="font-headline text-2xl">{editingMember ? 'Edit Member' : 'Add Member'}</DialogTitle>
+                        <DialogDescription>{editingMember ? `Editing details for ${editingMember.name}` : 'Fill out the form below to add a new staff or board member.'}</DialogDescription>
+                    </DialogHeader>
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                             <FormField
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                            <FormField
                                 control={form.control}
                                 name="type"
                                 render={({ field }) => (
@@ -516,69 +469,70 @@ export default function TeamAdminPage() {
                                     </FormItem>
                                 )}
                             />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="name"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                        <FormLabel>Full Name</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="e.g., 'Jane Doe'" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="title"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                        <FormLabel>Title / Role</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="e.g., 'Artistic Director'" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="email"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                        <FormLabel>Email Address</FormLabel>
+                                        <FormControl>
+                                            <Input type="email" placeholder="e.g., 'jane.doe@thekyo.ca'" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="order"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                        <FormLabel>Display Order (optional)</FormLabel>
+                                        <FormControl>
+                                            <Input type="number" placeholder="e.g., 1, 2, 3" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
                             <FormField
-                                control={form.control}
-                                name="name"
-                                render={({ field }) => (
-                                    <FormItem>
-                                    <FormLabel>Full Name</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="e.g., 'Jane Doe'" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                             <FormField
-                                control={form.control}
-                                name="title"
-                                render={({ field }) => (
-                                    <FormItem>
-                                    <FormLabel>Title / Role</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="e.g., 'Artistic Director'" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="email"
-                                render={({ field }) => (
-                                    <FormItem>
-                                    <FormLabel>Email Address</FormLabel>
-                                    <FormControl>
-                                        <Input type="email" placeholder="e.g., 'jane.doe@thekyo.ca'" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="order"
-                                render={({ field }) => (
-                                    <FormItem>
-                                    <FormLabel>Display Order (optional)</FormLabel>
-                                    <FormControl>
-                                        <Input type="number" placeholder="Lower numbers show first (e.g., 1, 2, 3)" {...field} />
-                                    </FormControl>
-                                    <FormDescription>
-                                        Use this to manually reorder members. If empty, they will be sorted alphabetically.
-                                    </FormDescription>
-                                    <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                             <FormField
                                 control={form.control}
                                 name="bio"
                                 render={({ field }) => (
                                     <FormItem>
                                     <FormLabel>Biography (optional)</FormLabel>
                                     <FormControl>
-                                        <Textarea placeholder="A short bio for the staff page..." {...field} />
+                                        <Textarea placeholder="A short bio for the staff page. Supports markdown." className="h-32" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                     </FormItem>
@@ -589,105 +543,47 @@ export default function TeamAdminPage() {
                                 <FormControl>
                                     <Input type="file" {...imageField} />
                                 </FormControl>
-                                <FormDescription>
-                                    Upload a profile picture for the member.
-                                </FormDescription>
                                 <FormMessage />
                             </FormItem>
 
                             <div className="pt-4 border-t border-primary/10">
                                 <h3 className="text-lg font-headline font-bold mb-4">Social & Web Links</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <FormField
-                                        control={form.control}
-                                        name="links.website"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Custom Website</FormLabel>
-                                                <FormControl><Input placeholder="https://..." {...field} /></FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="links.linkedin"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>LinkedIn URL</FormLabel>
-                                                <FormControl><Input placeholder="https://linkedin.com/in/..." {...field} /></FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="links.facebook"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Facebook URL</FormLabel>
-                                                <FormControl><Input placeholder="https://facebook.com/..." {...field} /></FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="links.instagram"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Instagram URL</FormLabel>
-                                                <FormControl><Input placeholder="https://instagram.com/..." {...field} /></FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="links.youtube"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>YouTube Channel</FormLabel>
-                                                <FormControl><Input placeholder="https://youtube.com/@..." {...field} /></FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="links.spotify"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Spotify Artist URL</FormLabel>
-                                                <FormControl><Input placeholder="https://open.spotify.com/artist/..." {...field} /></FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <FormField control={form.control} name="links.website" render={({ field }) => (
+                                        <FormItem><FormLabel>Website</FormLabel><FormControl><Input placeholder="https://..." {...field} /></FormControl><FormMessage /></FormItem>
+                                    )}/>
+                                    <FormField control={form.control} name="links.linkedin" render={({ field }) => (
+                                        <FormItem><FormLabel>LinkedIn</FormLabel><FormControl><Input placeholder="https://linkedin.com/in/..." {...field} /></FormControl><FormMessage /></FormItem>
+                                    )}/>
+                                    <FormField control={form.control} name="links.facebook" render={({ field }) => (
+                                        <FormItem><FormLabel>Facebook</FormLabel><FormControl><Input placeholder="https://facebook.com/..." {...field} /></FormControl><FormMessage /></FormItem>
+                                    )}/>
+                                    <FormField control={form.control} name="links.instagram" render={({ field }) => (
+                                        <FormItem><FormLabel>Instagram</FormLabel><FormControl><Input placeholder="https://instagram.com/..." {...field} /></FormControl><FormMessage /></FormItem>
+                                    )}/>
+                                    <FormField control={form.control} name="links.youtube" render={({ field }) => (
+                                        <FormItem><FormLabel>YouTube</FormLabel><FormControl><Input placeholder="https://youtube.com/@..." {...field} /></FormControl><FormMessage /></FormItem>
+                                    )}/>
+                                    <FormField control={form.control} name="links.spotify" render={({ field }) => (
+                                        <FormItem><FormLabel>Spotify</FormLabel><FormControl><Input placeholder="https://open.spotify.com/..." {...field} /></FormControl><FormMessage /></FormItem>
+                                    )}/>
                                 </div>
                             </div>
-                             <div className="flex gap-4">
+                            <div className="flex gap-4 justify-end pt-4">
+                                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} disabled={isSaving}>
+                                    Cancel
+                                </Button>
                                 <Button type="submit" disabled={isSaving}>
-                                    {isSaving ? (
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    ) : (
-                                        <UserPlus className="mr-2 h-4 w-4"/>
-                                    )}
+                                    {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                                     {saveStatus === 'uploading' ? 'Uploading Image...' : 
                                      saveStatus === 'saving' ? 'Saving Details...' : 
                                      (editingMember ? 'Update Member' : 'Save Member')}
                                 </Button>
-                                {editingMember && (
-                                    <Button variant="outline" onClick={() => setEditingMember(null)} disabled={isSaving}>
-                                        <X className="mr-2 h-4 w-4" />
-                                        Cancel Edit
-                                    </Button>
-                                )}
-                             </div>
+                            </div>
                         </form>
                     </Form>
-                </CardContent>
-            </Card>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

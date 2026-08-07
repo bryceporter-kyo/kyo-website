@@ -6,6 +6,8 @@ import Footer from '@/components/layout/Footer';
 import { Toaster } from "@/components/ui/toaster";
 import CookieConsent from '@/components/shared/CookieConsent';
 import Analytics from '@/components/shared/Analytics';
+import { Suspense } from 'react';
+import AnnouncementPopup from '@/components/shared/AnnouncementPopup';
 import { ImageProvider } from '@/components/providers/ImageProvider';
 import { DataProvider } from '@/components/providers/DataProvider';
 import { fetchPageMetadata } from '@/lib/metadata';
@@ -49,7 +51,9 @@ export default function RootLayout({
         className={cn('font-body antialiased', 'min-h-screen bg-background')}
         suppressHydrationWarning
       >
-        <Analytics />
+        <Suspense fallback={null}>
+          <Analytics />
+        </Suspense>
         <DataProvider>
           <ImageProvider>
             <div className="relative flex min-h-dvh flex-col bg-background">
@@ -61,6 +65,7 @@ export default function RootLayout({
             </div>
             <Toaster />
             <CookieConsent />
+            <AnnouncementPopup />
             <SpeedInsights />
           </ImageProvider>
         </DataProvider>
