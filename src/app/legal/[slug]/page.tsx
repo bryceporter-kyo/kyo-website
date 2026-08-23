@@ -11,6 +11,8 @@ import { format } from "date-fns";
 import { Metadata } from "next";
 import { cn } from "@/lib/utils";
 
+export const revalidate = 0;
+
 interface LegalPageProps {
   params: Promise<{
     slug: string;
@@ -79,12 +81,7 @@ export default async function DynamicLegalPage({ params }: LegalPageProps) {
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {content}
                   </ReactMarkdown>
-                  
-                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                    <Calendar className="w-3 h-3" />
-                    Last updated: {format(new Date(page.lastUpdated), "MMMM d, yyyy")}
-                  </div>
-                  <div className="mt-8 pt-6 border-t border-primary/5 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"><Calendar className="w-3 h-3" />Last updated: October 26, 2023</div></CardContent>
+                </CardContent>
               </Card>
             );
           })}

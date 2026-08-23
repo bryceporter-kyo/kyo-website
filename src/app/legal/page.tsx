@@ -7,6 +7,8 @@ import { format } from "date-fns";
 import { fetchLegalPages } from "@/lib/legal-pages";
 import { fetchLegalDocuments } from "@/lib/legal-documents";
 
+export const revalidate = 0;
+
 const getIconForSlug = (slug: string) => {
   switch (slug) {
     case 'privacy-policy': return Shield;
