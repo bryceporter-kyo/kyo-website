@@ -128,6 +128,27 @@ export default function Header() {
     setIsRegisterOpen(false);
   }, [pathname]);
 
+  const orchestrasImage = getImage("page-header-orchestras")?.imageUrl;
+  const upbeatImage = getImage("page-header-upbeat")?.imageUrl;
+
+  // Preload registration images so they are ready when the dialog opens
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+        // Use requestIdleCallback or setTimeout to not block initial page load
+        const timer = setTimeout(() => {
+            if (orchestrasImage) {
+                const img1 = new window.Image();
+                img1.src = orchestrasImage;
+            }
+            if (upbeatImage) {
+                const img2 = new window.Image();
+                img2.src = upbeatImage;
+            }
+        }, 1000);
+        return () => clearTimeout(timer);
+    }
+  }, [orchestrasImage, upbeatImage]);
+
   useEffect(() => {
     return () => clearCloseTimeout();
   }, []);
@@ -163,9 +184,6 @@ export default function Header() {
     damping: 30,
     restDelta: 0.001,
   });
-
-  const orchestrasImage = getImage("page-header-orchestras")?.imageUrl;
-  const upbeatImage = getImage("page-header-upbeat")?.imageUrl;
 
   const desktopLinkClasses = (active: boolean) =>
     cn(

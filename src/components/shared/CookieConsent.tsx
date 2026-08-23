@@ -49,12 +49,12 @@ export default function CookieConsent() {
     };
   }, []);
 
-  const handleSave = (acceptedAll = false) => {
+  const handleSave = (acceptedAll = false, declinedAll = false) => {
     try {
       const consentState = {
         accepted: true,
-        analytics: acceptedAll ? true : analyticsEnabled,
-        functional: acceptedAll ? true : functionalEnabled,
+        analytics: acceptedAll ? true : (declinedAll ? false : analyticsEnabled),
+        functional: acceptedAll ? true : (declinedAll ? false : functionalEnabled),
         timestamp: new Date().toISOString()
       };
       localStorage.setItem('kyo_cookie_consent', JSON.stringify(consentState));
@@ -169,6 +169,7 @@ export default function CookieConsent() {
             {!showDetails ? (
                 <>
                     <Button className="w-full sm:w-auto" onClick={() => handleSave(true)}>Accept All</Button>
+                    <Button className="w-full sm:w-auto" variant="outline" onClick={() => handleSave(false, true)}>Decline All</Button>
                     <Button className="w-full sm:w-auto" variant="outline" onClick={() => setShowDetails(true)}>Manage Cookies</Button>
                 </>
             ) : (
