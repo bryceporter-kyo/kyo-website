@@ -30,9 +30,6 @@ type LegalLink = {
 
 const legalLinks: LegalLink[] = [
     { name: 'Legal Overview', href: '/legal' },
-    { name: 'Privacy Policy', href: '/legal/privacy-policy' },
-    { name: 'Terms of Use', href: '/legal/terms-of-use' },
-    { name: 'Accessibility', href: '/legal/accessibility-policy' },
 ];
 
 export default function Footer() {
