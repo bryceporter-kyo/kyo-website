@@ -50,6 +50,23 @@ export async function fetchLegalPageBySlug(slug: string): Promise<LegalPage | nu
   }
 }
 
+export async function fetchLegalPageById(id: string): Promise<LegalPage | null> {
+  try {
+    const docRef = doc(db, LEGAL_COLLECTION, id);
+    const snapshot = await getDoc(docRef);
+    
+    if (!snapshot.exists()) return null;
+    
+    return {
+      id: snapshot.id,
+      ...snapshot.data(),
+    } as LegalPage;
+  } catch (error) {
+    console.error('[LegalPages] Error fetching by id:', error);
+    return null;
+  }
+}
+
 export async function saveLegalPage(page: Omit<LegalPage, 'id'>, id?: string): Promise<LegalPage> {
   const ref = collection(db, LEGAL_COLLECTION);
   
