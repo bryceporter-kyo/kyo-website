@@ -14,6 +14,7 @@ import Link from "next/link";
 import React from "react";
 import { fetchLegalPages, deleteLegalPage, type LegalPage } from "@/lib/legal-pages";
 import { fetchLegalDocuments, saveLegalDocument, deleteLegalDocument, type LegalDocument } from "@/lib/legal-documents";
+import { uploadDocument } from "@/lib/document-service";
 import { seedLegalPagesIfEmpty } from "@/lib/seed-legal";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
@@ -33,7 +34,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const legalDocumentSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters."),
   description: z.string().min(5, "Description must be at least 5 characters."),
-  url: z.string().url("Must be a valid URL link to PDF file."),
+  url: z.string().url("Must be a valid URL link to PDF file.").optional().or(z.literal("")),
 });
 
 export default function LegalAdminPage() {
@@ -46,6 +47,8 @@ export default function LegalAdminPage() {
     const [isDocsLoading, setIsDocsLoading] = React.useState(true);
     const [isDocsSaving, setIsDocsSaving] = React.useState(false);
     const [editingDoc, setEditingDoc] = React.useState<LegalDocument | null>(null);
+    const [uploadFile, setUploadFile] = React.useState<File | null>(null);
+    const [docInputMode, setDocInputMode] = React.useState<"upload" | "link">("upload");
 
     const docForm = useForm<z.infer<typeof legalDocumentSchema>>({
         resolver: zodResolver(legalDocumentSchema),
@@ -67,12 +70,16 @@ export default function LegalAdminPage() {
                 description: editingDoc.description,
                 url: editingDoc.url,
             });
+            setDocInputMode("link"); // Default to link mode when editing an existing doc
+            setUploadFile(null);
         } else {
             docForm.reset({
                 name: "",
                 description: "",
                 url: "",
             });
+            setDocInputMode("upload");
+            setUploadFile(null);
         }
     }, [editingDoc, docForm]);
 
@@ -117,10 +124,29 @@ export default function LegalAdminPage() {
     }
 
     async function onDocSubmit(values: z.infer<typeof legalDocumentSchema>) {
+        if (docInputMode === "upload" && !uploadFile && !editingDoc) {
+            toast({ title: "Error", description: "Please select a PDF file to upload.", variant: "destructive" });
+            return;
+        }
+        if (docInputMode === "link" && !values.url) {
+            toast({ title: "Error", description: "Please provide a valid URL.", variant: "destructive" });
+            return;
+        }
+
         setIsDocsSaving(true);
         try {
+            let finalUrl = values.url || "";
+            
+            if (docInputMode === "upload" && uploadFile) {
+                // Generate a slug-like ID from the document name
+                const docId = values.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+                finalUrl = await uploadDocument(uploadFile, docId);
+            }
+
             const docData = {
-                ...values,
+                name: values.name,
+                description: values.description,
+                url: finalUrl,
                 uploadedAt: new Date().toISOString(),
             };
             
@@ -135,6 +161,7 @@ export default function LegalAdminPage() {
             }
             
             setEditingDoc(null);
+            setUploadFile(null);
             docForm.reset();
         } catch (error) {
             console.error(error);
@@ -397,22 +424,44 @@ export default function LegalAdminPage() {
                                                     </FormItem>
                                                 )}
                                             />
-                                            <FormField
-                                                control={docForm.control}
-                                                name="url"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>PDF URL (Google Drive / Firebase Storage)</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="https://drive.google.com/..." {...field} />
-                                                        </FormControl>
-                                                        <FormDescription>
-                                                            Enter the public sharing link or URL of the PDF document.
-                                                        </FormDescription>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
+                                            <div className="space-y-3">
+                                                <FormLabel>Document File or Link</FormLabel>
+                                                <Tabs value={docInputMode} onValueChange={(val) => setDocInputMode(val as "upload" | "link")} className="w-full">
+                                                    <TabsList className="w-full grid grid-cols-2">
+                                                        <TabsTrigger value="upload">Upload PDF</TabsTrigger>
+                                                        <TabsTrigger value="link">Provide Link</TabsTrigger>
+                                                    </TabsList>
+                                                    <TabsContent value="upload" className="pt-2">
+                                                        <div className="flex items-center justify-center w-full">
+                                                            <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/30 hover:bg-muted/50 transition-colors">
+                                                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                                    <FileUp className="w-8 h-8 mb-2 text-muted-foreground" />
+                                                                    <p className="mb-1 text-sm font-semibold text-center px-4">{uploadFile ? uploadFile.name : "Click to upload a PDF"}</p>
+                                                                    {uploadFile && <p className="text-xs text-muted-foreground">{(uploadFile.size / 1024 / 1024).toFixed(2)} MB</p>}
+                                                                </div>
+                                                                <input id="dropzone-file" type="file" accept="application/pdf" className="hidden" onChange={(e) => setUploadFile(e.target.files?.[0] || null)} />
+                                                            </label>
+                                                        </div>
+                                                    </TabsContent>
+                                                    <TabsContent value="link" className="pt-2">
+                                                        <FormField
+                                                            control={docForm.control}
+                                                            name="url"
+                                                            render={({ field }) => (
+                                                                <FormItem>
+                                                                    <FormControl>
+                                                                        <Input placeholder="https://drive.google.com/..." {...field} />
+                                                                    </FormControl>
+                                                                    <FormDescription>
+                                                                        Enter the public sharing link or URL of the PDF document.
+                                                                    </FormDescription>
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
+                                                    </TabsContent>
+                                                </Tabs>
+                                            </div>
                                             <Button type="submit" className="w-full" disabled={isDocsSaving}>
                                                 {isDocsSaving ? (
                                                     <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</>
