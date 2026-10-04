@@ -236,7 +236,7 @@ export async function getMergedImages(
       }
       return {
         ...defaultImg,
-        imageUrl: "", // Remove hardcoded Unsplash URL
+        imageUrl: defaultImg.imageUrl || "",
         originalUrl: defaultImg.imageUrl,
       };
     });
@@ -244,11 +244,10 @@ export async function getMergedImages(
     console.log("[ImageService] getMergedImages completed", { resultCount: result.length });
     return result;
   } catch (error) {
-    console.error("[ImageService] getMergedImages failed, using empty defaults:", error);
-    // Return defaults with empty image URLs on error
+    console.error("[ImageService] getMergedImages failed, using defaults:", error);
+    // Return defaults with static placeholder image URLs on error
     return defaultImages.map((img) => ({
       ...img,
-      imageUrl: "",
       originalUrl: img.imageUrl,
     }));
   }

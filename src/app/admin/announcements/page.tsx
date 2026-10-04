@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Pencil, Trash2, CalendarIcon, X } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, CalendarIcon, X, FileText, Download, Upload, Info, Loader2, Plus, ExternalLink, Paperclip } from "lucide-react";
 import Link from "next/link";
 import { 
     fetchAnnouncementsFromFirebase, 
@@ -49,12 +49,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 
 
 const announcementSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters long."),
   content: z.string().min(20, "Content must be at least 20 characters long."),
   imageUrl: z.string().url().optional().or(z.literal('')),
+  link: z.string().url().optional().or(z.literal('')),
   pinned: z.boolean().default(false),
   unpinsAt: z.date().optional(),
   disappearsAt: z.date().optional(),
@@ -66,6 +68,8 @@ export default function AnnouncementsAdminPage() {
     const [announcements, setAnnouncements] = React.useState<Announcement[]>([]);
     const [editingAnnouncement, setEditingAnnouncement] = React.useState<Announcement | null>(null);
     const [imageFile, setImageFile] = React.useState<File | null>(null);
+    const [attachments, setAttachments] = React.useState<{ name: string; url: string }[]>([]);
+    const [isUploadingAttachment, setIsUploadingAttachment] = React.useState(false);
     const [isLoading, setIsLoading] = React.useState(true);
     const [isSaving, setIsSaving] = React.useState(false);
 
@@ -95,6 +99,7 @@ export default function AnnouncementsAdminPage() {
             title: "",
             content: "",
             imageUrl: "",
+            link: "",
             pinned: false,
             popupPage: "",
         },
@@ -106,27 +111,61 @@ export default function AnnouncementsAdminPage() {
                 title: editingAnnouncement.title,
                 content: editingAnnouncement.content,
                 imageUrl: editingAnnouncement.imageUrl || "",
+                link: editingAnnouncement.link || "",
                 pinned: editingAnnouncement.pinned,
                 unpinsAt: editingAnnouncement.unpinsAt ? new Date(editingAnnouncement.unpinsAt) : undefined,
                 disappearsAt: editingAnnouncement.disappearsAt ? new Date(editingAnnouncement.disappearsAt) : undefined,
                 popupPage: editingAnnouncement.popupPage || "",
             });
+            setAttachments(editingAnnouncement.attachments || []);
         } else {
             form.reset({
                 title: "",
                 content: "",
                 imageUrl: "",
+                link: "",
                 pinned: false,
                 popupPage: "",
                 unpinsAt: undefined,
                 disappearsAt: undefined,
             });
             setImageFile(null);
+            setAttachments([]);
         }
     }, [editingAnnouncement, form]);
 
     const contentValue = form.watch("content");
     const isPinned = form.watch("pinned");
+
+    const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || e.target.files.length === 0) return;
+        const file = e.target.files[0];
+        
+        setIsUploadingAttachment(true);
+        try {
+            const fileName = file.name.replace(/\.[^/.]+$/, "");
+            const uploadedUrl = await uploadImage(file, `announcements/doc_${Date.now()}`);
+            setAttachments(prev => [...prev, { name: file.name, url: uploadedUrl }]);
+            toast({
+                title: "PDF Uploaded",
+                description: `"${file.name}" attached successfully.`,
+            });
+        } catch (error) {
+            console.error("Error uploading PDF:", error);
+            toast({
+                title: "Upload Failed",
+                description: "Failed to upload document attachment. Please try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsUploadingAttachment(false);
+            e.target.value = "";
+        }
+    };
+
+    const handleRemoveAttachment = (indexToRemove: number) => {
+        setAttachments(prev => prev.filter((_, idx) => idx !== indexToRemove));
+    };
 
     async function onSubmit(values: z.infer<typeof announcementSchema>) {
         setIsSaving(true);
@@ -139,8 +178,9 @@ export default function AnnouncementsAdminPage() {
             const announcementData = {
                 ...values,
                 imageUrl: finalImageUrl,
-                ...values,
-                date: format(new Date(), 'yyyy-MM-dd'),
+                link: values.link || undefined,
+                attachments: attachments.length > 0 ? attachments : undefined,
+                date: editingAnnouncement?.date || format(new Date(), 'yyyy-MM-dd'),
                 excerpt: values.content.substring(0, 150) + (values.content.length > 150 ? '...' : ''),
                 unpinsAt: values.unpinsAt ? format(values.unpinsAt, 'yyyy-MM-dd') : undefined,
                 disappearsAt: values.disappearsAt ? format(values.disappearsAt, 'yyyy-MM-dd') : undefined,
@@ -167,6 +207,7 @@ export default function AnnouncementsAdminPage() {
             }
             form.reset();
             setImageFile(null);
+            setAttachments([]);
         } catch (error) {
             console.error('Error saving announcement:', error);
             toast({
@@ -377,45 +418,176 @@ export default function AnnouncementsAdminPage() {
                                     </FormItem>
                                 )}
                             />
-                            <FormField
-                                control={form.control}
-                                name="imageUrl"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Image (Optional)</FormLabel>
-                                        <FormControl>
-                                            <div className="flex flex-col gap-2">
-                                                {field.value && (
-                                                    <div className="relative h-32 w-48 rounded-md overflow-hidden border">
-                                                        <img src={field.value} className="object-cover w-full h-full" alt="Preview" />
-                                                        <Button 
-                                                            type="button" 
-                                                            variant="destructive" 
-                                                            size="icon" 
-                                                            className="absolute top-1 right-1 h-6 w-6 rounded-full"
-                                                            onClick={() => {
-                                                                field.onChange("");
-                                                                setImageFile(null);
-                                                            }}
+                            <div className="space-y-4 rounded-xl border p-5 bg-card">
+                                <FormField
+                                    control={form.control}
+                                    name="imageUrl"
+                                    render={({ field }) => (
+                                        <FormItem className="space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <FormLabel className="text-base font-semibold">Featured Image (Optional)</FormLabel>
+                                                <Badge variant="secondary" className="text-xs font-normal">
+                                                    Responsive Display
+                                                </Badge>
+                                            </div>
+
+                                            {/* Sizing & Responsiveness Guidance Callout */}
+                                            <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5 text-xs leading-relaxed space-y-1.5 text-slate-700 dark:text-slate-200">
+                                                <div className="flex items-center gap-1.5 font-semibold text-primary">
+                                                    <Info className="h-4 w-4 shrink-0" />
+                                                    <span>Image Sizing & Display Guide</span>
+                                                </div>
+                                                <p className="text-muted-foreground">
+                                                    Images are <strong>dynamically responsive</strong> across all devices (mobile, tablet, and desktop) and will automatically scale and fit cleanly within cards and announcement modals.
+                                                </p>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 pt-1 text-muted-foreground">
+                                                    <div>• <strong>Recommended aspect ratio:</strong> 16:9 or 4:3 (landscape)</div>
+                                                    <div>• <strong>Recommended resolution:</strong> 1200 × 675 px or 800 × 600 px</div>
+                                                    <div>• <strong>Supported formats:</strong> PNG, JPG, WebP</div>
+                                                    <div>• <strong>Max file size:</strong> 5 MB</div>
+                                                </div>
+                                            </div>
+
+                                            <FormControl>
+                                                <div className="flex flex-col gap-3 pt-1">
+                                                    {field.value && (
+                                                        <div className="relative h-36 w-60 rounded-xl overflow-hidden border shadow-sm group">
+                                                            <img src={field.value} className="object-cover w-full h-full" alt="Preview" />
+                                                            <Button 
+                                                                type="button" 
+                                                                variant="destructive" 
+                                                                size="icon" 
+                                                                className="absolute top-2 right-2 h-7 w-7 rounded-full shadow-md"
+                                                                onClick={() => {
+                                                                    field.onChange("");
+                                                                    setImageFile(null);
+                                                                }}
+                                                            >
+                                                                <X className="h-3.5 w-3.5" />
+                                                            </Button>
+                                                        </div>
+                                                    )}
+                                                    <Input 
+                                                        type="file" 
+                                                        accept="image/png,image/jpeg,image/webp,image/jpg" 
+                                                        onChange={(e) => {
+                                                            if (e.target.files && e.target.files[0]) {
+                                                                setImageFile(e.target.files[0]);
+                                                                field.onChange(URL.createObjectURL(e.target.files[0]));
+                                                            }
+                                                        }} 
+                                                    />
+                                                </div>
+                                            </FormControl>
+                                            <FormDescription>
+                                                Upload an image to display with the announcement across the website.
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+
+                            {/* PDF Documents & Attachments Section */}
+                            <div className="space-y-4 rounded-xl border p-5 bg-slate-50/70 dark:bg-slate-900/30">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                    <div>
+                                        <div className="flex items-center gap-2">
+                                            <FileText className="h-5 w-5 text-primary" />
+                                            <h4 className="font-semibold text-base">PDF Documents & Attachments (Optional)</h4>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground mt-0.5">
+                                            Upload PDF flyers, brochures, schedules, or permission slips that visitors can download.
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={isUploadingAttachment}
+                                            className="relative cursor-pointer bg-white dark:bg-slate-950"
+                                            asChild
+                                        >
+                                            <label>
+                                                {isUploadingAttachment ? (
+                                                    <>
+                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                        Uploading PDF...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Upload className="mr-2 h-4 w-4" />
+                                                        Upload PDF File
+                                                    </>
+                                                )}
+                                                <input
+                                                    type="file"
+                                                    accept=".pdf,application/pdf"
+                                                    className="sr-only"
+                                                    onChange={handlePdfUpload}
+                                                    disabled={isUploadingAttachment}
+                                                />
+                                            </label>
+                                        </Button>
+                                    </div>
+                                </div>
+
+                                {attachments.length > 0 ? (
+                                    <div className="space-y-2 pt-2 border-t">
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                            Attached Documents ({attachments.length})
+                                        </p>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                            {attachments.map((doc, idx) => (
+                                                <div
+                                                    key={idx}
+                                                    className="flex items-center justify-between gap-2 p-2.5 rounded-lg border bg-white dark:bg-slate-950 text-sm shadow-sm"
+                                                >
+                                                    <div className="flex items-center gap-2 min-w-0">
+                                                        <FileText className="h-4 w-4 text-rose-500 shrink-0" />
+                                                        <span className="truncate font-medium text-xs">{doc.name}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1 shrink-0">
+                                                        <Button asChild variant="ghost" size="icon" className="h-7 w-7 text-primary hover:text-primary">
+                                                            <Link href={doc.url} target="_blank" title="View Document">
+                                                                <Download className="h-3.5 w-3.5" />
+                                                            </Link>
+                                                        </Button>
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-7 w-7 text-destructive hover:text-destructive"
+                                                            onClick={() => handleRemoveAttachment(idx)}
+                                                            title="Remove Document"
                                                         >
-                                                            <X className="h-3 w-3" />
+                                                            <Trash2 className="h-3.5 w-3.5" />
                                                         </Button>
                                                     </div>
-                                                )}
-                                                <Input 
-                                                    type="file" 
-                                                    accept="image/*" 
-                                                    onChange={(e) => {
-                                                        if (e.target.files && e.target.files[0]) {
-                                                            setImageFile(e.target.files[0]);
-                                                            field.onChange(URL.createObjectURL(e.target.files[0]));
-                                                        }
-                                                    }} 
-                                                />
-                                            </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="text-xs text-muted-foreground py-2 border-t border-dashed text-center">
+                                        No PDF documents attached yet. Click "Upload PDF File" above to attach documents.
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Related Link Field */}
+                            <FormField
+                                control={form.control}
+                                name="link"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Related Web Link (Optional)</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="https://example.com/tickets or /programs/orchestras" {...field} />
                                         </FormControl>
                                         <FormDescription>
-                                            Upload an image to display with the announcement.
+                                            Add an external or internal link button for this announcement (e.g. registration page or ticket sales).
                                         </FormDescription>
                                         <FormMessage />
                                     </FormItem>

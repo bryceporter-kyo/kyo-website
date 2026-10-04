@@ -81,12 +81,9 @@ async function fetchImagesFromFirestore(): Promise<StoredImage[]> {
           ...storedImg,
         };
       }
-      // If no image in Firestore, return the default entry but with an EMPTY imageUrl 
-      // so it doesn't show the placeholder, unless we REALLY want a fallback.
-      // But the user said "load nothing first".
       return {
         ...defaultImg,
-        imageUrl: "", // Remove the hardcoded Unsplash URL
+        imageUrl: defaultImg.imageUrl || "",
         originalUrl: defaultImg.imageUrl,
       };
     });
@@ -95,19 +92,23 @@ async function fetchImagesFromFirestore(): Promise<StoredImage[]> {
     return mergedImages;
   } catch (error) {
     console.error("[ImageProvider] Error fetching from Firestore:", error);
-    return [];
+    return PlaceHolderImages.map(img => ({ ...img, originalUrl: img.imageUrl }));
   }
 }
 
 export function ImageProvider({ children }: { children: React.ReactNode }) {
-  const [images, setImages] = useState<StoredImage[]>([]);
+  const [images, setImages] = useState<StoredImage[]>(() => 
+    PlaceHolderImages.map(img => ({ ...img, originalUrl: img.imageUrl }))
+  );
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshImages = useCallback(async () => {
     setIsLoading(true);
     try {
       const fetchedImages = await fetchImagesFromFirestore();
-      setImages(fetchedImages);
+      if (fetchedImages.length > 0) {
+        setImages(fetchedImages);
+      }
     } catch (error) {
       console.error("[ImageProvider] Failed to refresh images:", error);
     } finally {
@@ -140,7 +141,18 @@ export function ImageProvider({ children }: { children: React.ReactNode }) {
   }, [images]);
 
   const getImage = useCallback((id: string) => {
-    return images.find(img => img.id === id);
+    const found = images.find(img => img.id === id);
+    if (found && found.imageUrl) {
+      return found;
+    }
+    const defaultImg = PlaceHolderImages.find(img => img.id === id);
+    if (defaultImg) {
+      return {
+        ...defaultImg,
+        originalUrl: defaultImg.imageUrl,
+      };
+    }
+    return undefined;
   }, [images]);
 
   return (

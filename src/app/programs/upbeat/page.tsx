@@ -268,7 +268,7 @@ export default function UpbeatPage() {
                     transition={{ duration: 0.8 }}
                     className="relative"
                 >
-                    {aboutImage && (
+                    {aboutImage?.imageUrl ? (
                         <div className="rounded-[3rem] overflow-hidden shadow-2xl group border-8 border-white bg-white">
                             <Image
                                 src={aboutImage.imageUrl}
@@ -278,7 +278,7 @@ export default function UpbeatPage() {
                                 className="object-cover w-full aspect-[4/3] transition-transform duration-1000 group-hover:scale-110"
                             />
                         </div>
-                    )}
+                    ) : null}
                 </motion.div>
             </div>
         </div>
@@ -374,7 +374,7 @@ export default function UpbeatPage() {
                       viewport={{ once: true }}
                       className="relative"
                   >
-                      {impactImage && (
+                      {impactImage?.imageUrl ? (
                           <div className="rounded-[3rem] overflow-hidden shadow-2xl group border-[12px] border-white bg-white">
                               <Image
                                   src={impactImage.imageUrl}
@@ -384,7 +384,7 @@ export default function UpbeatPage() {
                                   className="object-cover w-full aspect-[4/3] transition-transform duration-1000 group-hover:scale-105"
                               />
                           </div>
-                      )}
+                      ) : null}
                       <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl -z-10" />
                   </motion.div>
 
@@ -469,15 +469,15 @@ export default function UpbeatPage() {
                                     transition={{ duration: 0.8 }}
                                     className="w-full lg:w-1/2"
                                 >
-                                    <div className="relative aspect-[16/10] rounded-[2.5rem] overflow-hidden shadow-2xl group">
-                                        {image && (
+                                    <div className="relative aspect-[16/10] rounded-[2.5rem] overflow-hidden shadow-2xl group bg-slate-900/10">
+                                        {image?.imageUrl ? (
                                             <Image
                                                 src={image.imageUrl}
                                                 alt={activity.title}
                                                 fill
                                                 className="object-cover transition-transform duration-1000 group-hover:scale-110"
                                             />
-                                        )}
+                                        ) : null}
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                                         <div className="absolute bottom-8 left-8">
                                             <div className="p-3 bg-white/20 backdrop-blur-md rounded-2xl text-white">
@@ -558,7 +558,7 @@ export default function UpbeatPage() {
                                 <InnovationCarousel items={challengesSolutions} />
                             </div>
 
-                            {communityImage && (
+                            {communityImage?.imageUrl ? (
                                 <motion.div 
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     whileInView={{ opacity: 1, scale: 1 }}
@@ -572,7 +572,7 @@ export default function UpbeatPage() {
                                         className="object-cover"
                                     />
                                 </motion.div>
-                            )}
+                            ) : null}
                         </div>
                     </div>
                 </div>
