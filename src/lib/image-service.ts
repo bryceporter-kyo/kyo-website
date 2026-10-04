@@ -44,22 +44,90 @@ function isBase64Image(data: string): boolean {
 }
 
 /**
+ * Automatically compress and resize client image before uploading
+ */
+export async function compressImageIfNeeded(
+  file: File | Blob, 
+  maxWidth = 1920, 
+  maxHeight = 1920, 
+  quality = 0.85
+): Promise<File | Blob> {
+  if (typeof window === 'undefined') return file;
+  if (!file || !file.type || !file.type.startsWith('image/')) return file;
+  
+  // If image is already smaller than 300KB and JPEG/WebP, skip compression
+  if (file.size < 300 * 1024 && (file.type === 'image/jpeg' || file.type === 'image/webp')) {
+    return file;
+  }
+
+  return new Promise((resolve) => {
+    const img = new (window as any).Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+
+      if (width > maxWidth || height > maxHeight) {
+        if (width > height) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        } else {
+          width = Math.round((width * maxHeight) / height);
+          height = maxHeight;
+        }
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        resolve(file);
+        return;
+      }
+      ctx.drawImage(img, 0, 0, width, height);
+
+      canvas.toBlob(
+        (blob) => {
+          if (blob && blob.size < file.size) {
+            const fileName = file instanceof File ? file.name.replace(/\.[^/.]+$/, '.jpg') : 'image.jpg';
+            const compressedFile = new File([blob], fileName, { type: 'image/jpeg' });
+            console.log(`[ImageService] Compressed from ${(file.size / (1024 * 1024)).toFixed(2)}MB to ${(compressedFile.size / 1024).toFixed(0)}KB`);
+            resolve(compressedFile);
+          } else {
+            resolve(file);
+          }
+        },
+        'image/jpeg',
+        quality
+      );
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(file);
+    };
+    img.src = url;
+  });
+}
+
+/**
  * Upload an image file to Firebase Storage
  */
 export async function uploadImage(
   file: File | Blob,
   imageId: string
 ): Promise<string> {
-  console.log("[ImageService] uploadImage started", { imageId, fileSize: file.size });
+  const processedFile = await compressImageIfNeeded(file);
+  console.log("[ImageService] uploadImage started", { imageId, fileSize: processedFile.size });
   const timestamp = Date.now();
-  const extension = file instanceof File ? file.name.split(".").pop() : "png";
+  const extension = processedFile instanceof File ? processedFile.name.split(".").pop() : "jpg";
   const storagePath = `images/${imageId}_${timestamp}.${extension}`;
   const storageRef = ref(storage, storagePath);
 
   console.log("[ImageService] Uploading to Firebase Storage...", { path: storagePath });
   
   try {
-    await withTimeout(uploadBytes(storageRef, file), 30000, "Upload");
+    await withTimeout(uploadBytes(storageRef, processedFile), 30000, "Upload");
     console.log("[ImageService] Upload complete, getting download URL...");
     const downloadURL = await withTimeout(getDownloadURL(storageRef), 10000, "Get download URL");
     console.log("[ImageService] Download URL obtained:", downloadURL);
