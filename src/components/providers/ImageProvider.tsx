@@ -97,9 +97,12 @@ async function fetchImagesFromFirestore(): Promise<StoredImage[]> {
 }
 
 export function ImageProvider({ children }: { children: React.ReactNode }) {
-  const [images, setImages] = useState<StoredImage[]>(() => 
-    PlaceHolderImages.map(img => ({ ...img, originalUrl: img.imageUrl }))
-  );
+  // Start with an empty array — do NOT pre-populate with the static JSON.
+  // If we pre-populate, React immediately renders with the Unsplash template URLs
+  // (the "old" URLs) and then flashes to the correct Firebase Storage URLs once
+  // the async Firestore fetch completes. Starting empty means images simply don't
+  // render until we have the real data.
+  const [images, setImages] = useState<StoredImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshImages = useCallback(async () => {
@@ -108,9 +111,15 @@ export function ImageProvider({ children }: { children: React.ReactNode }) {
       const fetchedImages = await fetchImagesFromFirestore();
       if (fetchedImages.length > 0) {
         setImages(fetchedImages);
+      } else {
+        // Firestore returned nothing — fall back to static placeholders so
+        // the page isn't permanently blank.
+        setImages(PlaceHolderImages.map(img => ({ ...img, originalUrl: img.imageUrl })));
       }
     } catch (error) {
       console.error("[ImageProvider] Failed to refresh images:", error);
+      // On error, also fall back to static placeholders.
+      setImages(PlaceHolderImages.map(img => ({ ...img, originalUrl: img.imageUrl })));
     } finally {
       setIsLoading(false);
     }
@@ -141,19 +150,17 @@ export function ImageProvider({ children }: { children: React.ReactNode }) {
   }, [images]);
 
   const getImage = useCallback((id: string) => {
+    // While loading, return undefined so components render nothing (no flash).
+    // After loading, images[] is populated from Firestore (or static fallback),
+    // so we only look there — no secondary fallback to PlaceHolderImages which
+    // would re-introduce the old URL flash.
+    if (isLoading) return undefined;
     const found = images.find(img => img.id === id);
     if (found && found.imageUrl) {
       return found;
     }
-    const defaultImg = PlaceHolderImages.find(img => img.id === id);
-    if (defaultImg) {
-      return {
-        ...defaultImg,
-        originalUrl: defaultImg.imageUrl,
-      };
-    }
     return undefined;
-  }, [images]);
+  }, [images, isLoading]);
 
   return (
     <ImageContext.Provider value={{ images, getImage, isLoading, refreshImages }}>
