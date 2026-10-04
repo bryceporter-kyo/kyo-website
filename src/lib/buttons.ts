@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { db, sanitizeForFirestore } from './firebase';
 import { collection, getDocs, doc, setDoc, updateDoc } from 'firebase/firestore';
 import data from './buttons.json';
 
@@ -63,7 +63,8 @@ export async function fetchButtonsFromFirebase(): Promise<ButtonConfig[]> {
 export async function saveButtonToFirebase(button: ButtonConfig): Promise<void> {
     const buttonRef = doc(db, BUTTONS_COLLECTION, button.id);
     const { id, ...buttonData } = button;
-    await setDoc(buttonRef, buttonData);
+    const cleanButtonData = sanitizeForFirestore(buttonData);
+    await setDoc(buttonRef, cleanButtonData);
 }
 
 /**
@@ -79,7 +80,8 @@ export async function updateButtonVisibilityInFirebase(id: string, visible: bool
  */
 export async function updateButtonLinkInFirebase(id: string, link: LinkInfo): Promise<void> {
     const buttonRef = doc(db, BUTTONS_COLLECTION, id);
-    await updateDoc(buttonRef, { link });
+    const cleanLink = sanitizeForFirestore(link);
+    await updateDoc(buttonRef, { link: cleanLink });
 }
 
 /**

@@ -1,5 +1,5 @@
 
-import { db } from './firebase';
+import { db, sanitizeForFirestore } from './firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc } from 'firebase/firestore';
 import data from './links.json';
 
@@ -73,7 +73,8 @@ export async function fetchLinksFromFirebase(): Promise<ExternalLink[]> {
 export async function addLinkToFirebase(link: ExternalLink): Promise<ExternalLink> {
     // Use the link id as the document id for consistency
     const linkRef = doc(db, LINKS_COLLECTION, link.id);
-    await setDoc(linkRef, { name: link.name, url: link.url });
+    const cleanLink = sanitizeForFirestore({ name: link.name, url: link.url });
+    await setDoc(linkRef, cleanLink);
     return link;
 }
 
@@ -83,7 +84,8 @@ export async function addLinkToFirebase(link: ExternalLink): Promise<ExternalLin
 export async function updateLinkInFirebase(id: string, link: Partial<ExternalLink>): Promise<void> {
     const linkRef = doc(db, LINKS_COLLECTION, id);
     const { id: _id, ...linkData } = link as ExternalLink;
-    await updateDoc(linkRef, linkData);
+    const cleanLinkData = sanitizeForFirestore(linkData);
+    await updateDoc(linkRef, cleanLinkData);
 }
 
 /**

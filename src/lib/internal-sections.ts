@@ -1,6 +1,6 @@
 
 import internalSectionsData from './internal-sections.json';
-import { db } from './firebase';
+import { db, sanitizeForFirestore } from './firebase';
 import { collection, getDocs, doc, updateDoc, setDoc, query, orderBy } from 'firebase/firestore';
 
 export type InternalSection = {
@@ -42,13 +42,14 @@ export async function fetchInternalSectionsFromFirebase(): Promise<InternalSecti
 export async function updateInternalSectionInFirebase(section: InternalSection): Promise<void> {
   try {
     const sectionRef = doc(db, 'internal-sections', section.id);
-    await updateDoc(sectionRef, {
+    const data = sanitizeForFirestore({
       icon: section.icon,
       title: section.title,
       manager: section.manager,
       email: section.email,
       linkId: section.linkId
     });
+    await updateDoc(sectionRef, data);
   } catch (error) {
     console.error('Error updating internal section in Firebase:', error);
     throw error;
@@ -58,13 +59,14 @@ export async function updateInternalSectionInFirebase(section: InternalSection):
 export async function addInternalSectionToFirebase(section: InternalSection): Promise<void> {
   try {
     const sectionRef = doc(db, 'internal-sections', section.id);
-    await setDoc(sectionRef, {
+    const data = sanitizeForFirestore({
       icon: section.icon,
       title: section.title,
       manager: section.manager,
       email: section.email,
       linkId: section.linkId
     });
+    await setDoc(sectionRef, data);
   } catch (error) {
     console.error('Error adding internal section to Firebase:', error);
     throw error;

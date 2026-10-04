@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { db, sanitizeForFirestore } from './firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, Timestamp } from 'firebase/firestore';
 import data from './events.json';
 
@@ -64,7 +64,8 @@ export async function fetchEventsFromFirebase(): Promise<Event[]> {
  */
 export async function addEventToFirebase(event: Omit<Event, 'id'>): Promise<Event> {
   const eventsRef = collection(db, EVENTS_COLLECTION);
-  const docRef = await addDoc(eventsRef, event);
+  const cleanEvent = sanitizeForFirestore(event);
+  const docRef = await addDoc(eventsRef, cleanEvent);
   return { id: docRef.id, ...event };
 }
 
@@ -74,7 +75,8 @@ export async function addEventToFirebase(event: Omit<Event, 'id'>): Promise<Even
 export async function updateEventInFirebase(id: string, event: Partial<Event>): Promise<void> {
   const eventRef = doc(db, EVENTS_COLLECTION, id);
   const { id: _id, ...eventData } = event as Event;
-  await updateDoc(eventRef, eventData);
+  const cleanEventData = sanitizeForFirestore(eventData);
+  await updateDoc(eventRef, cleanEventData);
 }
 
 /**

@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { db, sanitizeForFirestore } from './firebase';
 import { z } from 'zod';
 import { 
   collection, 
@@ -203,24 +203,9 @@ export async function getGrant(id: string): Promise<GrantCase | null> {
   }
 }
 
-// Recursively remove undefined values before sending to Firestore
-function removeUndefined(obj: any): any {
-  if (Array.isArray(obj)) {
-    return obj.map(removeUndefined);
-  }
-  if (obj !== null && typeof obj === 'object') {
-    return Object.fromEntries(
-      Object.entries(obj)
-        .filter(([_, v]) => v !== undefined)
-        .map(([k, v]) => [k, removeUndefined(v)])
-    );
-  }
-  return obj;
-}
-
 export async function addGrant(grant: Omit<GrantCase, 'id'>): Promise<string> {
   try {
-    const sanitizedGrant = removeUndefined(grant);
+    const sanitizedGrant = sanitizeForFirestore(grant);
     const docRef = await addDoc(collection(db, COLLECTION_NAME), sanitizedGrant);
     return docRef.id;
   } catch (error: any) {
@@ -231,7 +216,7 @@ export async function addGrant(grant: Omit<GrantCase, 'id'>): Promise<string> {
 
 export async function updateGrant(id: string, grant: Partial<GrantCase>): Promise<void> {
   try {
-    const sanitizedGrant = removeUndefined(grant);
+    const sanitizedGrant = sanitizeForFirestore(grant);
     const docRef = doc(db, COLLECTION_NAME, id);
     await updateDoc(docRef, sanitizedGrant);
   } catch (error: any) {

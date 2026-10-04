@@ -1,5 +1,5 @@
 
-import { db } from './firebase';
+import { db, sanitizeForFirestore } from './firebase';
 import { collection, addDoc, serverTimestamp, doc, setDoc, getDoc, getDocs, query, where, orderBy, writeBatch, updateDoc } from 'firebase/firestore';
 import { FormProgram } from './registration-form';
 
@@ -25,11 +25,12 @@ export async function saveRegistrationSubmission(
   submission: Omit<RegistrationSubmission, 'submittedAt' | 'status'>
 ): Promise<string> {
   const ref = collection(db, COLLECTION);
-  const docRef = await addDoc(ref, {
+  const cleanData = sanitizeForFirestore({
     ...submission,
     submittedAt: serverTimestamp(),
     status: 'new',
   });
+  const docRef = await addDoc(ref, cleanData);
   return docRef.id;
 }
 
@@ -41,11 +42,12 @@ export async function saveRegistrationDraft(
   draft: Partial<RegistrationSubmission>
 ): Promise<void> {
   const draftRef = doc(db, DRAFTS_COLLECTION, uid);
-  await setDoc(draftRef, {
+  const cleanDraft = sanitizeForFirestore({
     ...draft,
     updatedAt: serverTimestamp(),
     status: 'draft',
-  }, { merge: true });
+  });
+  await setDoc(draftRef, cleanDraft, { merge: true });
 }
 
 /**
@@ -90,11 +92,12 @@ export async function batchImportSubmissions(submissions: Omit<RegistrationSubmi
   
   for (const sub of submissions) {
     const docRef = doc(ref);
-    batch.set(docRef, {
+    const cleanSub = sanitizeForFirestore({
       ...sub,
       submittedAt: serverTimestamp(),
       status: 'new',
     });
+    batch.set(docRef, cleanSub);
   }
   
   await batch.commit();

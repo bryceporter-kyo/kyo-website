@@ -1,4 +1,4 @@
-import { db, storage } from "./firebase";
+import { db, storage, sanitizeForFirestore } from "./firebase";
 import {
   collection,
   doc,
@@ -182,10 +182,10 @@ export async function saveImageMetadata(image: StoredImage): Promise<void> {
   try {
     // Save with 15 second timeout
     await withTimeout(
-      setDoc(docRef, {
+      setDoc(docRef, sanitizeForFirestore({
         ...image,
         updatedAt: new Date().toISOString(),
-      }),
+      })),
       15000,
       "Firestore save"
     );
@@ -250,11 +250,12 @@ export async function updateImage(
   additionalData?: Partial<StoredImage>
 ): Promise<void> {
   const docRef = doc(db, IMAGES_COLLECTION, imageId);
-  await updateDoc(docRef, {
+  const data = sanitizeForFirestore({
     imageUrl: newImageUrl,
     updatedAt: new Date().toISOString(),
     ...additionalData,
   });
+  await updateDoc(docRef, data);
 }
 
 /**

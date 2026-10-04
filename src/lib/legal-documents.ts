@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { db, sanitizeForFirestore } from './firebase';
 import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 
 export interface LegalDocument {
@@ -27,13 +27,14 @@ export async function fetchLegalDocuments(): Promise<LegalDocument[]> {
 
 export async function saveLegalDocument(document: Omit<LegalDocument, 'id'>, id?: string): Promise<LegalDocument> {
   const ref = collection(db, DOCUMENTS_COLLECTION);
+  const cleanDocument = sanitizeForFirestore(document);
   
   if (id) {
     const docRef = doc(db, DOCUMENTS_COLLECTION, id);
-    await updateDoc(docRef, document);
+    await updateDoc(docRef, cleanDocument);
     return { id, ...document };
   } else {
-    const docRef = await addDoc(ref, document);
+    const docRef = await addDoc(ref, cleanDocument);
     return { id: docRef.id, ...document };
   }
 }

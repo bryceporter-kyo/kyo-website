@@ -1,5 +1,5 @@
 
-import { db } from './firebase';
+import { db, sanitizeForFirestore } from './firebase';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import {
   RegistrationFormConfig,
@@ -46,7 +46,7 @@ export async function saveRegistrationForm(
   const { id, ...data } = config;
   
   // Firestore crashes if an object contains `undefined` values. Strip them out.
-  const cleanData = JSON.parse(JSON.stringify(data));
+  const cleanData = sanitizeForFirestore(data);
 
   const ref = doc(db, COLLECTION, id);
   await setDoc(ref, {

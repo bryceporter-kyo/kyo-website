@@ -1,4 +1,4 @@
-import { db } from "./firebase";
+import { db, sanitizeForFirestore } from "./firebase";
 import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
 
 export type PageMetadata = {
@@ -39,6 +39,7 @@ export async function fetchPageMetadata(path: string): Promise<PageMetadata | nu
 export async function savePageMetadata(path: string, data: Omit<PageMetadata, 'path'>): Promise<void> {
   const docId = path === "/" ? "root" : path.replace(/\//g, '_');
   const docRef = doc(db, METADATA_COLLECTION, docId);
+  const cleanData = sanitizeForFirestore(data);
   
-  await setDoc(docRef, data, { merge: true });
+  await setDoc(docRef, cleanData, { merge: true });
 }

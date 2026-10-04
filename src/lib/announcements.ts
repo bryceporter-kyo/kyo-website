@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { db, sanitizeForFirestore } from './firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import { format } from 'date-fns';
 
@@ -76,7 +76,8 @@ export async function fetchAnnouncementsFromFirebase(): Promise<Announcement[]> 
  */
 export async function addAnnouncementToFirebase(announcement: Omit<Announcement, 'id'>): Promise<Announcement> {
   const announcementsRef = collection(db, ANNOUNCEMENTS_COLLECTION);
-  const docRef = await addDoc(announcementsRef, announcement);
+  const cleanAnnouncement = sanitizeForFirestore(announcement);
+  const docRef = await addDoc(announcementsRef, cleanAnnouncement);
   return { id: docRef.id, ...announcement };
 }
 
@@ -86,7 +87,8 @@ export async function addAnnouncementToFirebase(announcement: Omit<Announcement,
 export async function updateAnnouncementInFirebase(id: string, announcement: Partial<Announcement>): Promise<void> {
   const announcementRef = doc(db, ANNOUNCEMENTS_COLLECTION, id);
   const { id: _id, ...announcementData } = announcement as Announcement;
-  await updateDoc(announcementRef, announcementData);
+  const cleanAnnouncementData = sanitizeForFirestore(announcementData);
+  await updateDoc(announcementRef, cleanAnnouncementData);
 }
 
 /**

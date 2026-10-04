@@ -1,5 +1,4 @@
-
-import { db } from './firebase';
+import { db, sanitizeForFirestore } from './firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc, query, where } from 'firebase/firestore';
 import data from './users.json';
 import { sendUserAddedEmail } from './mail';
@@ -53,7 +52,8 @@ export async function fetchUsersFromFirebase(): Promise<User[]> {
  */
 export async function addUserToFirebase(user: Omit<User, 'id'>): Promise<User> {
     const usersRef = collection(db, USERS_COLLECTION);
-    const docRef = await addDoc(usersRef, user);
+    const cleanUser = sanitizeForFirestore(user);
+    const docRef = await addDoc(usersRef, cleanUser);
     
     // Send welcome email to the new user
     try {
@@ -73,7 +73,8 @@ export async function addUserToFirebase(user: Omit<User, 'id'>): Promise<User> {
 export async function updateUserInFirebase(id: string, user: Partial<User>): Promise<void> {
     const userRef = doc(db, USERS_COLLECTION, id);
     const { id: _id, ...userData } = user;
-    await updateDoc(userRef, userData);
+    const cleanUserData = sanitizeForFirestore(userData);
+    await updateDoc(userRef, cleanUserData);
 }
 
 /**

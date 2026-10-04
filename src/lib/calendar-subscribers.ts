@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { db, sanitizeForFirestore } from './firebase';
 import { collection, getDocs, addDoc, deleteDoc, doc, query } from 'firebase/firestore';
 
 export type CalendarSubscriber = {
@@ -31,9 +31,9 @@ export async function fetchCalendarSubscribers(): Promise<CalendarSubscriber[]> 
  */
 export async function addCalendarSubscriber(email: string, programs: ('orchestras' | 'upbeat' | 'lessons')[]): Promise<CalendarSubscriber> {
   const ref = collection(db, SUBSCRIBERS_COLLECTION);
-  const data = { email: email.toLowerCase().trim(), programs };
+  const data = sanitizeForFirestore({ email: email.toLowerCase().trim(), programs });
   const docRef = await addDoc(ref, data);
-  return { id: docRef.id, ...data };
+  return { id: docRef.id, email: email.toLowerCase().trim(), programs };
 }
 
 /**

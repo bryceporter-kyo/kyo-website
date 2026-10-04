@@ -1,5 +1,5 @@
 
-import { db } from './firebase';
+import { db, sanitizeForFirestore } from './firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where, getDoc, setDoc } from 'firebase/firestore';
 
 export type LegalPage = {
@@ -69,13 +69,14 @@ export async function fetchLegalPageById(id: string): Promise<LegalPage | null> 
 
 export async function saveLegalPage(page: Omit<LegalPage, 'id'>, id?: string): Promise<LegalPage> {
   const ref = collection(db, LEGAL_COLLECTION);
+  const cleanPage = sanitizeForFirestore(page);
   
   if (id) {
     const docRef = doc(db, LEGAL_COLLECTION, id);
-    await updateDoc(docRef, page);
+    await updateDoc(docRef, cleanPage);
     return { id, ...page };
   } else {
-    const docRef = await addDoc(ref, page);
+    const docRef = await addDoc(ref, cleanPage);
     return { id: docRef.id, ...page };
   }
 }

@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { db, sanitizeForFirestore } from './firebase';
 import { collection, addDoc } from 'firebase/firestore';
 
 // Firestore collection name for the Trigger Email extension
@@ -19,7 +19,8 @@ export type EmailMessage = {
  */
 export async function sendEmail(email: EmailMessage): Promise<string> {
     const mailRef = collection(db, MAIL_COLLECTION);
-    const docRef = await addDoc(mailRef, email);
+    const cleanEmail = sanitizeForFirestore(email);
+    const docRef = await addDoc(mailRef, cleanEmail);
     console.log('[Mail] Email queued with ID:', docRef.id);
     return docRef.id;
 }

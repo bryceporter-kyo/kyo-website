@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { db, sanitizeForFirestore } from './firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 export type CalendarSettings = {
@@ -47,5 +47,6 @@ export async function fetchCalendarSettings(): Promise<CalendarSettings> {
  */
 export async function saveCalendarSettings(settings: CalendarSettings): Promise<void> {
   const docRef = doc(db, SETTINGS_COLLECTION, CALENDAR_DOCUMENT);
-  await setDoc(docRef, settings);
+  const cleanSettings = sanitizeForFirestore(settings);
+  await setDoc(docRef, cleanSettings);
 }

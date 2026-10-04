@@ -10,7 +10,7 @@ import { fetchAnnouncementsFromFirebase, Announcement } from "@/lib/announcement
 import { format, isSameMonth, isSameDay, startOfDay, startOfMonth, addDays } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { ArrowRight, Calendar as CalendarIcon, MapPin, Clock, ExternalLink, Sparkles, Info, Download, Share2, HelpCircle, Bell, Pin, Search, ChevronDown, ChevronUp, Copy, Check } from "lucide-react";
+import { ArrowRight, Calendar as CalendarIcon, MapPin, Clock, ExternalLink, Sparkles, Info, Download, Share2, HelpCircle, Bell, Pin, Search, ChevronDown, ChevronUp, Copy, Check, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
@@ -683,13 +683,32 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
                                                     <p className="text-muted-foreground">Posted Date</p>
                                                     <p className="font-bold">{format(new Date(selectedAnnouncement.date), 'MMMM d, yyyy')}</p>
                                                 </div>
-                                                {selectedAnnouncement.actionLink && (
+                                                {selectedAnnouncement.link && (
                                                     <Button asChild className="w-full rounded-xl mt-4 font-bold">
-                                                        <Link href={selectedAnnouncement.actionLink}>
-                                                            {selectedAnnouncement.actionText || "View Action"}
+                                                        <Link href={selectedAnnouncement.link} target={selectedAnnouncement.link.startsWith('http') ? '_blank' : undefined} rel={selectedAnnouncement.link.startsWith('http') ? 'noopener noreferrer' : undefined}>
+                                                            Learn More
                                                             <ArrowRight className="ml-2 w-4 h-4" />
                                                         </Link>
                                                     </Button>
+                                                )}
+                                                {selectedAnnouncement.attachments && selectedAnnouncement.attachments.length > 0 && (
+                                                    <div className="pt-2 border-t border-slate-200">
+                                                        <p className="text-muted-foreground mb-2">Attachments</p>
+                                                        <div className="space-y-1">
+                                                            {selectedAnnouncement.attachments.map((att, i) => (
+                                                                <a
+                                                                    key={i}
+                                                                    href={att.url}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="flex items-center text-primary hover:underline truncate"
+                                                                >
+                                                                    <Paperclip className="w-3.5 h-3.5 mr-1.5 shrink-0" />
+                                                                    <span className="truncate">{att.name}</span>
+                                                                </a>
+                                                            ))}
+                                                        </div>
+                                                    </div>
                                                 )}
                                             </CardContent>
                                         </Card>

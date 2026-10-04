@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { db, sanitizeForFirestore } from './firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import data from './staff.json';
 import { sendStaffAddedEmail, sendBoardMemberAddedEmail } from './mail';
@@ -100,7 +100,8 @@ export async function fetchBoardFromFirebase(): Promise<BoardMember[]> {
  */
 export async function addStaffToFirebase(staff: Omit<StaffMember, 'id'>): Promise<StaffMember> {
     const staffRef = collection(db, STAFF_COLLECTION);
-    const docRef = await addDoc(staffRef, staff);
+    const cleanStaff = sanitizeForFirestore(staff);
+    const docRef = await addDoc(staffRef, cleanStaff);
     
     // Send welcome email to the new staff member
     try {
@@ -119,7 +120,8 @@ export async function addStaffToFirebase(staff: Omit<StaffMember, 'id'>): Promis
  */
 export async function addBoardToFirebase(board: Omit<BoardMember, 'id'>): Promise<BoardMember> {
     const boardRef = collection(db, BOARD_COLLECTION);
-    const docRef = await addDoc(boardRef, board);
+    const cleanBoard = sanitizeForFirestore(board);
+    const docRef = await addDoc(boardRef, cleanBoard);
     
     // Send welcome email to the new board member
     try {
@@ -139,7 +141,8 @@ export async function addBoardToFirebase(board: Omit<BoardMember, 'id'>): Promis
 export async function updateStaffInFirebase(id: string, staff: Partial<StaffMember>): Promise<void> {
     const staffRef = doc(db, STAFF_COLLECTION, id);
     const { id: _id, ...staffData } = staff as StaffMember;
-    await updateDoc(staffRef, staffData);
+    const cleanStaffData = sanitizeForFirestore(staffData);
+    await updateDoc(staffRef, cleanStaffData);
 }
 
 /**
@@ -148,7 +151,8 @@ export async function updateStaffInFirebase(id: string, staff: Partial<StaffMemb
 export async function updateBoardInFirebase(id: string, board: Partial<BoardMember>): Promise<void> {
     const boardRef = doc(db, BOARD_COLLECTION, id);
     const { id: _id, ...boardData } = board as BoardMember;
-    await updateDoc(boardRef, boardData);
+    const cleanBoardData = sanitizeForFirestore(boardData);
+    await updateDoc(boardRef, cleanBoardData);
 }
 
 /**
