@@ -7,10 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useImages } from "@/components/providers/ImageProvider";
 import { fetchEventsFromFirebase, Event } from "@/lib/events";
 import { fetchAnnouncementsFromFirebase, Announcement } from "@/lib/announcements";
-import { format, isSameMonth, isSameDay } from "date-fns";
+import { format, isSameMonth, isSameDay, startOfDay, startOfMonth, addDays } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { ArrowRight, Calendar as CalendarIcon, MapPin, Clock, ExternalLink, Sparkles, Info, FileText, Download, Share2, HelpCircle, CheckCircle2, Monitor, Smartphone, RefreshCw, Bell, Pin, Search } from "lucide-react";
+import { ArrowRight, Calendar as CalendarIcon, MapPin, Clock, ExternalLink, Sparkles, Info, FileText, Download, Share2, HelpCircle, CheckCircle2, Monitor, Smartphone, RefreshCw, Bell, Pin, Search, ChevronDown, ChevronUp, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
@@ -32,14 +32,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 export default function CalendarPage() {
     const [month, setMonth] = useState<Date | undefined>(undefined);
@@ -50,8 +42,11 @@ export default function CalendarPage() {
     const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false);
+    const [isSubscribeDialogOpen, setIsSubscribeDialogOpen] = useState(false);
     const [isAnnouncementDialogOpen, setIsAnnouncementDialogOpen] = useState(false);
     const [origin, setOrigin] = useState("");
+    const [copiedFeedUrl, setCopiedFeedUrl] = useState(false);
+    const [showAllMonthEvents, setShowAllMonthEvents] = useState(false);
     
     // Filters and search
     const [categoryFilter, setCategoryFilter] = useState<'all' | 'orchestras' | 'upbeat' | 'lessons' | 'special'>('all');
@@ -131,6 +126,50 @@ export default function CalendarPage() {
             })
             .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     }, [allEvents, month, categoryFilter, searchQuery]);
+
+    // 10-Day Event Filter for Default View
+    const displayedEvents = useMemo(() => {
+        if (showAllMonthEvents) {
+            return filteredEventsForMonth;
+        }
+        if (!month || filteredEventsForMonth.length === 0) {
+            return [];
+        }
+
+        const today = startOfDay(new Date());
+        const isCurrent = isSameMonth(month, today);
+
+        if (isCurrent) {
+            // For current month: show next 10 days of events starting from today (or from first upcoming)
+            const upcoming = filteredEventsForMonth.filter(e => parseDate(e.date) >= today);
+            if (upcoming.length > 0) {
+                const firstDate = parseDate(upcoming[0].date);
+                const cutoff = addDays(firstDate > today ? firstDate : today, 10);
+                return upcoming.filter(e => parseDate(e.date) <= cutoff);
+            }
+            // If all events this month were in the past, show last few
+            return filteredEventsForMonth.slice(-5);
+        } else {
+            // For future/other months: show events in the first 10 days of that month (or first 10 days of events)
+            const cutoff = addDays(startOfMonth(month), 10);
+            const eventsIn10Days = filteredEventsForMonth.filter(e => parseDate(e.date) <= cutoff);
+            if (eventsIn10Days.length > 0) {
+                return eventsIn10Days;
+            }
+            const firstDate = parseDate(filteredEventsForMonth[0].date);
+            return filteredEventsForMonth.filter(e => parseDate(e.date) <= addDays(firstDate, 10));
+        }
+    }, [filteredEventsForMonth, month, showAllMonthEvents]);
+
+    const hiddenEventsCount = Math.max(0, filteredEventsForMonth.length - displayedEvents.length);
+
+    const handleCopyFeedUrl = () => {
+        if (typeof navigator !== 'undefined' && navigator.clipboard) {
+            navigator.clipboard.writeText(feedUrl);
+            setCopiedFeedUrl(true);
+            setTimeout(() => setCopiedFeedUrl(false), 2000);
+        }
+    };
 
     const eventsForSelectedDay = useMemo(() => {
         if (!selectedDay) return [];
@@ -293,7 +332,10 @@ export default function CalendarPage() {
                                         <Calendar
                                             mode="single"
                                             month={month}
-                                            onMonthChange={setMonth}
+                                            onMonthChange={(newMonth) => {
+                                                setMonth(newMonth);
+                                                setShowAllMonthEvents(false);
+                                            }}
                                             selected={selectedDay}
                                             onSelect={handleDayClick}
                                             className="p-3 w-full"
@@ -355,87 +397,14 @@ export default function CalendarPage() {
                                         </div>
                                         <div className="pt-4 flex gap-2">
                                             <div className="flex-grow">
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button 
-                                                            variant="outline" 
-                                                            className="w-full rounded-2xl border-primary/20 hover:bg-primary hover:text-white transition-all py-6"
-                                                        >
-                                                            <Share2 className="mr-2 h-4 w-4" />
-                                                            Subscribe to Live Calendar
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent className="w-[320px] rounded-2xl p-3 shadow-2xl border-primary/10">
-                                                        <DropdownMenuLabel className="font-headline text-sm font-bold px-3 py-2">Select Calendar Feed</DropdownMenuLabel>
-                                                        <DropdownMenuSeparator className="bg-primary/5" />
-                                                        
-                                                        {/* Feed Type Filter Buttons */}
-                                                        <div className="px-3 py-2 space-y-3">
-                                                            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Feed Channel:</p>
-                                                            <div className="grid grid-cols-2 gap-1 bg-slate-50 p-1 rounded-xl border border-slate-100">
-                                                                {(['all', 'orchestras', 'upbeat', 'lessons'] as const).map((feedType) => (
-                                                                    <button
-                                                                        key={feedType}
-                                                                        onClick={() => setSelectedFeed(feedType)}
-                                                                        className={cn(
-                                                                            "text-[10px] font-bold py-1.5 px-2 rounded-lg capitalize transition-all",
-                                                                            selectedFeed === feedType 
-                                                                                ? "bg-primary text-primary-foreground shadow-sm" 
-                                                                                : "text-muted-foreground hover:bg-slate-200"
-                                                                        )}
-                                                                    >
-                                                                        {feedType === 'all' ? 'All Events' : feedType}
-                                                                    </button>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-
-                                                        <DropdownMenuSeparator className="bg-primary/5" />
-                                                        <DropdownMenuLabel className="font-headline text-[10px] uppercase tracking-wider px-3 py-1 text-muted-foreground">Subscribe live:</DropdownMenuLabel>
-                                                        
-                                                        <DropdownMenuItem asChild className="rounded-xl py-3 cursor-pointer">
-                                                            <Link href={syncLinks.google} target="_blank" className="flex items-center gap-3">
-                                                                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                                                                    <svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 15l-5-5h3V9h4v4h3l-5 5z"/></svg>
-                                                                </div>
-                                                                <div>
-                                                                    <p className="font-bold text-sm">Google Calendar</p>
-                                                                    <p className="text-[10px] text-muted-foreground">Sync with Android/Gmail</p>
-                                                                </div>
-                                                            </Link>
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem asChild className="rounded-xl py-3 cursor-pointer">
-                                                            <Link href={syncLinks.apple} className="flex items-center gap-3">
-                                                                <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center">
-                                                                    <svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#000" d="M17.05 20.28c-.98.95-2.05 1.61-3.14 1.61-1.04 0-1.42-.64-2.73-.64-1.32 0-1.78.63-2.73.63-1.05 0-2.22-.72-3.23-1.72-2.03-2.03-3.13-5.74-3.13-8.6 0-4.63 2.92-7.1 5.71-7.1.92 0 1.77.29 2.53.29.68 0 1.7-.35 2.76-.35 1.09 0 2.15.22 3.02.83-2.31 1.79-1.92 5.34.42 6.51-.9 2.13-2.06 4.31-3.25 5.54zM12.03 7.25c-.15-2.23 1.66-4.07 3.65-4.25.26 2.37-2.11 4.14-3.65 4.25z"/></svg>
-                                                                </div>
-                                                                <div>
-                                                                    <p className="font-bold text-sm">iCloud / Apple Calendar</p>
-                                                                    <p className="text-[10px] text-muted-foreground">Sync with iPhone/Mac</p>
-                                                                </div>
-                                                            </Link>
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem asChild className="rounded-xl py-3 cursor-pointer">
-                                                            <Link href={syncLinks.outlook} target="_blank" className="flex items-center gap-3">
-                                                                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                                                                    <svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#0078d4" d="M16 1h-2v2h2V1zm-4 0h-2v2h2V1zM7 1H5v2h2V1zm13 4v14c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h1V1h2v2h2V1h2v2h2V1h2v2h1c1.1 0 2 .9 2 2zm-2 2H4v12h14V7zM6 9h2v2H6V9zm4 0h2v2h-2V9zm4 0h2v2h-2V9zm-8 4h2v2H6v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2z"/></svg>
-                                                                </div>
-                                                                <div>
-                                                                    <p className="font-bold text-sm">Outlook / Office 365</p>
-                                                                    <p className="text-[10px] text-muted-foreground">Sync with Microsoft Outlook</p>
-                                                                </div>
-                                                            </Link>
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuSeparator className="bg-primary/5" />
-                                                        <DropdownMenuItem 
-                                                            className="rounded-xl py-3 cursor-pointer text-primary font-bold justify-center"
-                                                            onClick={() => downloadCalendar(filteredEventsForMonth)}
-                                                        >
-                                                            <Download className="mr-2 h-4 w-4" />
-                                                            Download (.ics)
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
+                                                <Button 
+                                                    variant="outline" 
+                                                    onClick={() => setIsSubscribeDialogOpen(true)}
+                                                    className="w-full rounded-2xl border-primary/20 hover:bg-primary hover:text-white transition-all py-6 font-bold"
+                                                >
+                                                    <Share2 className="mr-2 h-4 w-4" />
+                                                    Subscribe to Live Calendar
+                                                </Button>
                                             </div>
                                             
                                             <TooltipProvider>
@@ -516,14 +485,16 @@ export default function CalendarPage() {
                                 </div>
                                 <div className="hidden md:block">
                                     <Badge variant="outline" className="px-4 py-1.5 text-sm rounded-full border-primary/20 text-primary bg-primary/5">
-                                        {filteredEventsForMonth.length} {filteredEventsForMonth.length === 1 ? 'Event' : 'Events'} listed
+                                        {!showAllMonthEvents && hiddenEventsCount > 0 
+                                            ? `Showing ${displayedEvents.length} of ${filteredEventsForMonth.length} Events (Next 10 Days)` 
+                                            : `${filteredEventsForMonth.length} ${filteredEventsForMonth.length === 1 ? 'Event' : 'Events'} listed`}
                                     </Badge>
                                 </div>
                             </div>
 
                             <AnimatePresence mode="wait">
                                 <motion.div 
-                                    key={`${month?.toISOString()}-${categoryFilter}-${searchQuery}`}
+                                    key={`${month?.toISOString()}-${categoryFilter}-${searchQuery}-${showAllMonthEvents}`}
                                     variants={containerVariants}
                                     initial="hidden"
                                     animate="visible"
@@ -531,8 +502,8 @@ export default function CalendarPage() {
                                 >
                                     {isLoading ? (
                                         [1, 2, 3].map(i => <Skeleton key={i} className="w-full h-32 rounded-3xl" />)
-                                    ) : filteredEventsForMonth.length > 0 ? (
-                                        filteredEventsForMonth.map(event => (
+                                    ) : displayedEvents.length > 0 ? (
+                                        displayedEvents.map(event => (
                                             <motion.div key={event.id} variants={itemVariants}>
                                                 <Card className="group relative overflow-hidden border-primary/5 bg-white transition-all duration-500 hover:shadow-2xl hover:border-primary/20 rounded-[2rem] cursor-pointer" onClick={() => handleDayClick(parseDate(event.date))}>
                                                     <div className={cn(
@@ -616,6 +587,42 @@ export default function CalendarPage() {
                                     )}
                                 </motion.div>
                             </AnimatePresence>
+
+                            {/* Expand / Collapse 10-day filter controls */}
+                            {!isLoading && hiddenEventsCount > 0 && !showAllMonthEvents && (
+                                <motion.div 
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="pt-4 flex flex-col items-center justify-center gap-2"
+                                >
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setShowAllMonthEvents(true)}
+                                        className="rounded-full px-8 py-6 border-primary/20 bg-white hover:bg-primary hover:text-white text-primary font-bold text-sm transition-all duration-300 shadow-md hover:shadow-xl flex items-center gap-2 group"
+                                    >
+                                        <span>Show All {filteredEventsForMonth.length} Events for {month ? format(month, 'MMMM') : 'this month'} ({hiddenEventsCount} more)</span>
+                                        <ChevronDown className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
+                                    </Button>
+                                    <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-semibold">Showing next 10 days of scheduled events</p>
+                                </motion.div>
+                            )}
+
+                            {!isLoading && showAllMonthEvents && filteredEventsForMonth.length > displayedEvents.length && (
+                                <motion.div 
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="pt-4 flex flex-col items-center justify-center"
+                                >
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setShowAllMonthEvents(false)}
+                                        className="rounded-full px-8 py-6 border-slate-200 bg-white hover:bg-slate-100 text-slate-600 font-bold text-sm transition-all duration-300 shadow-sm flex items-center gap-2"
+                                    >
+                                        <span>Show Next 10 Days Only</span>
+                                        <ChevronUp className="w-4 h-4" />
+                                    </Button>
+                                </motion.div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -872,6 +879,122 @@ export default function CalendarPage() {
                                 <p className="text-slate-500 font-light">No events scheduled for this day.</p>
                             </div>
                         )}
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Subscribe to Live Calendar Dialog */}
+            <Dialog open={isSubscribeDialogOpen} onOpenChange={setIsSubscribeDialogOpen}>
+                <DialogContent className="max-w-lg rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl">
+                    <div className="bg-primary p-8 text-white relative">
+                        <div className="flex items-center gap-2 text-white/70 mb-2">
+                            <Share2 className="w-4 h-4" />
+                            <span className="text-xs font-bold uppercase tracking-widest">Calendar Sync</span>
+                        </div>
+                        <DialogTitle className="text-3xl font-headline font-bold">Subscribe to Live Calendar</DialogTitle>
+                        <p className="text-white/80 text-xs mt-1">Automatic real-time schedule updates directly in your preferred calendar app.</p>
+                    </div>
+
+                    <div className="p-6 bg-white space-y-6 max-h-[75vh] overflow-y-auto">
+                        {/* Feed Selector */}
+                        <div className="space-y-2">
+                            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Select Feed Channel:</p>
+                            <div className="grid grid-cols-2 gap-1.5 bg-slate-100/80 p-1.5 rounded-2xl border border-slate-200/60">
+                                {(['all', 'orchestras', 'upbeat', 'lessons'] as const).map((feedType) => (
+                                    <button
+                                        key={feedType}
+                                        onClick={() => setSelectedFeed(feedType)}
+                                        className={cn(
+                                            "text-xs font-bold py-2 px-3 rounded-xl capitalize transition-all",
+                                            selectedFeed === feedType 
+                                                ? "bg-primary text-white shadow-sm" 
+                                                : "text-muted-foreground hover:bg-white hover:text-slate-900"
+                                        )}
+                                    >
+                                        {feedType === 'all' ? 'All Events' : feedType === 'upbeat' ? 'Upbeat!' : feedType}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Sync Options */}
+                        <div className="space-y-3">
+                            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">1-Click Subscriptions:</p>
+                            
+                            <Link 
+                                href={syncLinks.google} 
+                                target="_blank" 
+                                className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-100 bg-slate-50/70 hover:bg-primary/5 hover:border-primary/20 transition-all group"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                                        <svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 15l-5-5h3V9h4v4h3l-5 5z"/></svg>
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-sm text-slate-800 group-hover:text-primary transition-colors">Google Calendar</p>
+                                        <p className="text-[11px] text-muted-foreground">Android, Gmail, Web</p>
+                                    </div>
+                                </div>
+                                <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-primary transition-colors" />
+                            </Link>
+
+                            <Link 
+                                href={syncLinks.apple} 
+                                className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-100 bg-slate-50/70 hover:bg-primary/5 hover:border-primary/20 transition-all group"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0">
+                                        <svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#000" d="M17.05 20.28c-.98.95-2.05 1.61-3.14 1.61-1.04 0-1.42-.64-2.73-.64-1.32 0-1.78.63-2.73.63-1.05 0-2.22-.72-3.23-1.72-2.03-2.03-3.13-5.74-3.13-8.6 0-4.63 2.92-7.1 5.71-7.1.92 0 1.77.29 2.53.29.68 0 1.7-.35 2.76-.35 1.09 0 2.15.22 3.02.83-2.31 1.79-1.92 5.34.42 6.51-.9 2.13-2.06 4.31-3.25 5.54zM12.03 7.25c-.15-2.23 1.66-4.07 3.65-4.25.26 2.37-2.11 4.14-3.65 4.25z"/></svg>
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-sm text-slate-800 group-hover:text-primary transition-colors">Apple Calendar / iCloud</p>
+                                        <p className="text-[11px] text-muted-foreground">iPhone, iPad, Mac Calendar</p>
+                                    </div>
+                                </div>
+                                <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-primary transition-colors" />
+                            </Link>
+
+                            <Link 
+                                href={syncLinks.outlook} 
+                                target="_blank" 
+                                className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-100 bg-slate-50/70 hover:bg-primary/5 hover:border-primary/20 transition-all group"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center flex-shrink-0">
+                                        <svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#0078d4" d="M16 1h-2v2h2V1zm-4 0h-2v2h2V1zM7 1H5v2h2V1zm13 4v14c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h1V1h2v2h2V1h2v2h2V1h2v2h1c1.1 0 2 .9 2 2zm-2 2H4v12h14V7zM6 9h2v2H6V9zm4 0h2v2h-2V9zm4 0h2v2h-2V9zm-8 4h2v2H6v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2z"/></svg>
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-sm text-slate-800 group-hover:text-primary transition-colors">Outlook / Office 365</p>
+                                        <p className="text-[11px] text-muted-foreground">Windows, Outlook Web & Mobile</p>
+                                    </div>
+                                </div>
+                                <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-primary transition-colors" />
+                            </Link>
+                        </div>
+
+                        {/* Manual Feed URL Copy & ICS Download */}
+                        <div className="space-y-3 pt-2 border-t border-slate-100">
+                            <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+                                <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={handleCopyFeedUrl}
+                                    className="w-full sm:flex-1 rounded-xl text-xs font-bold py-5 border-slate-200 hover:border-primary/30"
+                                >
+                                    {copiedFeedUrl ? <Check className="w-3.5 h-3.5 mr-1.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 mr-1.5 text-slate-500" />}
+                                    {copiedFeedUrl ? 'Subscription Link Copied!' : 'Copy Feed URL (webcal)'}
+                                </Button>
+                                <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => downloadCalendar(filteredEventsForMonth)}
+                                    className="w-full sm:flex-1 rounded-xl text-xs font-bold py-5 border-slate-200 hover:border-primary/30 text-primary"
+                                >
+                                    <Download className="w-3.5 h-3.5 mr-1.5" />
+                                    Download (.ics)
+                                </Button>
+                            </div>
+                        </div>
                     </div>
                 </DialogContent>
             </Dialog>
