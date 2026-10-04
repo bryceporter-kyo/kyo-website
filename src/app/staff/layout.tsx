@@ -2,16 +2,16 @@ import { fetchPageMetadataServer } from "@/lib/metadata-server";
 import { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const data = await fetchPageMetadataServer("/programs/calendar");
+  const data = await fetchPageMetadataServer("/staff");
   
-  const title = data?.title || "Events Calendar & Concert Schedule | Kawartha Youth Orchestra";
-  const description = data?.description || "View upcoming concerts, rehearsals, workshops, and community performance dates for all Kawartha Youth Orchestra programs and ensembles.";
+  const title = data?.title || "Staff & Faculty | Kawartha Youth Orchestra";
+  const description = data?.description || "Meet our professional teaching artists, conductors, and faculty dedicated to inspiring youth through music education in the Kawarthas.";
   const ogDescription = data?.ogDescription || description;
 
   return {
     title,
     description,
-    keywords: data?.keywords ? data.keywords.split(',').map(k => k.trim()) : ['KYO concert dates', 'orchestra schedule Peterborough', 'youth concert calendar Ontario', 'music events Peterborough'],
+    keywords: data?.keywords ? data.keywords.split(',').map(k => k.trim()) : ['KYO faculty', 'music teachers Peterborough', 'orchestra conductors', 'teaching artists Kawartha'],
     robots: {
       index: data?.index ?? true,
       follow: data?.follow ?? true,
@@ -19,9 +19,9 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title,
       description: ogDescription,
-      url: 'https://kyo.ca/programs/calendar',
+      url: 'https://kyo.ca/staff',
       siteName: 'Kawartha Youth Orchestra',
-      images: [{ url: '/og-default.jpg', width: 1200, height: 630, alt: 'KYO Calendar & Schedule' }],
+      images: [{ url: '/og-default.jpg', width: 1200, height: 630, alt: 'KYO Staff & Faculty' }],
       type: 'website',
     },
     twitter: {
@@ -31,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
       images: ['/og-default.jpg'],
     },
     alternates: {
-      canonical: 'https://kyo.ca/programs/calendar',
+      canonical: 'https://kyo.ca/staff',
     },
   };
 }

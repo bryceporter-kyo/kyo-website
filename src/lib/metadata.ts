@@ -7,6 +7,9 @@ export type PageMetadata = {
   description: string;
   index: boolean;
   follow: boolean;
+  ogDescription?: string;
+  aiSummary?: string;
+  keywords?: string;
 };
 
 const METADATA_COLLECTION = 'page-metadata';
