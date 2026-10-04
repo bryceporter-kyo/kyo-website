@@ -110,14 +110,26 @@ export default function InternalPage() {
         async function loadData() {
             setIsLoading(true);
             try {
-                const [sectionsData, staffData, boardData, linksData, eventsData, announcementsData] = await Promise.all([
+                const [sectionsData, staffData, boardData, linksData, announcementsData] = await Promise.all([
                     fetchInternalSectionsFromFirebase(),
                     fetchStaffFromFirebase(),
                     fetchBoardFromFirebase(),
                     fetchLinksFromFirebase(),
-                    fetchEventsFromFirebase(),
                     fetchAnnouncementsFromFirebase()
                 ]);
+
+                let eventsData: Event[] = [];
+                try {
+                    const calendarRes = await fetch('/api/calendar/events');
+                    if (calendarRes.ok) {
+                        const calJson = await calendarRes.json();
+                        eventsData = calJson.events || [];
+                    } else {
+                        eventsData = await fetchEventsFromFirebase();
+                    }
+                } catch {
+                    eventsData = await fetchEventsFromFirebase();
+                }
                 
                 // Filter events for next 30 days
                 const now = new Date();

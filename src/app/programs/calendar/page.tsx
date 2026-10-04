@@ -7,8 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useImages } from "@/components/providers/ImageProvider";
 import { fetchEventsFromFirebase, Event } from "@/lib/events";
 import { fetchAnnouncementsFromFirebase, Announcement } from "@/lib/announcements";
-import { fetchCalendarSettings } from "@/lib/calendar-settings";
-import { fetchGoogleCalendarEvents } from "@/lib/google-calendar";
 import { format, isSameMonth, isSameDay } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -79,41 +77,28 @@ export default function CalendarPage() {
         
         const loadData = async () => {
             try {
-                // 1. Fetch configurations & bulletins
-                const [settings, announcementsData] = await Promise.all([
-                    fetchCalendarSettings(),
-                    fetchAnnouncementsFromFirebase()
+                // Fetch announcements from Firestore and events via server API (bypassing browser CORS)
+                const [announcementsData, calendarRes] = await Promise.all([
+                    fetchAnnouncementsFromFirebase(),
+                    fetch('/api/calendar/events')
                 ]);
                 setAnnouncements(announcementsData);
 
-                // 2. Fetch events from Google Calendar channels or fallback to Firestore
-                const hasGoogleCalendars = 
-                  !!settings.upbeatCalendarId || 
-                  !!settings.lessonsCalendarId || 
-                  !!settings.orchestrasCalendarId;
-
-                let eventsData: Event[] = [];
-
-                if (hasGoogleCalendars) {
-                  const promises: Promise<Event[]>[] = [];
-                  if (settings.upbeatCalendarId) {
-                    promises.push(fetchGoogleCalendarEvents(settings.upbeatCalendarId, 'upbeat'));
-                  }
-                  if (settings.lessonsCalendarId) {
-                    promises.push(fetchGoogleCalendarEvents(settings.lessonsCalendarId, 'lessons'));
-                  }
-                  if (settings.orchestrasCalendarId) {
-                    promises.push(fetchGoogleCalendarEvents(settings.orchestrasCalendarId, 'orchestras'));
-                  }
-                  const results = await Promise.all(promises);
-                  eventsData = results.flat();
+                if (calendarRes.ok) {
+                    const data = await calendarRes.json();
+                    setAllEvents(data.events || []);
                 } else {
-                  eventsData = await fetchEventsFromFirebase();
+                    const fallbackEvents = await fetchEventsFromFirebase();
+                    setAllEvents(fallbackEvents);
                 }
-
-                setAllEvents(eventsData);
             } catch (error) {
                 console.error('Error loading calendar data:', error);
+                try {
+                    const fallbackEvents = await fetchEventsFromFirebase();
+                    setAllEvents(fallbackEvents);
+                } catch (e) {
+                    console.error('Fallback failed:', e);
+                }
             } finally {
                 setIsLoading(false);
             }

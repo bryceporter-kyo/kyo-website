@@ -4,13 +4,14 @@ import { fetchGrantByTruncatedUid } from '@/lib/case-for-support';
 export async function generateMetadata({
   params,
 }: {
-  params: { uid: string; funder: string; year: string };
+  params: Promise<{ uid: string; funder: string; year: string }>;
 }): Promise<Metadata> {
   let noIndex = true; // default true as requested
   let noFollow = false; // default false as requested
   
   try {
-    const grant = await fetchGrantByTruncatedUid(params.uid);
+    const resolvedParams = await params;
+    const grant = await fetchGrantByTruncatedUid(resolvedParams.uid);
     if (grant) {
       // If the database has a specific override, use it. Otherwise rely on the defaults.
       if (grant.noIndex !== undefined && grant.noIndex !== null) {
