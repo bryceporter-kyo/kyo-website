@@ -107,6 +107,8 @@ export default function TeamPage() {
                                             bio={instructor.bio ?? ''}
                                             image={getImage(instructor.image || '')}
                                             links={instructor.links}
+                                            isOnLeave={instructor.isOnLeave}
+                                            leaveNote={instructor.leaveNote}
                                         />
                                     </motion.div>
                                 ))}
@@ -147,6 +149,8 @@ export default function TeamPage() {
                                             bio={member.bio ?? ''}
                                             image={getImage(member.image || '')}
                                             links={member.links}
+                                            isOnLeave={member.isOnLeave}
+                                            leaveNote={member.leaveNote}
                                         />
                                     </motion.div>
                                 ))}

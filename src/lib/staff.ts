@@ -10,6 +10,8 @@ export type TeamMemberLinks = {
     youtube?: string;
     spotify?: string;
     website?: string;
+    twitter?: string;
+    other?: string;
 }
 
 export type StaffMember = {
@@ -21,6 +23,8 @@ export type StaffMember = {
     email: string;
     links?: TeamMemberLinks;
     order?: number;
+    isOnLeave?: boolean;
+    leaveNote?: string;
 }
 
 export type BoardMember = {
@@ -32,6 +36,8 @@ export type BoardMember = {
     image?: string;
     links?: TeamMemberLinks;
     order?: number;
+    isOnLeave?: boolean;
+    leaveNote?: string;
 }
 
 const legacyStaff: StaffMember[] = data.staff;

@@ -42,6 +42,9 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { CsvManagerDialog } from "@/components/shared/CsvManagerDialog";
 
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+
 const memberSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters."),
   title: z.string().min(3, "Title must be at least 3 characters."),
@@ -50,6 +53,8 @@ const memberSchema = z.object({
   bio: z.string().optional(),
   image: z.any().optional(),
   type: z.enum(["staff", "board"]),
+  isOnLeave: z.boolean().default(false),
+  leaveNote: z.string().optional(),
   links: z.object({
     facebook: z.string().optional(),
     instagram: z.string().optional(),
@@ -57,6 +62,8 @@ const memberSchema = z.object({
     youtube: z.string().optional(),
     spotify: z.string().optional(),
     website: z.string().optional(),
+    twitter: z.string().optional(),
+    other: z.string().optional(),
   }).optional(),
 });
 
@@ -114,6 +121,8 @@ export default function TeamAdminPage() {
             bio: "",
             image: "",
             type: "staff",
+            isOnLeave: false,
+            leaveNote: "",
             links: {
                 facebook: "",
                 instagram: "",
@@ -121,6 +130,8 @@ export default function TeamAdminPage() {
                 youtube: "",
                 spotify: "",
                 website: "",
+                twitter: "",
+                other: "",
             }
         },
     });
@@ -137,6 +148,8 @@ export default function TeamAdminPage() {
                 order: editingMember.order,
                 bio: 'bio' in editingMember ? editingMember.bio : '',
                 image: undefined,
+                isOnLeave: Boolean(editingMember.isOnLeave),
+                leaveNote: editingMember.leaveNote || "",
                 links: {
                     facebook: editingMember.links?.facebook || "",
                     instagram: editingMember.links?.instagram || "",
@@ -144,6 +157,8 @@ export default function TeamAdminPage() {
                     youtube: editingMember.links?.youtube || "",
                     spotify: editingMember.links?.spotify || "",
                     website: editingMember.links?.website || "",
+                    twitter: editingMember.links?.twitter || "",
+                    other: editingMember.links?.other || "",
                 }
             });
         } else {
@@ -154,6 +169,8 @@ export default function TeamAdminPage() {
                 bio: "",
                 image: undefined,
                 type: "staff",
+                isOnLeave: false,
+                leaveNote: "",
                 links: {
                     facebook: "",
                     instagram: "",
@@ -161,6 +178,8 @@ export default function TeamAdminPage() {
                     youtube: "",
                     spotify: "",
                     website: "",
+                    twitter: "",
+                    other: "",
                 }
             });
         }
@@ -186,6 +205,8 @@ export default function TeamAdminPage() {
                 order: values.order,
                 bio: values.bio || '',
                 image: imageUrl || '',
+                isOnLeave: values.isOnLeave,
+                leaveNote: values.leaveNote || '',
                 links: values.links,
             };
 
@@ -291,7 +312,12 @@ export default function TeamAdminPage() {
                 const email = row.Email || row.email;
                 const permissions = row["Permission Settings"] || row.permissions || row.Permissions;
                 const bio = row.Biography || row.biography || row.bio || row.Bio;
+                const order = row.Order || row.order ? Number(row.Order || row.order) : undefined;
                 
+                const onLeaveRaw = String(row.OnLeave || row.onLeave || row["On Leave"] || "").toLowerCase().trim();
+                const isOnLeave = onLeaveRaw === 'true' || onLeaveRaw === 'yes' || onLeaveRaw === '1' || onLeaveRaw === 'y';
+                const leaveNote = row.LeaveNote || row.leaveNote || row["Leave Note"] || "";
+
                 const links = {
                     facebook: row.Facebook || row.facebook || "",
                     instagram: row.Instagram || row.instagram || "",
@@ -299,6 +325,8 @@ export default function TeamAdminPage() {
                     youtube: row.YouTube || row.youtube || row.Youtube || "",
                     spotify: row.Spotify || row.spotify || "",
                     website: row.Website || row.website || "",
+                    twitter: row.Twitter || row.twitter || "",
+                    other: row.Other || row.other || "",
                 };
 
                 if (!name || !title || !email) {
@@ -311,8 +339,11 @@ export default function TeamAdminPage() {
                     name,
                     title,
                     email,
+                    order,
                     bio: bio || "",
                     image: "", // Placeholder, can be updated manually
+                    isOnLeave,
+                    leaveNote,
                     links,
                 };
 
@@ -332,7 +363,13 @@ export default function TeamAdminPage() {
                         await addUserToFirebase({
                             name,
                             email,
-                            roles: rolesArray
+                            roles: rolesArray,
+                            linkedProfile: {
+                                type: type === 'board' ? 'board' : 'staff',
+                                id: name,
+                                name,
+                                title,
+                            }
                         });
                     }
                 }
@@ -363,11 +400,11 @@ export default function TeamAdminPage() {
                 <div className="flex flex-wrap gap-3">
                     <CsvManagerDialog
                         title="Import Team Data"
-                        description="Upload a CSV file to add or update staff and board members."
+                        description="Upload a CSV file to add staff and board members in bulk with bios, leave status, and social links."
                         triggerButtonText="Import Members"
-                        templateHeaders={["Name", "Type", "Title", "Email", "Permissions", "Bio", "Facebook", "Instagram", "LinkedIn", "YouTube", "Spotify", "Website"]}
-                        templateSampleRow={["Jane Doe", "staff", "Artistic Director", "jane.doe@thekyo.ca", "Website Editor", "Jane is a dedicated musician...", "https://facebook.com/jane", "", "https://linkedin.com/in/jane", "", "", "https://janedoe.com"]}
-                        instructionText="Use the template to bulk-add members with bios and social links. Valid values for 'Type' are 'staff' or 'board'. Adding 'Permissions' (comma separated) will also create an admin user account for the member."
+                        templateHeaders={["Name", "Type", "Title", "Email", "Permissions", "OnLeave", "LeaveNote", "Bio", "Website", "Spotify", "LinkedIn", "Instagram", "Facebook", "YouTube", "Twitter", "Order"]}
+                        templateSampleRow={["Jane Doe", "staff", "Artistic Director", "jane.doe@thekyo.ca", "Website Editor", "no", "", "Jane is a dedicated musician and educator...", "https://janedoe.com", "https://open.spotify.com/artist/...", "https://linkedin.com/in/jane", "https://instagram.com/jane", "https://facebook.com/jane", "", "", "1"]}
+                        instructionText="Use the template to bulk-add members with bios, sabbatical/leave status, and social links. 'Type' should be 'staff' or 'board'. Set 'OnLeave' to 'yes' or 'no'. Adding 'Permissions' (e.g. Website Editor, Internal Editor) will automatically create an admin user linked to this profile."
                         onUpload={handleCsvUpload}
                     />
                     <Button onClick={handleAddClick}>
@@ -380,7 +417,7 @@ export default function TeamAdminPage() {
             <Card className="mb-12">
                 <CardHeader>
                     <CardTitle className="font-headline text-2xl">Existing Staff & Board</CardTitle>
-                    <CardDescription>Manage current staff and board members.</CardDescription>
+                    <CardDescription>Manage current staff and board members, sabbatical statuses, and social links.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Table>
@@ -389,6 +426,7 @@ export default function TeamAdminPage() {
                                 <TableHead>Name</TableHead>
                                 <TableHead>Type</TableHead>
                                 <TableHead>Title</TableHead>
+                                <TableHead>Status</TableHead>
                                 <TableHead>Email</TableHead>
                                 <TableHead className="text-right w-[150px]">Actions</TableHead>
                             </TableRow>
@@ -396,7 +434,11 @@ export default function TeamAdminPage() {
                         <TableBody>
                             {allMembers.map((member) => (
                                 <TableRow key={member.id} className="group/row">
-                                    <TableCell className="font-medium">{member.name}</TableCell>
+                                    <TableCell className="font-medium">
+                                        <div className="flex items-center gap-2">
+                                            {member.name}
+                                        </div>
+                                    </TableCell>
                                     <TableCell>
                                         <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                                             member.type === 'staff' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
@@ -405,6 +447,17 @@ export default function TeamAdminPage() {
                                         </span>
                                     </TableCell>
                                     <TableCell>{member.title}</TableCell>
+                                    <TableCell>
+                                        {member.isOnLeave ? (
+                                            <Badge variant="secondary" className="bg-amber-100 text-amber-900 border-amber-300 text-[10px] font-semibold">
+                                                {member.leaveNote || "On Sabbatical / Leave"}
+                                            </Badge>
+                                        ) : (
+                                            <Badge variant="outline" className="text-emerald-700 border-emerald-200 bg-emerald-50 text-[10px]">
+                                                Active
+                                            </Badge>
+                                        )}
+                                    </TableCell>
                                     <TableCell>{member.email}</TableCell>
                                     <TableCell className="text-right">
                                         <Button variant="ghost" size="icon" onClick={() => handleEditClick(member)}>
@@ -490,7 +543,7 @@ export default function TeamAdminPage() {
                                         <FormItem>
                                         <FormLabel>Title / Role</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="e.g., 'Artistic Director'" {...field} />
+                                            <Input placeholder="e.g., 'Artistic Director' or 'Board Chair'" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                         </FormItem>
@@ -525,6 +578,47 @@ export default function TeamAdminPage() {
                                     )}
                                 />
                             </div>
+
+                            {/* Sabbatical / Leave Status */}
+                            <div className="p-4 rounded-xl border border-amber-200 bg-amber-50/50 space-y-4">
+                                <FormField
+                                    control={form.control}
+                                    name="isOnLeave"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-row items-center justify-between">
+                                            <div className="space-y-0.5">
+                                                <FormLabel className="font-semibold text-sm text-amber-950">Temporarily Away / On Sabbatical</FormLabel>
+                                                <FormDescription className="text-xs text-amber-800">
+                                                    Toggle on if this member is currently away on sabbatical or leave.
+                                                </FormDescription>
+                                            </div>
+                                            <FormControl>
+                                                <Switch
+                                                    checked={field.value}
+                                                    onCheckedChange={field.onChange}
+                                                />
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
+                                />
+
+                                {form.watch("isOnLeave") && (
+                                    <FormField
+                                        control={form.control}
+                                        name="leaveNote"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-xs font-semibold text-amber-950">Leave Status Note (optional)</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="e.g., 'On Sabbatical 2026-2027' or 'On Leave'" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                )}
+                            </div>
+
                             <FormField
                                 control={form.control}
                                 name="bio"
@@ -548,24 +642,31 @@ export default function TeamAdminPage() {
 
                             <div className="pt-4 border-t border-primary/10">
                                 <h3 className="text-lg font-headline font-bold mb-4">Social & Web Links</h3>
+                                <p className="text-xs text-muted-foreground mb-4">Links will only appear on the public card if a valid URL is provided.</p>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <FormField control={form.control} name="links.website" render={({ field }) => (
                                         <FormItem><FormLabel>Website</FormLabel><FormControl><Input placeholder="https://..." {...field} /></FormControl><FormMessage /></FormItem>
                                     )}/>
+                                    <FormField control={form.control} name="links.spotify" render={({ field }) => (
+                                        <FormItem><FormLabel>Spotify</FormLabel><FormControl><Input placeholder="https://open.spotify.com/..." {...field} /></FormControl><FormMessage /></FormItem>
+                                    )}/>
                                     <FormField control={form.control} name="links.linkedin" render={({ field }) => (
                                         <FormItem><FormLabel>LinkedIn</FormLabel><FormControl><Input placeholder="https://linkedin.com/in/..." {...field} /></FormControl><FormMessage /></FormItem>
-                                    )}/>
-                                    <FormField control={form.control} name="links.facebook" render={({ field }) => (
-                                        <FormItem><FormLabel>Facebook</FormLabel><FormControl><Input placeholder="https://facebook.com/..." {...field} /></FormControl><FormMessage /></FormItem>
                                     )}/>
                                     <FormField control={form.control} name="links.instagram" render={({ field }) => (
                                         <FormItem><FormLabel>Instagram</FormLabel><FormControl><Input placeholder="https://instagram.com/..." {...field} /></FormControl><FormMessage /></FormItem>
                                     )}/>
+                                    <FormField control={form.control} name="links.facebook" render={({ field }) => (
+                                        <FormItem><FormLabel>Facebook</FormLabel><FormControl><Input placeholder="https://facebook.com/..." {...field} /></FormControl><FormMessage /></FormItem>
+                                    )}/>
                                     <FormField control={form.control} name="links.youtube" render={({ field }) => (
                                         <FormItem><FormLabel>YouTube</FormLabel><FormControl><Input placeholder="https://youtube.com/@..." {...field} /></FormControl><FormMessage /></FormItem>
                                     )}/>
-                                    <FormField control={form.control} name="links.spotify" render={({ field }) => (
-                                        <FormItem><FormLabel>Spotify</FormLabel><FormControl><Input placeholder="https://open.spotify.com/..." {...field} /></FormControl><FormMessage /></FormItem>
+                                    <FormField control={form.control} name="links.twitter" render={({ field }) => (
+                                        <FormItem><FormLabel>Twitter / X</FormLabel><FormControl><Input placeholder="https://x.com/..." {...field} /></FormControl><FormMessage /></FormItem>
+                                    )}/>
+                                    <FormField control={form.control} name="links.other" render={({ field }) => (
+                                        <FormItem><FormLabel>Other Custom URL</FormLabel><FormControl><Input placeholder="https://..." {...field} /></FormControl><FormMessage /></FormItem>
                                     )}/>
                                 </div>
                             </div>

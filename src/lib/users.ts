@@ -5,11 +5,20 @@ import { sendUserAddedEmail } from './mail';
 
 export type UserRole = 'Website Editor' | 'Internal Editor' | 'Internal Viewer';
 
+export type LinkedProfile = {
+  type: 'staff' | 'board';
+  id: string;
+  name?: string;
+  title?: string;
+};
+
 export type User = {
   id: string; // Changed from number to string for Firestore IDs
   name: string;
   email: string;
   roles: UserRole[];
+  photoUrl?: string;
+  linkedProfile?: LinkedProfile;
 };
 
 const legacyUsers: User[] = data.users.map(u => ({ ...u, id: String(u.id) })) as User[];
