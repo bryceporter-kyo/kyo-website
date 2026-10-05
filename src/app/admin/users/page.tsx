@@ -503,41 +503,67 @@ export default function UsersAdminPage() {
                                                     </div>
                                                 </TableCell>
                                                 <TableCell className="text-right">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        onClick={() => handleSendPasswordReset(user.email, user.name)}
-                                                        disabled={isResettingPassword}
-                                                        title="Send Password Reset Email"
-                                                        className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
-                                                    >
-                                                        <KeyRound className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button variant="ghost" size="icon" onClick={() => openEditDialog(user)} title="Edit User">
-                                                        <Pencil className="h-4 w-4" />
-                                                    </Button>
-                                                    <AlertDialog>
-                                                        <AlertDialogTrigger asChild>
-                                                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" title="Delete User">
-                                                                <Trash2 className="h-4 w-4" />
-                                                            </Button>
-                                                        </AlertDialogTrigger>
-                                                        <AlertDialogContent>
-                                                            <AlertDialogHeader>
-                                                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                            <AlertDialogDescription>
-                                                                This action cannot be undone. This will permanently delete the user account for
-                                                                "{user.name}".
-                                                            </AlertDialogDescription>
-                                                            </AlertDialogHeader>
-                                                            <AlertDialogFooter>
-                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                            <AlertDialogAction onClick={() => handleDelete(user)}>
-                                                                Delete
-                                                            </AlertDialogAction>
-                                                            </AlertDialogFooter>
-                                                        </AlertDialogContent>
-                                                    </AlertDialog>
+                                                    <div className="flex items-center justify-end gap-0.5">
+                                                        {/* Password Reset */}
+                                                        <AlertDialog>
+                                                            <AlertDialogTrigger asChild>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    disabled={isResettingPassword}
+                                                                    title="Send Password Reset Email"
+                                                                    className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                                                                >
+                                                                    <KeyRound className="h-4 w-4" />
+                                                                </Button>
+                                                            </AlertDialogTrigger>
+                                                            <AlertDialogContent>
+                                                                <AlertDialogHeader>
+                                                                    <AlertDialogTitle>Send Password Reset?</AlertDialogTitle>
+                                                                    <AlertDialogDescription>
+                                                                        This will send a password reset email to <strong>{user.email}</strong>. The user will receive a link to set or reset their password.
+                                                                    </AlertDialogDescription>
+                                                                </AlertDialogHeader>
+                                                                <AlertDialogFooter>
+                                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                    <AlertDialogAction onClick={() => handleSendPasswordReset(user.email, user.name)}>
+                                                                        Send Reset Email
+                                                                    </AlertDialogAction>
+                                                                </AlertDialogFooter>
+                                                            </AlertDialogContent>
+                                                        </AlertDialog>
+
+                                                        {/* Edit */}
+                                                        <Button variant="ghost" size="icon" onClick={() => openEditDialog(user)} title="Edit User">
+                                                            <Pencil className="h-4 w-4" />
+                                                        </Button>
+
+                                                        {/* Delete */}
+                                                        <AlertDialog>
+                                                            <AlertDialogTrigger asChild>
+                                                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" title="Delete User">
+                                                                    <Trash2 className="h-4 w-4" />
+                                                                </Button>
+                                                            </AlertDialogTrigger>
+                                                            <AlertDialogContent>
+                                                                <AlertDialogHeader>
+                                                                    <AlertDialogTitle>Delete User?</AlertDialogTitle>
+                                                                    <AlertDialogDescription>
+                                                                        This action cannot be undone. This will permanently delete the portal account for <strong>{user.name}</strong> ({user.email}).
+                                                                    </AlertDialogDescription>
+                                                                </AlertDialogHeader>
+                                                                <AlertDialogFooter>
+                                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                    <AlertDialogAction
+                                                                        onClick={() => handleDelete(user)}
+                                                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                                    >
+                                                                        Delete
+                                                                    </AlertDialogAction>
+                                                                </AlertDialogFooter>
+                                                            </AlertDialogContent>
+                                                        </AlertDialog>
+                                                    </div>
                                                 </TableCell>
                                             </TableRow>
                                         );
@@ -840,20 +866,37 @@ export default function UsersAdminPage() {
                                     Send a Firebase password reset email to{" "}
                                     <span className="font-semibold">{editingUser?.email}</span>. The user will receive a link to set or reset their password.
                                 </p>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    className="border-amber-300 text-amber-800 hover:bg-amber-100 hover:border-amber-400 gap-2"
-                                    disabled={isResettingPassword || isSaving}
-                                    onClick={() => handleSendPasswordReset(editingUser?.email ?? "", editingUser?.name)}
-                                >
-                                    {isResettingPassword
-                                        ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                        : <Send className="h-3.5 w-3.5" />
-                                    }
-                                    {isResettingPassword ? "Sending…" : "Send Password Reset Email"}
-                                </Button>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            className="border-amber-300 text-amber-800 hover:bg-amber-100 hover:border-amber-400 gap-2"
+                                            disabled={isResettingPassword || isSaving}
+                                        >
+                                            {isResettingPassword
+                                                ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                : <Send className="h-3.5 w-3.5" />
+                                            }
+                                            {isResettingPassword ? "Sending…" : "Send Password Reset Email"}
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Send Password Reset?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                This will send a password reset email to <strong>{editingUser?.email}</strong>. They will receive a link to set or reset their password.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => handleSendPasswordReset(editingUser?.email ?? "", editingUser?.name)}>
+                                                Send Reset Email
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                             </div>
 
                             <DialogFooter className="pt-4">
