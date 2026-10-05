@@ -9,9 +9,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Pencil, Trash2, User as UserIcon, Download, Upload, Loader2, Camera, Link as LinkIcon, Unlink, UserCheck, Shield } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, User as UserIcon, Download, Upload, Loader2, Camera, Link as LinkIcon, Unlink, UserCheck, Shield, KeyRound, Mail, Send } from "lucide-react";
 import Link from "next/link";
-import { fetchUsersFromFirebase, addUserToFirebase, deleteUserFromFirebase, updateUserInFirebase } from "@/lib/users";
+import { fetchUsersFromFirebase, addUserToFirebase, deleteUserFromFirebase, updateUserInFirebase, sendUserPasswordReset } from "@/lib/users";
 import type { User as UserType, UserRole, LinkedProfile } from "@/lib/users";
 import { fetchStaffFromFirebase, fetchBoardFromFirebase, StaffMember, BoardMember } from "@/lib/staff";
 import { uploadImage } from "@/lib/image-service";
@@ -368,6 +368,44 @@ export default function UsersAdminPage() {
         }
     }
 
+    const [isResettingPassword, setIsResettingPassword] = React.useState(false);
+
+    async function handleSendPasswordReset(email: string, name?: string) {
+        if (!email) {
+            toast({
+                title: "Missing Email",
+                description: "No email address found to send a password reset to.",
+                variant: "destructive",
+            });
+            return;
+        }
+        setIsResettingPassword(true);
+        try {
+            await sendUserPasswordReset(email);
+            toast({
+                title: "Password Reset Sent",
+                description: `A password reset email has been sent to ${email}${name ? ` (${name})` : ""}. They can follow the instructions to set or reset their password.`,
+            });
+        } catch (error: any) {
+            console.error("Failed to send password reset email:", error);
+            let errorMsg = "Failed to send password reset email.";
+            if (error?.code === "auth/user-not-found") {
+                errorMsg = "No Firebase Auth account found for this email.";
+            } else if (error?.code === "auth/invalid-email") {
+                errorMsg = "The email address is invalid.";
+            } else if (error?.message) {
+                errorMsg = error.message;
+            }
+            toast({
+                title: "Password Reset Error",
+                description: errorMsg,
+                variant: "destructive",
+            });
+        } finally {
+            setIsResettingPassword(false);
+        }
+    }
+
     function openEditDialog(user: UserType) {
         setEditingUser(user);
         setIsEditDialogOpen(true);
@@ -465,6 +503,16 @@ export default function UsersAdminPage() {
                                                     </div>
                                                 </TableCell>
                                                 <TableCell className="text-right">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => handleSendPasswordReset(user.email, user.name)}
+                                                        disabled={isResettingPassword}
+                                                        title="Send Password Reset Email"
+                                                        className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                                                    >
+                                                        <KeyRound className="h-4 w-4" />
+                                                    </Button>
                                                     <Button variant="ghost" size="icon" onClick={() => openEditDialog(user)} title="Edit User">
                                                         <Pencil className="h-4 w-4" />
                                                     </Button>
@@ -781,6 +829,32 @@ export default function UsersAdminPage() {
                                     </FormItem>
                                 )}
                             />
+
+                            {/* Security & Password Reset */}
+                            <div className="p-3.5 rounded-xl border border-amber-200 bg-amber-50/60 space-y-2.5">
+                                <div className="flex items-center gap-2">
+                                    <Shield className="w-4 h-4 text-amber-600" />
+                                    <h4 className="text-sm font-bold text-amber-800">Security &amp; Password Reset</h4>
+                                </div>
+                                <p className="text-xs text-amber-700">
+                                    Send a Firebase password reset email to{" "}
+                                    <span className="font-semibold">{editingUser?.email}</span>. The user will receive a link to set or reset their password.
+                                </p>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="border-amber-300 text-amber-800 hover:bg-amber-100 hover:border-amber-400 gap-2"
+                                    disabled={isResettingPassword || isSaving}
+                                    onClick={() => handleSendPasswordReset(editingUser?.email ?? "", editingUser?.name)}
+                                >
+                                    {isResettingPassword
+                                        ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                        : <Send className="h-3.5 w-3.5" />
+                                    }
+                                    {isResettingPassword ? "Sending…" : "Send Password Reset Email"}
+                                </Button>
+                            </div>
 
                             <DialogFooter className="pt-4">
                                 <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)} disabled={isSaving}>

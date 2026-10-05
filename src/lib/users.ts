@@ -1,5 +1,6 @@
-import { db, sanitizeForFirestore } from './firebase';
+import { db, auth, sanitizeForFirestore } from './firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc, query, where } from 'firebase/firestore';
+import { sendPasswordResetEmail } from 'firebase/auth';
 import data from './users.json';
 import { sendUserAddedEmail } from './mail';
 
@@ -119,6 +120,19 @@ export async function getUserRolesByEmail(email: string): Promise<UserRole[]> {
     } catch (error) {
         console.error('[Users] Error fetching user roles:', error);
         return [];
+    }
+}
+
+/**
+ * Send a Firebase Auth password reset email to a user
+ */
+export async function sendUserPasswordReset(email: string): Promise<void> {
+    try {
+        await sendPasswordResetEmail(auth, email);
+        console.log('[Users] Password reset email sent to:', email);
+    } catch (error) {
+        console.error('[Users] Error sending password reset email:', error);
+        throw error;
     }
 }
 
