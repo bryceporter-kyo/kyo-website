@@ -2,6 +2,30 @@ import { Event } from './events';
 import { rrulestr } from 'rrule';
 
 /**
+ * Formats a Date object in America/Toronto timezone into "h:mm A" time string
+ */
+function formatTorontoTime(date: Date): string {
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Toronto',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  }).format(date);
+}
+
+/**
+ * Formats a Date object in America/Toronto timezone into "YYYY-MM-DD" date string
+ */
+function formatTorontoDate(date: Date): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Toronto',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date);
+}
+
+/**
  * Parses time string from ICS format (e.g. 20260802T193000 or 193000)
  */
 function parseIcalTime(timePart: string): { time?: string } {
@@ -18,6 +42,7 @@ function parseIcalTime(timePart: string): { time?: string } {
 
 /**
  * Extracts date (YYYY-MM-DD), time (h:mm A), and endTime (h:mm A) from DTSTART / DTEND strings.
+ * Accurately converts UTC timestamps (ending in 'Z') to 'America/Toronto' local time.
  */
 function parseDateAndTimes(dtstart?: string, dtend?: string): { date: string; time?: string; endTime?: string } {
   let date = '';
@@ -25,22 +50,79 @@ function parseDateAndTimes(dtstart?: string, dtend?: string): { date: string; ti
   let endTime: string | undefined = undefined;
 
   if (dtstart) {
-    const dPart = dtstart.split('T')[0];
-    if (dPart.length === 8) {
-      date = `${dPart.slice(0, 4)}-${dPart.slice(4, 6)}-${dPart.slice(6, 8)}`;
-    }
-    if (dtstart.includes('T')) {
-      const parsed = parseIcalTime(dtstart.split('T')[1]);
-      if (parsed.time) time = parsed.time;
+    if (dtstart.endsWith('Z') && dtstart.includes('T')) {
+      const dPart = dtstart.split('T')[0];
+      const tPart = dtstart.split('T')[1].replace('Z', '');
+      if (dPart.length === 8 && tPart.length >= 4) {
+        const y = parseInt(dPart.slice(0, 4), 10);
+        const m = parseInt(dPart.slice(4, 6), 10) - 1;
+        const d = parseInt(dPart.slice(6, 8), 10);
+        const h = parseInt(tPart.slice(0, 2), 10);
+        const min = parseInt(tPart.slice(2, 4), 10);
+        const sec = tPart.length >= 6 ? parseInt(tPart.slice(4, 6), 10) : 0;
+        const utcDate = new Date(Date.UTC(y, m, d, h, min, sec));
+
+        date = formatTorontoDate(utcDate);
+        time = formatTorontoTime(utcDate);
+      }
+    } else {
+      const dPart = dtstart.split('T')[0];
+      if (dPart.length === 8) {
+        date = `${dPart.slice(0, 4)}-${dPart.slice(4, 6)}-${dPart.slice(6, 8)}`;
+      }
+      if (dtstart.includes('T')) {
+        const parsed = parseIcalTime(dtstart.split('T')[1]);
+        if (parsed.time) time = parsed.time;
+      }
     }
   }
 
-  if (dtend && dtend.includes('T')) {
-    const parsed = parseIcalTime(dtend.split('T')[1]);
-    if (parsed.time) endTime = parsed.time;
+  if (dtend) {
+    if (dtend.endsWith('Z') && dtend.includes('T')) {
+      const dPart = dtend.split('T')[0];
+      const tPart = dtend.split('T')[1].replace('Z', '');
+      if (dPart.length === 8 && tPart.length >= 4) {
+        const y = parseInt(dPart.slice(0, 4), 10);
+        const m = parseInt(dPart.slice(4, 6), 10) - 1;
+        const d = parseInt(dPart.slice(6, 8), 10);
+        const h = parseInt(tPart.slice(0, 2), 10);
+        const min = parseInt(tPart.slice(2, 4), 10);
+        const sec = tPart.length >= 6 ? parseInt(tPart.slice(4, 6), 10) : 0;
+        const utcDate = new Date(Date.UTC(y, m, d, h, min, sec));
+
+        endTime = formatTorontoTime(utcDate);
+      }
+    } else if (dtend.includes('T')) {
+      const parsed = parseIcalTime(dtend.split('T')[1]);
+      if (parsed.time) endTime = parsed.time;
+    }
   }
 
   return { date, time, endTime };
+}
+
+/**
+ * Returns a friendly, informative fallback name when Google Calendar permissions
+ * are set to 'free/busy' (summary is 'Busy' or empty).
+ */
+function getEventDisplayName(rawSummary?: string, type?: string): string {
+  const clean = (rawSummary || '').trim();
+  if (clean && clean.toLowerCase() !== 'busy') {
+    return clean;
+  }
+
+  switch (type) {
+    case 'upbeat':
+      return 'Upbeat! Program Session';
+    case 'lessons':
+      return 'Lessons & Small Ensembles';
+    case 'orchestras':
+      return 'Orchestra Rehearsal';
+    case 'special':
+      return 'Special Event';
+    default:
+      return 'Scheduled Program Event';
+  }
 }
 
 interface RawIcsEvent {
@@ -156,14 +238,16 @@ export function parseICS(icsData: string, type: 'upbeat' | 'lessons' | 'orchestr
 
   // Pass 2: Process regular, recurring, and modified events
   for (const raw of rawEvents) {
+    const displayName = getEventDisplayName(raw.summary, type);
+
     // 1. Modified recurring instance
     if (raw.recurrenceId) {
       const { date, time, endTime } = parseDateAndTimes(raw.dtstart, raw.dtend);
-      if (date && raw.summary) {
+      if (date) {
         events.push({
           id: `${raw.uid || 'gcal'}-${date}`,
           date,
-          name: raw.summary,
+          name: displayName,
           location: raw.location,
           time,
           endTime,
@@ -186,7 +270,7 @@ export function parseICS(icsData: string, type: 'upbeat' | 'lessons' | 'orchestr
       let hours = 0;
       let minutes = 0;
       if (raw.dtstart.includes('T')) {
-        const tPart = raw.dtstart.split('T')[1];
+        const tPart = raw.dtstart.split('T')[1].replace('Z', '');
         if (tPart.length >= 4) {
           hours = parseInt(tPart.slice(0, 2), 10);
           minutes = parseInt(tPart.slice(2, 4), 10);
@@ -213,10 +297,16 @@ export function parseICS(icsData: string, type: 'upbeat' | 'lessons' | 'orchestr
         const occurrences = rule.between(windowStart, windowEnd, true);
 
         for (const occ of occurrences) {
-          const occYear = occ.getUTCFullYear();
-          const occMonth = String(occ.getUTCMonth() + 1).padStart(2, '0');
-          const occDay = String(occ.getUTCDate()).padStart(2, '0');
-          const occDateStr = `${occYear}-${occMonth}-${occDay}`;
+          // If raw.dtstart was UTC (ending with Z), convert the occurrence through America/Toronto
+          let occDateStr = '';
+          if (raw.dtstart.endsWith('Z')) {
+            occDateStr = formatTorontoDate(occ);
+          } else {
+            const occYear = occ.getUTCFullYear();
+            const occMonth = String(occ.getUTCMonth() + 1).padStart(2, '0');
+            const occDay = String(occ.getUTCDate()).padStart(2, '0');
+            occDateStr = `${occYear}-${occMonth}-${occDay}`;
+          }
 
           // Skip excluded dates
           if (exdateSet.has(occDateStr)) continue;
@@ -227,7 +317,7 @@ export function parseICS(icsData: string, type: 'upbeat' | 'lessons' | 'orchestr
           events.push({
             id: `${raw.uid || 'gcal'}-${occDateStr}`,
             date: occDateStr,
-            name: raw.summary || 'Event',
+            name: displayName,
             location: raw.location,
             time,
             endTime,
@@ -239,11 +329,11 @@ export function parseICS(icsData: string, type: 'upbeat' | 'lessons' | 'orchestr
         console.error(`[Google Calendar] Error expanding RRULE for "${raw.summary}":`, err);
         // Fallback: emit the initial occurrence
         const { date } = parseDateAndTimes(raw.dtstart, raw.dtend);
-        if (date && raw.summary) {
+        if (date) {
           events.push({
             id: raw.uid || `gcal-${date}`,
             date,
-            name: raw.summary,
+            name: displayName,
             location: raw.location,
             time,
             endTime,
@@ -255,11 +345,11 @@ export function parseICS(icsData: string, type: 'upbeat' | 'lessons' | 'orchestr
     } else {
       // 3. Single non-recurring event
       const { date, time, endTime } = parseDateAndTimes(raw.dtstart, raw.dtend);
-      if (date && raw.summary) {
+      if (date) {
         events.push({
           id: raw.uid || `gcal-${date}`,
           date,
-          name: raw.summary,
+          name: displayName,
           location: raw.location,
           time,
           endTime,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useLayoutEffect } from "react";
 import PageHeader from "@/components/shared/PageHeader";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -59,6 +59,23 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedFeed, setSelectedFeed] = useState<'all' | 'orchestras' | 'upbeat' | 'lessons'>('all');
 
+    // Scroll-lock: prevents viewport from jumping when filter changes list height
+    const savedScrollY = useRef<number | null>(null);
+    const filterBarRef = useRef<HTMLDivElement>(null);
+
+    useLayoutEffect(() => {
+        if (savedScrollY.current !== null) {
+            window.scrollTo({ top: savedScrollY.current, behavior: 'instant' as ScrollBehavior });
+            savedScrollY.current = null;
+        }
+    }, [categoryFilter, searchQuery]);
+
+    const handleCategoryChange = (filter: typeof categoryFilter) => {
+        savedScrollY.current = window.scrollY;
+        setCategoryFilter(filter);
+        setShowAllMonthEvents(false);
+    };
+
     // Filter announcements: show all pinned + top 2 unpinned
     const visibleAnnouncements = useMemo(() => {
         const pinned = announcements.filter(a => a.pinned);
@@ -105,10 +122,19 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
         return new Date(`${dateString}T00:00:00`);
     };
 
-    const filteredEventsForMonth = useMemo(() => {
-        if (!month) return [];
+    const [currentPage, setCurrentPage] = useState(1);
+    const SPECIAL_EVENTS_PER_PAGE = 6;
+
+    // Reset page when category or search changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [categoryFilter, searchQuery]);
+
+    const isSpecialCategory = categoryFilter === 'special';
+
+    // All matching events across the entire season (for Special events or global query)
+    const allFilteredEvents = useMemo(() => {
         return allEvents
-            .filter(event => isSameMonth(parseDate(event.date), month))
             .filter(event => {
                 if (categoryFilter === 'special') return event.type === 'special';
                 if (categoryFilter !== 'all' && event.type !== categoryFilter) return false;
@@ -124,10 +150,27 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
                 );
             })
             .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    }, [allEvents, month, categoryFilter, searchQuery]);
+    }, [allEvents, categoryFilter, searchQuery]);
 
-    // 10-Day Event Filter for Default View
+    // For standard calendar tabs: filter within currently selected month
+    const filteredEventsForMonth = useMemo(() => {
+        if (!month) return [];
+        return allFilteredEvents.filter(event => isSameMonth(parseDate(event.date), month));
+    }, [allFilteredEvents, month]);
+
+    // Pagination for Special Events (all special events across the season)
+    const totalSpecialPages = Math.ceil(allFilteredEvents.length / SPECIAL_EVENTS_PER_PAGE);
+    const paginatedSpecialEvents = useMemo(() => {
+        const start = (currentPage - 1) * SPECIAL_EVENTS_PER_PAGE;
+        return allFilteredEvents.slice(start, start + SPECIAL_EVENTS_PER_PAGE);
+    }, [allFilteredEvents, currentPage]);
+
+    // 10-Day Event Filter for Default View (or Paginated Special Events)
     const displayedEvents = useMemo(() => {
+        if (isSpecialCategory) {
+            return paginatedSpecialEvents;
+        }
+
         if (showAllMonthEvents) {
             return filteredEventsForMonth;
         }
@@ -158,9 +201,9 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
             const firstDate = parseDate(filteredEventsForMonth[0].date);
             return filteredEventsForMonth.filter(e => parseDate(e.date) <= addDays(firstDate, 10));
         }
-    }, [filteredEventsForMonth, month, showAllMonthEvents]);
+    }, [isSpecialCategory, paginatedSpecialEvents, filteredEventsForMonth, month, showAllMonthEvents]);
 
-    const hiddenEventsCount = Math.max(0, filteredEventsForMonth.length - displayedEvents.length);
+    const hiddenEventsCount = isSpecialCategory ? 0 : Math.max(0, filteredEventsForMonth.length - displayedEvents.length);
 
     const handleCopyFeedUrl = () => {
         if (typeof navigator !== 'undefined' && navigator.clipboard) {
@@ -216,16 +259,20 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
         hidden: { opacity: 0 },
         visible: {
             opacity: 1,
-            transition: { staggerChildren: 0.05 }
-        }
+            transition: { 
+                duration: 0.2,
+                staggerChildren: 0.04 
+            }
+        },
+        exit: { opacity: 0, transition: { duration: 0.12 } }
     } as const;
 
     const itemVariants = {
-        hidden: { y: 15, opacity: 0 },
+        hidden: { opacity: 0, y: 8 },
         visible: {
-            y: 0,
             opacity: 1,
-            transition: { type: "spring", stiffness: 100, damping: 15 }
+            y: 0,
+            transition: { duration: 0.25, ease: "easeOut" }
         }
     } as const;
 
@@ -438,11 +485,11 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
                             {/* Search & Filter Bar */}
                             <div className="bg-white/70 backdrop-blur-xl border border-primary/10 rounded-[2rem] p-6 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
                                 {/* Category Tabs */}
-                                <div className="flex flex-wrap gap-2 w-full md:w-auto">
+                                <div ref={filterBarRef} className="flex flex-wrap gap-2 w-full md:w-auto">
                                     {(['all', 'orchestras', 'upbeat', 'lessons', 'special'] as const).map((filter) => (
                                         <button
                                             key={filter}
-                                            onClick={() => setCategoryFilter(filter)}
+                                            onClick={() => handleCategoryChange(filter)}
                                             className={cn(
                                                 "px-4 py-2 rounded-full text-xs font-bold capitalize transition-all border border-transparent",
                                                 categoryFilter === filter
@@ -476,27 +523,34 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2 text-primary">
                                         <Sparkles className="w-4 h-4" />
-                                        <span className="text-xs font-bold uppercase tracking-widest">Schedule</span>
+                                        <span className="text-xs font-bold uppercase tracking-widest">
+                                            {isSpecialCategory ? 'Special Events & Concerts' : 'Schedule'}
+                                        </span>
                                     </div>
                                     <h2 className="text-4xl font-headline font-bold">
-                                        {month ? format(month, 'MMMM yyyy') : 'Upcoming Events'}
+                                        {isSpecialCategory 
+                                            ? 'Season Special Events' 
+                                            : month ? format(month, 'MMMM yyyy') : 'Upcoming Events'}
                                     </h2>
                                 </div>
                                 <div className="hidden md:block">
                                     <Badge variant="outline" className="px-4 py-1.5 text-sm rounded-full border-primary/20 text-primary bg-primary/5">
-                                        {!showAllMonthEvents && hiddenEventsCount > 0 
-                                            ? `Showing ${displayedEvents.length} of ${filteredEventsForMonth.length} Events (Next 10 Days)` 
-                                            : `${filteredEventsForMonth.length} ${filteredEventsForMonth.length === 1 ? 'Event' : 'Events'} listed`}
+                                        {isSpecialCategory
+                                            ? `Showing ${allFilteredEvents.length} Special ${allFilteredEvents.length === 1 ? 'Event' : 'Events'} (Season-Wide)`
+                                            : !showAllMonthEvents && hiddenEventsCount > 0 
+                                                ? `Showing ${displayedEvents.length} of ${filteredEventsForMonth.length} Events (Next 10 Days)` 
+                                                : `${filteredEventsForMonth.length} ${filteredEventsForMonth.length === 1 ? 'Event' : 'Events'} listed`}
                                     </Badge>
                                 </div>
                             </div>
 
-                            <AnimatePresence mode="wait">
+                            <AnimatePresence mode="sync">
                                 <motion.div 
-                                    key={`${month?.toISOString()}-${categoryFilter}-${searchQuery}-${showAllMonthEvents}`}
+                                    key={`${month?.toISOString()}-${categoryFilter}-${searchQuery}-${showAllMonthEvents}-${currentPage}`}
                                     variants={containerVariants}
                                     initial="hidden"
                                     animate="visible"
+                                    exit="exit"
                                     className="grid grid-cols-1 gap-6"
                                 >
                                     {isLoading ? (
@@ -578,7 +632,11 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
                                             className="text-center py-20 px-8 rounded-[3rem] border-2 border-dashed border-primary/10 bg-primary/[0.02]"
                                         >
                                             <CalendarIcon className="w-12 h-12 text-primary/20 mx-auto mb-4" />
-                                            <p className="text-muted-foreground text-lg font-light">No events match your criteria for {month ? format(month, 'MMMM yyyy') : 'this month'}.</p>
+                                            <p className="text-muted-foreground text-lg font-light">
+                                                {isSpecialCategory
+                                                    ? 'No special events currently scheduled.'
+                                                    : `No events match your criteria for ${month ? format(month, 'MMMM yyyy') : 'this month'}.`}
+                                            </p>
                                             <Button variant="link" onClick={() => { setCategoryFilter('all'); setSearchQuery(""); }} className="mt-4 text-primary font-bold">
                                                 Clear Filters & Search
                                             </Button>
@@ -587,8 +645,56 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
                                 </motion.div>
                             </AnimatePresence>
 
-                            {/* Expand / Collapse 10-day filter controls */}
-                            {!isLoading && hiddenEventsCount > 0 && !showAllMonthEvents && (
+                            {/* Pagination for Special Events */}
+                            {isSpecialCategory && totalSpecialPages > 1 && (
+                                <motion.div 
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="pt-6 flex items-center justify-center gap-3"
+                                >
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                        disabled={currentPage === 1}
+                                        className="rounded-full px-5 py-2 border-primary/20 hover:bg-primary hover:text-white transition-all text-xs font-bold"
+                                    >
+                                        Previous
+                                    </Button>
+
+                                    <div className="flex items-center gap-2">
+                                        {Array.from({ length: totalSpecialPages }, (_, i) => i + 1).map((pg) => (
+                                            <Button
+                                                key={pg}
+                                                variant={currentPage === pg ? "default" : "outline"}
+                                                size="sm"
+                                                onClick={() => setCurrentPage(pg)}
+                                                className={cn(
+                                                    "w-9 h-9 p-0 rounded-full text-xs font-bold transition-all",
+                                                    currentPage === pg 
+                                                        ? "bg-rose-500 text-white hover:bg-rose-600 border-rose-500 shadow-md"
+                                                        : "border-primary/20 hover:bg-primary/5 text-primary"
+                                                )}
+                                            >
+                                                {pg}
+                                            </Button>
+                                        ))}
+                                    </div>
+
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setCurrentPage(prev => Math.min(totalSpecialPages, prev + 1))}
+                                        disabled={currentPage === totalSpecialPages}
+                                        className="rounded-full px-5 py-2 border-primary/20 hover:bg-primary hover:text-white transition-all text-xs font-bold"
+                                    >
+                                        Next
+                                    </Button>
+                                </motion.div>
+                            )}
+
+                            {/* Expand / Collapse 10-day filter controls (for monthly view) */}
+                            {!isLoading && !isSpecialCategory && hiddenEventsCount > 0 && !showAllMonthEvents && (
                                 <motion.div 
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -606,7 +712,7 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
                                 </motion.div>
                             )}
 
-                            {!isLoading && showAllMonthEvents && filteredEventsForMonth.length > displayedEvents.length && (
+                            {!isLoading && !isSpecialCategory && showAllMonthEvents && filteredEventsForMonth.length > displayedEvents.length && (
                                 <motion.div 
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -618,7 +724,6 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
                                         className="rounded-full px-8 py-6 border-slate-200 bg-white hover:bg-slate-100 text-slate-600 font-bold text-sm transition-all duration-300 shadow-sm flex items-center gap-2"
                                     >
                                         <span>Show Next 10 Days Only</span>
-                                        <ChevronUp className="w-4 h-4" />
                                     </Button>
                                 </motion.div>
                             )}

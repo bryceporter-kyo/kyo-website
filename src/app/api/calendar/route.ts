@@ -22,30 +22,44 @@ export async function GET(request: NextRequest) {
       !!settings.lessonsCalendarId || 
       !!settings.orchestrasCalendarId;
 
-    if (hasGoogleCalendars) {
-      const promises: Promise<Event[]>[] = [];
+    const gcalPromises: Promise<Event[]>[] = [];
 
-      if (feed === 'all' || feed === 'upbeat') {
-        if (settings.upbeatCalendarId) {
-          promises.push(fetchGoogleCalendarEvents(settings.upbeatCalendarId, 'upbeat'));
-        }
+    if (feed === 'all' || feed === 'upbeat') {
+      if (settings.upbeatCalendarId) {
+        gcalPromises.push(fetchGoogleCalendarEvents(settings.upbeatCalendarId, 'upbeat'));
       }
-      if (feed === 'all' || feed === 'lessons') {
-        if (settings.lessonsCalendarId) {
-          promises.push(fetchGoogleCalendarEvents(settings.lessonsCalendarId, 'lessons'));
-        }
+    }
+    if (feed === 'all' || feed === 'lessons') {
+      if (settings.lessonsCalendarId) {
+        gcalPromises.push(fetchGoogleCalendarEvents(settings.lessonsCalendarId, 'lessons'));
       }
-      if (feed === 'all' || feed === 'orchestras') {
-        if (settings.orchestrasCalendarId) {
-          promises.push(fetchGoogleCalendarEvents(settings.orchestrasCalendarId, 'orchestras'));
-        }
+    }
+    if (feed === 'all' || feed === 'orchestras') {
+      if (settings.orchestrasCalendarId) {
+        gcalPromises.push(fetchGoogleCalendarEvents(settings.orchestrasCalendarId, 'orchestras'));
       }
+    }
 
-      const results = await Promise.all(promises);
-      events = results.flat();
+    const [gcalResults, firestoreEvents] = await Promise.all([
+      Promise.all(gcalPromises),
+      fetchEventsFromFirebase(),
+    ]);
+
+    const gcalEvents = gcalResults.flat();
+
+    if (gcalEvents.length > 0) {
+      events = [...gcalEvents];
+      const gcalTypes = new Set(gcalEvents.map(e => e.type));
+      for (const fe of firestoreEvents) {
+        if (feed !== 'all' && fe.type !== feed) continue;
+        if (fe.type === 'special' || !gcalTypes.has(fe.type)) {
+          if (!events.some(e => e.id === fe.id)) {
+            events.push(fe);
+          }
+        }
+      }
     } else {
-      // Fallback to standard Firebase database events
-      events = await fetchEventsFromFirebase();
+      events = firestoreEvents;
       if (feed !== 'all') {
         events = events.filter(e => e.type === feed);
       }

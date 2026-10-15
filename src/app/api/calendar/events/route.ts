@@ -14,23 +14,40 @@ export async function GET() {
       Boolean(settings.lessonsCalendarId?.trim()) ||
       Boolean(settings.orchestrasCalendarId?.trim());
 
-    let eventsData: Event[] = [];
+    // 1. Fetch Google Calendar events if configured
+    const gcalPromises: Promise<Event[]>[] = [];
+    if (settings.upbeatCalendarId?.trim()) {
+      gcalPromises.push(fetchGoogleCalendarEvents(settings.upbeatCalendarId.trim(), 'upbeat'));
+    }
+    if (settings.lessonsCalendarId?.trim()) {
+      gcalPromises.push(fetchGoogleCalendarEvents(settings.lessonsCalendarId.trim(), 'lessons'));
+    }
+    if (settings.orchestrasCalendarId?.trim()) {
+      gcalPromises.push(fetchGoogleCalendarEvents(settings.orchestrasCalendarId.trim(), 'orchestras'));
+    }
 
-    if (hasGoogleCalendars) {
-      const promises: Promise<Event[]>[] = [];
-      if (settings.upbeatCalendarId?.trim()) {
-        promises.push(fetchGoogleCalendarEvents(settings.upbeatCalendarId.trim(), 'upbeat'));
+    // 2. Fetch Firestore events (which include Special events and admin-created events)
+    const [gcalResults, firestoreEvents] = await Promise.all([
+      Promise.all(gcalPromises),
+      fetchEventsFromFirebase(),
+    ]);
+
+    const gcalEvents = gcalResults.flat();
+
+    // Merge events
+    let eventsData: Event[] = [];
+    if (gcalEvents.length > 0) {
+      eventsData = [...gcalEvents];
+      const gcalTypes = new Set(gcalEvents.map(e => e.type));
+      for (const fe of firestoreEvents) {
+        if (fe.type === 'special' || !gcalTypes.has(fe.type)) {
+          if (!eventsData.some(e => e.id === fe.id)) {
+            eventsData.push(fe);
+          }
+        }
       }
-      if (settings.lessonsCalendarId?.trim()) {
-        promises.push(fetchGoogleCalendarEvents(settings.lessonsCalendarId.trim(), 'lessons'));
-      }
-      if (settings.orchestrasCalendarId?.trim()) {
-        promises.push(fetchGoogleCalendarEvents(settings.orchestrasCalendarId.trim(), 'orchestras'));
-      }
-      const results = await Promise.all(promises);
-      eventsData = results.flat();
     } else {
-      eventsData = await fetchEventsFromFirebase();
+      eventsData = firestoreEvents;
     }
 
     // Sort events by date ascending
