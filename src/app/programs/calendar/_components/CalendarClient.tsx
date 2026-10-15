@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import PageHeader from "@/components/shared/PageHeader";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -59,20 +59,9 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedFeed, setSelectedFeed] = useState<'all' | 'orchestras' | 'upbeat' | 'lessons'>('all');
 
-    // Keeps the filter bar at a consistent position on every filter click
-    const filterBarRef = useRef<HTMLDivElement>(null);
-
     const handleCategoryChange = (filter: typeof categoryFilter) => {
         setCategoryFilter(filter);
         setShowAllMonthEvents(false);
-        // After React re-renders, scroll the filter bar to a consistent position
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                filterBarRef.current?.scrollIntoView({ behavior: 'instant', block: 'start' });
-                // nudge up a bit so the bar isn't flush with the top
-                window.scrollBy({ top: -24, behavior: 'instant' });
-            });
-        });
     };
 
     // Filter announcements: show all pinned + top 2 unpinned
@@ -254,26 +243,7 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
         apple: feedUrl.replace(/^https?:\/\//, 'webcal://')
     };
 
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: { 
-                duration: 0.2,
-                staggerChildren: 0.04 
-            }
-        },
-        exit: { opacity: 0, transition: { duration: 0.12 } }
-    } as const;
 
-    const itemVariants = {
-        hidden: { opacity: 0, y: 8 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.25, ease: "easeOut" }
-        }
-    } as const;
 
     return (
         <div className="relative overflow-hidden bg-background min-h-screen pb-24">
@@ -484,7 +454,7 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
                             {/* Search & Filter Bar */}
                             <div className="bg-white/70 backdrop-blur-xl border border-primary/10 rounded-[2rem] p-6 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
                                 {/* Category Tabs */}
-                                <div ref={filterBarRef} className="flex flex-wrap gap-2 w-full md:w-auto">
+                                <div className="flex flex-wrap gap-2 w-full md:w-auto">
                                     {(['all', 'orchestras', 'upbeat', 'lessons', 'special'] as const).map((filter) => (
                                         <button
                                             key={filter}
@@ -543,20 +513,20 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
                                 </div>
                             </div>
 
-                            <AnimatePresence mode="sync">
-                                <motion.div 
-                                    key={`${month?.toISOString()}-${categoryFilter}-${searchQuery}-${showAllMonthEvents}-${currentPage}`}
-                                    variants={containerVariants}
-                                    initial="hidden"
-                                    animate="visible"
-                                    exit="exit"
-                                    className="grid grid-cols-1 gap-6"
-                                >
+                            <div className="grid grid-cols-1 gap-6">
+                            <AnimatePresence mode="popLayout" initial={false}>
                                     {isLoading ? (
                                         [1, 2, 3].map(i => <Skeleton key={i} className="w-full h-32 rounded-3xl" />)
                                     ) : displayedEvents.length > 0 ? (
                                         displayedEvents.map(event => (
-                                            <motion.div key={event.id} variants={itemVariants}>
+                                            <motion.div
+                                                key={event.id}
+                                                layout
+                                                initial={{ opacity: 0, y: 8 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0 }}
+                                                transition={{ duration: 0.2, ease: "easeOut" }}
+                                            >
                                                 <Card className="group relative overflow-hidden border-primary/5 bg-white transition-all duration-500 hover:shadow-2xl hover:border-primary/20 rounded-[2rem] cursor-pointer" onClick={() => handleDayClick(parseDate(event.date))}>
                                                     <div className={cn(
                                                         "absolute top-0 left-0 w-1.5 h-full transition-colors",
@@ -626,8 +596,12 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
                                             </motion.div>
                                         ))
                                     ) : (
-                                        <motion.div 
-                                            variants={itemVariants}
+                                        <motion.div
+                                            key="empty-state"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            exit={{ opacity: 0 }}
+                                            transition={{ duration: 0.2 }}
                                             className="text-center py-20 px-8 rounded-[3rem] border-2 border-dashed border-primary/10 bg-primary/[0.02]"
                                         >
                                             <CalendarIcon className="w-12 h-12 text-primary/20 mx-auto mb-4" />
@@ -641,8 +615,8 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
                                             </Button>
                                         </motion.div>
                                     )}
-                                </motion.div>
                             </AnimatePresence>
+                            </div>
 
                             {/* Pagination for Special Events */}
                             {isSpecialCategory && totalSpecialPages > 1 && (
