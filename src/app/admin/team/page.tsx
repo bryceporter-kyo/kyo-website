@@ -27,6 +27,8 @@ import { uploadImage } from "@/lib/image-service";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Image from "next/image";
 import React, { useState } from "react";
 import {
   AlertDialog,
@@ -435,8 +437,14 @@ export default function TeamAdminPage() {
                             {allMembers.map((member) => (
                                 <TableRow key={member.id} className="group/row">
                                     <TableCell className="font-medium">
-                                        <div className="flex items-center gap-2">
-                                            {member.name}
+                                        <div className="flex items-center gap-3">
+                                            <Avatar className="h-9 w-9 bg-primary/10 border border-primary/20 shrink-0">
+                                                {member.image ? <AvatarImage src={member.image} alt={member.name} className="object-cover" /> : null}
+                                                <AvatarFallback className="text-primary text-xs font-semibold">
+                                                    {member.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <span>{member.name}</span>
                                         </div>
                                     </TableCell>
                                     <TableCell>
@@ -634,9 +642,40 @@ export default function TeamAdminPage() {
                             />
                             <FormItem>
                                 <FormLabel>Profile Photo (optional)</FormLabel>
+                                {editingMember && editingMember.image && (
+                                    <div className="flex items-center gap-4 mb-3 p-3 bg-muted/50 rounded-lg border">
+                                        <div className="relative w-16 h-16 rounded-md overflow-hidden bg-muted shrink-0 border">
+                                            <Image 
+                                                src={editingMember.image} 
+                                                alt={editingMember.name} 
+                                                fill 
+                                                className="object-cover" 
+                                            />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium truncate">Current photo attached</p>
+                                            <p className="text-xs text-muted-foreground">Upload a new file below to replace it</p>
+                                        </div>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                            onClick={() => {
+                                                setEditingMember({ ...editingMember, image: '' });
+                                            }}
+                                        >
+                                            <Trash2 className="h-4 w-4 mr-1" />
+                                            Remove
+                                        </Button>
+                                    </div>
+                                )}
                                 <FormControl>
-                                    <Input type="file" {...imageField} />
+                                    <Input type="file" accept="image/*" {...imageField} />
                                 </FormControl>
+                                <FormDescription className="text-xs">
+                                    JPG, PNG, or WebP. Images are automatically optimized and uploaded to cloud storage.
+                                </FormDescription>
                                 <FormMessage />
                             </FormItem>
 

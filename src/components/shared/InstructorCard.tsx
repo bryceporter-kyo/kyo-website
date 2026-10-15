@@ -23,7 +23,7 @@ type InstructorCardProps = {
   name: string;
   title: string;
   bio: string;
-  image: ImagePlaceholder | undefined;
+  image: ImagePlaceholder | string | undefined;
   links?: TeamMemberLinks;
   isOnLeave?: boolean;
   leaveNote?: string;
@@ -68,11 +68,11 @@ export default function InstructorCard({ name, title, bio, image, links, isOnLea
         {image && (
             <div className="aspect-[4/5] relative w-full overflow-hidden shrink-0">
                 <Image 
-                    src={image.imageUrl} 
+                    src={typeof image === 'string' ? image : image.imageUrl} 
                     alt={name}
                     fill
                     className="object-cover transition-transform duration-1000 group-hover:scale-110"
-                    data-ai-hint={image.imageHint}
+                    data-ai-hint={typeof image === 'string' ? name : image.imageHint}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 {isOnLeave && (

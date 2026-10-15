@@ -36,7 +36,7 @@ export default async function StaffPage() {
                                     name={instructor.name}
                                     title={instructor.title}
                                     bio={instructor.bio ?? ''}
-                                    image={getImage(instructor.image || '')}
+                                    image={instructor.image?.startsWith('http') || instructor.image?.startsWith('/') || instructor.image?.startsWith('data:') ? instructor.image : getImage(instructor.image || '')}
                                     links={instructor.links}
                                 />
                             ))}
@@ -51,7 +51,7 @@ export default async function StaffPage() {
                                     name={member.name}
                                     title={member.title}
                                     bio={member.bio ?? ''}
-                                    image={getImage(member.image || '')}
+                                    image={member.image?.startsWith('http') || member.image?.startsWith('/') || member.image?.startsWith('data:') ? member.image : getImage(member.image || '')}
                                     links={member.links}
                                 />
                             ))}
