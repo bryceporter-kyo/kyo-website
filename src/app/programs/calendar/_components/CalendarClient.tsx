@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef, useLayoutEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import PageHeader from "@/components/shared/PageHeader";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -59,21 +59,20 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedFeed, setSelectedFeed] = useState<'all' | 'orchestras' | 'upbeat' | 'lessons'>('all');
 
-    // Scroll-lock: prevents viewport from jumping when filter changes list height
-    const savedScrollY = useRef<number | null>(null);
+    // Keeps the filter bar at a consistent position on every filter click
     const filterBarRef = useRef<HTMLDivElement>(null);
 
-    useLayoutEffect(() => {
-        if (savedScrollY.current !== null) {
-            window.scrollTo({ top: savedScrollY.current, behavior: 'instant' as ScrollBehavior });
-            savedScrollY.current = null;
-        }
-    }, [categoryFilter, searchQuery]);
-
     const handleCategoryChange = (filter: typeof categoryFilter) => {
-        savedScrollY.current = window.scrollY;
         setCategoryFilter(filter);
         setShowAllMonthEvents(false);
+        // After React re-renders, scroll the filter bar to a consistent position
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                filterBarRef.current?.scrollIntoView({ behavior: 'instant', block: 'start' });
+                // nudge up a bit so the bar isn't flush with the top
+                window.scrollBy({ top: -24, behavior: 'instant' });
+            });
+        });
     };
 
     // Filter announcements: show all pinned + top 2 unpinned
