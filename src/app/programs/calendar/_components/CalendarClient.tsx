@@ -521,7 +521,6 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
                                         displayedEvents.map(event => (
                                             <motion.div
                                                 key={event.id}
-                                                layout
                                                 initial={{ opacity: 0, y: 8 }}
                                                 animate={{ opacity: 1, y: 0 }}
                                                 exit={{ opacity: 0 }}
