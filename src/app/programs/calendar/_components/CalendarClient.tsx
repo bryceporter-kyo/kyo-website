@@ -60,8 +60,18 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
     const [selectedFeed, setSelectedFeed] = useState<'all' | 'orchestras' | 'upbeat' | 'lessons'>('all');
 
     const handleCategoryChange = (filter: typeof categoryFilter) => {
+        const currentScrollY = typeof window !== 'undefined' ? window.scrollY : 0;
         setCategoryFilter(filter);
         setShowAllMonthEvents(false);
+        if (typeof window !== 'undefined') {
+            // Restore scroll position across the next frames to counter any layout shifts
+            requestAnimationFrame(() => {
+                window.scrollTo({ top: currentScrollY, behavior: 'instant' as ScrollBehavior });
+                requestAnimationFrame(() => {
+                    window.scrollTo({ top: currentScrollY, behavior: 'instant' as ScrollBehavior });
+                });
+            });
+        }
     };
 
     // Filter announcements: show all pinned + top 2 unpinned
@@ -513,7 +523,7 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 gap-6">
+                            <div className="grid grid-cols-1 gap-6" style={{ overflowAnchor: 'none' }}>
                             <AnimatePresence mode="popLayout" initial={false}>
                                     {isLoading ? (
                                         [1, 2, 3].map(i => <Skeleton key={i} className="w-full h-32 rounded-3xl" />)
