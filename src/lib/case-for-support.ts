@@ -203,10 +203,31 @@ export async function getGrant(id: string): Promise<GrantCase | null> {
   }
 }
 
+async function triggerRevalidation(paths: string[] = []) {
+  try {
+    const allPaths = [
+      '/support-us/case-for-support',
+      ...paths
+    ];
+    await fetch('/api/revalidate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        secret: 'kyo-revalidate-secret-token-2026',
+        paths: allPaths,
+      }),
+    });
+  } catch (err) {
+    console.warn('[Revalidation] Failed to revalidate paths:', paths, err);
+  }
+}
+
 export async function addGrant(grant: Omit<GrantCase, 'id'>): Promise<string> {
   try {
     const sanitizedGrant = sanitizeForFirestore(grant);
     const docRef = await addDoc(collection(db, COLLECTION_NAME), sanitizedGrant);
+    const createdGrant: GrantCase = { id: docRef.id, ...grant };
+    triggerRevalidation([getGrantUrlPath(createdGrant)]);
     return docRef.id;
   } catch (error: any) {
     console.error('Error adding grant:', error);
@@ -219,15 +240,21 @@ export async function updateGrant(id: string, grant: Partial<GrantCase>): Promis
     const sanitizedGrant = sanitizeForFirestore(grant);
     const docRef = doc(db, COLLECTION_NAME, id);
     await updateDoc(docRef, sanitizedGrant);
+    if (grant.funderName && grant.grantCycleYear) {
+      triggerRevalidation([getGrantUrlPath({ id, ...grant } as GrantCase)]);
+    } else {
+      triggerRevalidation();
+    }
   } catch (error: any) {
     console.error('Error updating grant:', error);
     throw new Error(`Failed to update grant: ${error.message || 'Unknown error'}`);
   }
 }
 
-export async function deleteGrant(id: string): Promise<void> {
+export async function deleteGrant(id: string, grantPath?: string): Promise<void> {
   const docRef = doc(db, COLLECTION_NAME, id);
   await deleteDoc(docRef);
+  triggerRevalidation(grantPath ? [grantPath] : []);
 }
 
 // Fetch a grant by its truncated 6-character UID

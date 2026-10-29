@@ -33,22 +33,22 @@ import { motion } from 'framer-motion';
 const orchestras = [
   {
     title: 'Junior KYO (JKYO)',
-    description: 'A welcoming introduction to orchestral playing. Focused on building fundamental ensemble skills, rhythmic precision, and the joy of making music together.',
-    experience: 'Beginner Level',
+    description: 'A welcoming introduction to orchestral playing. Focused on building fundamental ensemble skills, musical literacy, and the joy of making music together. For violin, viola, or cello, other instruments by request.',
+    experience: 'Typically 1-2 Years Experience',
     imageId: 'orchestra-junior',
     icon: Music
   },
   {
     title: 'Intermediate KYO (IKYO)',
-    description: 'Developing advanced techniques and expanding repertoire. Musicians explore complex harmonies and a diverse range of musical styles.',
-    experience: 'Typically 2+ years experience',
+    description: 'Taking Orchestral music to the next level. Play classical favourites and popular arrangements with a full orchestra of peers. IKYO is an auditioned orchestra, please reach out for more information.',
+    experience: 'Typically 3-5 Years Experience',
     imageId: 'orchestra-intermediate',
     icon: Sparkles
   },
   {
     title: 'Senior KYO (SKYO)',
-    description: 'Our flagship ensemble for advanced musicians. Tackling major symphonic works and professional-level repertoire with passion and precision.',
-    experience: 'Typically 4+ years experience',
+    description: 'The KYO\'s premier orchestra, playing orchestral standard repertoire. Intended for confident youth musicians committed to their instruments. SKYO is an auditioned orchestra, please reach out for more information.',
+    experience: 'Typically 5+ Years Experience',
     imageId: 'orchestra-senior',
     icon: Trophy
   },
@@ -81,6 +81,16 @@ const scholarships = [
         icon: GraduationCap,
         title: "Helen Ball Leadership Award",
         description: "Recognizes a KYO youth musician who demonstrates exceptional commitment, leadership, and community support."
+    },
+    {
+        icon: Award,
+        title: "Simmonds Scholarship",
+        description: "Supporting deserving KYO musicians in continuing their musical journey."
+    },
+    {
+        icon: HeartHandshake,
+        title: "Women's Art Association Scholarship",
+        description: "Awarded in partnership with the Women's Art Association to support young musicians in the KYO."
     }
 ]
 
@@ -94,11 +104,6 @@ const supplementaryEnsembles = [
         title: "Jazz Combo",
         description: "Dive into swing, blues, and Latin music. Focus on improvisation and accompaniment in a small group setting.",
         imageId: 'ensemble-jazz'
-    },
-    {
-        title: "Chamber Music",
-        description: "Receive small ensemble coaching from professional musicians for confident classical players.",
-        imageId: 'ensemble-chamber'
     }
 ];
 
@@ -166,7 +171,7 @@ export default function OrchestrasPage() {
       </div>
 
       <PageHeader
-        title="Find Your Ensemble"
+        title="Orchestras and Ensembles"
         subtitle="Discover the orchestra or ensemble that’s the perfect fit for your passion and skill level."
         image={headerImage || undefined}
       />
@@ -183,7 +188,7 @@ export default function OrchestrasPage() {
             >
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest">
                     <Music className="w-4 h-4" />
-                    Join the Legacy
+                    Find your place at the KYO
                 </div>
                 <h2 className="text-4xl md:text-5xl font-headline font-bold leading-tight">Join a Thriving Musical Community</h2>
                 <p className="text-muted-foreground text-lg leading-relaxed">
@@ -211,7 +216,7 @@ export default function OrchestrasPage() {
                 className="relative"
             >
                 {joinImage && (
-                    <div className="rounded-[2.5rem] overflow-hidden shadow-2xl group border-8 border-white">
+                    <div className="rounded-[2.5rem] overflow-hidden group border-8 border-white">
                         <Image
                             src={joinImage.imageUrl}
                             alt={joinImage.description}
@@ -299,10 +304,64 @@ export default function OrchestrasPage() {
         </div>
       </section>
       
-      <ProgramPathways />
+      <ProgramPathways />      {/* Supplementary Ensembles — moved above Philosophy per feedback */}
+       <section className="py-24 px-4 bg-secondary/30">
+        <div className="container mx-auto">
+            <div className="text-center mb-16">
+                <div className="flex flex-col items-center gap-3">
+                    <div className="p-3 bg-secondary/20 rounded-2xl text-secondary-foreground mb-2">
+                        <Sparkles className="w-8 h-8" />
+                    </div>
+                    <h2 className="text-4xl font-headline font-bold">Creative &amp; Supplementary Programs</h2>
+                    <p className="mx-auto max-w-2xl text-muted-foreground text-lg mt-4 font-light leading-relaxed">
+                        Broaden your musical horizons with specialized training in diverse genres and modern techniques.
+                    </p>
+                </div>
+            </div>
+            
+            <motion.div 
+                variants={containerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                className="grid grid-cols-1 lg:grid-cols-2 gap-10"
+            >
+                {supplementaryEnsembles.map((ensemble) => {
+                    const image = getImage(ensemble.imageId);
+                    return (
+                        <motion.div key={ensemble.title} variants={itemVariants}>
+                            <Card className="group text-center flex flex-col h-full overflow-hidden transition-all duration-500 hover:shadow-xl border-primary/5 bg-white/80 backdrop-blur-sm hover:-translate-y-2">
+                                {image && (
+                                    <div className="relative aspect-video overflow-hidden">
+                                        <Image
+                                            src={image.imageUrl}
+                                            alt={ensemble.title}
+                                            fill
+                                            className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                        />
+                                    </div>
+                                )}
+                                <CardHeader className="items-center flex-grow">
+                                    <CardTitle className="font-headline text-2xl pt-2 group-hover:text-primary transition-colors">{ensemble.title}</CardTitle>
+                                    <CardDescription className="pt-2 italic line-clamp-3">{ensemble.description}</CardDescription>
+                                </CardHeader>
+                                {registerButton && (
+                                    <CardFooter className="justify-center pt-4 border-t border-primary/5">
+                                         <Button asChild variant="outline" className="rounded-full px-6 hover:bg-primary hover:text-white transition-all">
+                                            <Link href={registerButton.href}>Enroll Now</Link>
+                                        </Button>
+                                    </CardFooter>
+                                )}
+                            </Card>
+                        </motion.div>
+                    )
+                })}
+            </motion.div>
+        </div>
+      </section>
 
       {/* Philosophy Section */}
-      <section className="py-24 px-4">
+       <section className="py-24 px-4">
           <div className="container mx-auto">
             <motion.div 
                 initial={{ opacity: 0 }}
@@ -343,63 +402,7 @@ export default function OrchestrasPage() {
                 </div>
             </motion.div>
           </div>
-       </section>
-
-      {/* Supplementary Ensembles */}
-       <section className="py-24 px-4 bg-secondary/30">
-        <div className="container mx-auto">
-            <div className="text-center mb-16">
-                <div className="flex flex-col items-center gap-3">
-                    <div className="p-3 bg-secondary/20 rounded-2xl text-secondary-foreground mb-2">
-                        <Sparkles className="w-8 h-8" />
-                    </div>
-                    <h2 className="text-4xl font-headline font-bold">Creative & Supplementary Programs</h2>
-                    <p className="mx-auto max-w-2xl text-muted-foreground text-lg mt-4 font-light leading-relaxed">
-                        Broaden your musical horizons with specialized training in diverse genres and modern techniques.
-                    </p>
-                </div>
-            </div>
-            
-            <motion.div 
-                variants={containerVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                className="grid grid-cols-1 lg:grid-cols-3 gap-10"
-            >
-                {supplementaryEnsembles.map((ensemble) => {
-                    const image = getImage(ensemble.imageId);
-                    return (
-                        <motion.div key={ensemble.title} variants={itemVariants}>
-                            <Card className="group text-center flex flex-col h-full overflow-hidden transition-all duration-500 hover:shadow-xl border-primary/5 bg-white/80 backdrop-blur-sm hover:-translate-y-2">
-                                {image && (
-                                    <div className="relative aspect-video overflow-hidden">
-                                        <Image
-                                            src={image.imageUrl}
-                                            alt={ensemble.title}
-                                            fill
-                                            className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                        />
-                                    </div>
-                                )}
-                                <CardHeader className="items-center flex-grow">
-                                    <CardTitle className="font-headline text-2xl pt-2 group-hover:text-primary transition-colors">{ensemble.title}</CardTitle>
-                                    <CardDescription className="pt-2 italic line-clamp-3">{ensemble.description}</CardDescription>
-                                </CardHeader>
-                                {registerButton && (
-                                    <CardFooter className="justify-center pt-4 border-t border-primary/5">
-                                         <Button asChild variant="outline" className="rounded-full px-6 hover:bg-primary hover:text-white transition-all">
-                                            <Link href={registerButton.href}>Enroll Now</Link>
-                                        </Button>
-                                    </CardFooter>
-                                )}
-                            </Card>
-                        </motion.div>
-                    )
-                })}
-            </motion.div>
-        </div>
-      </section>
+       </section>n>
 
       {/* Aid Section */}
        <section className="py-24 px-4">
@@ -561,14 +564,14 @@ export default function OrchestrasPage() {
                     </div>
                     <h3 className="text-4xl md:text-6xl font-headline font-bold mb-8">Ready to Play With Us?</h3>
                     <p className="text-xl text-neutral-100 max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
-                        Whether you're just starting out or ready for the big stage, there's a place for you in the KYO family.
+                        Whether you&apos;re just starting out or ready for the big stage, there&apos;s a place for you at the KYO.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-6 justify-center">
                         <Button asChild size="lg" className="bg-white text-[#0a3d2c] hover:bg-forest-50 px-12 py-8 rounded-full font-bold text-xl shadow-2xl hover:scale-105 transition-all duration-300">
-                            <Link href="/contact">Apply to Join</Link>
+                            <Link href="/programs/registration">Book an Audition</Link>
                         </Button>
                         <Button asChild variant="outline" size="lg" className="bg-transparent border-white/30 text-white hover:bg-white/10 px-12 py-8 rounded-full font-bold text-xl transition-all">
-                            <Link href="/about">Learn More</Link>
+                            <Link href="/contact">Learn More</Link>
                         </Button>
                     </div>
                 </div>

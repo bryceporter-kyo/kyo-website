@@ -3,7 +3,8 @@ import { fetchPageMetadataServer } from "@/lib/metadata-server";
 import { CalendarEventsJsonLd } from "@/components/shared/JsonLd";
 import CalendarClient from "./_components/CalendarClient";
 
-export const dynamic = 'force-dynamic';
+// Revalidate hourly in background; updated on demand
+export const revalidate = 3600;
 
 export default async function CalendarPage() {
   const [{ events, settings }, metadata] = await Promise.all([

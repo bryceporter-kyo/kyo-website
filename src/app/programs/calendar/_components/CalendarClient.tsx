@@ -55,6 +55,7 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
     const [showAllMonthEvents, setShowAllMonthEvents] = useState(false);
     
     // Filters and search
+    const [viewMode, setViewMode] = useState<'calendar' | 'concerts'>('calendar');
     const [categoryFilter, setCategoryFilter] = useState<'all' | 'orchestras' | 'upbeat' | 'lessons' | 'special'>('all');
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedFeed, setSelectedFeed] = useState<'all' | 'orchestras' | 'upbeat' | 'lessons'>('all');
@@ -120,6 +121,38 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
         return new Date(`${dateString}T00:00:00`);
     };
 
+    // Helper to parse time strings like "7:30 PM", "6:00 pm", or "19:30" into minutes from midnight
+    const parseTimeMinutes = (timeStr?: string): number => {
+        if (!timeStr) return 0;
+        const trimmed = timeStr.trim();
+        const ampmMatch = trimmed.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+        if (ampmMatch) {
+            let hours = parseInt(ampmMatch[1], 10);
+            const minutes = parseInt(ampmMatch[2], 10);
+            const meridiem = ampmMatch[3]?.toUpperCase();
+            if (meridiem === 'PM' && hours < 12) hours += 12;
+            if (meridiem === 'AM' && hours === 12) hours = 0;
+            return hours * 60 + minutes;
+        }
+        const hourOnlyMatch = trimmed.match(/^(\d{1,2})\s*(AM|PM)$/i);
+        if (hourOnlyMatch) {
+            let hours = parseInt(hourOnlyMatch[1], 10);
+            const meridiem = hourOnlyMatch[2].toUpperCase();
+            if (meridiem === 'PM' && hours < 12) hours += 12;
+            if (meridiem === 'AM' && hours === 12) hours = 0;
+            return hours * 60;
+        }
+        return 0;
+    };
+
+    const sortEventsChronologically = (a: Event, b: Event): number => {
+        const dateDiff = new Date(a.date).getTime() - new Date(b.date).getTime();
+        if (dateDiff !== 0) return dateDiff;
+        const timeDiff = parseTimeMinutes(a.time) - parseTimeMinutes(b.time);
+        if (timeDiff !== 0) return timeDiff;
+        return a.name.localeCompare(b.name);
+    };
+
     const [currentPage, setCurrentPage] = useState(1);
     const SPECIAL_EVENTS_PER_PAGE = 6;
 
@@ -147,7 +180,7 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
                     (event.notes && event.notes.toLowerCase().includes(query))
                 );
             })
-            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+            .sort(sortEventsChronologically);
     }, [allEvents, categoryFilter, searchQuery]);
 
     // For standard calendar tabs: filter within currently selected month
@@ -215,12 +248,7 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
         if (!selectedDay) return [];
         return allEvents
             .filter(event => isSameDay(parseDate(event.date), selectedDay))
-            .sort((a, b) => {
-                const timeA = a.time || "00:00";
-                const timeB = b.time || "00:00";
-                if (timeA !== timeB) return timeA.localeCompare(timeB);
-                return a.name.localeCompare(b.name);
-            });
+            .sort(sortEventsChronologically);
     }, [allEvents, selectedDay]);
 
     // Calendar dot markers
@@ -255,6 +283,26 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
 
 
 
+    // Concerts and major events for the "Concert Season" view tab
+    const concertEvents = useMemo(() => {
+        return allEvents
+            .filter(event => {
+                const isConcertType = event.type === 'special' || event.type === 'concert';
+                const lowerName = event.name.toLowerCase();
+                const lowerNotes = (event.notes || '').toLowerCase();
+                const hasConcertKeyword = 
+                    lowerName.includes('concert') || 
+                    lowerName.includes('showcase') || 
+                    lowerName.includes('recital') ||
+                    lowerName.includes('gala') ||
+                    lowerName.includes('performance') ||
+                    lowerNotes.includes('concert') ||
+                    lowerNotes.includes('showcase');
+                return isConcertType || hasConcertKeyword;
+            })
+            .sort(sortEventsChronologically);
+    }, [allEvents]);
+
     return (
         <div className="relative overflow-hidden bg-background min-h-screen pb-24">
             {/* Ambient Background */}
@@ -264,14 +312,141 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
             </div>
 
             <PageHeader
-                title="Events Calendar"
-                subtitle="Stay connected with our rehearsals, concerts, and community events."
+                title={viewMode === 'concerts' ? "Concert Season" : "Program Calendar"}
+                subtitle={viewMode === 'concerts' 
+                    ? "Join us for our signature concerts, seasonal showcases, and public performances." 
+                    : "Stay connected with our rehearsals, concerts, and community events."}
                 image={headerImage || undefined}
             />
 
-            <section className="py-24 px-4">
+            <section className="py-16 md:py-24 px-4">
                 <div className="container mx-auto">
-                    
+                    {/* View Switcher Tabs: Program Calendar vs Concert Season */}
+                    <div className="flex justify-center mb-14">
+                        <div className="inline-flex p-1.5 rounded-full bg-slate-100 border border-slate-200 shadow-inner">
+                            <button
+                                onClick={() => setViewMode('calendar')}
+                                className={cn(
+                                    "flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300",
+                                    viewMode === 'calendar'
+                                        ? "bg-white text-primary shadow-md"
+                                        : "text-muted-foreground hover:text-slate-900"
+                                )}
+                            >
+                                <CalendarIcon className="w-4 h-4" />
+                                <span>Program Calendar</span>
+                            </button>
+                            <button
+                                onClick={() => setViewMode('concerts')}
+                                className={cn(
+                                    "flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300",
+                                    viewMode === 'concerts'
+                                        ? "bg-rose-500 text-white shadow-md shadow-rose-500/20"
+                                        : "text-muted-foreground hover:text-slate-900"
+                                )}
+                            >
+                                <Sparkles className="w-4 h-4" />
+                                <span>Concert Season</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* CONCERT SEASON VIEW */}
+                    {viewMode === 'concerts' ? (
+                        <div className="max-w-5xl mx-auto space-y-12">
+                            <div className="text-center space-y-3">
+                                <Badge className="bg-rose-500/10 text-rose-600 border-none rounded-full px-4 py-1 text-xs font-bold uppercase tracking-wider">
+                                    Concerts & Signature Performances
+                                </Badge>
+                                <h2 className="text-3xl md:text-5xl font-headline font-bold text-slate-900">
+                                    Our Season at a Glance
+                                </h2>
+                                <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto font-light">
+                                    Experience the artistry and passion of our young musicians. All major concerts, studio recitals, and public showcases across the region.
+                                </p>
+                            </div>
+
+                            {isLoading ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    {[1, 2, 3, 4].map(i => (
+                                        <Skeleton key={i} className="w-full h-64 rounded-3xl" />
+                                    ))}
+                                </div>
+                            ) : concertEvents.length > 0 ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    {concertEvents.map((concert) => (
+                                        <Card
+                                            key={concert.id}
+                                            onClick={() => handleDayClick(parseDate(concert.date))}
+                                            className="group relative overflow-hidden rounded-[2.5rem] border-primary/10 bg-white/90 backdrop-blur-md shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1.5 cursor-pointer flex flex-col justify-between"
+                                        >
+                                            <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-rose-500 via-primary to-rose-400" />
+                                            <CardHeader className="p-8 pb-4">
+                                                <div className="flex items-center justify-between mb-4">
+                                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-rose-50 text-rose-600 border border-rose-200">
+                                                        <Sparkles className="w-3.5 h-3.5" />
+                                                        Concert Event
+                                                    </span>
+                                                    <div className="text-right">
+                                                        <div className="text-sm font-bold text-slate-900">
+                                                            {format(parseDate(concert.date), 'MMMM d, yyyy')}
+                                                        </div>
+                                                        <div className="text-xs text-muted-foreground uppercase font-semibold">
+                                                            {format(parseDate(concert.date), 'EEEE')}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <CardTitle className="font-headline text-2xl md:text-3xl font-bold group-hover:text-primary transition-colors leading-tight">
+                                                    {concert.name}
+                                                </CardTitle>
+                                            </CardHeader>
+                                            <CardContent className="p-8 pt-0 space-y-6">
+                                                <div className="space-y-2 text-sm text-muted-foreground">
+                                                    {concert.time && (
+                                                        <div className="flex items-center gap-2.5">
+                                                            <Clock className="w-4 h-4 text-primary shrink-0" />
+                                                            <span className="font-medium text-slate-700">{concert.time}{concert.endTime && ` — ${concert.endTime}`}</span>
+                                                        </div>
+                                                    )}
+                                                    {concert.location && (
+                                                        <div className="flex items-center gap-2.5">
+                                                            <MapPin className="w-4 h-4 text-primary shrink-0" />
+                                                            <span className="font-medium text-slate-700">{concert.location}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {concert.notes && (
+                                                    <p className="text-sm text-slate-600 font-light line-clamp-3 leading-relaxed border-t border-slate-100 pt-4">
+                                                        {concert.notes}
+                                                    </p>
+                                                )}
+
+                                                <div className="pt-2 flex items-center justify-between">
+                                                    <Button variant="ghost" className="p-0 text-primary font-bold text-sm group-hover:translate-x-1 transition-transform">
+                                                        View Event Details <ArrowRight className="ml-2 w-4 h-4" />
+                                                    </Button>
+                                                    {concert.link && (
+                                                        <span className="text-xs text-muted-foreground flex items-center gap-1 font-medium">
+                                                            <ExternalLink className="w-3.5 h-3.5" /> More info
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-20 px-8 rounded-[3rem] border-2 border-dashed border-primary/10 bg-primary/[0.02]">
+                                    <Sparkles className="w-12 h-12 text-rose-400 mx-auto mb-4" />
+                                    <p className="text-muted-foreground text-lg font-light">
+                                        No concert events are currently scheduled. Check back soon for announcements!
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <>
                     {/* Announcements Section */}
                     <AnimatePresence>
                         {visibleAnnouncements.length > 0 && (
@@ -711,6 +886,8 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
                             )}
                         </div>
                     </div>
+                    </>
+                    )}
                 </div>
             </section>
 

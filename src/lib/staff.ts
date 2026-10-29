@@ -38,6 +38,10 @@ export type BoardMember = {
     order?: number;
     isOnLeave?: boolean;
     leaveNote?: string;
+    tenure?: string;
+    professionPosition?: string;
+    professionCompany?: string;
+    bioUrl?: string;
 }
 
 const legacyStaff: StaffMember[] = data.staff;

@@ -88,3 +88,64 @@
         justify-content: flex-start !important;
     }
 }
+
+/* ==========================================================================
+   Executive Brief & Grant Document Print Engine (@media print)
+   ========================================================================== */
+@media print {
+  /* Hide interactive web UI chrome, navigation, cookie banners, floating buttons */
+  header,
+  footer,
+  nav,
+  aside,
+  button,
+  .print\:hidden,
+  [role="dialog"],
+  [data-radix-portal] {
+    display: none !important;
+  }
+
+  /* Reset layout constraints for standard letterhead printing */
+  html, body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Avoid unwanted page breaks in key proposal cards, tables, and signatures */
+  section {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+    page-break-inside: auto;
+  }
+
+  article,
+  blockquote,
+  table,
+  tr,
+  .card,
+  [class*="rounded-"] {
+    page-break-inside: avoid !important;
+    box-shadow: none !important;
+    border-color: #e2e8f0 !important;
+  }
+
+  /* Ensure text colors are high contrast */
+  h1, h2, h3, h4, h5, h6 {
+    color: #0f172a !important;
+    page-break-after: avoid !important;
+  }
+
+  p, li, td, th {
+    color: #334155 !important;
+  }
+
+  /* Clean background blurs and shadows */
+  * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+  }
+}

@@ -1,5 +1,10 @@
 import { notFound } from 'next/navigation';
-import { fetchGrantByTruncatedUidServer } from '@/lib/case-for-support-server';
+import { 
+  fetchGrantByTruncatedUidServer, 
+  fetchPublishedGrantsServer,
+  fetchBoardMembersServer,
+  fetchGovernanceDocumentsServer 
+} from '@/lib/case-for-support-server';
 import { GrantDocumentJsonLd } from '@/components/shared/JsonLd';
 import GrantDetailClient from './_components/GrantDetailClient';
 
@@ -11,11 +16,35 @@ interface Props {
   }>;
 }
 
-export const dynamic = 'force-dynamic';
+// Revalidate daily as a fallback; updated instantly on demand via /api/revalidate
+export const revalidate = 86400;
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  try {
+    const grants = await fetchPublishedGrantsServer();
+    return grants.map((grant) => {
+      const uid = grant.id ? grant.id.substring(0, 6) : 'grant';
+      const funder = (grant.funderName || 'funder')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+      const year = grant.grantCycleYear || '2026';
+      return { uid, funder, year };
+    });
+  } catch (err) {
+    console.error('[DynamicGrantPage] Error generating static params:', err);
+    return [];
+  }
+}
 
 export default async function DynamicCaseForSupportPage(props: Props) {
   const { uid, funder, year } = await props.params;
-  const grant = await fetchGrantByTruncatedUidServer(uid);
+  const [grant, board, documents] = await Promise.all([
+    fetchGrantByTruncatedUidServer(uid),
+    fetchBoardMembersServer(),
+    fetchGovernanceDocumentsServer(),
+  ]);
 
   if (!grant) {
     notFound();
@@ -25,7 +54,7 @@ export default async function DynamicCaseForSupportPage(props: Props) {
 
   return (
     <>
-      {/* Schema.org Article Structured Data */}
+      {/* Schema.org DigitalDocument Structured Data */}
       <GrantDocumentJsonLd
         title={`Case for Support: ${grant.funderName} (${grant.grantCycleYear})`}
         funderName={grant.funderName}
@@ -33,6 +62,8 @@ export default async function DynamicCaseForSupportPage(props: Props) {
         summary={`Funding proposal by Kawartha Youth Orchestra requesting support for ${grant.programOfSupport || 'youth music education'}.`}
         url={canonicalUrl}
         datePublished={grant.submissionDate}
+        amountRequested={grant.amountRequested}
+        programArea={grant.programOfSupport || grant.primaryProgram}
       />
 
       {/* Crawlable Semantic Content for Search Engines & AI Crawlers */}
@@ -70,7 +101,7 @@ export default async function DynamicCaseForSupportPage(props: Props) {
       </section>
 
       {/* Interactive Animated Client Island */}
-      <GrantDetailClient grant={grant} />
+      <GrantDetailClient grant={grant} board={board} documents={documents} />
     </>
   );
 }

@@ -1,12 +1,15 @@
 import { db, sanitizeForFirestore } from './firebase';
 import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 
+export type LegalDocumentCategory = 'general' | 'financial-statement' | 'agm-report' | 'financial-stewardship';
+
 export interface LegalDocument {
   id: string;
   name: string;
   description: string;
   url: string;
   uploadedAt: string;
+  category?: LegalDocumentCategory;
 }
 
 const DOCUMENTS_COLLECTION = 'legal-documents';

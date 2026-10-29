@@ -10,7 +10,7 @@ const timelineData = [
   {
     year: "2007-2012",
     title: "The Founding Years",
-    content: "KYO was established by Karen Lauder, Ben Bell, and Steven Brown, with Michael Newnham of the Peterborough Symphony Orchestra as the first conductor. The group grew to 30 players but later declined as founding members aged out and local school music programs were reduced.",
+    content: "KYO was established by Karen Lauder, Ben Bell, and Steven Brown, with Michael Newnham of the Peterborough Symphony Orchestra as the first conductor. This first iteration of the orchestra grew to a tight knit group of 30 players but further growth was slow as local school music programs were reduced.",
   },
   {
     year: "2013-2016",
@@ -25,12 +25,12 @@ const timelineData = [
   {
     year: "2020-2021",
     title: "Pandemic Adaptation",
-    content: "Inspired by the El Sistema model, the UPBEAT! after-school program was launched in 2020. In response to the COVID-19 pandemic, KYO pivoted to virtual e-orchestras and online concerts to keep the music playing. Marilyn Chalk became the Acting Conductor for The Orchestras during this period.",
+    content: "Inspired by the El Sistema model, the Upbeat! after-school program was launched in 2020. In response to the COVID-19 pandemic, KYO pivoted to virtual e-orchestras and online concerts to keep the music playing. Marilyn Chalk became the Acting Conductor for The Orchestras during this period.",
   },
   {
     year: "2022-Present",
     title: "Growth & New Leadership",
-    content: "The organization has continued its growth trajectory, welcoming new artistic leaders like Dr. Alexander Cannon, Maziar Heidari, and currently Murray Lefebvre. With expanded faculty and the addition of a Jazz Ensemble, KYO has solidified its role as a comprehensive center for youth music education in the Kawarthas.",
+    content: "The organization has continued its growth trajectory, welcoming new artistic leaders like Dr. Alexander Cannon, Maziar Heidari, and current lead conductor Murray Lefebvre. With expanded faculty and the addition of a Jazz Ensemble and Folk Ensemble, KYO has solidified its role as a comprehensive centre for youth music education in the Kawarthas.",
   },
 ];
 

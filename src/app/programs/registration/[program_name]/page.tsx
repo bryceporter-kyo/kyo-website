@@ -8,6 +8,13 @@ interface Props {
   }>;
 }
 
+export function generateStaticParams() {
+  return [
+    { program_name: 'orchestras' },
+    { program_name: 'upbeat' },
+  ];
+}
+
 export default async function DynamicRegistrationPage(props: Props) {
   const unwrappedParams = await props.params;
   const program = unwrappedParams.program_name as FormProgram;

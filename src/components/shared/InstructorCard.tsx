@@ -106,8 +106,8 @@ export default function InstructorCard({ name, title, bio, image, links, isOnLea
       
       <CardContent className="flex-grow flex flex-col justify-between pt-2 relative z-10">
         <div className="space-y-6">
-            <div className="relative text-center px-2">
-                <div className="prose prose-sm text-muted-foreground leading-relaxed max-w-none italic font-serif">
+            <div className="relative text-left px-2">
+                <div className="prose prose-sm text-left text-muted-foreground leading-relaxed max-w-none italic font-serif">
                     <ReactMarkdown>
                         {getTruncatedBio(bio)}
                     </ReactMarkdown>
@@ -126,14 +126,14 @@ export default function InstructorCard({ name, title, bio, image, links, isOnLea
                         </DialogTrigger>
                         <DialogContent className="max-w-2xl bg-white/95 backdrop-blur-md border-primary/10">
                             <DialogHeader>
-                                <DialogTitle className="font-headline text-4xl text-forest-900">{name}</DialogTitle>
-                                <DialogDescription className="text-primary font-bold uppercase tracking-[0.2em] text-xs mt-2">
+                                <DialogTitle className="font-headline text-4xl text-forest-900 text-left">{name}</DialogTitle>
+                                <DialogDescription className="text-primary font-bold uppercase tracking-[0.2em] text-xs mt-2 text-left">
                                     {title}
                                     {isOnLeave && ` • (${leaveNote || "On Leave / Sabbatical"})`}
                                 </DialogDescription>
                             </DialogHeader>
-                            <div className="mt-6 max-h-[60vh] overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-primary/20">
-                                <div className="prose prose-neutral dark:prose-invert max-w-none prose-p:leading-relaxed prose-p:text-forest-800">
+                            <div className="mt-6 max-h-[60vh] overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-primary/20 text-left">
+                                <div className="prose prose-neutral dark:prose-invert max-w-none prose-p:leading-relaxed prose-p:text-forest-800 text-left">
                                     <ReactMarkdown>
                                         {bio}
                                     </ReactMarkdown>

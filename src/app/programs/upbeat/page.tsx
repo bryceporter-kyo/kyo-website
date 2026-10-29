@@ -10,32 +10,18 @@ import {
     Target, 
     HeartHandshake, 
     Users, 
-    Award, 
-    Smile, 
-    BarChart, 
     Quote, 
-    HandCoins, 
-    BookOpen, 
-    LifeBuoy, 
     Star, 
-    GitCommitHorizontal, 
     Group, 
-    GraduationCap, 
     Check, 
-    ShieldCheck, 
     Heart, 
-    ArrowRight,
     Sparkles,
     Zap
 } from 'lucide-react';
 import Image from 'next/image';
 import { getLinkById } from '@/lib/links';
 import { fetchButtonsFromFirebase, ButtonConfig } from '@/lib/buttons';
-import AnimatedCounter from '@/components/shared/AnimatedCounter';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Badge } from '@/components/ui/badge';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 const programPillars = [
@@ -48,63 +34,43 @@ const programPillars = [
     {
         icon: HeartHandshake,
         title: "Social Support",
-        description: "Providing a safe, structured after-school environment with dedicated mentors to promote a strong sense of belonging.",
+        description: "Providing a safe, structured after-school environment with staff and volunteers dedicated to the care and wellbeing of our participants.",
         accent: "bg-rose-500/10 text-rose-600"
     },
      {
         icon: Group,
-        title: "Community Enrichment",
-        description: "Deepening community engagement by showcasing youth performances that promote cross-cultural understanding.",
+        title: "Community and Belonging",
+        description: "Ensemble music making means children develop accountability and learn how to support each other. This process helps children develop a strong sense of community.",
         accent: "bg-amber-500/10 text-amber-600"
     },
     {
         icon: Star,
         title: "Equitable Access",
-        description: "Eliminating all cost barriers, including instruments, transportation, and snacks, to ensure participation for all.",
+        description: "Eliminating all cost barriers, including instruments, transportation, and providing food support with after-school snacks, to ensure participation for all.",
         accent: "bg-emerald-500/10 text-emerald-600"
     }
 ];
 
-const impactStats = [
-    { number: 87, suffix: '%', label: 'Retention Rate', icon: Award, description: 'Exceeding the 60% industry benchmark.' },
-    { number: 92, suffix: '%', label: 'Satisfaction', icon: Smile, description: 'Positive experiences reported by families.' },
-    { number: 100, suffix: '+', label: 'On Waitlist', icon: BarChart, description: 'Demonstrating high program demand.' },
-];
-
 const coreActivities = [
-    { icon: GitCommitHorizontal, title: "String Instruction", description: "Students learn violin, viola, or cello in small group settings.", imageId: "program-upbeat" },
-    { icon: BookOpen, title: "Music Literacy", description: "Activities in rhythm, theory, and listening foster musical fluency.", imageId: "upbeat-kids-smiling" },
-    { icon: LifeBuoy, title: "Wellness Support", description: "A full-time Wellness Coordinator offers guidance and mentoring.", imageId: "support-volunteer" },
-    { icon: HandCoins, title: "Holistic Care", description: "Healthy snacks and free transportation from local schools.", imageId: "support-cta" }
-];
-
-const instructionalHighlights = [
-    { icon: GraduationCap, title: "Pro Educators", description: "Experienced professional musicians with advanced music degrees." },
-    { icon: Users, title: "Leadership Pipeline", description: "Advanced students are trained as assistant instructors." },
-    { icon: Star, title: "Best Practices", description: "Regular reviews and collaboration ensure program quality." },
-    { icon: ShieldCheck, title: "Inclusive Pedagogy", description: "Trauma-informed and neurodivergent-inclusive practices." },
-];
-
-const challengesSolutions = [
-    {
-        id: "innovation-1",
-        challenge: "Nutrition Program",
-        solution: "Introduced after families flagged food insecurity as a barrier to focus and participation. A snack is now provided at every session as a structural program component."
+    { 
+        title: "String Instruction", 
+        description: "Violin, viola or cello aren't easy instruments but in an environment that's fun, supportive, and led by world class instructors any child can learn and the challenge makes the process incredibly rewarding.", 
+        imageId: "program-upbeat" 
     },
-    {
-        id: "innovation-2",
-        challenge: "Flexible Scheduling",
-        solution: "Originally offered three days per week, the program shifted to two mandatory days based on direct family feedback about accessibility and schedule conflicts."
+    { 
+        title: "Music Literacy", 
+        description: "Activities in rhythm, theory, and listening foster musical fluency. These skills are transferable to any instrument and set kids up for a lifetime of music.", 
+        imageId: "upbeat-kids-smiling" 
     },
-    {
-        id: "innovation-3",
-        challenge: "Inclusive Branding",
-        solution: "Formerly “UpBeat! Downtown,” the name was changed after community feedback identified unintended geographic exclusion."
+    { 
+        title: "Social Development Through Music", 
+        description: "Upbeat! uses music education as the medium to support children's growth and well-being. The ensemble method provides a sense of community and self worth. All while learning to focus and express themselves through music which leads to resilience and confidence.", 
+        imageId: "support-volunteer" 
     },
-    {
-        id: "innovation-4",
-        challenge: "Instrument Expansion",
-        solution: "Student and community input has shaped plans to add guitar, wind, and brass instruments in future program iterations."
+    { 
+        title: "Wellness Support", 
+        description: "Our Wellness Coordinator and dedicated teachers offer guidance and mentoring. Beyond music, Upbeat! offers a safe social environment filled with games and soon-to-be life long friends.\n\nEvery Upbeat! begins with a healthy snack time, ensuring kids are nourished and ready to learn.", 
+        imageId: "support-cta" 
     }
 ];
 
@@ -117,56 +83,10 @@ const testimonials = [
   {
     quote: "Upbeat! isn’t just about music. It’s about creating a place where kids feel seen, supported, and inspired. For some, this is the first place where they’ve really felt they belonged.",
     author: "Colin McMahon",
-    role: "Program Manager"
+    role: "Upbeat! Artistic Director"
   }
 ];
 
-function InnovationCarousel({ items }: { items: typeof challengesSolutions }) {
-  const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setIndex((prev) => (prev + 1) % items.length);
-    }, 8000);
-    return () => clearInterval(timer);
-  }, [items.length]);
-
-  return (
-    <div className="bg-white shadow-2xl rounded-[2.5rem] border border-primary/5 p-10 relative overflow-hidden h-full flex flex-col justify-center min-h-[350px]">
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={index}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.6, ease: "easeInOut" }}
-          className="space-y-6"
-        >
-          <div className="flex items-center gap-3">
-             <div className="w-1.5 h-8 bg-primary rounded-full" />
-             <h4 className="font-bold text-2xl font-headline tracking-tight">{items[index].challenge}</h4>
-          </div>
-          <p className="text-muted-foreground text-lg leading-relaxed font-light italic font-serif">
-            "{items[index].solution}"
-          </p>
-        </motion.div>
-      </AnimatePresence>
-      
-      {/* Progress Indicators */}
-      <div className="absolute bottom-8 left-10 flex gap-2">
-        {items.map((_, i) => (
-          <div 
-            key={i} 
-            className={cn(
-                "h-1.5 transition-all duration-700 rounded-full",
-                i === index ? "w-8 bg-primary" : "w-2 bg-primary/10"
-            )} 
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
 
 export default function UpbeatPage() {
   const { getImage } = useImages();
@@ -230,7 +150,7 @@ export default function UpbeatPage() {
 
       <PageHeader
         title="Upbeat!"
-        subtitle="Removing Barriers, Building Futures: Music, Mentorship, and Equity for Youth"
+        subtitle="Removing Barriers, Building Futures: Offering transformative music education to children from grades 3-8."
         image={headerImage || undefined}
       />
 
@@ -330,39 +250,6 @@ export default function UpbeatPage() {
         </div>
       </section>
       
-      {/* Stats Section */}
-       <section className="py-24 px-4">
-        <div className="container mx-auto">
-            <div className="text-center mb-20">
-                <h2 className="text-4xl font-headline font-bold">Proven Impact, Real Results</h2>
-                <div className="h-1 w-20 bg-primary/20 rounded-full mx-auto mt-6" />
-            </div>
-            <motion.div 
-                variants={containerVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                className="grid grid-cols-1 md:grid-cols-3 gap-10"
-            >
-                 {impactStats.map(stat => (
-                    <motion.div key={stat.label} variants={itemVariants}>
-                        <Card className="text-center transition-all duration-500 hover:shadow-xl border-primary/5 bg-white/50 backdrop-blur-sm p-4">
-                            <CardHeader className="items-center">
-                                <div className="p-4 bg-secondary/20 rounded-full text-secondary-foreground mb-4">
-                                    <stat.icon className="w-8 h-8" />
-                                </div>
-                                <AnimatedCounter target={stat.number} suffix={stat.suffix} className="text-6xl font-bold text-primary" />
-                            </CardHeader>
-                            <CardContent>
-                                <p className="font-bold text-xl mb-2">{stat.label}</p>
-                                <p className="text-sm text-muted-foreground leading-relaxed">{stat.description}</p>
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-                ))}
-            </motion.div>
-        </div>
-      </section>
 
       {/* Equity Section */}
       <section className="py-24 px-4 bg-secondary/30">
@@ -478,12 +365,7 @@ export default function UpbeatPage() {
                                                 className="object-cover transition-transform duration-1000 group-hover:scale-110"
                                             />
                                         ) : null}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                                        <div className="absolute bottom-8 left-8">
-                                            <div className="p-3 bg-white/20 backdrop-blur-md rounded-2xl text-white">
-                                                <Icon className="w-6 h-6" />
-                                            </div>
-                                        </div>
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
                                     </div>
                                 </motion.div>
 
@@ -497,86 +379,15 @@ export default function UpbeatPage() {
                                 >
                                     <h3 className="text-3xl font-headline font-bold">{activity.title}</h3>
                                     <div className="h-1.5 w-12 bg-primary/20 rounded-full" />
-                                    <p className="text-muted-foreground text-lg leading-relaxed font-light italic font-serif">
-                                        "{activity.description}"
+                                    <p className="text-muted-foreground text-lg leading-relaxed font-normal whitespace-pre-line">
+                                        {activity.description}
                                     </p>
-                                    <div className="flex items-center gap-2 text-primary font-bold group cursor-pointer pt-4">
-                                        <span>Learn more</span>
-                                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                    </div>
                                 </motion.div>
                             </div>
                         </div>
                     );
                 })}
             </div>
-
-            {/* Excellence & Innovation Section */}
-            <section className="py-24 px-4 bg-primary/[0.02]">
-                <div className="container mx-auto">
-                    <div className="grid lg:grid-cols-12 gap-20">
-                        {/* Instructional Quality */}
-                        <div className="lg:col-span-7 space-y-12">
-                            <div>
-                                <h3 className="text-3xl font-headline font-bold mb-4">Artistic & Instructional Excellence</h3>
-                                <p className="text-muted-foreground text-lg font-light leading-relaxed">
-                                    Our success is built on the expertise and dedication of professional teaching artists who are committed to both musical excellence and student well-being.
-                                </p>
-                            </div>
-                            
-                            <div className="space-y-12">
-                                {instructionalHighlights.map((highlight, idx) => (
-                                    <motion.div 
-                                        key={highlight.title}
-                                        initial={{ opacity: 0, x: -20 }}
-                                        whileInView={{ opacity: 1, x: 0 }}
-                                        viewport={{ once: true }}
-                                        className="flex gap-8 group"
-                                    >
-                                        <div className="text-6xl font-bold text-primary/10 group-hover:text-primary/40 transition-colors font-headline leading-none">
-                                            {(idx + 1).toString().padStart(2, '0')}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <h4 className="font-bold text-2xl">{highlight.title}</h4>
-                                            <p className="text-muted-foreground text-lg leading-relaxed font-light">{highlight.description}</p>
-                                        </div>
-                                    </motion.div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Community Design & Innovation */}
-                        <div className="lg:col-span-5 space-y-12">
-                            <div>
-                                <h3 className="text-3xl font-headline font-bold mb-4">Community-Centered Innovation</h3>
-                                <p className="text-muted-foreground text-lg font-light leading-relaxed">
-                                    UpBeat! is not a static model. From scheduling to branding to the food program itself, every major adaptation has come directly from listening to students, families, and community partners. This responsiveness is not incidental, but it is a core organizational competency.
-                                </p>
-                            </div>
-
-                            <div className="relative min-h-[300px]">
-                                <InnovationCarousel items={challengesSolutions} />
-                            </div>
-
-                            {communityImage?.imageUrl ? (
-                                <motion.div 
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    whileInView={{ opacity: 1, scale: 1 }}
-                                    viewport={{ once: true }}
-                                    className="relative aspect-[16/9] rounded-[2rem] overflow-hidden shadow-lg border-4 border-white"
-                                >
-                                    <Image
-                                        src={communityImage.imageUrl}
-                                        alt="Community Design"
-                                        fill
-                                        className="object-cover"
-                                    />
-                                </motion.div>
-                            ) : null}
-                        </div>
-                    </div>
-                </div>
-            </section>
         </div>
       </section>
       

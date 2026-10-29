@@ -16,6 +16,8 @@ import {
   TimelineSection,
   ReportingPlanSection,
   RecognitionPlanSection,
+  BoardGovernanceSection,
+  GovernanceDocumentsSection,
 } from '@/components/case-for-support/FunderPageSections';
 import { 
   Sparkles, 
@@ -26,10 +28,13 @@ import {
   Landmark, 
   TrendingUp,
   Smile,
-  HeartHandshake
+  HeartHandshake,
+  Printer
 } from 'lucide-react';
 import CountUp from '@/components/shared/CountUp';
 import { GrantCase } from '@/lib/case-for-support';
+import { BoardMember } from '@/lib/staff';
+import { LegalDocument } from '@/lib/legal-documents';
 import { ProgramSection, PROGRAM_CONTENT } from '@/components/case-for-support/ProgramSection';
 import { DriveFolderLink } from '@/components/case-for-support/DriveFolderLink';
 
@@ -88,9 +93,11 @@ const staggerContainer = {
 
 interface GrantDetailClientProps {
   grant: GrantCase;
+  board?: BoardMember[];
+  documents?: LegalDocument[];
 }
 
-export default function GrantDetailClient({ grant }: GrantDetailClientProps) {
+export default function GrantDetailClient({ grant, board, documents }: GrantDetailClientProps) {
   const [yearsOfService, setYearsOfService] = useState<number>(23);
   const [contactInfo, setContactInfo] = useState<{ email: string; phone: string } | null>(null);
 
@@ -214,6 +221,14 @@ export default function GrantDetailClient({ grant }: GrantDetailClientProps) {
           <a href={caseForSupportHref} download>
             <Download className="w-4 h-4 mr-2" /> Download Case for Support
           </a>
+        </Button>
+        <Button
+          type="button"
+          onClick={() => window.print()}
+          variant="outline"
+          className="rounded-full px-6 py-5 text-sm font-semibold border-white/20 text-white hover:bg-white/10 bg-transparent backdrop-blur-sm shadow-sm print:hidden"
+        >
+          <Printer className="w-4 h-4 mr-2" /> Print / Save PDF
         </Button>
       </PageHeader>
 
@@ -493,7 +508,13 @@ export default function GrantDetailClient({ grant }: GrantDetailClientProps) {
       {/* 12. Recognition plan */}
       <RecognitionPlanSection text={recognitionPlan} />
 
-      {/* 13. Closing gratitude */}
+      {/* 13. Board Governance & Fiduciary Oversight */}
+      <BoardGovernanceSection board={board} />
+
+      {/* 14. Due Diligence & Institutional Governance Documents */}
+      <GovernanceDocumentsSection documents={documents} />
+
+      {/* 15. Closing gratitude */}
       <section className="py-24 px-4 bg-primary/[0.01] border-t border-primary/5">
         <motion.div 
           {...fadeInUp}

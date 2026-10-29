@@ -57,6 +57,10 @@ const memberSchema = z.object({
   type: z.enum(["staff", "board"]),
   isOnLeave: z.boolean().default(false),
   leaveNote: z.string().optional(),
+  tenure: z.string().optional(),
+  professionPosition: z.string().optional(),
+  professionCompany: z.string().optional(),
+  bioUrl: z.string().optional(),
   links: z.object({
     facebook: z.string().optional(),
     instagram: z.string().optional(),
@@ -152,6 +156,10 @@ export default function TeamAdminPage() {
                 image: undefined,
                 isOnLeave: Boolean(editingMember.isOnLeave),
                 leaveNote: editingMember.leaveNote || "",
+                tenure: 'tenure' in editingMember ? (editingMember as any).tenure || "" : "",
+                professionPosition: 'professionPosition' in editingMember ? (editingMember as any).professionPosition || "" : "",
+                professionCompany: 'professionCompany' in editingMember ? (editingMember as any).professionCompany || "" : "",
+                bioUrl: 'bioUrl' in editingMember ? (editingMember as any).bioUrl || "" : "",
                 links: {
                     facebook: editingMember.links?.facebook || "",
                     instagram: editingMember.links?.instagram || "",
@@ -173,6 +181,10 @@ export default function TeamAdminPage() {
                 type: "staff",
                 isOnLeave: false,
                 leaveNote: "",
+                tenure: "",
+                professionPosition: "",
+                professionCompany: "",
+                bioUrl: "",
                 links: {
                     facebook: "",
                     instagram: "",
@@ -209,6 +221,10 @@ export default function TeamAdminPage() {
                 image: imageUrl || '',
                 isOnLeave: values.isOnLeave,
                 leaveNote: values.leaveNote || '',
+                tenure: values.tenure || '',
+                professionPosition: values.professionPosition || '',
+                professionCompany: values.professionCompany || '',
+                bioUrl: values.bioUrl || '',
                 links: values.links,
             };
 
@@ -626,6 +642,72 @@ export default function TeamAdminPage() {
                                     />
                                 )}
                             </div>
+
+                            {/* Board Specific Governance Details */}
+                            {form.watch("type") === "board" && (
+                                <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 space-y-4">
+                                    <div className="space-y-0.5">
+                                        <h4 className="font-semibold text-sm text-slate-900">Board Governance & Fiduciary Details</h4>
+                                        <p className="text-xs text-muted-foreground">Used on the Case for Support and Funder pages to showcase fiduciary oversight.</p>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <FormField
+                                            control={form.control}
+                                            name="tenure"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel className="text-xs">Tenure / Service</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="e.g., 'Board Member since 2019'" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="bioUrl"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel className="text-xs">Bio / Profile Link (optional)</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="e.g., '/team#bryce-porter' or LinkedIn" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <FormField
+                                            control={form.control}
+                                            name="professionPosition"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel className="text-xs">Professional Title / Career</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="e.g., 'Vice President' or 'Senior Counsel'" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="professionCompany"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel className="text-xs">Company / Organization</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="e.g., 'RBC Royal Bank' or 'Trent University'" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                </div>
+                            )}
 
                             <FormField
                                 control={form.control}

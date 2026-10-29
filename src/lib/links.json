@@ -230,6 +230,11 @@
       "id": "contact-attendance",
       "name": "Contact - Attendance",
       "url": "mailto:attendance@thekyo.ca"
+    },
+    {
+      "id": "cra-charities-directory",
+      "name": "CRA Charities Directorate Profile",
+      "url": "https://apps.cra-arc.gc.ca/ebci/hacc/srch/pub/dsplyBscSrch?request_locale=en"
     }
   ]
 }

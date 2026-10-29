@@ -99,19 +99,48 @@ function CheckoutForm({ amount, name, email, onSuccess }: CheckoutFormProps) {
 }
 
 export default function StripeDonationForm({ 
-  onStateChange 
+  onStateChange,
+  externalFrequency,
+  externalPresetIndex,
+  externalAmount,
 }: { 
-  onStateChange?: (frequency: 'one-time' | 'monthly', activePresetIndex: number, amount: number) => void 
+  onStateChange?: (frequency: 'one-time' | 'monthly', activePresetIndex: number, amount: number) => void;
+  externalFrequency?: 'one-time' | 'monthly';
+  externalPresetIndex?: number;
+  externalAmount?: number;
 }) {
-  const [frequency, setFrequency] = useState<'one-time' | 'monthly'>('one-time');
-  const [activePresetIndex, setActivePresetIndex] = useState<number>(1); // Default to 2nd preset index
-  const [amount, setAmount] = useState<number>(50);
+  const [frequency, setFrequency] = useState<'one-time' | 'monthly'>(externalFrequency || 'one-time');
+  const [activePresetIndex, setActivePresetIndex] = useState<number>(externalPresetIndex !== undefined ? externalPresetIndex : 1); // Default to 2nd preset index
+  const [amount, setAmount] = useState<number>(externalAmount !== undefined ? externalAmount : 50);
   const [customAmount, setCustomAmount] = useState<string>('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  // Sync external changes from tier card clicks
+  useEffect(() => {
+    if (externalFrequency !== undefined && externalFrequency !== frequency) {
+      setFrequency(externalFrequency);
+      setClientSecret(null);
+    }
+  }, [externalFrequency]);
+
+  useEffect(() => {
+    if (externalPresetIndex !== undefined && externalPresetIndex !== activePresetIndex) {
+      setActivePresetIndex(externalPresetIndex);
+      setCustomAmount('');
+      setClientSecret(null);
+    }
+  }, [externalPresetIndex]);
+
+  useEffect(() => {
+    if (externalAmount !== undefined && externalAmount !== amount) {
+      setAmount(externalAmount);
+      setClientSecret(null);
+    }
+  }, [externalAmount]);
 
   const presets = frequency === 'monthly' ? [10, 25, 50, 100] : [25, 50, 100, 250];
 

@@ -58,9 +58,11 @@ export default function AdminCaseForSupportPage() {
     loadData();
   }, []);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (grant: GrantCase) => {
+    if (!grant.id) return;
     try {
-      await deleteGrant(id);
+      const urlPath = getGrantUrlPath(grant);
+      await deleteGrant(grant.id, urlPath);
       toast({ title: "Grant deleted successfully!" });
       loadData();
     } catch (err: any) {
@@ -430,7 +432,7 @@ export default function AdminCaseForSupportPage() {
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDelete(grant.id || '')} className="rounded-xl bg-destructive hover:bg-destructive/90">
+                                  <AlertDialogAction onClick={() => handleDelete(grant)} className="rounded-xl bg-destructive hover:bg-destructive/90">
                                     Confirm Delete
                                   </AlertDialogAction>
                                 </AlertDialogFooter>

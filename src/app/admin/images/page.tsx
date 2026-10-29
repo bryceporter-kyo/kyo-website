@@ -20,12 +20,20 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
+import { Input } from "@/components/ui/input";
+import { getBassRepairsCampaign, setBassRepairsCampaign } from "@/lib/bass-repairs-campaign";
+
 export default function AdminImagesPage() {
   const { toast } = useToast();
   const [images, setImages] = useState<StoredImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitializing, setIsInitializing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Bass Repairs Campaign State
+  const [bassRaised, setBassRaised] = useState<number>(1000);
+  const [bassGoal, setBassGoal] = useState<number>(2800);
+  const [isSavingBass, setIsSavingBass] = useState(false);
   
   // Dialog states
   const [selectedImage, setSelectedImage] = useState<StoredImage | null>(null);
@@ -42,6 +50,11 @@ export default function AdminImagesPage() {
       const mergedImages = await getMergedImages(PlaceHolderImages);
       console.log("[AdminImagesPage] getMergedImages completed", { count: mergedImages.length });
       setImages(mergedImages);
+
+      // Load Bass Repairs
+      const bassData = await getBassRepairsCampaign();
+      setBassRaised(bassData.raised);
+      setBassGoal(bassData.goal);
     } catch (err) {
       console.error("[AdminImagesPage] Failed to load images:", err);
       setError("Failed to load images from database. Using default images.");
@@ -206,6 +219,26 @@ export default function AdminImagesPage() {
     );
   }
 
+  const handleSaveBassRepairs = async () => {
+    setIsSavingBass(true);
+    try {
+      await setBassRepairsCampaign(bassRaised, bassGoal);
+      toast({
+        title: "Success",
+        description: "Bass Repairs progress bar figures updated!",
+      });
+    } catch (err) {
+      console.error("Failed to update Bass Repairs campaign:", err);
+      toast({
+        title: "Error",
+        description: "Failed to update Bass Repairs campaign.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSavingBass(false);
+    }
+  };
+
   return (
     <div className="container mx-auto py-12">
       <div className="mb-8 flex items-center justify-between">
@@ -250,6 +283,68 @@ export default function AdminImagesPage() {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
+
+      {/* Upbeat! Holiday Gift Catalogue - Seasonal Controls */}
+      <Card className="mb-12 border-primary/40 bg-primary/5">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <Badge variant="default" className="bg-primary text-white">Seasonal</Badge>
+                <CardTitle className="font-headline text-2xl">Upbeat! Holiday Gift Catalogue</CardTitle>
+              </div>
+              <CardDescription className="mt-1">
+                Manage the live Bass Repairs campaign progress bar ($1,000 / $2,800) and catalogue image assets below under <strong>Gift Catalogue (Seasonal)</strong>.
+              </CardDescription>
+            </div>
+            <Button
+              onClick={handleSaveBassRepairs}
+              disabled={isSavingBass}
+              className="bg-primary text-white"
+            >
+              {isSavingBass ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save Progress Bar"
+              )}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-xl">
+            <div>
+              <label className="text-xs font-semibold uppercase text-muted-foreground block mb-1">
+                Current Amount Raised (CAD)
+              </label>
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                value={bassRaised}
+                onChange={(e) => setBassRaised(parseFloat(e.target.value) || 0)}
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold uppercase text-muted-foreground block mb-1">
+                Goal Amount (CAD)
+              </label>
+              <Input
+                type="number"
+                step="0.01"
+                min="1"
+                value={bassGoal}
+                onChange={(e) => setBassGoal(parseFloat(e.target.value) || 2800)}
+              />
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground mt-3">
+            Note: Donations made through Stripe for Bass Repairs automatically increment this total in real-time. You can also adjust it manually at any time.
+          </p>
+        </CardContent>
+      </Card>
 
       <div className="space-y-12">
         {categories.map(category => (

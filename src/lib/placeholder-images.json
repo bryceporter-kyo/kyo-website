@@ -377,6 +377,111 @@
       "imageUrl": "https://images.unsplash.com/photo-1587578742810-388275823548?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxjaGFtYmVyJTIwbXVzaWN8ZW58MHx8fHwxNzY0MDQ2MDA3fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "chamber music",
       "category": "Site Image"
+    },
+    {
+      "id": "gift-catalogue-hero",
+      "description": "Upbeat! Holiday Gift Catalogue hero banner showing youth playing string instruments with holiday warmth.",
+      "imageUrl": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "youth strings festive music",
+      "category": "Gift Catalogue (Seasonal)"
+    },
+    {
+      "id": "gift-catalogue-violin-small",
+      "description": "Small-sized student violin outfit with case and bow.",
+      "imageUrl": "https://images.unsplash.com/photo-1612225330812-01a9c6b355ec?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "small student violin",
+      "category": "Gift Catalogue (Seasonal)"
+    },
+    {
+      "id": "gift-catalogue-violin",
+      "description": "Full student violin outfit with bow and protective case.",
+      "imageUrl": "https://images.unsplash.com/photo-1685954154829-5ebdf5956824?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "student violin outfit",
+      "category": "Gift Catalogue (Seasonal)"
+    },
+    {
+      "id": "gift-catalogue-viola",
+      "description": "Warm orchestral viola outfit with bow and case.",
+      "imageUrl": "https://images.unsplash.com/photo-1511192336575-5a79af67a629?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "orchestral viola outfit",
+      "category": "Gift Catalogue (Seasonal)"
+    },
+    {
+      "id": "gift-catalogue-cello",
+      "description": "Full-sized student cello outfit with bow and case.",
+      "imageUrl": "https://images.unsplash.com/photo-1541689592655-f5f52825a3b8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "student cello outfit",
+      "category": "Gift Catalogue (Seasonal)"
+    },
+    {
+      "id": "gift-catalogue-dedication",
+      "description": "Instrument dedication plaque celebrating donor generosity.",
+      "imageUrl": "https://images.unsplash.com/photo-1507838153414-b4b713384a76?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "instrument dedication nameplate",
+      "category": "Gift Catalogue (Seasonal)"
+    },
+    {
+      "id": "gift-catalogue-stand",
+      "description": "Collapsible music stand set up for practice.",
+      "imageUrl": "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "collapsible music stand",
+      "category": "Gift Catalogue (Seasonal)"
+    },
+    {
+      "id": "gift-catalogue-rosin",
+      "description": "Shock-absorbent shatterproof string rosin block.",
+      "imageUrl": "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "string rosin block",
+      "category": "Gift Catalogue (Seasonal)"
+    },
+    {
+      "id": "gift-catalogue-bundle",
+      "description": "Practice at home package with rosin and clip-on electronic tuner.",
+      "imageUrl": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "practice at home package",
+      "category": "Gift Catalogue (Seasonal)"
+    },
+    {
+      "id": "gift-catalogue-bow",
+      "description": "Quality student bow with fresh horsehair.",
+      "imageUrl": "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "student violin bow",
+      "category": "Gift Catalogue (Seasonal)"
+    },
+    {
+      "id": "gift-catalogue-bass",
+      "description": "Two double basses needing professional repairs to return to KYO orchestras.",
+      "imageUrl": "https://images.unsplash.com/photo-1525201548942-d8732f6617a0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "orchestral double bass",
+      "category": "Gift Catalogue (Seasonal)"
+    },
+    {
+      "id": "gift-catalogue-instruction-month",
+      "description": "Upbeat! teacher guiding young musicians in rehearsal.",
+      "imageUrl": "https://images.unsplash.com/photo-1544717302-de2939b7ef71?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "music instruction",
+      "category": "Gift Catalogue (Seasonal)"
+    },
+    {
+      "id": "gift-catalogue-instruction-year",
+      "description": "Full-year Upbeat! ensemble rehearsing together with instructor.",
+      "imageUrl": "https://images.unsplash.com/photo-1740995384593-3ad31accf950?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "full year youth orchestra rehearsal",
+      "category": "Gift Catalogue (Seasonal)"
+    },
+    {
+      "id": "gift-catalogue-snack",
+      "description": "Healthy snack spread provided for Upbeat! kids after school.",
+      "imageUrl": "https://images.unsplash.com/photo-1498837167922-ddd27525d352?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "healthy youth snack",
+      "category": "Gift Catalogue (Seasonal)"
+    },
+    {
+      "id": "gift-catalogue-pathways",
+      "description": "Dedicated young musician receiving one-on-one studio coaching.",
+      "imageUrl": "https://images.unsplash.com/photo-1507838153414-b4b713384a76?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "one on one studio music lesson",
+      "category": "Gift Catalogue (Seasonal)"
     }
   ]
 }

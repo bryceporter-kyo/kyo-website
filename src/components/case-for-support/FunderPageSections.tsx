@@ -10,6 +10,7 @@ import type {
   PrimaryProgram,
   TimelineMilestone,
 } from '@/lib/case-for-support';
+import { getLinkById } from '@/lib/links';
 
 const PROGRAM_LABELS: Record<PrimaryProgram, string> = {
   general: 'General Operating Support',
@@ -83,6 +84,24 @@ export function GrantDetailsCard({
       {applicationDeadline && (
         <DetailRow label="Deadline" value={applicationDeadline} />
       )}
+      
+      {/* Registered Charity Status & CRA Verification */}
+      <div className="col-span-2 md:col-span-3 border-t border-slate-200/60 pt-4 mt-2 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-2 text-slate-700">
+          <span className="font-semibold text-primary">Registered Charitable Organization</span>
+          <span className="text-slate-400">•</span>
+          <span>Kawartha Youth Orchestra Inc.</span>
+        </div>
+        <a 
+          href={getLinkById('cra-charities-directory')?.url || "https://apps.cra-arc.gc.ca/ebci/hacc/srch/pub/dsplyBscSrch?request_locale=en"}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-primary hover:underline font-medium"
+        >
+          Verify on CRA Charities Directorate
+          <span className="text-[10px]">↗</span>
+        </a>
+      </div>
     </div>
   );
 }
@@ -443,6 +462,146 @@ export function RecognitionPlanSection({ text }: { text?: string | null }) {
           <div className="prose prose-slate prose-p:leading-relaxed prose-a:text-primary max-w-none text-slate-600">
             <ReactMarkdown>{text}</ReactMarkdown>
           </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** Governing Board of Directors Fiduciary Oversight Table */
+export function BoardGovernanceSection({ board }: { board?: any[] | null }) {
+  if (!board || board.length === 0) return null;
+
+  return (
+    <section className="py-16 px-4 bg-slate-50/50 border-t border-slate-100">
+      <div className="container mx-auto max-w-4xl space-y-6">
+        <div className="text-center space-y-2">
+          <h3 className="text-2xl font-headline font-bold text-slate-900">
+            Governing Board &amp; Fiduciary Oversight
+          </h3>
+          <p className="text-slate-500 text-sm max-w-xl mx-auto font-light">
+            The Kawartha Youth Orchestra is governed by a dedicated volunteer Board of Directors holding legal, financial, and strategic accountability for our programs.
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200/80 bg-white overflow-hidden shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-50 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <tr>
+                  <th className="py-3.5 px-4">Name &amp; Role</th>
+                  <th className="py-3.5 px-4">Tenure</th>
+                  <th className="py-3.5 px-4">Professional Background</th>
+                  <th className="py-3.5 px-4 text-right">Profile</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {board.map((member) => (
+                  <tr key={member.id || member.name} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="py-3 px-4 font-medium text-slate-900">
+                      <div>{member.name}</div>
+                      <div className="text-xs text-primary font-normal">{member.title}</div>
+                    </td>
+                    <td className="py-3 px-4 text-xs text-slate-600 font-light">
+                      {member.tenure || "Board Member"}
+                    </td>
+                    <td className="py-3 px-4 text-xs text-slate-600 font-light">
+                      {member.professionPosition ? (
+                        <span>
+                          {member.professionPosition}
+                          {member.professionCompany ? ` · ${member.professionCompany}` : ""}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400">Community Leader</span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      {member.bioUrl ? (
+                        <a 
+                          href={member.bioUrl} 
+                          target={member.bioUrl.startsWith('http') ? '_blank' : '_self'}
+                          rel={member.bioUrl.startsWith('http') ? 'noopener noreferrer' : undefined}
+                          className="text-xs text-primary hover:underline font-medium"
+                        >
+                          Bio ↗
+                        </a>
+                      ) : (
+                        <a href="/team" className="text-xs text-slate-400 hover:text-primary transition-colors">
+                          View
+                        </a>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** Institutional Governance & Due Diligence Documents (Strictly Conditional) */
+export function GovernanceDocumentsSection({ documents }: { documents?: any[] | null }) {
+  if (!documents || documents.length === 0) return null;
+
+  // Filter only audited financial statements, agm reports, or stewardship statements
+  const relevantDocs = documents.filter((doc) => 
+    doc.category === 'financial-statement' || 
+    doc.category === 'agm-report' || 
+    doc.category === 'financial-stewardship'
+  );
+
+  if (relevantDocs.length === 0) return null;
+
+  const categoryLabels: Record<string, string> = {
+    'financial-statement': 'Audited Financials / Notice to Reader',
+    'agm-report': 'Annual General Meeting (AGM) Report',
+    'financial-stewardship': 'Financial Stewardship Statement',
+  };
+
+  return (
+    <section className="py-16 px-4 bg-white border-t border-slate-100">
+      <div className="container mx-auto max-w-4xl space-y-6">
+        <div className="text-center space-y-2">
+          <h3 className="text-2xl font-headline font-bold text-slate-900">
+            Institutional Due Diligence &amp; Governance
+          </h3>
+          <p className="text-slate-500 text-sm max-w-xl mx-auto font-light">
+            Public financial statements, annual meeting reports, and governance documentation available for granting bodies and institutional donors.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {relevantDocs.map((docItem) => (
+            <div 
+              key={docItem.id} 
+              className="p-5 rounded-2xl border border-slate-200/80 bg-slate-50/40 hover:bg-slate-50 transition-colors flex items-start justify-between gap-4"
+            >
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                  {categoryLabels[docItem.category] || 'Governance Document'}
+                </span>
+                <h4 className="font-headline font-semibold text-slate-900 text-sm">
+                  {docItem.name}
+                </h4>
+                {docItem.description && (
+                  <p className="text-xs text-slate-500 font-light line-clamp-2">
+                    {docItem.description}
+                  </p>
+                )}
+              </div>
+              <a
+                href={docItem.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold bg-white border border-slate-200 hover:border-primary text-slate-700 hover:text-primary transition-all shadow-sm"
+              >
+                Download PDF
+              </a>
+            </div>
+          ))}
         </div>
       </div>
     </section>

@@ -35,6 +35,7 @@ const legalDocumentSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters."),
   description: z.string().min(5, "Description must be at least 5 characters."),
   url: z.string().url("Must be a valid URL link to PDF file.").optional().or(z.literal("")),
+  category: z.enum(['general', 'financial-statement', 'agm-report', 'financial-stewardship']).default('general'),
 });
 
 export default function LegalAdminPage() {
@@ -56,6 +57,7 @@ export default function LegalAdminPage() {
             name: "",
             description: "",
             url: "",
+            category: "general",
         },
     });
 
@@ -69,6 +71,7 @@ export default function LegalAdminPage() {
                 name: editingDoc.name,
                 description: editingDoc.description,
                 url: editingDoc.url,
+                category: editingDoc.category || "general",
             });
             setDocInputMode("link"); // Default to link mode when editing an existing doc
             setUploadFile(null);
@@ -77,6 +80,7 @@ export default function LegalAdminPage() {
                 name: "",
                 description: "",
                 url: "",
+                category: "general",
             });
             setDocInputMode("upload");
             setUploadFile(null);
@@ -148,9 +152,20 @@ export default function LegalAdminPage() {
                 description: values.description,
                 url: finalUrl,
                 uploadedAt: new Date().toISOString(),
+                category: values.category,
             };
             
             const savedDoc = await saveLegalDocument(docData, editingDoc?.id);
+
+            // Revalidate case-for-support static cache on save
+            fetch('/api/revalidate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    secret: 'kyo-revalidate-secret-token-2026',
+                    paths: ['/support-us/case-for-support'],
+                }),
+            }).catch(() => {});
             
             if (editingDoc) {
                 setDocuments(documents.map(d => d.id === editingDoc.id ? savedDoc : d));
@@ -329,6 +344,7 @@ export default function LegalAdminPage() {
                                             <TableHeader>
                                                 <TableRow>
                                                     <TableHead>Document Name</TableHead>
+                                                    <TableHead>Category</TableHead>
                                                     <TableHead>Description</TableHead>
                                                     <TableHead>Added Date</TableHead>
                                                     <TableHead className="text-right">Actions</TableHead>
@@ -337,7 +353,7 @@ export default function LegalAdminPage() {
                                             <TableBody>
                                                 {documents.length === 0 ? (
                                                     <TableRow>
-                                                        <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                                                        <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                                                             No governance documents found. Add one on the right!
                                                         </TableCell>
                                                     </TableRow>
@@ -345,6 +361,13 @@ export default function LegalAdminPage() {
                                                     documents.map((docItem) => (
                                                         <TableRow key={docItem.id}>
                                                             <TableCell className="font-medium">{docItem.name}</TableCell>
+                                                            <TableCell>
+                                                                <Badge variant="outline" className="text-xs capitalize">
+                                                                    {docItem.category === 'financial-statement' ? 'Financials' :
+                                                                     docItem.category === 'agm-report' ? 'AGM Report' :
+                                                                     docItem.category === 'financial-stewardship' ? 'Stewardship' : 'General'}
+                                                                </Badge>
+                                                            </TableCell>
                                                             <TableCell className="text-sm text-muted-foreground line-clamp-1 max-w-[200px]">{docItem.description}</TableCell>
                                                             <TableCell className="text-sm">
                                                                 {docItem.uploadedAt ? format(new Date(docItem.uploadedAt), "MMM d, yyyy") : "N/A"}
@@ -407,6 +430,32 @@ export default function LegalAdminPage() {
                                                         <FormControl>
                                                             <Input placeholder="e.g. KYO By-Laws (2026)" {...field} />
                                                         </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={docForm.control}
+                                                name="category"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Document Category</FormLabel>
+                                                        <Select onValueChange={field.onChange} value={field.value}>
+                                                            <FormControl>
+                                                                <SelectTrigger>
+                                                                    <SelectValue placeholder="Select a category" />
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent>
+                                                                <SelectItem value="general">General Corporate / Policy</SelectItem>
+                                                                <SelectItem value="financial-statement">Audited Financial Statements / Notice to Reader</SelectItem>
+                                                                <SelectItem value="agm-report">Annual General Meeting (AGM) Report</SelectItem>
+                                                                <SelectItem value="financial-stewardship">Financial Stewardship Statement</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <FormDescription className="text-xs">
+                                                            Financial statements, AGM reports, and Stewardship statements will conditionally appear in the Case for Support Due Diligence section once uploaded.
+                                                        </FormDescription>
                                                         <FormMessage />
                                                     </FormItem>
                                                 )}

@@ -1,5 +1,6 @@
 import { fetchPageMetadataServer } from "@/lib/metadata-server";
 import { Metadata } from "next";
+import { EducationalProgramJsonLd } from "@/components/shared/JsonLd";
 
 export async function generateMetadata(): Promise<Metadata> {
   const data = await fetchPageMetadataServer("/programs/orchestras");
@@ -37,5 +38,15 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return (
+    <>
+      <EducationalProgramJsonLd
+        name="The Orchestras Program — Kawartha Youth Orchestra"
+        description="KYO's tiered orchestral ensemble program serving beginner, intermediate, and advanced youth musicians from Peterborough and the Kawarthas. Includes Junior, Intermediate, and Senior KYO ensembles with deeply subsidized tuition."
+        url="https://kyo.ca/programs/orchestras"
+        programType="Orchestral Ensemble Training"
+      />
+      {children}
+    </>
+  );
 }

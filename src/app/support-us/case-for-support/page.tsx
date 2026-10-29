@@ -1,18 +1,44 @@
 import { fetchPageMetadataServer } from '@/lib/metadata-server';
-import { fetchPublishedGrantsServer } from '@/lib/case-for-support-server';
+import { 
+  fetchPublishedGrantsServer,
+  fetchBoardMembersServer,
+  fetchGovernanceDocumentsServer 
+} from '@/lib/case-for-support-server';
+import { CaseForSupportIndexJsonLd } from '@/components/shared/JsonLd';
 import CaseForSupportIndexClient from './_components/CaseForSupportIndexClient';
 import Link from 'next/link';
 
-export const dynamic = 'force-dynamic';
+// Revalidate daily as a fallback; updated instantly on demand via /api/revalidate
+export const revalidate = 86400;
 
 export default async function CaseForSupportPage() {
-  const [metadata, publishedGrants] = await Promise.all([
+  const [metadata, publishedGrants, board, documents] = await Promise.all([
     fetchPageMetadataServer('/support-us/case-for-support'),
     fetchPublishedGrantsServer(),
+    fetchBoardMembersServer(),
+    fetchGovernanceDocumentsServer(),
   ]);
+
+  const grantParts = publishedGrants.map((g) => {
+    const uid = g.id ? g.id.substring(0, 6) : 'grant';
+    const funder = (g.funderName || 'funder')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+    const year = g.grantCycleYear || '2026';
+    return {
+      uid,
+      funder,
+      year,
+      name: `${g.funderName} (${g.grantCycleYear}) — ${g.programOfSupport || 'Case for Support'}`,
+    };
+  });
 
   return (
     <>
+      {/* Schema.org CollectionPage Structured Data */}
+      <CaseForSupportIndexJsonLd grants={grantParts} />
+
       {/* Crawlable Semantic Content for Search Engines & AI Crawlers */}
       <section className="sr-only" aria-label="Kawartha Youth Orchestra Case for Support Overview">
         <h1>Kawartha Youth Orchestra — Institutional Case for Support</h1>
@@ -61,7 +87,7 @@ export default async function CaseForSupportPage() {
       </section>
 
       {/* Interactive UI Island */}
-      <CaseForSupportIndexClient />
+      <CaseForSupportIndexClient board={board} documents={documents} />
     </>
   );
 }

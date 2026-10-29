@@ -104,3 +104,58 @@ export async function fetchGrantByTruncatedUidServer(truncatedUid: string): Prom
     return null;
   }
 }
+
+/**
+ * Fetch all board members from Firebase REST API (Server safe)
+ */
+export async function fetchBoardMembersServer(): Promise<any[]> {
+  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+  if (!projectId) return [];
+
+  const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/default/documents/board`;
+
+  try {
+    const res = await fetch(url, {
+      next: { revalidate: 3600 },
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!res.ok) return [];
+
+    const data = await res.json();
+    if (!data.documents || data.documents.length === 0) return [];
+
+    return data.documents.map(decodeFirestoreDocument);
+  } catch (error) {
+    console.error('[CaseForSupportServer] Error fetching board members:', error);
+    return [];
+  }
+}
+
+/**
+ * Fetch governance documents from Firebase REST API (Server safe)
+ */
+export async function fetchGovernanceDocumentsServer(): Promise<any[]> {
+  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+  if (!projectId) return [];
+
+  const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/default/documents/legal-documents`;
+
+  try {
+    const res = await fetch(url, {
+      next: { revalidate: 3600 },
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!res.ok) return [];
+
+    const data = await res.json();
+    if (!data.documents || data.documents.length === 0) return [];
+
+    return data.documents.map(decodeFirestoreDocument);
+  } catch (error) {
+    console.error('[CaseForSupportServer] Error fetching governance documents:', error);
+    return [];
+  }
+}
+

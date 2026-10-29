@@ -1,5 +1,6 @@
 import { fetchPageMetadataServer } from "@/lib/metadata-server";
 import { Metadata } from "next";
+import { EducationalProgramJsonLd } from "@/components/shared/JsonLd";
 
 export async function generateMetadata(): Promise<Metadata> {
   const data = await fetchPageMetadataServer("/programs/lessons");
@@ -37,5 +38,15 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return (
+    <>
+      <EducationalProgramJsonLd
+        name="Instrumental Lessons Program — Kawartha Youth Orchestra"
+        description="Weekly private and small-group conservatory-level music lessons in violin, viola, cello, bass, flute, clarinet, oboe, bassoon, brass, and percussion. Taught by trained instructors with bursaries available for families demonstrating financial need."
+        url="https://kyo.ca/programs/lessons"
+        programType="Private and Group Instrumental Music Instruction"
+      />
+      {children}
+    </>
+  );
 }

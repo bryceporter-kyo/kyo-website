@@ -108,8 +108,8 @@ export default function AboutPage() {
     return (
         <div>
             <PageHeader
-                title="Discover the Heart of KYO"
-                subtitle="Where passion for music meets a community dedicated to nurturing the next generation of musicians."
+                title="How We Got Here: One Note at a Time"
+                subtitle="An ever growing community dedicated to nurturing the next generation of musicians."
                 image={headerImage}
             />
             <section className="container mx-auto overflow-hidden relative py-20 md:py-28">
@@ -129,6 +129,9 @@ export default function AboutPage() {
                         <div className="space-y-6">
                             <p className="text-muted-foreground text-lg leading-relaxed">
                                 Kawartha Youth Orchestra is a vibrant community organization offering music and orchestra training to youth from elementary to post-secondary levels. Drawing students from across the Kawartha Region, we provide opportunities for young musicians seeking to go beyond their school music programs.
+                            </p>
+                            <p className="text-muted-foreground text-lg leading-relaxed">
+                                What began as a single ensemble for advanced young musicians has grown into a complete musical pathway. From a student&apos;s very first notes to a lifetime of music, the KYO is here for every step of the journey. We are guided at every step by a deep commitment to accessibility and inclusion for all.
                             </p>
                             <p className="text-muted-foreground text-lg leading-relaxed">
                                As a registered non-profit, KYO proudly collaborates with local schools, private instructors, and community organizations to support and develop our student musicians under the guidance of seasoned conductors and faculty.
@@ -182,51 +185,6 @@ export default function AboutPage() {
                 </div>
             </section>
             
-            <section className="container mx-auto py-24 md:py-32 relative">
-                {/* Decorative dots background */}
-                <div className="absolute right-0 top-1/4 w-32 h-64 opacity-10 pointer-events-none hidden lg:block" 
-                     style={{ backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
-                
-                 <FadeIn className="text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-headline font-bold">We Are a Community</h2>
-                    <p className="mx-auto max-w-2xl text-muted-foreground md:text-xl mt-6">
-                        KYO is a collective of passionate individuals dedicated to the transformative power of music.
-                    </p>
-                </FadeIn>
-                
-                <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                   {communityRoles.map(role => {
-                        const img = getImage(role.imageKey);
-                        return (
-                            <StaggerItem direction="up" key={role.title}>
-                                <Card className="h-full border-primary/5 bg-white/50 backdrop-blur-sm transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 hover:bg-white group overflow-hidden flex flex-col">
-                                    <div className="relative h-48 overflow-hidden">
-                                        {img && (
-                                            <Image 
-                                                src={img.imageUrl} 
-                                                alt={role.title}
-                                                fill
-                                                className="object-cover transition-transform duration-700 group-hover:scale-110"
-                                            />
-                                        )}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                                    </div>
-                                    <CardHeader className="pb-4 relative">
-                                        <div className="absolute -top-6 right-6 w-12 h-12 rounded-xl bg-primary text-white flex items-center justify-center shadow-lg transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3">
-                                            <role.icon className="w-6 h-6"/>
-                                        </div>
-                                        <CardTitle className="font-headline text-2xl pt-2">{role.title}</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="flex-grow">
-                                        <p className="text-muted-foreground leading-relaxed">{role.description}</p>
-                                    </CardContent>
-                                    <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-                                </Card>
-                            </StaggerItem>
-                        );
-                   })}
-                </StaggerContainer>
-            </section>
 
              <section className="bg-secondary">
                 <HorizontalTimeline />

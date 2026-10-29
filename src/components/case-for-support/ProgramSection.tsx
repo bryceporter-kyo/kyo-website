@@ -166,7 +166,7 @@ export const PROGRAM_CONTENT: Record<
     quote: {
       text:
         'UpBeat! isn\u2019t just about music. It\u2019s about creating a place where kids feel seen, supported, and inspired. For some, this is the first place where they\u2019ve really felt they belonged.',
-      author: 'Colin McMahon, Program Manager',
+      author: 'Colin McMahon, Upbeat! Artistic Director',
     },
     href: '/programs/upbeat',
   },

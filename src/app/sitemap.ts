@@ -11,6 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/staff', priority: 0.7, changeFrequency: 'monthly' },
     { path: '/programs/orchestras', priority: 0.9, changeFrequency: 'weekly' },
     { path: '/programs/upbeat', priority: 0.9, changeFrequency: 'weekly' },
+    { path: '/programs/upbeat/gift-catalogue', priority: 0.9, changeFrequency: 'daily' },
     { path: '/programs/lessons', priority: 0.8, changeFrequency: 'weekly' },
     { path: '/programs/calendar', priority: 0.9, changeFrequency: 'daily' },
     { path: '/programs/registration/orchestras', priority: 0.8, changeFrequency: 'weekly' },
@@ -39,21 +40,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     const grants = await fetchPublishedGrantsServer();
-    const grantEntries: MetadataRoute.Sitemap = grants.map((g) => {
-      const uid = g.id ? g.id.substring(0, 6) : 'grant';
-      const funderSlug = (g.funderName || 'funder')
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
-      const year = g.grantCycleYear || new Date().getFullYear().toString();
+    const grantEntries: MetadataRoute.Sitemap = grants
+      // Exclude any grant where the admin has toggled noIndex = true
+      .filter((g) => !g.noIndex)
+      .map((g) => {
+        const uid = g.id ? g.id.substring(0, 6) : 'grant';
+        const funderSlug = (g.funderName || 'funder')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '');
+        const year = g.grantCycleYear || new Date().getFullYear().toString();
 
-      return {
-        url: `${baseUrl}/support-us/case-for-support/${uid}/${funderSlug}/${year}`,
-        lastModified: g.submissionDate ? new Date(g.submissionDate) : new Date(),
-        changeFrequency: 'weekly' as const,
-        priority: 0.7,
-      };
-    });
+        return {
+          url: `${baseUrl}/support-us/case-for-support/${uid}/${funderSlug}/${year}`,
+          lastModified: g.submissionDate ? new Date(g.submissionDate) : new Date(),
+          changeFrequency: 'weekly' as const,
+          priority: 0.7,
+        };
+      });
 
     return [...staticEntries, ...grantEntries];
   } catch (err) {

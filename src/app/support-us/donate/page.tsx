@@ -223,32 +223,61 @@ export default function DonatePage() {
 
                         {/* Preset Impact Details Tiers - Left Column (Stacked Vertically) */}
                         <div className="lg:col-span-6 space-y-6">
-                            <h3 className="text-sm font-bold uppercase tracking-widest text-primary mb-4 flex items-center gap-2">
-                                <Sparkles className="w-4 h-4" />
-                                Donation Impact Tiers
-                            </h3>
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-sm font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4" />
+                                    Donation Impact Tiers
+                                </h3>
+                                <span className="text-xs text-muted-foreground font-medium">Click any tier to select</span>
+                            </div>
                             <div className="flex flex-col gap-6">
                                 {(donationState.frequency === 'monthly' ? monthlyTiers : oneTimeTiers).map((tier, index) => {
                                     const isHighlighted = donationState.activePresetIndex === index;
+                                    const tierNum = parseInt(tier.amount.replace(/[^0-9]/g, ''), 10) || 50;
                                     return (
                                         <Card 
                                             key={tier.title} 
+                                            onClick={() => {
+                                                setDonationState(prev => ({
+                                                    ...prev,
+                                                    activePresetIndex: index,
+                                                    amount: tierNum,
+                                                }));
+                                            }}
+                                            role="button"
+                                            tabIndex={0}
+                                            aria-pressed={isHighlighted}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                    e.preventDefault();
+                                                    setDonationState(prev => ({
+                                                        ...prev,
+                                                        activePresetIndex: index,
+                                                        amount: tierNum,
+                                                    }));
+                                                }
+                                            }}
                                             className={cn(
-                                                "rounded-[2rem] border transition-all duration-300 bg-white p-6",
+                                                "rounded-[2rem] border transition-all duration-300 bg-white p-6 cursor-pointer text-left select-none relative group",
                                                 isHighlighted 
-                                                    ? "ring-2 ring-primary border-primary bg-primary/[0.02] shadow-lg scale-[1.01]" 
-                                                    : "border-primary/5 hover:shadow-md"
+                                                    ? "ring-2 ring-primary border-primary bg-primary/[0.03] shadow-xl scale-[1.02]" 
+                                                    : "border-primary/10 hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5 hover:bg-slate-50/50"
                                             )}
                                         >
                                             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
                                                 {/* Title & Amount (Left Side) */}
                                                 <div className="md:col-span-5 space-y-2">
-                                                    {tier.popular && (
-                                                        <Badge className="w-fit bg-primary text-white border-none text-[9px] uppercase tracking-wider mb-1">Most Common</Badge>
-                                                    )}
+                                                    <div className="flex items-center gap-2">
+                                                        {tier.popular && (
+                                                            <Badge className="w-fit bg-primary text-white border-none text-[9px] uppercase tracking-wider">Most Common</Badge>
+                                                        )}
+                                                        {isHighlighted && (
+                                                            <Badge variant="outline" className="w-fit border-primary text-primary bg-primary/10 text-[9px] uppercase tracking-wider font-bold">Selected</Badge>
+                                                        )}
+                                                    </div>
                                                     <CardTitle className={cn(
                                                         "text-xl font-headline font-bold transition-colors duration-150",
-                                                        isHighlighted ? "text-primary" : "text-slate-800"
+                                                        isHighlighted ? "text-primary" : "text-slate-800 group-hover:text-primary"
                                                     )}>
                                                         {tier.title}
                                                     </CardTitle>
@@ -261,7 +290,7 @@ export default function DonatePage() {
                                                 {/* Description (Right Side) */}
                                                 <div className={cn(
                                                     "md:col-span-7 md:border-l md:pl-6 transition-colors duration-150",
-                                                    isHighlighted ? "border-primary/20" : "border-primary/5"
+                                                    isHighlighted ? "border-primary/20" : "border-primary/10"
                                                 )}>
                                                     <p className={cn(
                                                         "text-sm md:text-base leading-relaxed font-light transition-colors duration-150",
@@ -269,6 +298,10 @@ export default function DonatePage() {
                                                     )}>
                                                         {tier.description}
                                                     </p>
+                                                    <div className="mt-3 flex items-center gap-1.5 text-xs font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <span>{isHighlighted ? '✓ Selected amount' : 'Click to select this tier'}</span>
+                                                        <ArrowRight className="w-3.5 h-3.5" />
+                                                    </div>
                                                 </div>
                                             </div>
                                         </Card>
@@ -280,6 +313,9 @@ export default function DonatePage() {
                         {/* Interactive Stripe Payment Element - Right Column */}
                         <div className="lg:col-span-6 sticky top-28">
                             <StripeDonationForm 
+                                externalFrequency={donationState.frequency}
+                                externalPresetIndex={donationState.activePresetIndex}
+                                externalAmount={donationState.amount}
                                 onStateChange={(frequency, activePresetIndex, amount) => {
                                     setDonationState({ frequency, activePresetIndex, amount });
                                 }}

@@ -23,6 +23,10 @@ import {
   HeartHandshake
 } from 'lucide-react';
 import CountUp from '@/components/shared/CountUp';
+import { BoardGovernanceSection, GovernanceDocumentsSection } from '@/components/case-for-support/FunderPageSections';
+import { BoardMember } from '@/lib/staff';
+import { LegalDocument } from '@/lib/legal-documents';
+import { getLinkById } from '@/lib/links';
 
 const CORE_VALUES = [
   {
@@ -77,7 +81,12 @@ const staggerContainer = {
   viewport: { once: true, margin: "-100px" }
 } as const;
 
-export default function CaseForSupportIndexClient() {
+interface CaseForSupportIndexClientProps {
+  board?: BoardMember[];
+  documents?: LegalDocument[];
+}
+
+export default function CaseForSupportIndexClient({ board, documents }: CaseForSupportIndexClientProps = {}) {
   const { getImage } = useImages();
   const [yearsOfService, setYearsOfService] = useState<number>(23);
   const [contactInfo, setContactInfo] = useState<{ email: string; phone: string } | null>(null);
@@ -131,8 +140,21 @@ export default function CaseForSupportIndexClient() {
         image={headerImage}
       />
 
-      {/* Dynamic Action Sticky Panel */}
-      <div className="container mx-auto max-w-5xl px-4 pt-8 flex justify-end">
+      {/* Dynamic Action Sticky Panel & Institutional Trust Badge */}
+      <div className="container mx-auto max-w-5xl px-4 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 border border-slate-200/80 shadow-xs text-xs text-slate-700 backdrop-blur-md">
+          <span className="font-semibold text-primary">Registered Charitable Organization</span>
+          <span className="text-slate-300">•</span>
+          <a
+            href={getLinkById('cra-charities-directory')?.url || "https://apps.cra-arc.gc.ca/ebci/hacc/srch/pub/dsplyBscSrch?request_locale=en"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-slate-600 hover:text-primary transition-colors inline-flex items-center gap-1 font-medium"
+          >
+            Verify on CRA ↗
+          </a>
+        </div>
+
         <Button 
           asChild 
           variant="outline" 
@@ -456,7 +478,7 @@ export default function CaseForSupportIndexClient() {
             ]}
             quote={{
               text: 'UpBeat! isn’t just about music. It’s about creating a place where kids feel seen, supported, and inspired. For some, this is the first place where they’ve really felt they belonged.',
-              author: 'Colin McMahon, Program Manager',
+              author: 'Colin McMahon, Upbeat! Artistic Director',
             }}
             href="/programs/upbeat"
           />
@@ -612,7 +634,13 @@ export default function CaseForSupportIndexClient() {
         </div>
       </section>
 
-      {/* 8. Closing gratitude */}
+      {/* 8. Board Governance & Fiduciary Oversight */}
+      <BoardGovernanceSection board={board} />
+
+      {/* 9. Institutional Due Diligence & Governance Documents */}
+      <GovernanceDocumentsSection documents={documents} />
+
+      {/* 10. Closing gratitude */}
       <section className="py-24 px-4">
         <motion.div 
           {...fadeInUp}

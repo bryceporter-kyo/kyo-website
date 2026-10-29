@@ -21,21 +21,38 @@ import { useRef } from 'react';
 
 // ButtonConfig imported from @/lib/buttons
 
+const missionStatement = "To provide youth with access to high-quality music education and orchestral training in a safe, welcoming community where they can develop artistry, build social connections, grow in confidence, and foster a lifelong love of music.";
+
 const coreValues = [
     {
         icon: Heart,
-        title: "Our Mission",
-        description: "We inspire our musicians and our instructors to develop and cultivate a love for music, and to share their music and passion with the community."
+        title: "Artistry",
+        description: "We are committed to musical excellence. We cultivate a deep love of music and inspire young musicians to pursue their craft with ambition, expression, and pride."
+    },
+    {
+        icon: Music,
+        title: "Joy",
+        description: "We believe music should be fun. We bring energy, positivity, and inspiration to everything we do, celebrating the joy of making music together."
+    },
+    {
+        icon: Users,
+        title: "Inclusion",
+        description: "We welcome every young person, regardless of background or experience. We are committed to accessibility, fairness, and building a community where everyone belongs."
+    },
+    {
+        icon: GraduationCap,
+        title: "Growth",
+        description: "We support young musicians in developing not just their musical skills, but their confidence and resilience. We encourage responsibility, authenticity, and a commitment to continuous improvement on and off the stage."
     },
     {
         icon: Handshake,
-        title: "Our Philosophy",
-        description: "Music is for everyone. We foster the development of individual and group skills in an atmosphere of inclusivity, openness, collaboration, and passion. KYO encourages excellence within a nurturing environment."
+        title: "Connection",
+        description: "We believe in the power of music to bring people together. Through collaboration, mentorship, and community partnerships, we create meaningful relationships that extend beyond the concert hall."
     },
     {
         icon: Eye,
-        title: "Our Vision",
-        description: "The Kawartha Youth Orchestra is much more than dedicated student musicians led by dynamic teaching artists – although that is pretty great. We are community."
+        title: "Nurture",
+        description: "We are a safe and caring community. We lead with encouragement and heart, supporting every young person in discovering what they are capable of."
     }
 ];
 
@@ -91,14 +108,14 @@ export default function Home() {
     },
     {
       title: 'Upbeat!',
-      description: 'An inclusive and fun introduction to orchestral music for younger students.',
+      description: 'A barrier free after-school program getting kids started with Violin, Viola, or Cello.',
       href: '/programs/upbeat',
       icon: Music,
       image: getImage('program-upbeat')
     },
     {
       title: 'Lessons Program',
-      description: 'Individual and group lessons with our experienced instructors to hone your skills.',
+      description: 'Group lesson and small ensembles, for getting started or getting to the next level on an instrument.',
       href: '/programs/lessons',
       icon: GraduationCap,
       image: getImage('program-lessons')
@@ -312,7 +329,11 @@ export default function Home() {
                 <div className="container mx-auto">
                     <div className="grid md:grid-cols-2 gap-12 items-center">
                         <SlideIn direction="right" className="space-y-8">
-                            <h2 className="text-3xl font-headline font-bold text-center md:text-left">Our Core Values</h2>
+                            <div>
+                                <h2 className="text-3xl font-headline font-bold text-center md:text-left mb-4">Our Mission</h2>
+                                <p className="text-muted-foreground md:text-lg">{missionStatement}</p>
+                            </div>
+                            <h3 className="text-2xl font-headline font-bold text-center md:text-left">Our Values</h3>
                             <StaggerContainer>
                                 {coreValues.map(value => (
                                     <StaggerItem key={value.title} direction="left" distance={20}>
@@ -349,7 +370,7 @@ export default function Home() {
                 <FadeIn className="text-center mb-12">
                 <h2 className="text-3xl font-headline font-bold">What Our Community is Saying</h2>
                 <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed mt-4">
-                    We are proud to have the support of our incredible community of parents and students.
+                    We are proud to have the support of our incredible community of parents, volunteers, and students.
                 </p>
                 </FadeIn>
                 <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -431,12 +452,12 @@ export default function Home() {
                         <h2 className="text-3xl font-headline font-bold">Financial Aid & Scholarships</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-center">
                             <div className="bg-secondary p-6 rounded-lg transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
-                                <AnimatedCounter target={100} prefix="$" suffix="K" className="text-4xl font-bold text-primary" />
+                                <AnimatedCounter target={70000} prefix="$" suffix="+" className="text-4xl font-bold text-primary" />
                                 <p className="text-sm text-muted-foreground mt-1">In Annual Bursaries</p>
                             </div>
                             <div className="bg-secondary p-6 rounded-lg transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
-                                <AnimatedCounter target={100} suffix="+" className="text-4xl font-bold text-primary" />
-                                <p className="text-sm text-muted-foreground mt-1">Students Supported</p>
+                                <AnimatedCounter target={60} suffix="+" className="text-4xl font-bold text-primary" />
+                                <p className="text-sm text-muted-foreground mt-1">Bursaries and Scholarships Provided</p>
                             </div>
                         </div>
                         <p className="text-muted-foreground md:text-lg">
@@ -444,7 +465,7 @@ export default function Home() {
                         </p>
                         <div className="flex gap-4">
                             <Button asChild className="transition-transform duration-300 hover:-translate-y-1">
-                                <Link href='/programs/orchestras'>Explore Aid</Link>
+                                <Link href='/contact'>Contact Us for More Information</Link>
                             </Button>
                             {(() => {
                                 const buttonProps = getButtonProps(financialAidButton);

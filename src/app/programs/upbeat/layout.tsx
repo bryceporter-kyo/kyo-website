@@ -1,5 +1,6 @@
 import { fetchPageMetadataServer } from "@/lib/metadata-server";
 import { Metadata } from "next";
+import { EducationalProgramJsonLd } from "@/components/shared/JsonLd";
 
 export async function generateMetadata(): Promise<Metadata> {
   const data = await fetchPageMetadataServer("/programs/upbeat");
@@ -37,5 +38,15 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return (
+    <>
+      <EducationalProgramJsonLd
+        name="Upbeat! Social Development Program — Kawartha Youth Orchestra"
+        description="Upbeat! is KYO's fully subsidized, El Sistema-inspired after-school music and social development program. Families pay nothing — instruments, tuition, nutrition, and transport are all provided free of charge."
+        url="https://kyo.ca/programs/upbeat"
+        programType="El Sistema Social Development Music Program"
+      />
+      {children}
+    </>
+  );
 }
