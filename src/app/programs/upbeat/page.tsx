@@ -16,7 +16,8 @@ import {
     Check, 
     Heart, 
     Sparkles,
-    Zap
+    Zap,
+    Gift
 } from 'lucide-react';
 import Image from 'next/image';
 import { getLinkById } from '@/lib/links';
@@ -179,6 +180,12 @@ export default function UpbeatPage() {
                             <Link href={enrollButton.href} target={enrollButton.target}>{enrollButton.text}</Link>
                         </Button>
                       )}
+                      <Button asChild size="lg" variant="outline" className="rounded-full px-10 py-7 text-lg hover:scale-105 transition-all font-bold border-primary/30">
+                          <Link href="/programs/upbeat/gift-catalogue">
+                              <Gift className="w-5 h-5 mr-2" />
+                              Holiday Gift Catalogue
+                          </Link>
+                      </Button>
                     </div>
                 </motion.div>
                 <motion.div 
@@ -457,6 +464,12 @@ export default function UpbeatPage() {
                     <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
                         <Button asChild size="lg" className="bg-white text-[#0a3d2c] hover:bg-forest-50 px-12 py-8 rounded-full font-bold text-2xl shadow-2xl hover:scale-105 transition-all duration-300 w-full sm:w-auto">
                             <Link href='/support-us/donate'>Donate Today</Link>
+                        </Button>
+                        <Button asChild size="lg" className="bg-white/15 border border-white/40 text-white hover:bg-white/25 px-12 py-8 rounded-full font-bold text-xl transition-all w-full sm:w-auto">
+                            <Link href='/programs/upbeat/gift-catalogue'>
+                                <Gift className="w-5 h-5 mr-2" />
+                                Holiday Gift Catalogue
+                            </Link>
                         </Button>
                         <Button asChild variant="outline" size="lg" className="bg-transparent border-white/30 text-white hover:bg-white/10 px-12 py-8 rounded-full font-bold text-xl transition-all w-full sm:w-auto">
                             <Link href='/support-us/ways-to-give'>More Ways to Give</Link>
