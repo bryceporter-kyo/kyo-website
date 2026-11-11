@@ -319,8 +319,9 @@ export default function LinksAdminPage() {
                                                     field.onChange(
                                                         e.target.value
                                                             .toLowerCase()
-                                                            .replace(/\s+/g, "-")
-                                                            .replace(/[^a-z0-9-]/g, "")
+                                                            .replace(/\s+/g, "-")       // spaces → hyphens
+                                                            .replace(/[^a-z0-9-]/g, "") // strip special chars
+                                                            .replace(/-{2,}/g, "-")     // collapse double-hyphens
                                                     )
                                                 }
                                             />
