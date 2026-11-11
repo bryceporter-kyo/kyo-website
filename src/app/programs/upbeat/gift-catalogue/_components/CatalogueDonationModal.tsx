@@ -111,6 +111,7 @@ export default function CatalogueDonationModal({
   const [phone, setPhone] = useState('');
   const [taxReceiptRequested, setTaxReceiptRequested] = useState(false);
   const [dedicationText, setDedicationText] = useState('');
+  const [donorNote, setDonorNote] = useState('');
 
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [confirmedAmount, setConfirmedAmount] = useState<number>(0);
@@ -170,6 +171,7 @@ export default function CatalogueDonationModal({
           phone: phone.trim(),
           taxReceiptRequested: taxReceiptRequested && isTaxReceiptEligible,
           dedicationText: item.hasDedicationInscription ? dedicationText.trim() : undefined,
+          donorNote: donorNote.trim() ? donorNote.trim() : undefined,
         }),
       });
 
@@ -353,6 +355,26 @@ export default function CatalogueDonationModal({
                 />
               </div>
             </div>
+
+            {/* Optional Donor Note / Message (available on all items when not an inscription) */}
+            {!item.hasDedicationInscription && (
+              <div>
+                <Label htmlFor="donor-note" className="font-semibold text-sm">
+                  Add a Note or Message (Optional)
+                </Label>
+                <Textarea
+                  id="donor-note"
+                  placeholder="Share a message of support, dedication, or instructions..."
+                  value={donorNote}
+                  onChange={(e) => setDonorNote(e.target.value)}
+                  className="mt-1 resize-none text-sm"
+                  rows={2}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Your note will be included with your donation in our records.
+                </p>
+              </div>
+            )}
 
             {/* CRA Tax Receipt Section */}
             <div className="pt-2 border-t">

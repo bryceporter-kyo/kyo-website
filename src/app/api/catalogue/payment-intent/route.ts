@@ -15,12 +15,13 @@ interface CataloguePaymentRequestBody {
   phone?: string;
   taxReceiptRequested?: boolean;
   dedicationText?: string;
+  donorNote?: string;
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: CataloguePaymentRequestBody = await request.json();
-    const { itemId, donorAmount, name, email, address, phone, taxReceiptRequested, dedicationText } = body;
+    const { itemId, donorAmount, name, email, address, phone, taxReceiptRequested, dedicationText, donorNote } = body;
 
     // 1. Validate catalogue item exists in trusted registry
     const item = getCatalogueItem(itemId);
@@ -103,6 +104,9 @@ export async function POST(request: NextRequest) {
     }
     if (item.hasDedicationInscription && dedicationText && dedicationText.trim()) {
       metadata.dedication_text = dedicationText.trim().slice(0, 500);
+    }
+    if (donorNote && donorNote.trim()) {
+      metadata.donor_note = donorNote.trim().slice(0, 500);
     }
 
     // 7. Create PaymentIntent
