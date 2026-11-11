@@ -6,6 +6,7 @@ import {
   RegistrationFormConfig,
   FormQuestion,
   QuestionType,
+  RegistrationMode,
   QUESTION_TYPE_LABELS,
   createEmptyQuestion,
 } from "@/lib/registration-form";
@@ -37,6 +38,9 @@ import {
   CheckCircle2,
   CheckCircle,
   Zap,
+  Globe,
+  FileText,
+  ExternalLink,
 } from "lucide-react";
 import { CsvManagerDialog } from "@/components/shared/CsvManagerDialog";
 import { generateQuestionId } from "@/lib/registration-form";
@@ -382,10 +386,97 @@ Both the **Question Title** and **Description** fields support Markdown formatti
       {/* ── Form Metadata ── */}
       <Card>
         <CardHeader>
-          <CardTitle className="font-headline text-base">Form Settings</CardTitle>
-          <CardDescription>Title, description, and the message shown when the form is closed.</CardDescription>
+          <CardTitle className="font-headline text-base">Registration Destination & Settings</CardTitle>
+          <CardDescription>
+            Choose whether buttons link to this on-website form or an external Google Form, and configure form details.
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
+          {/* Registration Mode Selector */}
+          <div className="space-y-3 rounded-lg border bg-muted/20 p-4">
+            <div>
+              <label className="text-sm font-semibold tracking-wide">
+                Registration Type
+              </label>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Select where users are directed when clicking "Register" buttons for this program across the website.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <label
+                className={cn(
+                  "flex items-start gap-3 p-3.5 rounded-lg border cursor-pointer transition-all",
+                  (config.registrationType ?? "online_form") === "online_form"
+                    ? "border-primary bg-primary/5 shadow-sm ring-1 ring-primary"
+                    : "border-border hover:bg-muted/40"
+                )}
+              >
+                <input
+                  type="radio"
+                  name="registrationType"
+                  value="online_form"
+                  checked={(config.registrationType ?? "online_form") === "online_form"}
+                  onChange={() => updateConfig({ registrationType: "online_form" })}
+                  className="mt-1 h-4 w-4 text-primary accent-primary"
+                />
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1.5 font-medium text-sm">
+                    <Globe className="h-4 w-4 text-primary" />
+                    <span>On-Website Form</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Uses the interactive built-in web form at <code className="bg-muted px-1 py-0.5 rounded text-[11px]">{publicUrl}</code>.
+                  </p>
+                </div>
+              </label>
+
+              <label
+                className={cn(
+                  "flex items-start gap-3 p-3.5 rounded-lg border cursor-pointer transition-all",
+                  config.registrationType === "google_form"
+                    ? "border-primary bg-primary/5 shadow-sm ring-1 ring-primary"
+                    : "border-border hover:bg-muted/40"
+                )}
+              >
+                <input
+                  type="radio"
+                  name="registrationType"
+                  value="google_form"
+                  checked={config.registrationType === "google_form"}
+                  onChange={() => updateConfig({ registrationType: "google_form" })}
+                  className="mt-1 h-4 w-4 text-primary accent-primary"
+                />
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1.5 font-medium text-sm">
+                    <ExternalLink className="h-4 w-4 text-primary" />
+                    <span>Google Form Link</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Registration buttons link directly to an external Google Form.
+                  </p>
+                </div>
+              </label>
+            </div>
+
+            {config.registrationType === "google_form" && (
+              <div className="space-y-1.5 pt-2">
+                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Google Form URL
+                </label>
+                <Input
+                  value={config.googleFormUrl ?? ""}
+                  onChange={(e) => updateConfig({ googleFormUrl: e.target.value })}
+                  placeholder="https://docs.google.com/forms/d/... or https://forms.gle/..."
+                  className="h-9"
+                />
+                <p className="text-xs text-muted-foreground">
+                  When saved, all registration buttons across the website for this program will point directly to this Google Form.
+                </p>
+              </div>
+            )}
+          </div>
+
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Form Title

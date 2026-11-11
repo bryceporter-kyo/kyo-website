@@ -303,6 +303,29 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
             .sort(sortEventsChronologically);
     }, [allEvents]);
 
+    // Group concert events by Month Year (e.g., "December 2026")
+    const groupedConcertEvents = useMemo(() => {
+        const groups: { [key: string]: { monthDate: Date; events: Event[] } } = {};
+        concertEvents.forEach(event => {
+            const date = parseDate(event.date);
+            const key = format(date, 'yyyy-MM');
+            if (!groups[key]) {
+                groups[key] = {
+                    monthDate: date,
+                    events: []
+                };
+            }
+            groups[key].events.push(event);
+        });
+
+        return Object.keys(groups)
+            .sort()
+            .map(key => ({
+                monthTitle: format(groups[key].monthDate, 'MMMM yyyy'),
+                events: groups[key].events
+            }));
+    }, [concertEvents]);
+
     return (
         <div className="relative overflow-hidden bg-background min-h-screen pb-24">
             {/* Ambient Background */}
@@ -341,7 +364,7 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
                                 className={cn(
                                     "flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300",
                                     viewMode === 'concerts'
-                                        ? "bg-rose-500 text-white shadow-md shadow-rose-500/20"
+                                        ? "bg-white text-primary shadow-md"
                                         : "text-muted-foreground hover:text-slate-900"
                                 )}
                             >
@@ -355,90 +378,125 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
                     {viewMode === 'concerts' ? (
                         <div className="max-w-5xl mx-auto space-y-12">
                             <div className="text-center space-y-3">
-                                <Badge className="bg-rose-500/10 text-rose-600 border-none rounded-full px-4 py-1 text-xs font-bold uppercase tracking-wider">
-                                    Concerts & Signature Performances
-                                </Badge>
+                                <span className="inline-flex items-center rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
+                                    Concerts, Recitals &amp; Special Events
+                                </span>
                                 <h2 className="text-3xl md:text-5xl font-headline font-bold text-slate-900">
                                     Our Season at a Glance
                                 </h2>
                                 <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto font-light">
-                                    Experience the artistry and passion of our young musicians. All major concerts, studio recitals, and public showcases across the region.
+                                    Come out and support our talented musicians as they showcase their artistry and passion.
                                 </p>
                             </div>
 
+                            {/* Concerts Grouped by Month */}
                             {isLoading ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    {[1, 2, 3, 4].map(i => (
-                                        <Skeleton key={i} className="w-full h-64 rounded-3xl" />
+                                <div className="space-y-6">
+                                    {[1, 2, 3].map(i => (
+                                        <Skeleton key={i} className="w-full h-48 rounded-3xl" />
                                     ))}
                                 </div>
-                            ) : concertEvents.length > 0 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    {concertEvents.map((concert) => (
-                                        <Card
-                                            key={concert.id}
-                                            onClick={() => handleDayClick(parseDate(concert.date))}
-                                            className="group relative overflow-hidden rounded-[2.5rem] border-primary/10 bg-white/90 backdrop-blur-md shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1.5 cursor-pointer flex flex-col justify-between"
-                                        >
-                                            <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-rose-500 via-primary to-rose-400" />
-                                            <CardHeader className="p-8 pb-4">
-                                                <div className="flex items-center justify-between mb-4">
-                                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-rose-50 text-rose-600 border border-rose-200">
-                                                        <Sparkles className="w-3.5 h-3.5" />
-                                                        Concert Event
-                                                    </span>
-                                                    <div className="text-right">
-                                                        <div className="text-sm font-bold text-slate-900">
-                                                            {format(parseDate(concert.date), 'MMMM d, yyyy')}
-                                                        </div>
-                                                        <div className="text-xs text-muted-foreground uppercase font-semibold">
-                                                            {format(parseDate(concert.date), 'EEEE')}
-                                                        </div>
-                                                    </div>
+                            ) : groupedConcertEvents.length > 0 ? (
+                                <div className="space-y-16">
+                                    {groupedConcertEvents.map((group) => (
+                                        <div key={group.monthTitle} className="space-y-6">
+                                            {/* Month Delineation Header */}
+                                            <div className="flex items-center gap-4 pb-2 border-b-2 border-primary/20">
+                                                <div className="p-2.5 rounded-2xl bg-primary/10 text-primary">
+                                                    <CalendarIcon className="w-5 h-5" />
                                                 </div>
-                                                <CardTitle className="font-headline text-2xl md:text-3xl font-bold group-hover:text-primary transition-colors leading-tight">
-                                                    {concert.name}
-                                                </CardTitle>
-                                            </CardHeader>
-                                            <CardContent className="p-8 pt-0 space-y-6">
-                                                <div className="space-y-2 text-sm text-muted-foreground">
-                                                    {concert.time && (
-                                                        <div className="flex items-center gap-2.5">
-                                                            <Clock className="w-4 h-4 text-primary shrink-0" />
-                                                            <span className="font-medium text-slate-700">{concert.time}{concert.endTime && ` — ${concert.endTime}`}</span>
-                                                        </div>
-                                                    )}
-                                                    {concert.location && (
-                                                        <div className="flex items-center gap-2.5">
-                                                            <MapPin className="w-4 h-4 text-primary shrink-0" />
-                                                            <span className="font-medium text-slate-700">{concert.location}</span>
-                                                        </div>
-                                                    )}
-                                                </div>
+                                                <h3 className="font-headline text-2xl md:text-3xl font-bold text-slate-900">
+                                                    {group.monthTitle}
+                                                </h3>
+                                                <Badge variant="outline" className="ml-auto text-xs font-semibold px-3 py-1 rounded-full border-primary/30 text-primary bg-primary/5">
+                                                    {group.events.length} {group.events.length === 1 ? 'Event' : 'Events'}
+                                                </Badge>
+                                            </div>
 
-                                                {concert.notes && (
-                                                    <p className="text-sm text-slate-600 font-light line-clamp-3 leading-relaxed border-t border-slate-100 pt-4">
-                                                        {concert.notes}
-                                                    </p>
-                                                )}
+                                            {/* Full-width Vertically Stacked Event Cards */}
+                                            <div className="space-y-6">
+                                                {group.events.map((concert) => (
+                                                    <Card
+                                                        key={concert.id}
+                                                        onClick={() => handleDayClick(parseDate(concert.date))}
+                                                        className="group relative overflow-hidden rounded-[2.5rem] border-primary/10 bg-white/95 backdrop-blur-md shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer flex flex-col md:flex-row"
+                                                    >
+                                                        <div className="absolute top-0 left-0 right-0 md:bottom-0 md:right-auto md:w-2 h-2 md:h-auto bg-gradient-to-r md:bg-gradient-to-b from-primary via-primary/80 to-primary/60" />
+                                                        
+                                                        {concert.imageUrl && (
+                                                            <div className="relative w-full md:w-80 md:min-w-[20rem] h-56 md:h-auto overflow-hidden shrink-0">
+                                                                <img
+                                                                    src={concert.imageUrl}
+                                                                    alt={concert.name}
+                                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                                />
+                                                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent md:hidden" />
+                                                            </div>
+                                                        )}
 
-                                                <div className="pt-2 flex items-center justify-between">
-                                                    <Button variant="ghost" className="p-0 text-primary font-bold text-sm group-hover:translate-x-1 transition-transform">
-                                                        View Event Details <ArrowRight className="ml-2 w-4 h-4" />
-                                                    </Button>
-                                                    {concert.link && (
-                                                        <span className="text-xs text-muted-foreground flex items-center gap-1 font-medium">
-                                                            <ExternalLink className="w-3.5 h-3.5" /> More info
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </CardContent>
-                                        </Card>
+                                                        <div className="flex-1 p-6 md:p-8 flex flex-col justify-between">
+                                                            <div>
+                                                                <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                                                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-primary/10 text-primary border border-primary/20">
+                                                                        <Sparkles className="w-3.5 h-3.5" />
+                                                                        Concert Event
+                                                                    </span>
+                                                                    <div className="text-right">
+                                                                        <div className="text-sm font-bold text-slate-900">
+                                                                            {format(parseDate(concert.date), 'MMMM d, yyyy')}
+                                                                        </div>
+                                                                        <div className="text-xs text-muted-foreground uppercase font-semibold">
+                                                                            {format(parseDate(concert.date), 'EEEE')}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <CardTitle className="font-headline text-2xl md:text-3xl font-bold group-hover:text-primary transition-colors leading-tight mb-4">
+                                                                    {concert.name}
+                                                                </CardTitle>
+
+                                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-muted-foreground mb-4">
+                                                                    {concert.time && (
+                                                                        <div className="flex items-center gap-2.5">
+                                                                            <Clock className="w-4 h-4 text-primary shrink-0" />
+                                                                            <span className="font-medium text-slate-700">{concert.time}{concert.endTime && ` — ${concert.endTime}`}</span>
+                                                                        </div>
+                                                                    )}
+                                                                    {concert.location && (
+                                                                        <div className="flex items-center gap-2.5">
+                                                                            <MapPin className="w-4 h-4 text-primary shrink-0" />
+                                                                            <span className="font-medium text-slate-700">{concert.location}</span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+
+                                                                {concert.notes && (
+                                                                    <p className="text-sm text-slate-600 font-light line-clamp-3 leading-relaxed border-t border-slate-100 pt-3 mb-4">
+                                                                        {concert.notes}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+
+                                                            <div className="pt-2 flex items-center justify-between border-t border-slate-100">
+                                                                <Button variant="ghost" className="p-0 text-primary font-bold text-sm group-hover:translate-x-1 transition-transform">
+                                                                    View Event Details <ArrowRight className="ml-2 w-4 h-4" />
+                                                                </Button>
+                                                                {concert.link && (
+                                                                    <span className="text-xs text-muted-foreground flex items-center gap-1 font-medium">
+                                                                        <ExternalLink className="w-3.5 h-3.5" /> More info
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </Card>
+                                                ))}
+                                            </div>
+                                        </div>
                                     ))}
                                 </div>
                             ) : (
                                 <div className="text-center py-20 px-8 rounded-[3rem] border-2 border-dashed border-primary/10 bg-primary/[0.02]">
-                                    <Sparkles className="w-12 h-12 text-rose-400 mx-auto mb-4" />
+                                    <Sparkles className="w-12 h-12 text-primary mx-auto mb-4" />
                                     <p className="text-muted-foreground text-lg font-light">
                                         No concert events are currently scheduled. Check back soon for announcements!
                                     </p>
@@ -1009,16 +1067,6 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
                                     )}>
                                         <div className="flex items-start justify-between gap-4">
                                             <div className="space-y-1">
-                                                <Badge className={cn(
-                                                    "mb-2 text-white border-none",
-                                                    event.type === 'special' ? "bg-rose-500 hover:bg-rose-600" :
-                                                    event.type === 'orchestras' ? "bg-primary hover:bg-primary/95" :
-                                                    event.type === 'upbeat' ? "bg-sky-500 hover:bg-sky-600" :
-                                                    event.type === 'lessons' ? "bg-violet-500 hover:bg-violet-600" :
-                                                    "bg-slate-400"
-                                                )}>
-                                                    {event.type}
-                                                </Badge>
                                                 <h4 className="text-2xl font-headline font-bold text-slate-900">{event.name}</h4>
                                             </div>
                                             {event.link && (
@@ -1058,12 +1106,14 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
                                         {event.notes && (
                                             <div className="p-6 rounded-2xl bg-primary/[0.03] border border-primary/10 space-y-3">
                                                 <div className="flex items-center gap-2 text-primary">
-                                                    <Info className="w-4 h-4" />
+                                                    <Info className="w-4 h-4 shrink-0" />
                                                     <span className="text-xs font-bold uppercase tracking-widest">Notes & Details</span>
                                                 </div>
-                                                <p className="text-slate-600 leading-relaxed font-light italic font-serif">
-                                                    "{event.notes}"
-                                                </p>
+                                                <div className="prose prose-slate max-w-none text-slate-700 font-light leading-relaxed space-y-4 prose-p:my-0 prose-p:leading-relaxed prose-a:text-primary prose-a:font-semibold prose-a:underline hover:prose-a:text-primary/80 prose-strong:text-slate-900 prose-strong:font-semibold prose-ul:my-2 prose-li:my-0.5">
+                                                    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                                                        {event.notes}
+                                                    </ReactMarkdown>
+                                                </div>
                                             </div>
                                         )}
                                     </div>

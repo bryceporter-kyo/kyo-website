@@ -1,0 +1,33 @@
+File,Original/Comments,New/Changes,NOTES
+/support-us/ways-to-give,Become a Volunteer,,This should be a link to our Volenteer Registration form: https://docs.google.com/forms/d/e/1FAIpQLSdglMsv7yojGWDCl-PoTad3TNTbzfJDgxxq14mtKoH5enOWHg/viewform?usp=header
+/support-us/ways-to-give,Learn About Sponsorship,,This should be a link the the Case for Support
+/support-us/ways-to-give,Make an In-Kind Gift,,This should be a link to /contact
+/support-us/ways-to-give,"100%
+Community Focused
+
+24+
+Years of Impact",,There should be a button to /support-us/donate right here. 
+,,,
+,,,
+/support-us/donate,Tuition fees cover only 4% of what it takes to run our programs. ,Tuition fees cover only 17% of what it takes to run our programs. ,"This what I get with my rough math, in either case I think its a more viable public facing number. 4% comes across as concerningly low."
+/support-us/donate,Section Supporter,Minuet,Make sure these new names match on the donation portal. 
+/support-us/donate,"Covers the cost of printing clean, high-quality orchestrations for an entire section for the concert series.",Every note maters! Join the incredible community of music lovers that make the KYO possible.,
+/support-us/donate,Instrument Care Partner,Sonata,
+/support-us/donate,"Funds routine maintenance, new strings, or brass slide cleaning for an orchestra-owned instrument.",Help us create beautiful harmonies and lasting impacts. Strike a chord that will resonate for years to come.,
+/support-us/donate,Guest Artist Host,Concerto,
+/support-us/donate,Helps subsidize visiting artists to host educational masterclasses and work with our students.,Give a gift that takes centre stage and raises up our talented performers. Your support allows young musicians to shine.,
+/support-us/donate,Concert Patron,Symphony,
+/support-us/donate,Directly sponsors venue rental and stage equipment setup fees for our seasonal showcase performance.,A donation that impacts the whole orchestra. Be the reason we can nurture local youth from their first concert to a triumphant KYO finale and beyond to a lifetime of music. ,
+/support-us/donate,"Covers the cost of printing clean, high-quality orchestrations for an entire section for the concert series.",Help keep the music playing. Support our dedicated team of professional musician and volunteers in changing lives through music.,
+/support-us/donate,"Funds a group sectional coaching, giving students direct mentorship from a professional musician.","Contribute to a partial scholarship, making music education accessible for a deserving student.",
+/support-us/donate,"Contributes to a partial scholarship, making music education accessible for a deserving student.","Fund a sectional coaching, giving students direct mentorship from a professional musician and helping them achieve their musical goals.",
+/support-us/donate,"Tax receipts are provided for instruments in like-new condition that are fully playable and require no repairs or servicing. If your instrument needs work, we still welcome the donation — however, to issue a receipt you will need to arrange an appraisal and service quote beforehand and include it with your donation. The receiptable amount will be the appraised value minus the cost of the quoted service.","Tax receipts are provided for instruments in like-new condition that are fully playable and require no repairs or servicing and with a receipt of purchased dated in the last 3 years. If your instrument is older or needs work, we still welcome the donation — however, to issue a receipt you will need to arrange an appraisal and/or service quote beforehand and include it with your donation. The receiptable amount will be the appraised value minus the cost of the quoted service. For more information on the tax receipt process please reach out. ",
+/support-us/volunteer,,,Links from this page need to go to our Volenteer Registration form: https://docs.google.com/forms/d/e/1FAIpQLSdglMsv7yojGWDCl-PoTad3TNTbzfJDgxxq14mtKoH5enOWHg/viewform?usp=header
+Navigation bar,,,"Remove Case for Support from navigation, leave as internally linked page only. "
+Navigation bar (Register),Specialized program for younger musicians.,Join our barrier free afterschool string program!,
+Navigation bar (Register),"Junior, Intermediate, and Senior programs.","Join one of our three levels of Orchestras, Beginner & Intermediate Classes, or an Ensemble.  ",
+Navigation bar (Register),Register now,,Link to Google Forms
+/programs/calendar,,,"remove red highlights and change text from red to black or green from ""Concert Season"" tab"
+/programs/calendar,,,Add ablility to post images to concert season events
+/programs/calendar,Concerts & Signature Performances,"Concerts, Recitals & Special Events",
+/programs/calendar,"Experience the artistry and passion of our young musicians. All major concerts, studio recitals, and public showcases across the region.",Come out and support our talented musicians as they showcase their artistry and passion. ,

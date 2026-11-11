@@ -22,12 +22,17 @@ export async function fetchPageMetadataServer(path: string): Promise<PageMetadat
   const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/default/documents/page-metadata/${docId}`;
 
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+
     const res = await fetch(url, {
       next: { revalidate: 3600 }, // Cache for 1 hour
+      signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',
       },
     });
+    clearTimeout(timeoutId);
 
     if (!res.ok) return null;
 
@@ -45,7 +50,7 @@ export async function fetchPageMetadataServer(path: string): Promise<PageMetadat
       keywords: data.fields.keywords?.stringValue,
     };
   } catch (error) {
-    console.error(`[MetadataServer] Error fetching metadata for ${path}:`, error);
+    // Graceful fallback: when offline, during network hiccup, or when rate limited
     return null;
   }
 }
@@ -60,12 +65,17 @@ export async function fetchAllPageMetadataServer(): Promise<PageMetadata[]> {
   const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/default/documents/page-metadata`;
 
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+
     const res = await fetch(url, {
       next: { revalidate: 3600 },
+      signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',
       },
     });
+    clearTimeout(timeoutId);
 
     if (!res.ok) return [];
 
@@ -88,7 +98,6 @@ export async function fetchAllPageMetadataServer(): Promise<PageMetadata[]> {
       };
     });
   } catch (error) {
-    console.error("[MetadataServer] Error fetching all metadata:", error);
     return [];
   }
 }

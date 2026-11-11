@@ -7,12 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Pencil, Trash2, Download, Upload, X, Loader2, Save } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, Download, Upload, X, Loader2, Save, Info } from "lucide-react";
 import Link from "next/link";
 import Papa from "papaparse";
 import { fetchEventsFromFirebase, addEventToFirebase, updateEventInFirebase, deleteEventFromFirebase } from "@/lib/events";
+import { uploadImage } from "@/lib/image-service";
 import { fetchCalendarSettings, saveCalendarSettings } from "@/lib/calendar-settings";
 import { fetchCalendarSubscribers, addCalendarSubscriber, deleteCalendarSubscriber, CalendarSubscriber } from "@/lib/calendar-subscribers";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -45,6 +47,7 @@ const eventSchema = z.object({
   endTime: z.string().optional(),
   notes: z.string().optional(),
   link: z.string().optional(),
+  imageUrl: z.string().optional(),
   type: z.string({ required_error: "You need to select an event type." }),
 });
 
@@ -52,6 +55,7 @@ export default function EventsAdminPage() {
     const { toast } = useToast();
     const [events, setEvents] = React.useState<Event[]>([]);
     const [editingEvent, setEditingEvent] = React.useState<Event | null>(null);
+    const [imageFile, setImageFile] = React.useState<File | null>(null);
     const [isLoading, setIsLoading] = React.useState(true);
     const [isSaving, setIsSaving] = React.useState(false);
 
@@ -171,6 +175,7 @@ export default function EventsAdminPage() {
             endTime: "",
             notes: "",
             link: "",
+            imageUrl: "",
             type: "normal",
         },
     });
@@ -185,6 +190,7 @@ export default function EventsAdminPage() {
           endTime: editingEvent.endTime || "",
           notes: editingEvent.notes || "",
           link: editingEvent.link || "",
+          imageUrl: editingEvent.imageUrl || "",
           type: editingEvent.type,
         });
       } else {
@@ -196,17 +202,25 @@ export default function EventsAdminPage() {
           endTime: "",
           notes: "",
           link: "",
+          imageUrl: "",
           type: "normal",
         });
       }
+      setImageFile(null);
     }, [editingEvent, form]);
 
     async function onSubmit(values: z.infer<typeof eventSchema>) {
         setIsSaving(true);
         try {
+            let finalImageUrl = values.imageUrl;
+            if (imageFile) {
+                finalImageUrl = await uploadImage(imageFile, `events/img_${Date.now()}`);
+            }
+
             if (editingEvent) {
                 const updatedEventData = {
                     ...values,
+                    imageUrl: finalImageUrl || undefined,
                     date: format(values.date, 'yyyy-MM-dd'),
                 };
                 await updateEventInFirebase(editingEvent.id, updatedEventData);
@@ -225,6 +239,7 @@ export default function EventsAdminPage() {
             } else {
                 const newEventData = {
                     ...values,
+                    imageUrl: finalImageUrl || undefined,
                     date: format(values.date, 'yyyy-MM-dd'),
                 };
                 const newEvent = await addEventToFirebase(newEventData);
@@ -237,6 +252,7 @@ export default function EventsAdminPage() {
                 });
             }
             form.reset();
+            setImageFile(null);
         } catch (error) {
             console.error('Error saving event:', error);
             toast({
@@ -740,9 +756,16 @@ export default function EventsAdminPage() {
                                 name="notes"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Notes / Details (Optional)</FormLabel>
+                                        <div className="flex items-center justify-between">
+                                            <FormLabel>Notes / Details (Optional)</FormLabel>
+                                            <span className="text-xs text-muted-foreground font-normal">Supports Markdown and multiple paragraphs</span>
+                                        </div>
                                         <FormControl>
-                                            <Input placeholder="e.g., 'Bring a music stand and formal attire.'" {...field} />
+                                            <Textarea 
+                                                placeholder="Write details, schedule breakdown, or concert instructions. Supports Markdown, bold text, links, and paragraphs." 
+                                                className="min-h-[120px] font-mono text-sm"
+                                                {...field} 
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -756,6 +779,52 @@ export default function EventsAdminPage() {
                                         <FormLabel>Link (Optional)</FormLabel>
                                         <FormControl>
                                             <Input placeholder="e.g., '/events/spring-concert'" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="imageUrl"
+                                render={({ field }) => (
+                                    <FormItem className="space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <FormLabel className="text-base font-semibold">Event Image / Flyer (Optional)</FormLabel>
+                                            <Badge variant="secondary" className="text-xs font-normal">
+                                                Concert Season &amp; Calendar
+                                            </Badge>
+                                        </div>
+                                        <FormControl>
+                                            <div className="flex flex-col gap-3">
+                                                {field.value && (
+                                                    <div className="relative h-36 w-60 rounded-xl overflow-hidden border shadow-sm group">
+                                                        <img src={field.value} className="object-cover w-full h-full" alt="Preview" />
+                                                        <Button 
+                                                            type="button" 
+                                                            variant="destructive" 
+                                                            size="icon" 
+                                                            className="absolute top-2 right-2 h-7 w-7 rounded-full shadow-md"
+                                                            onClick={() => {
+                                                                field.onChange("");
+                                                                setImageFile(null);
+                                                            }}
+                                                        >
+                                                            <X className="h-3.5 w-3.5" />
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                                <Input 
+                                                    type="file" 
+                                                    accept="image/png,image/jpeg,image/webp,image/jpg" 
+                                                    onChange={(e) => {
+                                                        if (e.target.files && e.target.files[0]) {
+                                                            setImageFile(e.target.files[0]);
+                                                            field.onChange(URL.createObjectURL(e.target.files[0]));
+                                                        }
+                                                    }} 
+                                                />
+                                            </div>
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>

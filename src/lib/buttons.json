@@ -87,7 +87,7 @@
       "text": "Sign Up to Volunteer",
       "link": {
         "type": "external",
-        "value": "register"
+        "value": "volunteer-registration"
       },
       "visible": true
     },
@@ -97,7 +97,7 @@
       "text": "Become a Volunteer Today",
       "link": {
         "type": "external",
-        "value": "register"
+        "value": "volunteer-registration"
       },
       "visible": true
     }

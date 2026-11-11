@@ -9,6 +9,8 @@ import Image from "next/image";
 import Link from 'next/link';
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useData } from "@/components/providers/DataProvider";
+import { getLinkById } from "@/lib/links";
 
 const supportOptions = [
     {
@@ -16,29 +18,33 @@ const supportOptions = [
         title: "Volunteer Your Time",
         description: "We rely on dedicated volunteers to help with concerts, events, and administrative tasks. Whether you can help usher at a concert, assist with mailings, or serve on a committee, your time and talent are invaluable to us.",
         cta: "Become a Volunteer",
-        color: "bg-rose-500",
-        delay: 0.1
+        delay: 0.1,
+        linkId: "volunteer-registration",
+        external: true,
     },
     {
         icon: Briefcase,
         title: "Corporate Sponsorships",
-        description: "Partner with KYO Hub to support the arts in our community while gaining visibility for your business. Align your brand with artistic excellence and youth development through our tailored sponsorship packages.",
+        description: "Partner with KYO to support the arts in our community while gaining visibility for your business. Align your brand with artistic excellence and youth development through our tailored sponsorship packages.",
         cta: "Learn About Sponsorship",
-        color: "bg-amber-500",
-        delay: 0.2
+        delay: 0.2,
+        href: "/support-us/case-for-support",
+        external: false,
     },
     {
         icon: Gift,
         title: "In-Kind Donations",
         description: "Non-monetary contributions are a great way to support our mission. We welcome donations of instruments, office supplies, and professional services such as printing, marketing, or photography.",
         cta: "Make an In-Kind Gift",
-        color: "bg-emerald-500",
-        delay: 0.3
+        delay: 0.3,
+        href: "/contact",
+        external: false,
     }
 ];
 
 export default function SupportPage() {
     const { getImage } = useImages();
+    const { getLink } = useData();
     const headerImage = getImage('page-header-support');
     const supportImage = getImage('support-volunteer');
     const supportCtaImage = getImage('support-cta');
@@ -112,6 +118,15 @@ export default function SupportPage() {
                                     <p className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Years of Impact</p>
                                 </div>
                             </div>
+
+                            <div className="pt-2">
+                                <Button asChild size="lg" className="rounded-full px-8 py-6 text-base font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">
+                                    <Link href="/support-us/donate">
+                                        <Heart className="mr-2 h-5 w-5 fill-current" />
+                                        Donate Now
+                                    </Link>
+                                </Button>
+                            </div>
                         </motion.div>
 
                         <motion.div 
@@ -163,41 +178,45 @@ export default function SupportPage() {
                     </motion.div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {supportOptions.map((option, idx) => (
-                            <motion.div
-                                key={option.title}
-                                initial={{ opacity: 0, y: 30 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: option.delay }}
-                            >
-                                <Card className="group relative h-full flex flex-col border-primary/5 bg-white shadow-sm transition-all duration-500 hover:shadow-2xl hover:border-primary/20 rounded-[2.5rem] overflow-hidden">
-                                    <div className={cn(
-                                        "h-2 w-full transition-all duration-500 group-hover:h-3",
-                                        option.color
-                                    )} />
-                                    <CardHeader className="pt-10 px-8 pb-4">
-                                        <div className={cn(
-                                            "w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3",
-                                            option.color,
-                                            "bg-opacity-10 text-opacity-100"
-                                        )}>
-                                            <option.icon className={cn("w-8 h-8", option.color.replace('bg-', 'text-'))} />
+                        {supportOptions.map((option, idx) => {
+                            const resolvedHref = option.linkId
+                                ? (getLink(option.linkId)?.url || getLinkById(option.linkId)?.url || "#")
+                                : (option.href || "#");
+
+                            return (
+                                <motion.div
+                                    key={option.title}
+                                    initial={{ opacity: 0, y: 30 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: option.delay }}
+                                >
+                                    <Card className="group relative h-full flex flex-col border border-primary/10 bg-white/95 shadow-sm transition-all duration-500 hover:shadow-2xl hover:border-primary/30 rounded-[2.5rem] overflow-hidden">
+                                        <div className="h-2 w-full transition-all duration-500 group-hover:h-3 bg-gradient-to-r from-primary via-primary/80 to-primary/60" />
+                                        <CardHeader className="pt-10 px-8 pb-4">
+                                            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3 bg-primary/10 text-primary border border-primary/20">
+                                                <option.icon className="w-8 h-8 text-primary" />
+                                            </div>
+                                            <CardTitle className="font-headline text-2xl group-hover:text-primary transition-colors">{option.title}</CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="px-8 pb-8 flex-grow">
+                                            <p className="text-muted-foreground leading-relaxed font-light">{option.description}</p>
+                                        </CardContent>
+                                        <div className="px-8 pb-10 mt-auto">
+                                            <Link
+                                                href={resolvedHref}
+                                                target={option.external ? "_blank" : undefined}
+                                                rel={option.external ? "noopener noreferrer" : undefined}
+                                                className="inline-flex items-center gap-2 text-primary font-bold group/link transition-all"
+                                            >
+                                                <span className="text-base group-hover/link:underline decoration-2 underline-offset-4">{option.cta}</span>
+                                                <ArrowRight className="w-5 h-5 transition-transform group-hover/link:translate-x-2" />
+                                            </Link>
                                         </div>
-                                        <CardTitle className="font-headline text-2xl group-hover:text-primary transition-colors">{option.title}</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="px-8 pb-8 flex-grow">
-                                        <p className="text-muted-foreground leading-relaxed font-light">{option.description}</p>
-                                    </CardContent>
-                                    <div className="px-8 pb-10 mt-auto">
-                                        <div className="flex items-center gap-2 text-primary font-bold group/link transition-all cursor-pointer">
-                                            <span className="text-base group-hover/link:underline decoration-2 underline-offset-4">{option.cta}</span>
-                                            <ArrowRight className="w-5 h-5 transition-transform group-hover/link:translate-x-2" />
-                                        </div>
-                                    </div>
-                                </Card>
-                            </motion.div>
-                        ))}
+                                    </Card>
+                                </motion.div>
+                            );
+                        })}
                     </div>
                 </div>
             </section>

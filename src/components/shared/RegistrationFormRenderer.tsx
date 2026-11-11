@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, CheckCircle, ArrowRight, AlertCircle, ArrowLeft, Info } from "lucide-react";
+import { Loader2, CheckCircle, ArrowRight, AlertCircle, ArrowLeft, Info, ExternalLink } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { motion } from "framer-motion";
@@ -86,6 +86,32 @@ export function RegistrationFormRenderer({ program }: RegistrationFormRendererPr
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
         <p className="text-muted-foreground animate-pulse">Loading registration form...</p>
       </div>
+    );
+  }
+
+  if (config?.registrationType === 'google_form' && config.googleFormUrl) {
+    return (
+      <Card className="max-w-2xl mx-auto shadow-md">
+        <CardHeader className="text-center pb-2">
+          <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-4">
+            <ExternalLink className="h-6 w-6" />
+          </div>
+          <CardTitle className="font-headline text-3xl">{config.title}</CardTitle>
+          <CardDescription className="text-base mt-2">
+            {config.description || "Registration for this program is hosted via Google Forms. Click the button below to complete your registration."}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center gap-4 py-8">
+          <Button asChild size="lg" className="rounded-xl px-8 py-6 text-lg font-bold gap-2 shadow-lg">
+            <a href={config.googleFormUrl} target="_blank" rel="noopener noreferrer">
+              Register Now <ArrowRight className="h-5 w-5" />
+            </a>
+          </Button>
+          <p className="text-xs text-muted-foreground text-center max-w-sm">
+            Opens the registration form in a new tab.
+          </p>
+        </CardContent>
+      </Card>
     );
   }
 

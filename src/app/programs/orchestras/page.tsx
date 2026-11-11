@@ -402,7 +402,7 @@ export default function OrchestrasPage() {
                 </div>
             </motion.div>
           </div>
-       </section>n>
+       </section>
 
       {/* Aid Section */}
        <section className="py-24 px-4">

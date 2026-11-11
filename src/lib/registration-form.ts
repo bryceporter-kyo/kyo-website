@@ -61,6 +61,8 @@ export interface FormQuestion {
 
 export type FormProgram = 'orchestras' | 'upbeat';
 
+export type RegistrationMode = 'online_form' | 'google_form';
+
 export interface RegistrationFormConfig {
   /** Firestore document ID — matches FormProgram */
   id: FormProgram;
@@ -68,6 +70,10 @@ export interface RegistrationFormConfig {
   description?: string;
   /** Whether the form is publicly accepting submissions */
   isOpen: boolean;
+  /** Whether to use the custom online form or an external Google Form */
+  registrationType?: RegistrationMode;
+  /** External Google Form URL when registrationType is 'google_form' */
+  googleFormUrl?: string;
   /** Shown to users when isOpen is false */
   closedMessage?: string;
   submissionPage?: {
@@ -127,6 +133,8 @@ export const DEFAULT_ORCHESTRAS_FORM: RegistrationFormConfig = {
   title: 'Orchestra Program Registration',
   description: 'Register for the Kawartha Youth Orchestra program. Please complete all required fields.',
   isOpen: false,
+  registrationType: 'online_form',
+  googleFormUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSf3tGbfSdo8jdVtx85G7BbX0c4AVxTgRUviCLkhbBDbXia19A/viewform?usp=sf_link',
   closedMessage: 'Registration is not currently open. Please check back later or contact us for more information.',
   submissionPage: {
     title: 'Thank You!',
@@ -142,6 +150,8 @@ export const DEFAULT_UPBEAT_FORM: RegistrationFormConfig = {
   title: 'UpBeat Program Registration',
   description: 'Register for the KYO UpBeat program. Please complete all required fields.',
   isOpen: false,
+  registrationType: 'online_form',
+  googleFormUrl: 'https://forms.gle/tUwncYLCnuALW8FT7',
   closedMessage: 'Registration is not currently open. Please check back later or contact us for more information.',
   submissionPage: {
     title: 'Registration Complete!',

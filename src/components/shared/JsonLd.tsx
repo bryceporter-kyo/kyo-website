@@ -215,6 +215,7 @@ export function CalendarEventsJsonLd({ events }: { events: Event[] }) {
       description: e.notes || `${e.name} with Kawartha Youth Orchestra (${e.type || 'Program Event'})`,
       startDate,
       ...(endDate ? { endDate } : {}),
+      ...(e.imageUrl ? { image: [e.imageUrl] } : {}),
       eventStatus: 'https://schema.org/EventScheduled',
       eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
       location: {
@@ -238,7 +239,7 @@ export function CalendarEventsJsonLd({ events }: { events: Event[] }) {
         price: '0',
         priceCurrency: 'CAD',
         availability: 'https://schema.org/InStock',
-        url: 'https://kyo.ca/programs/calendar',
+        url: e.link ? (e.link.startsWith('http') ? e.link : `https://kyo.ca${e.link}`) : 'https://kyo.ca/programs/calendar',
       },
     };
   });

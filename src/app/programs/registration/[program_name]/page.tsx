@@ -1,6 +1,7 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { RegistrationFormRenderer } from "@/components/shared/RegistrationFormRenderer";
 import { FormProgram } from "@/lib/registration-form";
+import { getRegistrationFormServer } from "@/lib/registration-form-service";
 
 interface Props {
   params: Promise<{
@@ -23,6 +24,12 @@ export default async function DynamicRegistrationPage(props: Props) {
   // We can expand this list or make it dynamic if we change the core type later.
   if (program !== "orchestras" && program !== "upbeat") {
     notFound();
+  }
+
+  // Check if this program is set to redirect to a Google Form
+  const formConfig = await getRegistrationFormServer(program);
+  if (formConfig?.registrationType === 'google_form' && formConfig.googleFormUrl) {
+    redirect(formConfig.googleFormUrl);
   }
 
   return (

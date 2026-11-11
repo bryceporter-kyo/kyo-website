@@ -12,6 +12,7 @@ export type Event = {
   notes?: string;
   attachments?: { name: string; url: string }[];
   link?: string;
+  imageUrl?: string;
   type: 'special' | 'normal' | string;
 };
 

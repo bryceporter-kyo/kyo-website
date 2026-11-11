@@ -33,6 +33,9 @@ export default async function CalendarPage() {
                   <span itemProp="name">{event.location}</span>
                 </div>
               )}
+              {event.imageUrl && (
+                <img itemProp="image" src={event.imageUrl} alt={event.name} />
+              )}
               {event.notes && <p itemProp="description">{event.notes}</p>}
               <span itemProp="eventAttendanceMode" content="https://schema.org/OfflineEventAttendanceMode" />
               <span itemProp="eventStatus" content="https://schema.org/EventScheduled" />

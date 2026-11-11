@@ -30,7 +30,7 @@ const monthlyTiers = [
         title: 'Supporter',
         amount: '$25',
         period: '/month',
-        description: 'Funds a group sectional coaching, giving students direct mentorship from a professional musician.',
+        description: 'Contribute to a partial scholarship, making music education accessible for a deserving student.',
         features: ['Enhances learning experiences', 'Provides expert instruction'],
         linkId: 'donate-stripe-supporter',
     },
@@ -38,7 +38,7 @@ const monthlyTiers = [
         title: 'Patron',
         amount: '$50',
         period: '/month',
-        description: 'Contributes to a partial scholarship, making music education accessible for a deserving student.',
+        description: 'Fund a sectional coaching, giving students direct mentorship from a professional musician and helping them achieve their musical goals.',
         features: ['Increases program accessibility', 'Empowers a young musician'],
         popular: true,
         linkId: 'donate-stripe-patron',
@@ -55,32 +55,32 @@ const monthlyTiers = [
 
 const oneTimeTiers = [
     {
-        title: 'Section Supporter',
+        title: 'Minuet',
         amount: '$25',
         period: 'one-time',
-        description: 'Covers the cost of printing clean, high-quality orchestrations for an entire section for the concert series.',
+        description: 'Every note matters! Join the incredible community of music lovers that make the KYO possible.',
         features: ['Supports section needs'],
     },
     {
-        title: 'Instrument Care Partner',
+        title: 'Sonata',
         amount: '$50',
         period: 'one-time',
-        description: 'Funds routine maintenance, new strings, or brass slide cleaning for an orchestra-owned instrument.',
+        description: 'Help us create beautiful harmonies and lasting impacts. Strike a chord that will resonate for years to come.',
         features: ['Preserves instruments'],
     },
     {
-        title: 'Guest Artist Host',
+        title: 'Concerto',
         amount: '$100',
         period: 'one-time',
-        description: 'Helps subsidize visiting artists to host educational masterclasses and work with our students.',
+        description: 'Give a gift that takes centre stage and raises up our talented performers. Your support allows young musicians to shine.',
         features: ['Expert coaching access'],
         popular: true,
     },
     {
-        title: 'Concert Patron',
+        title: 'Symphony',
         amount: '$250',
         period: 'one-time',
-        description: 'Directly sponsors venue rental and stage equipment setup fees for our seasonal showcase performance.',
+        description: 'A donation that impacts the whole orchestra. Be the reason we can nurture local youth from their first concert to a triumphant KYO finale and beyond to a lifetime of music.',
         features: ['Supports concert staging'],
     },
 ];
@@ -166,7 +166,7 @@ export default function DonatePage() {
                             <h2 className="text-5xl font-headline font-bold leading-tight">Your Support Keeps the Music Playing</h2>
                             <div className="space-y-6 text-muted-foreground text-lg font-light leading-relaxed">
                                 <p>
-                                    Tuition fees cover only <span className="text-primary font-bold">4%</span> of what it takes to run our programs. The rest comes from the generosity of people like you.
+                                    Tuition fees cover only <span className="text-primary font-bold">17%</span> of what it takes to run our programs. The rest comes from the generosity of people like you.
                                 </p>
                                 <p>
                                     Your donation directly funds everything from sheet music and instrument repairs to scholarships and expert coaching, ensuring that every young person has the chance to experience the power of music.
@@ -530,7 +530,7 @@ export default function DonatePage() {
                                                                 Will I receive a tax receipt?
                                                             </AccordionTrigger>
                                                             <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
-                                                                Tax receipts are provided for instruments in like-new condition that are fully playable and require no repairs or servicing. If your instrument needs work, we still welcome the donation — however, to issue a receipt you will need to arrange an appraisal and service quote beforehand and include it with your donation. The receiptable amount will be the appraised value minus the cost of the quoted service.
+                                                                Tax receipts are provided for instruments in like-new condition that are fully playable and require no repairs or servicing and with a receipt of purchase dated in the last 3 years. If your instrument is older or needs work, we still welcome the donation — however, to issue a receipt you will need to arrange an appraisal and/or service quote beforehand and include it with your donation. The receiptable amount will be the appraised value minus the cost of the quoted service. For more information on the tax receipt process please reach out.
                                                             </AccordionContent>
                                                         </AccordionItem>
                                                         <AccordionItem value="types" className="border-slate-100">

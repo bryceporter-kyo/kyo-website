@@ -26,6 +26,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Logo } from "@/components/icons/Logo";
 import { cn } from "@/lib/utils";
 import { useImages } from "@/components/providers/ImageProvider";
+import { useData } from "@/components/providers/DataProvider";
 
 type NavSubLink = {
   name: string;
@@ -62,7 +63,6 @@ const navLinks: NavLinkItem[] = [
       { name: "Ways to Give", href: "/support-us/ways-to-give" },
       { name: "Donate", href: "/support-us/donate" },
       { name: "Volunteer", href: "/support-us/volunteer" },
-      { name: "Case For Support", href: "/support-us/case-for-support" },
     ],
   },
   { name: "Contact", href: "/contact" },
@@ -70,11 +70,28 @@ const navLinks: NavLinkItem[] = [
 
 export default function Header() {
   const { getImage } = useImages();
+  const { buttons, getLink } = useData();
   const pathname = usePathname();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+
+  // Compute registration button targets based on buttons state
+  const orchestraButtonConfig = buttons.find(b => b.id === 'hero-register-orchestra' || b.id === 'orchestras-register');
+  const upbeatButtonConfig = buttons.find(b => b.id === 'hero-register-upbeat' || b.id === 'upbeat-enroll');
+
+  const resolveRegHref = (buttonConfig?: typeof buttons[0], fallbackInternal: string = '#') => {
+    if (!buttonConfig) return { href: fallbackInternal, target: '_self' };
+    if (buttonConfig.link.type === 'external') {
+      const ext = getLink(buttonConfig.link.value);
+      return { href: ext?.url || '#', target: '_blank' };
+    }
+    return { href: buttonConfig.link.value || fallbackInternal, target: '_self' };
+  };
+
+  const orchestrasReg = resolveRegHref(orchestraButtonConfig, '/programs/registration/orchestras');
+  const upbeatReg = resolveRegHref(upbeatButtonConfig, '/programs/registration/upbeat');
 
   const desktopNavRef = React.useRef<HTMLElement | null>(null);
   const closeTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
@@ -240,7 +257,7 @@ export default function Header() {
                 >
                   <button
                     type="button"
-                    className={desktopLinkClasses(active)}
+                    className={cn(desktopLinkClasses(active), "cursor-default")}
                     aria-expanded={isOpen}
                     aria-haspopup="true"
                     onClick={() =>
@@ -426,7 +443,9 @@ export default function Header() {
 
           <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
             <Link
-              href="/programs/registration/orchestras"
+              href={orchestrasReg.href}
+              target={orchestrasReg.target}
+              rel={orchestrasReg.target === '_blank' ? 'noopener noreferrer' : undefined}
               onClick={() => setIsRegisterOpen(false)}
               className="group"
             >
@@ -447,7 +466,7 @@ export default function Header() {
                     Orchestras & Lessons
                   </h3>
                   <p className="mb-4 text-sm text-white/80">
-                    Junior, Intermediate, and Senior programs.
+                    Join one of our three levels of Orchestras, Beginner &amp; Intermediate Classes, or an Ensemble.
                   </p>
                   <div className="flex items-center text-sm font-bold transition-transform group-hover:translate-x-2">
                     Register Now <ArrowRight className="ml-2 h-4 w-4" />
@@ -457,7 +476,9 @@ export default function Header() {
             </Link>
 
             <Link
-              href="/programs/registration/upbeat"
+              href={upbeatReg.href}
+              target={upbeatReg.target}
+              rel={upbeatReg.target === '_blank' ? 'noopener noreferrer' : undefined}
               onClick={() => setIsRegisterOpen(false)}
               className="group"
             >
@@ -478,7 +499,7 @@ export default function Header() {
                     Upbeat!
                   </h3>
                   <p className="mb-4 text-sm text-white/80">
-                    Specialized program for younger musicians.
+                    Join our barrier free afterschool string program!
                   </p>
                   <div className="flex items-center text-sm font-bold transition-transform group-hover:translate-x-2">
                     Register Now <ArrowRight className="ml-2 h-4 w-4" />
