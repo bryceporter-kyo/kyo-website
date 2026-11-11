@@ -798,8 +798,15 @@ export default function EventsAdminPage() {
                                         <FormControl>
                                             <div className="flex flex-col gap-3">
                                                 {field.value && (
-                                                    <div className="relative h-36 w-60 rounded-xl overflow-hidden border shadow-sm group">
-                                                        <img src={field.value} className="object-cover w-full h-full" alt="Preview" />
+                                                    <div className="relative h-36 w-60 rounded-xl overflow-hidden border shadow-sm group bg-slate-50 flex items-center justify-center">
+                                                        {field.value.endsWith('.pdf') || (imageFile && imageFile.type === 'application/pdf') ? (
+                                                            <div className="flex flex-col items-center justify-center text-slate-600 p-2 text-center">
+                                                                <span className="font-bold text-xs uppercase px-2 py-0.5 bg-red-100 text-red-700 rounded mb-1">PDF Flyer</span>
+                                                                <span className="text-[11px] truncate max-w-[200px]">{imageFile?.name || "Event PDF"}</span>
+                                                            </div>
+                                                        ) : (
+                                                            <img src={field.value} className="object-cover w-full h-full" alt="Preview" />
+                                                        )}
                                                         <Button 
                                                             type="button" 
                                                             variant="destructive" 
@@ -816,11 +823,12 @@ export default function EventsAdminPage() {
                                                 )}
                                                 <Input 
                                                     type="file" 
-                                                    accept="image/png,image/jpeg,image/webp,image/jpg" 
+                                                    accept="image/png,image/jpeg,image/webp,image/jpg,.pdf,application/pdf" 
                                                     onChange={(e) => {
                                                         if (e.target.files && e.target.files[0]) {
-                                                            setImageFile(e.target.files[0]);
-                                                            field.onChange(URL.createObjectURL(e.target.files[0]));
+                                                            const file = e.target.files[0];
+                                                            setImageFile(file);
+                                                            field.onChange(URL.createObjectURL(file));
                                                         }
                                                     }} 
                                                 />

@@ -1079,6 +1079,36 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
                                             )}
                                         </div>
 
+                                        {event.imageUrl && (
+                                            <div className="rounded-2xl overflow-hidden border border-slate-100 shadow-sm bg-slate-50">
+                                                {event.imageUrl.toLowerCase().endsWith('.pdf') ? (
+                                                    <div className="p-4 flex items-center justify-between gap-4 bg-slate-50">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="p-2.5 bg-red-100 text-red-700 rounded-xl font-bold text-xs uppercase">PDF</div>
+                                                            <div>
+                                                                <p className="text-sm font-semibold text-slate-800">Event Flyer &amp; Document</p>
+                                                                <p className="text-xs text-muted-foreground">Download or view the official event PDF</p>
+                                                            </div>
+                                                        </div>
+                                                        <Button asChild size="sm" variant="outline" className="rounded-full">
+                                                            <a href={event.imageUrl} target="_blank" rel="noopener noreferrer">
+                                                                View PDF
+                                                                <ExternalLink className="ml-2 w-3 h-3" />
+                                                            </a>
+                                                        </Button>
+                                                    </div>
+                                                ) : (
+                                                    <a href={event.imageUrl} target="_blank" rel="noopener noreferrer" className="block cursor-zoom-in">
+                                                        <img
+                                                            src={event.imageUrl}
+                                                            alt={event.name}
+                                                            className="w-full max-h-80 object-cover object-top hover:opacity-95 transition-opacity"
+                                                        />
+                                                    </a>
+                                                )}
+                                            </div>
+                                        )}
+
                                         <div className="grid sm:grid-cols-2 gap-4">
                                             <div className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-100">
                                                 <div className="p-2 bg-primary/10 text-primary rounded-lg">

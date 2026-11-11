@@ -47,7 +47,7 @@
       "text": "Sign Up for an Audition",
       "link": {
         "type": "external",
-        "value": "register"
+        "value": "audition-registration"
       },
       "visible": true
     },
