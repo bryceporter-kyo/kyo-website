@@ -9,8 +9,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Check, Target, Users, GraduationCap, Music } from 'lucide-react';
 import Image from 'next/image';
-import { getLinkById } from '@/lib/links';
-import { fetchButtonsFromFirebase, ButtonConfig } from '@/lib/buttons';
+import { useData } from '@/components/providers/DataProvider';
 
 // ButtonConfig imported from @/lib/buttons
 
@@ -45,25 +44,17 @@ export default function LessonsPage() {
   const aboutImage = getImage('program-lessons');
   const studentImage = getImage('lessons-teacher-student');
   const orchestraImage = getImage('orchestra-kids-playing') || getImage('program-orchestra');
-  const [buttons, setButtons] = useState<ButtonConfig[]>([]);
-
-  useEffect(() => {
-    const loadButtons = async () => {
-      const data = await fetchButtonsFromFirebase();
-      setButtons(data);
-    };
-    loadButtons();
-  }, []);
+  const { buttons, getLink } = useData();
 
   const mainButtonConfig = buttons.find(b => b.id === 'lessons-register-main');
   const secondaryButtonConfig = buttons.find(b => b.id === 'lessons-register-secondary');
 
-  const getButtonProps = (buttonConfig?: ButtonConfig) => {
+  const getButtonProps = (buttonConfig?: typeof buttons[0]) => {
     if (!buttonConfig || !buttonConfig.visible) return null;
     let href = '#';
     let target = '_self';
     if (buttonConfig.link.type === 'external') {
-      const link = getLinkById(buttonConfig.link.value);
+      const link = getLink(buttonConfig.link.value);
       if (link) {
         href = link.url;
         target = '_blank';

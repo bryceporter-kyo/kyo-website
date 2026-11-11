@@ -20,8 +20,7 @@ import {
     Gift
 } from 'lucide-react';
 import Image from 'next/image';
-import { getLinkById } from '@/lib/links';
-import { fetchButtonsFromFirebase, ButtonConfig } from '@/lib/buttons';
+import { useData } from '@/components/providers/DataProvider';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -95,22 +94,14 @@ export default function UpbeatPage() {
   const aboutImage = getImage('program-upbeat');
   const impactImage = getImage('upbeat-kids-smiling');
   const communityImage = getImage('support-volunteer');
-  const [buttons, setButtons] = useState<ButtonConfig[]>([]);
+  const { buttons, getLink } = useData();
 
-  useEffect(() => {
-    const loadButtons = async () => {
-      const data = await fetchButtonsFromFirebase();
-      setButtons(data);
-    };
-    loadButtons();
-  }, []);
-
-  const getButtonProps = (buttonConfig?: ButtonConfig) => {
+  const getButtonProps = (buttonConfig?: typeof buttons[0]) => {
     if (!buttonConfig || !buttonConfig.visible) return null;
     let href = '#';
     let target = '_self';
     if (buttonConfig.link.type === 'external') {
-      const link = getLinkById(buttonConfig.link.value);
+      const link = getLink(buttonConfig.link.value);
       if (link) {
         href = link.url;
         target = '_blank';

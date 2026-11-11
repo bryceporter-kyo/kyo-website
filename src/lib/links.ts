@@ -32,11 +32,17 @@ export const internalPages = [
     { id: '/admin', name: 'Admin' },
 ];
 
+let cachedFirebaseLinks: ExternalLink[] | null = null;
+
 export function getLinks(): ExternalLink[] {
-  return legacyLinks;
+  return cachedFirebaseLinks || legacyLinks;
 }
 
 export function getLinkById(id: string): ExternalLink | undefined {
+  if (cachedFirebaseLinks) {
+    const found = cachedFirebaseLinks.find(link => link.id === id);
+    if (found) return found;
+  }
   return legacyLinks.find(link => link.id === id);
 }
 
@@ -54,16 +60,18 @@ export async function fetchLinksFromFirebase(): Promise<ExternalLink[]> {
         
         if (snapshot.empty) {
             console.log('[Links] No links in Firebase, using legacy data');
-            return getLinks();
+            return legacyLinks;
         }
         
-        return snapshot.docs.map(doc => ({
+        const fetched = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data(),
         })) as ExternalLink[];
+        cachedFirebaseLinks = fetched;
+        return fetched;
     } catch (error) {
         console.error('[Links] Error fetching from Firebase:', error);
-        return getLinks();
+        return legacyLinks;
     }
 }
 
@@ -75,17 +83,23 @@ export async function addLinkToFirebase(link: ExternalLink): Promise<ExternalLin
     const linkRef = doc(db, LINKS_COLLECTION, link.id);
     const cleanLink = sanitizeForFirestore({ name: link.name, url: link.url });
     await setDoc(linkRef, cleanLink);
+    if (cachedFirebaseLinks) {
+        cachedFirebaseLinks = [...cachedFirebaseLinks.filter(l => l.id !== link.id), link];
+    }
     return link;
 }
 
 /**
- * Update a link in Firebase
+ * Update a link in Firebase (creates if not existing)
  */
 export async function updateLinkInFirebase(id: string, link: Partial<ExternalLink>): Promise<void> {
     const linkRef = doc(db, LINKS_COLLECTION, id);
     const { id: _id, ...linkData } = link as ExternalLink;
     const cleanLinkData = sanitizeForFirestore(linkData);
-    await updateDoc(linkRef, cleanLinkData);
+    await setDoc(linkRef, cleanLinkData, { merge: true });
+    if (cachedFirebaseLinks) {
+        cachedFirebaseLinks = cachedFirebaseLinks.map(l => l.id === id ? { ...l, ...cleanLinkData } : l);
+    }
 }
 
 /**
@@ -94,4 +108,7 @@ export async function updateLinkInFirebase(id: string, link: Partial<ExternalLin
 export async function deleteLinkFromFirebase(id: string): Promise<void> {
     const linkRef = doc(db, LINKS_COLLECTION, id);
     await deleteDoc(linkRef);
+    if (cachedFirebaseLinks) {
+        cachedFirebaseLinks = cachedFirebaseLinks.filter(l => l.id !== id);
+    }
 }

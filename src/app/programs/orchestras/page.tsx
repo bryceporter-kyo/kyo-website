@@ -25,8 +25,7 @@ import {
     HeartHandshake
 } from 'lucide-react';
 import Image from 'next/image';
-import { getLinkById } from '@/lib/links';
-import { fetchButtonsFromFirebase, ButtonConfig } from '@/lib/buttons';
+import { useData } from '@/components/providers/DataProvider';
 import ProgramPathways from '@/components/shared/ProgramPathways';
 import { motion } from 'framer-motion';
 
@@ -112,25 +111,17 @@ export default function OrchestrasPage() {
   const headerImage = getImage('page-header-orchestras');
   const joinImage = getImage('orchestra-kids-playing');
   const communityImage = getImage('support-volunteer');
-  const [buttons, setButtons] = useState<ButtonConfig[]>([]);
-
-  useEffect(() => {
-    const loadButtons = async () => {
-      const data = await fetchButtonsFromFirebase();
-      setButtons(data);
-    };
-    loadButtons();
-  }, []);
+  const { buttons, getLink } = useData();
 
   const registerButtonConfig = buttons.find(b => b.id === 'orchestras-register');
   const auditionButtonConfig = buttons.find(b => b.id === 'orchestras-audition');
 
-  const getButtonProps = (buttonConfig?: ButtonConfig) => {
+  const getButtonProps = (buttonConfig?: typeof buttons[0]) => {
     if (!buttonConfig || !buttonConfig.visible) return null;
     let href = '#';
     let target = '_self';
     if (buttonConfig.link.type === 'external') {
-      const link = getLinkById(buttonConfig.link.value);
+      const link = getLink(buttonConfig.link.value);
       if (link) {
         href = link.url;
         target = '_blank';
@@ -422,7 +413,7 @@ export default function OrchestrasPage() {
             <div className="max-w-6xl mx-auto space-y-16">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     {financialAidOptions.map(option => {
-                        const link = getLinkById(option.linkId);
+                        const link = getLink(option.linkId);
                         const image = getImage(option.imageId);
                         return (
                             <motion.div 

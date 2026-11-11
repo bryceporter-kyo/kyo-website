@@ -16,8 +16,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, useScroll, useSpring } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { getLinkById } from "@/lib/links";
-import { fetchButtonsFromFirebase, ButtonConfig } from "@/lib/buttons";
+import { useData } from "@/components/providers/DataProvider";
 
 const volunteerRoles = [
   {
@@ -176,7 +175,7 @@ const itemVariants = {
 
 export default function VolunteerPage() {
   const { getImage } = useImages();
-  const [buttons, setButtons] = useState<ButtonConfig[]>([]);
+  const { buttons, getLink } = useData();
   const [activeRoleIndex, setActiveRoleIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -196,14 +195,6 @@ export default function VolunteerPage() {
 
   const CYCLE_DURATION = 8000; // 8 seconds per role
   const PROGRESS_INTERVAL = 50; // Update progress every 50ms
-
-  useEffect(() => {
-    const loadButtons = async () => {
-      const data = await fetchButtonsFromFirebase();
-      setButtons(data);
-    };
-    loadButtons();
-  }, []);
 
   // Auto-cycle logic with pause-on-hover check
   useEffect(() => {
@@ -230,12 +221,12 @@ export default function VolunteerPage() {
     setProgress(0);
   };
 
-  const getButtonProps = (buttonConfig?: ButtonConfig) => {
+  const getButtonProps = (buttonConfig?: typeof buttons[0]) => {
     if (!buttonConfig || !buttonConfig.visible) return null;
     let href = "#";
     let target = "_self";
     if (buttonConfig.link.type === "external") {
-      const link = getLinkById(buttonConfig.link.value);
+      const link = getLink(buttonConfig.link.value);
       if (link) {
         href = link.url;
         target = "_blank";
