@@ -1,9 +1,10 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Newspaper, Users, Image as ImageIcon, Calendar, UsersRound, Link2, Pointer, FolderKanban, ClipboardList, Gavel, Map, Sparkles } from "lucide-react";
+import { Newspaper, Users, Image as ImageIcon, Calendar, UsersRound, Link2, Pointer, FolderKanban, ClipboardList, Gavel, Map, Sparkles, Receipt } from "lucide-react";
 import Link from "next/link";
 
 const adminTiles = [
+    { href: "/admin/donations", label: "Donations & Tax Receipts", icon: Receipt },
     { href: "/admin/announcements", label: "Announcements", icon: Newspaper },
     { href: "/admin/images", label: "Images", icon: ImageIcon },
     { href: "/admin/events", label: "Events", icon: Calendar },

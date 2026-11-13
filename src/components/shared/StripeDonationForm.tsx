@@ -118,6 +118,10 @@ export default function StripeDonationForm({
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [wantsTaxReceipt, setWantsTaxReceipt] = useState(false);
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [addressInputValue, setAddressInputValue] = useState('');
 
   // Sync external changes from tier card clicks
   useEffect(() => {
@@ -143,6 +147,42 @@ export default function StripeDonationForm({
   }, [externalAmount]);
 
   const presets = frequency === 'monthly' ? [10, 25, 50, 100] : [25, 50, 100, 250];
+
+  const addressInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!wantsTaxReceipt || !addressInputRef.current) return;
+
+    // Load Google Maps script if not already loaded
+    const scriptId = 'google-maps-places';
+    const initAutocomplete = () => {
+      if (!addressInputRef.current) return;
+      const autocomplete = new (window as any).google.maps.places.Autocomplete(
+        addressInputRef.current,
+        { types: ['address'], componentRestrictions: { country: 'ca' } }
+      );
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        const formatted = place.formatted_address || '';
+        setAddress(formatted);
+        setAddressInputValue(formatted);
+      });
+    };
+
+    if ((window as any).google?.maps?.places) {
+      initAutocomplete();
+    } else if (!document.getElementById(scriptId)) {
+      const script = document.createElement('script');
+      script.id = scriptId;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`;
+      script.async = true;
+      script.onload = initAutocomplete;
+      document.head.appendChild(script);
+    } else {
+      // Script tag exists but may still be loading
+      document.getElementById(scriptId)!.addEventListener('load', initAutocomplete);
+    }
+  }, [wantsTaxReceipt]);
 
   // Store latest callback in a ref to avoid infinite re-render loops
   const onStateChangeRef = useRef(onStateChange);
@@ -199,6 +239,10 @@ export default function StripeDonationForm({
       alert('Please provide your name and email address for tax receipt records.');
       return;
     }
+    if (wantsTaxReceipt && (!phone.trim() || !address.trim())) {
+      alert('Please provide your phone number and mailing address for your tax receipt.');
+      return;
+    }
 
     setIsLoading(true);
 
@@ -213,6 +257,9 @@ export default function StripeDonationForm({
           name,
           email,
           frequency,
+          wantsTaxReceipt,
+          phone: wantsTaxReceipt ? phone.trim() : '',
+          address: wantsTaxReceipt ? address.trim() : '',
         }),
       });
 
@@ -238,8 +285,13 @@ export default function StripeDonationForm({
         </div>
         <h3 className="font-headline text-3xl font-bold text-slate-900">Thank You for Your Support!</h3>
         <p className="text-slate-500 leading-relaxed font-light">
-          Your donation of <span className="font-bold text-primary">${amount.toFixed(2)}</span> has been securely processed. A tax receipt for this contribution will be emailed to <span className="font-semibold text-slate-800">{email}</span>.
+          Your donation of <span className="font-bold text-primary">${amount.toFixed(2)}</span> has been securely processed.
         </p>
+        {wantsTaxReceipt && (
+          <p className="text-slate-500 leading-relaxed font-light">
+            Your official charitable tax receipt will be emailed to <span className="font-semibold text-slate-800">{email}</span> once your payment is processed.
+          </p>
+        )}
         <Button onClick={() => {
           setIsSuccess(false);
           setClientSecret(null);
@@ -365,6 +417,53 @@ export default function StripeDonationForm({
                   required
                 />
                 <p className="text-[10px] text-slate-400">Your tax receipt will be sent to this email address.</p>
+              </div>
+
+              {/* Tax Receipt Checkbox */}
+              <div className="pt-2 border-t border-slate-100">
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={wantsTaxReceipt}
+                    onChange={(e) => {
+                      setWantsTaxReceipt(e.target.checked);
+                      if (!e.target.checked) { setPhone(''); setAddress(''); setAddressInputValue(''); }
+                    }}
+                    className="mt-0.5 w-4 h-4 accent-primary cursor-pointer"
+                  />
+                  <div>
+                    <span className="text-sm font-bold text-slate-700">I would like a charitable tax receipt</span>
+                    <p className="text-[10px] text-slate-400 mt-0.5">We'll generate and email an official CRA-compliant receipt.</p>
+                  </div>
+                </label>
+
+                {wantsTaxReceipt && (
+                  <div className="mt-4 space-y-3 pl-7">
+                    <div className="space-y-1">
+                      <Label className="text-slate-600 font-bold uppercase tracking-wider text-xs">Phone Number</Label>
+                      <Input
+                        type="tel"
+                        placeholder="(705) 555-0100"
+                        className="py-5 rounded-xl border-slate-200"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-slate-600 font-bold uppercase tracking-wider text-xs">Mailing Address</Label>
+                      <input
+                        ref={addressInputRef}
+                        type="text"
+                        placeholder="Start typing your address..."
+                        className="w-full px-3 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        value={addressInputValue}
+                        onChange={(e) => setAddressInputValue(e.target.value)}
+                        autoComplete="off"
+                      />
+                      <p className="text-[10px] text-slate-400">Select from the dropdown to auto-fill. You may add a unit/apt number.</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

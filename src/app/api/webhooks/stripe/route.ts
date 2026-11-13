@@ -69,9 +69,86 @@ export async function POST(request: NextRequest) {
             { merge: true }
           );
         });
-        console.log(`[Stripe Webhook] Updated Bass Repairs raised amount by +$${donatedAmountCAD}`);
+        console.log(`[Stripe Webhook] Updated Bass Repairs raised amount by +$${donatedAmountCAD} CAD`);
       } catch (err) {
         console.error('[Stripe Webhook] Failed to update Bass Repairs in Firestore:', err);
+      }
+    }
+
+    // Handle tax receipt generation
+    if (metadata.wants_tax_receipt === 'true') {
+      const { logTaxReceipt, updateTaxReceiptStatus, getTaxReceiptSettings } = 
+        await import('@/lib/taxReceipts');
+      
+      const donorData = {
+        donorName: metadata.donor_name || 'Anonymous',
+        donorEmail: metadata.donor_email || '',
+        donorPhone: metadata.donor_phone || '',
+        donorAddress: metadata.donor_address || '',
+        amount: paymentIntent.amount / 100,
+        frequency: metadata.frequency || 'one-time',
+        donationDate: metadata.donation_date || new Date().toLocaleDateString('en-US'),
+        status: 'pending' as const,
+      };
+
+      // Log to Firestore immediately
+      let firestoreId: string | null = null;
+      try {
+        firestoreId = await logTaxReceipt(donorData);
+      } catch (err) {
+        console.error('[Tax Receipt] Failed to log to Firestore:', err);
+      }
+
+      // Load admin settings and trigger Apps Script
+      try {
+        const settings = await getTaxReceiptSettings();
+        
+        if (!settings.appsScriptWebAppUrl) {
+          console.warn('[Tax Receipt] Apps Script URL not configured. Skipping receipt generation.');
+          if (firestoreId) {
+            await updateTaxReceiptStatus(firestoreId, 'failed', { 
+              errorMessage: 'Apps Script URL not configured in admin settings.' 
+            });
+          }
+        } else {
+          const scriptResponse = await fetch(settings.appsScriptWebAppUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              secret: settings.appsScriptSecret || '',
+              donorName: donorData.donorName,
+              donorEmail: donorData.donorEmail,
+              donorAddress: donorData.donorAddress,
+              amount: donorData.amount.toFixed(2),
+              donationDate: donorData.donationDate,
+              frequency: donorData.frequency,
+            }),
+          });
+
+          if (scriptResponse.ok) {
+            const result = await scriptResponse.json();
+            if (firestoreId) {
+              await updateTaxReceiptStatus(firestoreId, 'emailed', {
+                receiptId: result.receiptId || '',
+                driveUrl: result.receiptUrl || '',
+              });
+            }
+            console.log(`[Tax Receipt] Receipt generated and emailed for ${donorData.donorName}`);
+          } else {
+            const errText = await scriptResponse.text();
+            console.error('[Tax Receipt] Apps Script error:', errText);
+            if (firestoreId) {
+              await updateTaxReceiptStatus(firestoreId, 'failed', { 
+                errorMessage: `Apps Script returned ${scriptResponse.status}: ${errText.slice(0, 200)}` 
+              });
+            }
+          }
+        }
+      } catch (err: any) {
+        console.error('[Tax Receipt] Error triggering Apps Script:', err);
+        if (firestoreId) {
+          await updateTaxReceiptStatus(firestoreId, 'failed', { errorMessage: err.message });
+        }
       }
     }
   }
