@@ -14,6 +14,7 @@ import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Heart, Loader2, DollarSign, CheckCircle2, Shield, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Loader } from '@googlemaps/js-api-loader';
 
 // Initialize Stripe on client side
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
@@ -156,33 +157,15 @@ export default function StripeDonationForm({
 
     let isMounted = true;
 
-    // Load Maps JavaScript API and modern Places library using dynamic importLibrary
     const loadModernPlaces = async () => {
       try {
-        // Initialize the inline bootstrap if not already present
-        if (!(window as any).google?.maps?.importLibrary) {
-          await new Promise<void>((resolve, reject) => {
-            const existingScript = document.getElementById('google-maps-bootstrap');
-            if (existingScript) {
-              existingScript.addEventListener('load', () => resolve());
-              existingScript.addEventListener('error', (e) => reject(e));
-              return;
-            }
+        const loader = new Loader({
+          apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
+          version: 'weekly',
+          libraries: ['places'],
+        });
 
-            const script = document.createElement('script');
-            script.id = 'google-maps-bootstrap';
-            script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&v=weekly&loading=async`;
-            script.async = true;
-            script.onload = () => resolve();
-            script.onerror = (err) => reject(err);
-            document.head.appendChild(script);
-          });
-        }
-
-        if (!isMounted || !addressContainerRef.current) return;
-
-        // Import the new Places library
-        const { PlaceAutocompleteElement } = await (window as any).google.maps.importLibrary('places');
+        const { PlaceAutocompleteElement } = await loader.importLibrary('places');
 
         if (!isMounted || !addressContainerRef.current) return;
 
