@@ -38,14 +38,14 @@ const volunteerRoles = [
     title: "Creative & Technical",
     category: "Operations",
     description: "Put your talents to use in photography, digital recording, instrument maintenance, or post-production.",
-    impact: "Captures and preserves our legacy",
+    impact: "Help our musicians Shine",
   },
   {
     icon: Handshake,
-    title: "Operational Support",
-    category: "Admin",
-    description: "Assist with bookkeeping, data management, or event coordination to help our day-to-day run smoothly.",
-    impact: "Supports long-term organizational success",
+    title: "Bingo & Fundraising Efforts",
+    category: "Raise Funds",
+    description: "Support all of our programs by volunteering at our monthly bingo nights or fundraising events.",
+    impact: "Keep Upbeat! free and KYO Accessible",
   },
 ];
 
@@ -294,10 +294,10 @@ export default function VolunteerPage() {
               <h2 className="text-5xl font-headline font-bold leading-tight">Be the Power Behind the Performance</h2>
               <div className="space-y-6 text-muted-foreground text-lg font-light leading-relaxed">
                 <p>
-                  Volunteers are the vital force that keeps the KYO moving forward. From the concert stage to the administrative office, your time and dedication ensure that our young musicians have the resources and support they need to succeed.
+                  Volunteers are the vital force that keeps the KYO moving forward. From the concert stage to the rehearsal hall, your time and dedication ensure that our young musicians have the resources and support they need to succeed.
                 </p>
                 <p>
-                  By giving your time, you're not just helping with tasks — you're becoming a role model for our students and a cornerstone of the Peterborough arts community.
+                  By giving your time, you're not just helping with tasks — you're becoming a role model for our students and a cornerstone of the Peterborough arts community. Join our incredible Upbeat! programming team and make life changing impact, help us raise the fund we need to provide music education, or join our board and help guide KYO into the future. There are so many ways to make an difference at KYO.
                 </p>
               </div>
 

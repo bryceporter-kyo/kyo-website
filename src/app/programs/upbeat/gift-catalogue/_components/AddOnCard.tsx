@@ -57,7 +57,7 @@ export default function AddOnCard({ item, onDonate }: AddOnCardProps) {
             className="w-full md:w-auto rounded-xl py-5 px-6 border-primary/40 text-primary hover:bg-primary hover:text-white font-bold gap-2"
           >
             <Sparkles className="w-4 h-4" />
-            <span>Add a Dedication Plaque (${item.displayPrice})</span>
+            <span>Add a Dedication Plaque ({item.displayPrice})</span>
           </Button>
         </CardFooter>
       </div>

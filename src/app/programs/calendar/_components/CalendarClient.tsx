@@ -582,7 +582,7 @@ export default function CalendarClient({ initialEvents, initialSettings }: Calen
                                         <CalendarIcon className="w-5 h-5" />
                                         <span className="text-xs font-bold uppercase tracking-widest">Interactive Calendar</span>
                                     </div>
-                                    <CardTitle className="font-headline text-2xl">Plan Your Season</CardTitle>
+                                    <CardTitle className="font-headline text-2xl">Programming Schedule</CardTitle>
                                     <CardDescription>Click any day to see detailed events.</CardDescription>
                                 </CardHeader>
                                 <CardContent className="p-4">
