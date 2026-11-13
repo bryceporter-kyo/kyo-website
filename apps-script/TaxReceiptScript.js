@@ -544,3 +544,4 @@ function logToSheet(data, issueDateStr, receiptUrl, trackingSheetId) {
     receiptUrl
   ]);
 }
+

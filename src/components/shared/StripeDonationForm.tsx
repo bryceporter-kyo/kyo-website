@@ -148,6 +148,7 @@ export default function StripeDonationForm({
 
   const presets = frequency === 'monthly' ? [10, 25, 50, 100] : [25, 50, 100, 250];
 
+  const [autocompleteError, setAutocompleteError] = useState(false);
   const addressContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -170,7 +171,7 @@ export default function StripeDonationForm({
 
             const script = document.createElement('script');
             script.id = 'google-maps-bootstrap';
-            script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&v=weekly`;
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&v=weekly&loading=async`;
             script.async = true;
             script.onload = () => resolve();
             script.onerror = (err) => reject(err);
@@ -213,9 +214,15 @@ export default function StripeDonationForm({
           }
         });
 
+        // Listen to error events (e.g. key blocked or API disabled)
+        autocomplete.addEventListener('gmp-error', () => {
+          if (isMounted) setAutocompleteError(true);
+        });
+
         addressContainerRef.current.appendChild(autocomplete);
       } catch (err) {
         console.error('[Google Maps Places New Error]:', err);
+        if (isMounted) setAutocompleteError(true);
       }
     };
 
@@ -498,8 +505,18 @@ export default function StripeDonationForm({
                     <div className="space-y-1">
                       <Label className="text-slate-600 font-bold uppercase tracking-wider text-xs">Mailing Address</Label>
                       {/* Places API (New) PlaceAutocompleteElement Container */}
-                      <div ref={addressContainerRef} className="rounded-xl overflow-hidden [&_gmp-place-autocomplete]:w-full" />
-                      {address && (
+                      <div ref={addressContainerRef} className={cn("rounded-xl overflow-hidden [&_gmp-place-autocomplete]:w-full", autocompleteError && "hidden")} />
+                      {autocompleteError ? (
+                        <div className="space-y-1.5">
+                          <Input
+                            type="text"
+                            placeholder="Enter your street address, city, province, postal code"
+                            className="py-5 rounded-xl border-slate-200 text-sm"
+                            value={address}
+                            onChange={(e) => setAddress(e.target.value)}
+                          />
+                        </div>
+                      ) : address ? (
                         <div className="mt-2 text-xs bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-700">
                           <span className="font-semibold text-slate-900">Selected Address: </span>
                           {address}
@@ -515,8 +532,12 @@ export default function StripeDonationForm({
                             />
                           </div>
                         </div>
-                      )}
-                      <p className="text-[10px] text-slate-400">Search and select your address above.</p>
+                      ) : null}
+                      <p className="text-[10px] text-slate-400">
+                        {autocompleteError 
+                          ? "Enter your full mailing address for your official tax receipt."
+                          : "Search and select your address above."}
+                      </p>
                     </div>
                   </div>
                 )}
