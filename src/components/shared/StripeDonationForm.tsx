@@ -14,7 +14,7 @@ import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Heart, Loader2, DollarSign, CheckCircle2, Shield, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Loader } from '@googlemaps/js-api-loader';
+import { setOptions, importLibrary } from '@googlemaps/js-api-loader';
 
 // Initialize Stripe on client side
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
@@ -159,13 +159,12 @@ export default function StripeDonationForm({
 
     const loadModernPlaces = async () => {
       try {
-        const loader = new Loader({
-          apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
-          version: 'weekly',
-          libraries: ['places'],
+        setOptions({
+          key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
+          v: 'weekly',
         });
 
-        const { PlaceAutocompleteElement } = await loader.importLibrary('places');
+        const { PlaceAutocompleteElement } = await importLibrary('places') as any;
 
         if (!isMounted || !addressContainerRef.current) return;
 
