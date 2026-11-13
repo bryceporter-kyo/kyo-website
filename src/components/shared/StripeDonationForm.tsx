@@ -148,40 +148,82 @@ export default function StripeDonationForm({
 
   const presets = frequency === 'monthly' ? [10, 25, 50, 100] : [25, 50, 100, 250];
 
-  const addressInputRef = useRef<HTMLInputElement>(null);
+  const addressContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!wantsTaxReceipt || !addressInputRef.current) return;
+    if (!wantsTaxReceipt || !addressContainerRef.current) return;
 
-    // Load Google Maps script if not already loaded
-    const scriptId = 'google-maps-places';
-    const initAutocomplete = () => {
-      if (!addressInputRef.current) return;
-      const autocomplete = new (window as any).google.maps.places.Autocomplete(
-        addressInputRef.current,
-        { types: ['address'], componentRestrictions: { country: 'ca' } }
-      );
-      autocomplete.addListener('place_changed', () => {
-        const place = autocomplete.getPlace();
-        const formatted = place.formatted_address || '';
-        setAddress(formatted);
-        setAddressInputValue(formatted);
-      });
+    let isMounted = true;
+
+    // Load Maps JavaScript API and modern Places library using dynamic importLibrary
+    const loadModernPlaces = async () => {
+      try {
+        // Initialize the inline bootstrap if not already present
+        if (!(window as any).google?.maps?.importLibrary) {
+          await new Promise<void>((resolve, reject) => {
+            const existingScript = document.getElementById('google-maps-bootstrap');
+            if (existingScript) {
+              existingScript.addEventListener('load', () => resolve());
+              existingScript.addEventListener('error', (e) => reject(e));
+              return;
+            }
+
+            const script = document.createElement('script');
+            script.id = 'google-maps-bootstrap';
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&v=weekly`;
+            script.async = true;
+            script.onload = () => resolve();
+            script.onerror = (err) => reject(err);
+            document.head.appendChild(script);
+          });
+        }
+
+        if (!isMounted || !addressContainerRef.current) return;
+
+        // Import the new Places library
+        const { PlaceAutocompleteElement } = await (window as any).google.maps.importLibrary('places');
+
+        if (!isMounted || !addressContainerRef.current) return;
+
+        // Clean any existing element inside container
+        addressContainerRef.current.innerHTML = '';
+
+        // Instantiate the modern PlaceAutocompleteElement (Places API New)
+        const autocomplete = new PlaceAutocompleteElement({
+          includedRegionCodes: ['ca'],
+        });
+
+        // Style the custom element for seamless theme integration
+        autocomplete.style.width = '100%';
+
+        // Listen to modern gmp-select event
+        autocomplete.addEventListener('gmp-select', async (event: any) => {
+          const placePrediction = event.placePrediction;
+          if (!placePrediction) return;
+
+          const place = placePrediction.toPlace();
+          // Explicit FieldMask parameter as required by Places API (New)
+          await place.fetchFields({
+            fields: ['displayName', 'formattedAddress'],
+          });
+
+          const formatted = place.formattedAddress || '';
+          if (isMounted) {
+            setAddress(formatted);
+          }
+        });
+
+        addressContainerRef.current.appendChild(autocomplete);
+      } catch (err) {
+        console.error('[Google Maps Places New Error]:', err);
+      }
     };
 
-    if ((window as any).google?.maps?.places) {
-      initAutocomplete();
-    } else if (!document.getElementById(scriptId)) {
-      const script = document.createElement('script');
-      script.id = scriptId;
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`;
-      script.async = true;
-      script.onload = initAutocomplete;
-      document.head.appendChild(script);
-    } else {
-      // Script tag exists but may still be loading
-      document.getElementById(scriptId)!.addEventListener('load', initAutocomplete);
-    }
+    loadModernPlaces();
+
+    return () => {
+      isMounted = false;
+    };
   }, [wantsTaxReceipt]);
 
   // Store latest callback in a ref to avoid infinite re-render loops
@@ -246,6 +288,10 @@ export default function StripeDonationForm({
 
     setIsLoading(true);
 
+    const fullAddress = addressInputValue.trim() 
+      ? `${addressInputValue.trim()}, ${address.trim()}`
+      : address.trim();
+
     try {
       const response = await fetch('/api/donate/payment-intent', {
         method: 'POST',
@@ -259,7 +305,7 @@ export default function StripeDonationForm({
           frequency,
           wantsTaxReceipt,
           phone: wantsTaxReceipt ? phone.trim() : '',
-          address: wantsTaxReceipt ? address.trim() : '',
+          address: wantsTaxReceipt ? fullAddress : '',
         }),
       });
 
@@ -451,16 +497,26 @@ export default function StripeDonationForm({
                     </div>
                     <div className="space-y-1">
                       <Label className="text-slate-600 font-bold uppercase tracking-wider text-xs">Mailing Address</Label>
-                      <input
-                        ref={addressInputRef}
-                        type="text"
-                        placeholder="Start typing your address..."
-                        className="w-full px-3 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-                        value={addressInputValue}
-                        onChange={(e) => setAddressInputValue(e.target.value)}
-                        autoComplete="off"
-                      />
-                      <p className="text-[10px] text-slate-400">Select from the dropdown to auto-fill. You may add a unit/apt number.</p>
+                      {/* Places API (New) PlaceAutocompleteElement Container */}
+                      <div ref={addressContainerRef} className="rounded-xl overflow-hidden [&_gmp-place-autocomplete]:w-full" />
+                      {address && (
+                        <div className="mt-2 text-xs bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-700">
+                          <span className="font-semibold text-slate-900">Selected Address: </span>
+                          {address}
+                          <div className="mt-1">
+                            <input
+                              type="text"
+                              placeholder="Apartment, unit, or suite number (optional)"
+                              className="w-full mt-1 px-2.5 py-1.5 bg-white border border-slate-200 rounded text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                              value={addressInputValue}
+                              onChange={(e) => {
+                                setAddressInputValue(e.target.value);
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                      <p className="text-[10px] text-slate-400">Search and select your address above.</p>
                     </div>
                   </div>
                 )}
