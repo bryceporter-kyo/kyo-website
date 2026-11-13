@@ -80,15 +80,21 @@ export async function POST(request: NextRequest) {
       const { logTaxReceipt, updateTaxReceiptStatus, getTaxReceiptSettings } = 
         await import('@/lib/taxReceipts');
       
+      const isMonthly = metadata.frequency === 'monthly';
+      const donationAmount = paymentIntent.amount / 100;
+      const assumedAnnualAmount = isMonthly ? donationAmount * 12 : donationAmount;
+
       const donorData = {
         donorName: metadata.donor_name || 'Anonymous',
         donorEmail: metadata.donor_email || '',
         donorPhone: metadata.donor_phone || '',
         donorAddress: metadata.donor_address || '',
-        amount: paymentIntent.amount / 100,
+        amount: donationAmount,
+        assumedAnnualAmount: assumedAnnualAmount,
         frequency: metadata.frequency || 'one-time',
         donationDate: metadata.donation_date || new Date().toLocaleDateString('en-US'),
-        status: 'pending' as const,
+        // Monthly donations require admin verification before generating receipts
+        status: isMonthly ? ('requires-verification' as const) : ('pending' as const),
       };
 
       // Log to Firestore immediately
@@ -99,7 +105,37 @@ export async function POST(request: NextRequest) {
         console.error('[Tax Receipt] Failed to log to Firestore:', err);
       }
 
-      // Load admin settings and trigger Apps Script
+      // If it's a monthly donation, log to Google Sheet with assumed annual value,
+      // but DISALLOW auto-generating or emailing the receipt until verified
+      if (isMonthly) {
+        try {
+          const settings = await getTaxReceiptSettings();
+          if (settings.appsScriptWebAppUrl) {
+            await fetch(settings.appsScriptWebAppUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                secret: settings.appsScriptSecret || '',
+                action: 'log_only',
+                donorName: donorData.donorName,
+                donorEmail: donorData.donorEmail,
+                donorAddress: donorData.donorAddress,
+                amount: donorData.amount.toFixed(2),
+                assumedAnnualAmount: donorData.assumedAnnualAmount.toFixed(2),
+                donationDate: donorData.donationDate,
+                frequency: 'monthly',
+                notes: 'Monthly Recurring (Assumed 12-Month Annual Total: $' + donorData.assumedAnnualAmount.toFixed(2) + ' CAD) - Requires Verification',
+              }),
+            });
+            console.log(`[Tax Receipt] Logged monthly donation for ${donorData.donorName} (Receipt held pending verification)`);
+          }
+        } catch (monthlyErr) {
+          console.error('[Tax Receipt] Error logging monthly donation to sheet:', monthlyErr);
+        }
+        return NextResponse.json({ received: true });
+      }
+
+      // For single/one-time donations: proceed with automated receipt generation
       try {
         const settings = await getTaxReceiptSettings();
         

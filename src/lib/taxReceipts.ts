@@ -13,6 +13,7 @@ export interface TaxReceiptSettings {
   senderEmail: string;
   senderName: string;
   gmailAppPassword: string; // stored encrypted, server-side only
+  termsLegalSlug?: string; // slug of the legal page for CRA terms (e.g. 'cra-tax-receipt-terms')
 }
 
 export interface TaxReceiptRecord {
@@ -22,11 +23,12 @@ export interface TaxReceiptRecord {
   donorPhone: string;
   donorAddress: string;
   amount: number;
+  assumedAnnualAmount?: number; // 12-month value for monthly donations
   frequency: string;
   donationDate: string;
   receiptId?: string;
   driveUrl?: string;
-  status: 'pending' | 'emailed' | 'failed';
+  status: 'pending' | 'emailed' | 'failed' | 'requires-verification';
   errorMessage?: string;
   createdAt?: Timestamp;
 }

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { 
   ArrowLeft, Save, RefreshCw, ExternalLink, CheckCircle2, XCircle, 
-  Clock, Eye, EyeOff, Copy, Check, FileCode, Shield, Info, HelpCircle
+  Clock, Eye, EyeOff, Copy, Check, FileCode, Shield, Info, HelpCircle, AlertCircle
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import {
   TaxReceiptSettings, TaxReceiptRecord 
 } from "@/lib/taxReceipts";
 import { APPS_SCRIPT_CODE } from "@/lib/appsScriptTemplate";
+import { fetchLegalPages, LegalPage } from "@/lib/legal-pages";
 
 export default function DonationsAdminPage() {
   const { toast } = useToast();
@@ -27,6 +28,7 @@ export default function DonationsAdminPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
   const [receipts, setReceipts] = useState<TaxReceiptRecord[]>([]);
+  const [legalPages, setLegalPages] = useState<LegalPage[]>([]);
 
   const [settings, setSettings] = useState<Partial<TaxReceiptSettings>>({
     googleDocTemplateId: '',
@@ -37,10 +39,12 @@ export default function DonationsAdminPage() {
     senderEmail: '',
     senderName: '',
     gmailAppPassword: '',
+    termsLegalSlug: '',
   });
 
   useEffect(() => {
     getTaxReceiptSettings().then(setSettings).catch(console.error);
+    fetchLegalPages().then(setLegalPages).catch(console.error);
     fetchTaxReceipts()
       .then(setReceipts)
       .catch(console.error)
@@ -73,6 +77,7 @@ export default function DonationsAdminPage() {
   const statusBadge = (status: string) => {
     if (status === 'emailed') return <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100"><CheckCircle2 className="w-3 h-3 mr-1" />Emailed</Badge>;
     if (status === 'failed') return <Badge className="bg-red-100 text-red-800 hover:bg-red-100"><XCircle className="w-3 h-3 mr-1" />Failed</Badge>;
+    if (status === 'requires-verification') return <Badge className="bg-amber-100 text-amber-900 hover:bg-amber-100"><AlertCircle className="w-3 h-3 mr-1" />Requires Verification (Monthly)</Badge>;
     return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
   };
 
@@ -231,6 +236,46 @@ export default function DonationsAdminPage() {
               </CardContent>
             </Card>
 
+            {/* CRA Terms & Conditions Legal Link */}
+            <Card>
+              <CardHeader>
+                <CardTitle>CRA Tax Receipt Terms & Conditions Legal Page</CardTitle>
+                <CardDescription>
+                  Select which Legal Page is linked in the donation form disclaimer: "in accordance with our CRA tax receipt terms & conditions [Link]".
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-1">
+                  <Label>Legal Page Link</Label>
+                  <select
+                    value={settings.termsLegalSlug || ''}
+                    onChange={(e) => handleChange('termsLegalSlug', e.target.value)}
+                    className="w-full h-10 px-3 py-2 bg-white border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  >
+                    <option value="">-- Select a Legal Page or enter slug below --</option>
+                    {legalPages.map((lp) => (
+                      <option key={lp.id} value={lp.slug}>
+                        {lp.title} (/legal/{lp.slug})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Or Custom Relative URL / Slug</Label>
+                  <Input
+                    value={settings.termsLegalSlug || ''}
+                    onChange={(e) => handleChange('termsLegalSlug', e.target.value)}
+                    placeholder="e.g. cra-tax-receipt-terms or /legal/terms"
+                    className="font-mono text-sm"
+                  />
+                  <p className="text-[11px] text-muted-foreground">
+                    Donors who check "I want a tax receipt" will be shown a link pointing to this page.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="flex justify-end pt-2">
               <Button onClick={handleSave} disabled={isSaving} className="px-8 shadow-md">
                 {isSaving ? <><RefreshCw className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />Save All Settings</>}
@@ -361,39 +406,53 @@ export default function DonationsAdminPage() {
                       <TableRow>
                         <TableHead>Donor</TableHead>
                         <TableHead>Phone / Address</TableHead>
-                        <TableHead>Amount</TableHead>
+                        <TableHead>Donation</TableHead>
                         <TableHead>Date</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Receipt Doc</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {receipts.map((r) => (
-                        <TableRow key={r.id}>
-                          <TableCell>
-                            <div className="font-medium text-slate-900">{r.donorName}</div>
-                            <div className="text-xs text-muted-foreground">{r.donorEmail}</div>
-                          </TableCell>
-                          <TableCell className="text-xs text-slate-600 max-w-[200px] truncate">
-                            <div>{r.donorPhone || 'No phone'}</div>
-                            <div className="truncate text-muted-foreground" title={r.donorAddress}>{r.donorAddress || 'No address'}</div>
-                          </TableCell>
-                          <TableCell className="font-semibold">${r.amount?.toFixed(2)} CAD</TableCell>
-                          <TableCell className="text-sm">{r.donationDate}</TableCell>
-                          <TableCell>{statusBadge(r.status)}</TableCell>
-                          <TableCell>
-                            {r.driveUrl ? (
-                              <a href={r.driveUrl} target="_blank" rel="noopener noreferrer">
-                                <Button variant="ghost" size="sm" className="text-primary hover:text-primary">
-                                  <ExternalLink className="w-3.5 h-3.5 mr-1" />View
-                                </Button>
-                              </a>
-                            ) : (
-                              <span className="text-xs text-muted-foreground">{r.errorMessage?.slice(0, 45) || '—'}</span>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {receipts.map((r) => {
+                        const isMonthly = r.frequency === 'monthly';
+                        return (
+                          <TableRow key={r.id}>
+                            <TableCell>
+                              <div className="font-medium text-slate-900">{r.donorName}</div>
+                              <div className="text-xs text-muted-foreground">{r.donorEmail}</div>
+                            </TableCell>
+                            <TableCell className="text-xs text-slate-600 max-w-[200px] truncate">
+                              <div>{r.donorPhone || 'No phone'}</div>
+                              <div className="truncate text-muted-foreground" title={r.donorAddress}>{r.donorAddress || 'No address'}</div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="font-semibold">${r.amount?.toFixed(2)} CAD</div>
+                              {isMonthly && (
+                                <div className="text-[11px] text-amber-700 font-medium">
+                                  Monthly (Assumed 12-Mo: ${(r.assumedAnnualAmount ?? (r.amount * 12)).toFixed(2)})
+                                </div>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-sm">{r.donationDate}</TableCell>
+                            <TableCell>{statusBadge(r.status)}</TableCell>
+                            <TableCell>
+                              {r.driveUrl ? (
+                                <a href={r.driveUrl} target="_blank" rel="noopener noreferrer">
+                                  <Button variant="ghost" size="sm" className="text-primary hover:text-primary">
+                                    <ExternalLink className="w-3.5 h-3.5 mr-1" />View
+                                  </Button>
+                                </a>
+                              ) : isMonthly && r.status === 'requires-verification' ? (
+                                <span className="text-[11px] text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200">
+                                  Held for 12-mo verification
+                                </span>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">{r.errorMessage?.slice(0, 45) || '—'}</span>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </div>

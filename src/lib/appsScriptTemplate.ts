@@ -76,6 +76,24 @@ function doPost(e) {
       donDate = \`\${parts[1]}/\${parts[2]}/\${parts[0]}\`;
     }
 
+    // Handle action: 'log_only' (used for monthly recurring donations pending 12-month verification)
+    if (params.action === 'log_only') {
+      const annualVal = params.assumedAnnualAmount || (parseFloat(params.amount || '0') * 12).toFixed(2);
+      const noteText = params.notes || \`Monthly Support (\$\${params.amount}/mo - Assumed 12-Mo Annual Total: \$\${annualVal} CAD - Verification Required)\`;
+      logToSheet({
+        donorName:    params.donorName || 'Generous Donor',
+        donorAddress: params.donorAddress || 'N/A',
+        amount:       annualVal,
+        advantage:    '0.00',
+        eligible:     annualVal
+      }, donDate || formatTodayDate(), noteText, settings.trackingSheetId);
+
+      return jsonOutput({ 
+        status: 'logged_only', 
+        message: 'Monthly donation logged with assumed 12-month annual total. Receipt generation withheld until verified.' 
+      }, 200);
+    }
+
     const data = {
       donDate:        donDate || formatTodayDate(),
       donorName:      params.donorName || 'Generous Donor',

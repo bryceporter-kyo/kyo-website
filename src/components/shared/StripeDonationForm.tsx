@@ -12,9 +12,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Heart, Loader2, DollarSign, CheckCircle2, Shield, Calendar } from 'lucide-react';
+import { Heart, Loader2, DollarSign, CheckCircle2, Shield, Calendar, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { setOptions, importLibrary } from '@googlemaps/js-api-loader';
+import { getTaxReceiptSettings } from '@/lib/taxReceipts';
+import Link from 'next/link';
 
 // Initialize Stripe on client side
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
@@ -123,6 +125,13 @@ export default function StripeDonationForm({
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [addressInputValue, setAddressInputValue] = useState('');
+  const [termsLegalSlug, setTermsLegalSlug] = useState<string>('');
+
+  useEffect(() => {
+    getTaxReceiptSettings().then((s) => {
+      if (s?.termsLegalSlug) setTermsLegalSlug(s.termsLegalSlug);
+    }).catch(console.error);
+  }, []);
 
   // Sync external changes from tier card clicks
   useEffect(() => {
@@ -452,13 +461,20 @@ export default function StripeDonationForm({
                 <Input
                   type="number"
                   placeholder="Other amount"
-                  className="pl-10 py-6 text-base font-medium rounded-xl border-slate-200"
+                  className={cn(
+                    "pl-10 py-6 text-base font-medium rounded-xl border-slate-200",
+                    customAmount !== '' && parseFloat(customAmount) < 5 && "border-red-400 focus-visible:ring-red-400"
+                  )}
                   value={customAmount}
                   onChange={handleCustomChange}
                   min="5"
                 />
               </div>
-              <p className="text-[10px] text-slate-400">Minimum donation of $5.00 required.</p>
+              {customAmount !== '' && parseFloat(customAmount) < 5 && (
+                <p className="text-xs text-red-500 font-medium flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5" /> Minimum donation of $5.00 required.
+                </p>
+              )}
             </div>
 
             {/* Donor Information */}
@@ -504,12 +520,28 @@ export default function StripeDonationForm({
                   />
                   <div>
                     <span className="text-sm font-bold text-slate-700">I would like a charitable tax receipt</span>
-                    <p className="text-[10px] text-slate-400 mt-0.5">We'll generate and email an official CRA-compliant receipt.</p>
+                    <p className="text-[10px] text-slate-400 mt-0.5">
+                      We will generate and email you a CRA compliant receipt in accordance with our{' '}
+                      {termsLegalSlug ? (
+                        <Link 
+                          href={termsLegalSlug.startsWith('/') ? termsLegalSlug : `/legal/${termsLegalSlug}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-primary underline hover:text-primary/80 font-medium inline-flex items-center"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          CRA tax receipt terms & conditions
+                        </Link>
+                      ) : (
+                        <span className="font-medium text-slate-600">CRA tax receipt terms & conditions</span>
+                      )}
+                      .
+                    </p>
                   </div>
                 </label>
 
                 {wantsTaxReceipt && (
-                  <div className="mt-4 space-y-3 pl-7">
+                  <div className="mt-4 space-y-3">
                     <div className="space-y-1">
                       <Label className="text-slate-600 font-bold uppercase tracking-wider text-xs">Phone Number</Label>
                       <Input
