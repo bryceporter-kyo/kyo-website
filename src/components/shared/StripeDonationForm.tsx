@@ -149,71 +149,107 @@ export default function StripeDonationForm({
 
   const presets = frequency === 'monthly' ? [10, 25, 50, 100] : [25, 50, 100, 250];
 
-  const [autocompleteError, setAutocompleteError] = useState(false);
-  const addressContainerRef = useRef<HTMLDivElement>(null);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [isFetchingSuggestions, setIsFetchingSuggestions] = useState(false);
+  const [placesLib, setPlacesLib] = useState<any>(null);
+  const sessionTokenRef = useRef<any>(null);
 
   useEffect(() => {
-    if (!wantsTaxReceipt || !addressContainerRef.current) return;
+    if (!wantsTaxReceipt) return;
 
     let isMounted = true;
 
-    const loadModernPlaces = async () => {
+    const initPlaces = async () => {
       try {
         setOptions({
           key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
           v: 'weekly',
         });
 
-        const { PlaceAutocompleteElement } = await importLibrary('places') as any;
-
-        if (!isMounted || !addressContainerRef.current) return;
-
-        // Clean any existing element inside container
-        addressContainerRef.current.innerHTML = '';
-
-        // Instantiate the modern PlaceAutocompleteElement (Places API New)
-        const autocomplete = new PlaceAutocompleteElement({
-          includedRegionCodes: ['ca'],
-        });
-
-        // Style the custom element for seamless theme integration
-        autocomplete.style.width = '100%';
-
-        // Listen to modern gmp-select event
-        autocomplete.addEventListener('gmp-select', async (event: any) => {
-          const placePrediction = event.placePrediction;
-          if (!placePrediction) return;
-
-          const place = placePrediction.toPlace();
-          // Explicit FieldMask parameter as required by Places API (New)
-          await place.fetchFields({
-            fields: ['displayName', 'formattedAddress'],
-          });
-
-          const formatted = place.formattedAddress || '';
-          if (isMounted) {
-            setAddress(formatted);
+        const lib = await importLibrary('places') as any;
+        if (isMounted) {
+          setPlacesLib(lib);
+          if (lib.AutocompleteSessionToken) {
+            sessionTokenRef.current = new lib.AutocompleteSessionToken();
           }
-        });
-
-        // Listen to error events (e.g. key blocked or API disabled)
-        autocomplete.addEventListener('gmp-error', () => {
-          if (isMounted) setAutocompleteError(true);
-        });
-
-        addressContainerRef.current.appendChild(autocomplete);
+        }
       } catch (err) {
-        console.error('[Google Maps Places New Error]:', err);
-        if (isMounted) setAutocompleteError(true);
+        console.error('[Google Maps Places Init Error]:', err);
       }
     };
 
-    loadModernPlaces();
+    initPlaces();
 
     return () => {
       isMounted = false;
     };
   }, [wantsTaxReceipt]);
+
+  // Handle typing in the address input with AutocompleteSuggestion.fetchAutocompleteSuggestions
+  const handleAddressInputChange = async (val: string) => {
+    setAddress(val);
+    setAddressInputValue(''); // Clear unit number if base address is being retyped
+
+    if (!val || val.trim().length < 3) {
+      setSuggestions([]);
+      return;
+    }
+
+    if (!placesLib?.AutocompleteSuggestion) {
+      return;
+    }
+
+    try {
+      setIsFetchingSuggestions(true);
+      const request: any = {
+        input: val.trim(),
+        includedRegionCodes: ['ca'],
+      };
+      if (sessionTokenRef.current) {
+        request.sessionToken = sessionTokenRef.current;
+      }
+
+      const response = await placesLib.AutocompleteSuggestion.fetchAutocompleteSuggestions(request);
+      if (response && response.suggestions) {
+        setSuggestions(response.suggestions);
+      } else {
+        setSuggestions([]);
+      }
+    } catch (err) {
+      console.error('[AutocompleteSuggestion Error]:', err);
+      setSuggestions([]);
+    } finally {
+      setIsFetchingSuggestions(false);
+    }
+  };
+
+  // When donor selects a prediction from the dropdown list
+  const handleSelectSuggestion = async (suggestion: any) => {
+    try {
+      if (suggestion.placePrediction) {
+        const place = suggestion.placePrediction.toPlace();
+        // Required FieldMask
+        await place.fetchFields({
+          fields: ['displayName', 'formattedAddress'],
+        });
+        const formatted = place.formattedAddress || suggestion.placePrediction.text?.text || '';
+        setAddress(formatted);
+      } else {
+        setAddress(suggestion.text?.text || '');
+      }
+      setSuggestions([]);
+      // Refresh session token for subsequent searches
+      if (placesLib?.AutocompleteSessionToken) {
+        sessionTokenRef.current = new placesLib.AutocompleteSessionToken();
+      }
+    } catch (err) {
+      console.error('[Place fetchFields Error]:', err);
+      // Fallback to prediction text if fetchFields fails
+      const fallbackText = suggestion?.placePrediction?.text?.text || '';
+      if (fallbackText) setAddress(fallbackText);
+      setSuggestions([]);
+    }
+  };
 
   // Store latest callback in a ref to avoid infinite re-render loops
   const onStateChangeRef = useRef(onStateChange);
@@ -484,41 +520,65 @@ export default function StripeDonationForm({
                         onChange={(e) => setPhone(e.target.value)}
                       />
                     </div>
-                    <div className="space-y-1">
+                    <div className="space-y-1 relative">
                       <Label className="text-slate-600 font-bold uppercase tracking-wider text-xs">Mailing Address</Label>
-                      {/* Places API (New) PlaceAutocompleteElement Container */}
-                      <div ref={addressContainerRef} className={cn("rounded-xl overflow-hidden [&_gmp-place-autocomplete]:w-full", autocompleteError && "hidden")} />
-                      {autocompleteError ? (
-                        <div className="space-y-1.5">
-                          <Input
+                      <div className="relative">
+                        <Input
+                          type="text"
+                          placeholder="Start typing your street address..."
+                          className="py-5 rounded-xl border-slate-200 text-sm pr-9"
+                          value={address}
+                          onChange={(e) => handleAddressInputChange(e.target.value)}
+                          autoComplete="off"
+                        />
+                        {isFetchingSuggestions && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Dropdown suggestions from Places API */}
+                      {suggestions.length > 0 && (
+                        <div className="absolute z-50 left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden max-h-60 overflow-y-auto">
+                          {suggestions.map((item, idx) => {
+                            const pred = item.placePrediction;
+                            const mainText = pred?.structuredFormat?.mainText?.text || pred?.text?.text || item.text?.text || 'Address';
+                            const secondaryText = pred?.structuredFormat?.secondaryText?.text || '';
+
+                            return (
+                              <button
+                                key={idx}
+                                type="button"
+                                onClick={() => handleSelectSuggestion(item)}
+                                className="w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-b-0 flex flex-col"
+                              >
+                                <span className="text-xs font-semibold text-slate-900">{mainText}</span>
+                                {secondaryText && (
+                                  <span className="text-[11px] text-slate-500">{secondaryText}</span>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {/* Unit / Suite number field */}
+                      {address && (
+                        <div className="mt-2 text-xs bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-700">
+                          <span className="font-semibold text-slate-900">Apartment / Suite: </span>
+                          <input
                             type="text"
-                            placeholder="Enter your street address, city, province, postal code"
-                            className="py-5 rounded-xl border-slate-200 text-sm"
-                            value={address}
-                            onChange={(e) => setAddress(e.target.value)}
+                            placeholder="Unit, apt, or suite # (optional)"
+                            className="w-full mt-1.5 px-2.5 py-1.5 bg-white border border-slate-200 rounded text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                            value={addressInputValue}
+                            onChange={(e) => setAddressInputValue(e.target.value)}
                           />
                         </div>
-                      ) : address ? (
-                        <div className="mt-2 text-xs bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-700">
-                          <span className="font-semibold text-slate-900">Selected Address: </span>
-                          {address}
-                          <div className="mt-1">
-                            <input
-                              type="text"
-                              placeholder="Apartment, unit, or suite number (optional)"
-                              className="w-full mt-1 px-2.5 py-1.5 bg-white border border-slate-200 rounded text-xs focus:outline-none focus:ring-1 focus:ring-primary"
-                              value={addressInputValue}
-                              onChange={(e) => {
-                                setAddressInputValue(e.target.value);
-                              }}
-                            />
-                          </div>
-                        </div>
-                      ) : null}
+                      )}
+
                       <p className="text-[10px] text-slate-400">
-                        {autocompleteError 
-                          ? "Enter your full mailing address for your official tax receipt."
-                          : "Search and select your address above."}
+                        Select your address from the dropdown suggestions as you type.
                       </p>
                     </div>
                   </div>
