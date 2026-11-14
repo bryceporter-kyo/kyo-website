@@ -18,7 +18,7 @@ import {
   getTaxReceiptSettings, saveTaxReceiptSettings, fetchTaxReceipts, 
   TaxReceiptSettings, TaxReceiptRecord 
 } from "@/lib/taxReceipts";
-import { APPS_SCRIPT_CODE } from "@/lib/appsScriptTemplate";
+import { generateAppsScriptCode } from "@/lib/appsScriptTemplate";
 import { fetchLegalPages, LegalPage } from "@/lib/legal-pages";
 
 export default function DonationsAdminPage() {
@@ -40,7 +40,18 @@ export default function DonationsAdminPage() {
     senderName: '',
     gmailAppPassword: '',
     termsLegalSlug: '',
+    smtpUser: '',
+    smtpHost: '',
+    smtpPort: '',
   });
+
+  const [origin, setOrigin] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setOrigin(window.location.origin);
+    }
+  }, []);
 
   useEffect(() => {
     getTaxReceiptSettings().then(setSettings).catch(console.error);
@@ -67,10 +78,18 @@ export default function DonationsAdminPage() {
     setSettings(prev => ({ ...prev, [key]: value }));
   };
 
+  const dynamicAppsScriptCode = generateAppsScriptCode({
+    trackingSheetId: settings.googleSheetId,
+    templateDocId: settings.googleDocTemplateId,
+    driveFolderId: settings.googleDriveFolderId,
+    secret: settings.appsScriptSecret,
+    websiteUrl: origin,
+  });
+
   const copyScriptToClipboard = () => {
-    navigator.clipboard.writeText(APPS_SCRIPT_CODE);
+    navigator.clipboard.writeText(dynamicAppsScriptCode);
     setCopiedCode(true);
-    toast({ title: "Copied!", description: "Apps Script code copied to clipboard." });
+    toast({ title: "Copied!", description: "Customized Apps Script with your settings copied to clipboard." });
     setTimeout(() => setCopiedCode(false), 3000);
   };
 
@@ -181,12 +200,12 @@ export default function DonationsAdminPage() {
               </CardContent>
             </Card>
 
-            {/* Email Sender Configuration & App Password */}
+            {/* Email Sender & SMTP Configuration */}
             <Card>
               <CardHeader>
-                <CardTitle>Email Sender Configuration & Google App Password</CardTitle>
+                <CardTitle>Email Sender & SMTP Configuration</CardTitle>
                 <CardDescription>
-                  Receipts will be sent as PDF attachments. You can update the sender details and Google App Password here anytime.
+                  Configure the sending email address, SMTP server, and Google Workspace App Password for sending receipt emails.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -211,27 +230,62 @@ export default function DonationsAdminPage() {
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <Label>Gmail / Google Workspace App Password</Label>
-                  <div className="relative">
-                    <Input
-                      type={showPassword ? 'text' : 'password'}
-                      value={settings.gmailAppPassword || ''}
-                      onChange={(e) => handleChange('gmailAppPassword', e.target.value)}
-                      placeholder="xxxx xxxx xxxx xxxx (16-character app password)"
-                      className="pr-10 font-mono"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(p => !p)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
+                <div className="border-t border-slate-100 pt-3">
+                  <h4 className="text-sm font-semibold text-slate-800 mb-3">SMTP Server & Authentication</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                    <div className="space-y-1 sm:col-span-1">
+                      <Label>SMTP Account / Username</Label>
+                      <Input
+                        value={settings.smtpUser || ''}
+                        onChange={(e) => handleChange('smtpUser', e.target.value)}
+                        placeholder="e.g. donations@thekyo.ca"
+                      />
+                      <p className="text-[11px] text-muted-foreground">Typically the same as your sender email.</p>
+                    </div>
+
+                    <div className="space-y-1 sm:col-span-1">
+                      <Label>SMTP Host / Server</Label>
+                      <Input
+                        value={settings.smtpHost || ''}
+                        onChange={(e) => handleChange('smtpHost', e.target.value)}
+                        placeholder="smtp.gmail.com"
+                      />
+                      <p className="text-[11px] text-muted-foreground">Default: smtp.gmail.com</p>
+                    </div>
+
+                    <div className="space-y-1 sm:col-span-1">
+                      <Label>SMTP Port</Label>
+                      <Input
+                        value={settings.smtpPort || ''}
+                        onChange={(e) => handleChange('smtpPort', e.target.value)}
+                        placeholder="465 (SSL) or 587 (TLS)"
+                      />
+                      <p className="text-[11px] text-muted-foreground">Default: 465 (SSL)</p>
+                    </div>
                   </div>
-                  <p className="text-[11px] text-muted-foreground">
-                    Stored securely in your database. See the "Setup Instructions" tab for step-by-step instructions on creating a Google App Password.
-                  </p>
+
+                  <div className="space-y-1">
+                    <Label>Gmail / Google Workspace App Password</Label>
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? 'text' : 'password'}
+                        value={settings.gmailAppPassword || ''}
+                        onChange={(e) => handleChange('gmailAppPassword', e.target.value)}
+                        placeholder="xxxx xxxx xxxx xxxx (16-character app password)"
+                        className="pr-10 font-mono"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(p => !p)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      Stored securely in your database. See the "Setup Instructions" tab for instructions on creating a Google App Password.
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -294,7 +348,7 @@ export default function DonationsAdminPage() {
                   Google Apps Script Code
                 </CardTitle>
                 <CardDescription>
-                  Copy this entire script and paste it into your Google Doc/Drive Apps Script editor.
+                  Copy this script into your Google Doc/Drive Apps Script editor. It is dynamically pre-filled with your settings above.
                 </CardDescription>
               </div>
               <Button onClick={copyScriptToClipboard} variant="default" className="gap-2">
@@ -305,7 +359,7 @@ export default function DonationsAdminPage() {
             <CardContent>
               <div className="relative">
                 <pre className="p-4 bg-slate-900 text-slate-100 rounded-xl overflow-x-auto text-xs font-mono max-h-[550px] leading-relaxed">
-                  <code>{APPS_SCRIPT_CODE}</code>
+                  <code>{dynamicAppsScriptCode}</code>
                 </pre>
               </div>
             </CardContent>

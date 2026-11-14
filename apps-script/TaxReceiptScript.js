@@ -11,6 +11,7 @@
 //    - TEMPLATE_DOC_ID:   The Google Doc Template ID (or leave blank to use the active doc)
 //    - DRIVE_FOLDER_ID:   The Google Drive Folder ID to save generated receipts in
 //    - SHARED_SECRET:     A secret string to authorize requests from your KYO website
+//    - WEBSITE_URL:       Your KYO website root URL (e.g. https://thekyo.ca) to push manual receipts back to the admin log
 // 5. Deploy as a Web App:
 //    - Click "Deploy" -> "New deployment"
 //    - Select type: "Web app"
@@ -30,10 +31,11 @@
 function setupProperties() {
   const props = PropertiesService.getScriptProperties();
   props.setProperties({
-    'TRACKING_SHEET_ID': '1oMrFa1OgL6ghU3HlxeQv9QHPeOFqoYiWkQ9wazht3XI',
-    'TEMPLATE_DOC_ID':   '', // Leave blank if bound to the template doc, or enter ID
-    'DRIVE_FOLDER_ID':   '', // Enter root Google Drive folder ID for receipts
-    'SHARED_SECRET':     'CHANGE_ME_TO_A_SECURE_SECRET_STRING'
+    'TRACKING_SHEET_ID': '%%TRACKING_SHEET_ID%%',
+    'TEMPLATE_DOC_ID':   '%%TEMPLATE_DOC_ID%%', // Leave blank if bound to the template doc, or enter ID
+    'DRIVE_FOLDER_ID':   '%%DRIVE_FOLDER_ID%%', // Enter root Google Drive folder ID for receipts
+    'SHARED_SECRET':     '%%SHARED_SECRET%%',
+    'WEBSITE_URL':       '%%WEBSITE_URL%%'      // KYO website root URL to sync manual receipts
   });
   Logger.log('Default properties set successfully.');
 }
@@ -41,10 +43,11 @@ function setupProperties() {
 function getSettings() {
   const props = PropertiesService.getScriptProperties();
   return {
-    trackingSheetId: props.getProperty('TRACKING_SHEET_ID') || '1oMrFa1OgL6ghU3HlxeQv9QHPeOFqoYiWkQ9wazht3XI',
-    templateDocId:   props.getProperty('TEMPLATE_DOC_ID') || '',
-    driveFolderId:   props.getProperty('DRIVE_FOLDER_ID') || '',
-    secret:          props.getProperty('SHARED_SECRET') || ''
+    trackingSheetId: props.getProperty('TRACKING_SHEET_ID') || '%%TRACKING_SHEET_ID%%',
+    templateDocId:   props.getProperty('TEMPLATE_DOC_ID') || '%%TEMPLATE_DOC_ID%%',
+    driveFolderId:   props.getProperty('DRIVE_FOLDER_ID') || '%%DRIVE_FOLDER_ID%%',
+    secret:          props.getProperty('SHARED_SECRET') || '%%SHARED_SECRET%%',
+    websiteUrl:      props.getProperty('WEBSITE_URL') || '%%WEBSITE_URL%%'
   };
 }
 
@@ -402,6 +405,9 @@ function processReceipt(data) {
     sendReceiptByEmail(newFile, data, issueDateStr);
   }
 
+  // Push manual receipt to website database for storage and audit log
+  pushReceiptToWebsite(data, receiptId, receiptUrl, settings);
+
   return { receiptId, receiptUrl };
 }
 
@@ -562,4 +568,45 @@ function logToSheet(data, issueDateStr, receiptUrl, trackingSheetId) {
     receiptUrl
   ]);
 }
+
+/**
+ * Pushes a manually created tax receipt back to the KYO website's database.
+ */
+function pushReceiptToWebsite(data, receiptId, receiptUrl, settings) {
+  if (!settings.websiteUrl || settings.websiteUrl.indexOf('%%') !== -1) {
+    Logger.log('[pushReceiptToWebsite] No WEBSITE_URL configured, skipping website sync.');
+    return;
+  }
+
+  const cleanBase = settings.websiteUrl.replace(/\/+$/, '');
+  const endpoint = `${cleanBase}/api/tax-receipts/manual`;
+
+  const payload = {
+    secret:       settings.secret,
+    donorName:    data.donorName,
+    donorEmail:   data.recipientEmail || '',
+    donorPhone:   '',
+    donorAddress: data.donorAddress,
+    amount:       data.amount,
+    frequency:    'one-time',
+    donationDate: data.donDate,
+    receiptId:    receiptId,
+    receiptUrl:   receiptUrl,
+    status:       data.sendPdf ? 'emailed' : 'pending'
+  };
+
+  try {
+    const options = {
+      method: 'post',
+      contentType: 'application/json',
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    };
+    const response = UrlFetchApp.fetch(endpoint, options);
+    Logger.log(`[pushReceiptToWebsite] Response status: ${response.getResponseCode()}, body: ${response.getContentText()}`);
+  } catch (err) {
+    console.error(`[pushReceiptToWebsite] Failed to push receipt to website: ${err.message}`);
+  }
+}
+
 

@@ -14,6 +14,9 @@ export interface TaxReceiptSettings {
   senderName: string;
   gmailAppPassword: string; // stored encrypted, server-side only
   termsLegalSlug?: string; // slug of the legal page for CRA terms (e.g. 'cra-tax-receipt-terms')
+  smtpUser?: string;       // explicit SMTP username / account
+  smtpHost?: string;       // explicit SMTP host (defaults to smtp.gmail.com)
+  smtpPort?: string;       // explicit SMTP port (defaults to 465 or 587)
 }
 
 export interface TaxReceiptRecord {
