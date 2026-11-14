@@ -200,12 +200,12 @@ export default function DonationsAdminPage() {
               </CardContent>
             </Card>
 
-            {/* Email Sender & SMTP Configuration */}
+            {/* Email Sender Configuration & Google Workspace App Password */}
             <Card>
               <CardHeader>
-                <CardTitle>Email Sender & SMTP Configuration</CardTitle>
+                <CardTitle>Email Sender Configuration & Google Workspace App Password</CardTitle>
                 <CardDescription>
-                  Configure the sending email address, SMTP server, and Google Workspace App Password for sending receipt emails.
+                  Configure the sending email account and Google App Password for delivering receipt PDFs to donors.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -220,72 +220,38 @@ export default function DonationsAdminPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <Label>Sender Email Address</Label>
+                    <Label>Google Account / Sender Email Address</Label>
                     <Input
                       type="email"
                       value={settings.senderEmail || ''}
                       onChange={(e) => handleChange('senderEmail', e.target.value)}
-                      placeholder="donations@thekyo.ca"
+                      placeholder="e.g. bryce@thekyo.ca or donations@thekyo.ca"
                     />
+                    <p className="text-[11px] text-muted-foreground">The Google Workspace user account that generates the App Password.</p>
                   </div>
                 </div>
 
-                <div className="border-t border-slate-100 pt-3">
-                  <h4 className="text-sm font-semibold text-slate-800 mb-3">SMTP Server & Authentication</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                    <div className="space-y-1 sm:col-span-1">
-                      <Label>SMTP Account / Username</Label>
-                      <Input
-                        value={settings.smtpUser || ''}
-                        onChange={(e) => handleChange('smtpUser', e.target.value)}
-                        placeholder="e.g. donations@thekyo.ca"
-                      />
-                      <p className="text-[11px] text-muted-foreground">Typically the same as your sender email.</p>
-                    </div>
-
-                    <div className="space-y-1 sm:col-span-1">
-                      <Label>SMTP Host / Server</Label>
-                      <Input
-                        value={settings.smtpHost || ''}
-                        onChange={(e) => handleChange('smtpHost', e.target.value)}
-                        placeholder="smtp.gmail.com"
-                      />
-                      <p className="text-[11px] text-muted-foreground">Default: smtp.gmail.com</p>
-                    </div>
-
-                    <div className="space-y-1 sm:col-span-1">
-                      <Label>SMTP Port</Label>
-                      <Input
-                        value={settings.smtpPort || ''}
-                        onChange={(e) => handleChange('smtpPort', e.target.value)}
-                        placeholder="465 (SSL) or 587 (TLS)"
-                      />
-                      <p className="text-[11px] text-muted-foreground">Default: 465 (SSL)</p>
-                    </div>
+                <div className="space-y-1 pt-1">
+                  <Label>Google Account App Password</Label>
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? 'text' : 'password'}
+                      value={settings.gmailAppPassword || ''}
+                      onChange={(e) => handleChange('gmailAppPassword', e.target.value)}
+                      placeholder="xxxx xxxx xxxx xxxx (16-character app password)"
+                      className="pr-10 font-mono"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(p => !p)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
-
-                  <div className="space-y-1">
-                    <Label>Gmail / Google Workspace App Password</Label>
-                    <div className="relative">
-                      <Input
-                        type={showPassword ? 'text' : 'password'}
-                        value={settings.gmailAppPassword || ''}
-                        onChange={(e) => handleChange('gmailAppPassword', e.target.value)}
-                        placeholder="xxxx xxxx xxxx xxxx (16-character app password)"
-                        className="pr-10 font-mono"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(p => !p)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                      >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground">
-                      Stored securely in your database. See the "Setup Instructions" tab for instructions on creating a Google App Password.
-                    </p>
-                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    Generated from your Google Account settings under Security &rarr; 2-Step Verification &rarr; App Passwords.
+                  </p>
                 </div>
               </CardContent>
             </Card>
