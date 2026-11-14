@@ -36,13 +36,12 @@ export default function DonationsAdminPage() {
     googleSheetId: '',
     appsScriptWebAppUrl: '',
     appsScriptSecret: '',
-    senderEmail: '',
     senderName: '',
+    senderEmail: '',
+    replyToEmail: '',
+    googleAccountUser: '',
     gmailAppPassword: '',
     termsLegalSlug: '',
-    smtpUser: '',
-    smtpHost: '',
-    smtpPort: '',
   });
 
   const [origin, setOrigin] = useState('');
@@ -205,53 +204,85 @@ export default function DonationsAdminPage() {
               <CardHeader>
                 <CardTitle>Email Sender Configuration & Google Workspace App Password</CardTitle>
                 <CardDescription>
-                  Configure the sending email account and Google App Password for delivering receipt PDFs to donors.
+                  Configure your sender display identity, From & Reply-To addresses, and Google Account credentials for delivering receipt PDFs.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1 sm:col-span-1">
                     <Label>Sender Display Name</Label>
                     <Input
                       value={settings.senderName || ''}
                       onChange={(e) => handleChange('senderName', e.target.value)}
                       placeholder="Kawartha Youth Orchestra"
                     />
+                    <p className="text-[11px] text-muted-foreground">The friendly name donors see in their inbox.</p>
                   </div>
 
-                  <div className="space-y-1">
-                    <Label>Google Account / Sender Email Address</Label>
+                  <div className="space-y-1 sm:col-span-1">
+                    <Label>From Email Address</Label>
                     <Input
                       type="email"
                       value={settings.senderEmail || ''}
                       onChange={(e) => handleChange('senderEmail', e.target.value)}
-                      placeholder="e.g. bryce@thekyo.ca or donations@thekyo.ca"
+                      placeholder="donations@thekyo.ca"
                     />
-                    <p className="text-[11px] text-muted-foreground">The Google Workspace user account that generates the App Password.</p>
+                    <p className="text-[11px] text-muted-foreground">The email address the receipt appears from.</p>
+                  </div>
+
+                  <div className="space-y-1 sm:col-span-1">
+                    <Label>Reply-To Email Address</Label>
+                    <Input
+                      type="email"
+                      value={settings.replyToEmail || ''}
+                      onChange={(e) => handleChange('replyToEmail', e.target.value)}
+                      placeholder="info@thekyo.ca or donations@thekyo.ca"
+                    />
+                    <p className="text-[11px] text-muted-foreground">Where donor replies will be directed.</p>
                   </div>
                 </div>
 
-                <div className="space-y-1 pt-1">
-                  <Label>Google Account App Password</Label>
-                  <div className="relative">
-                    <Input
-                      type={showPassword ? 'text' : 'password'}
-                      value={settings.gmailAppPassword || ''}
-                      onChange={(e) => handleChange('gmailAppPassword', e.target.value)}
-                      placeholder="xxxx xxxx xxxx xxxx (16-character app password)"
-                      className="pr-10 font-mono"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(p => !p)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground">
-                    Generated from your Google Account settings under Security &rarr; 2-Step Verification &rarr; App Passwords.
+                <div className="border-t border-slate-100 pt-3">
+                  <h4 className="text-sm font-semibold text-slate-800 mb-2">Google Account Authentication</h4>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Connect the Google Workspace or Gmail account responsible for sending the emails and its 16-character App Password.
                   </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <Label>Google Account / Username</Label>
+                      <Input
+                        type="email"
+                        value={settings.googleAccountUser || ''}
+                        onChange={(e) => handleChange('googleAccountUser', e.target.value)}
+                        placeholder="e.g. bryce@thekyo.ca or donations@thekyo.ca"
+                      />
+                      <p className="text-[11px] text-muted-foreground">The Google account generating the App Password.</p>
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label>Google App Password</Label>
+                      <div className="relative">
+                        <Input
+                          type={showPassword ? 'text' : 'password'}
+                          value={settings.gmailAppPassword || ''}
+                          onChange={(e) => handleChange('gmailAppPassword', e.target.value)}
+                          placeholder="xxxx xxxx xxxx xxxx (16 characters)"
+                          className="pr-10 font-mono"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(p => !p)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground">
+                        Generated in Google Account &rarr; Security &rarr; 2-Step Verification &rarr; App Passwords.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>

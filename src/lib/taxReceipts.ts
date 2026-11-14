@@ -10,13 +10,15 @@ export interface TaxReceiptSettings {
   googleSheetId: string;
   appsScriptWebAppUrl: string;
   appsScriptSecret: string;
-  senderEmail: string;
   senderName: string;
-  gmailAppPassword: string; // stored encrypted, server-side only
-  termsLegalSlug?: string; // slug of the legal page for CRA terms (e.g. 'cra-tax-receipt-terms')
-  smtpUser?: string;       // explicit SMTP username / account
-  smtpHost?: string;       // explicit SMTP host (defaults to smtp.gmail.com)
-  smtpPort?: string;       // explicit SMTP port (defaults to 465 or 587)
+  senderEmail: string;       // From Email Address
+  replyToEmail?: string;     // Reply-To Email Address
+  googleAccountUser?: string;// Google Workspace / Account Username (authenticating account)
+  gmailAppPassword: string;  // 16-character Google App Password
+  termsLegalSlug?: string;   // slug of the legal page for CRA terms (e.g. 'cra-tax-receipt-terms')
+  smtpUser?: string;
+  smtpHost?: string;
+  smtpPort?: string;
 }
 
 export interface TaxReceiptRecord {
