@@ -508,18 +508,24 @@ export default function StripeDonationForm({
 
               {/* Tax Receipt Checkbox */}
               <div className="pt-2 border-t border-slate-100">
-                <label className="flex items-start gap-3 cursor-pointer group">
+                <div className="flex items-start gap-3">
                   <input
+                    id="tax-receipt-checkbox"
                     type="checkbox"
                     checked={wantsTaxReceipt}
                     onChange={(e) => {
                       setWantsTaxReceipt(e.target.checked);
                       if (!e.target.checked) { setPhone(''); setAddress(''); setAddressInputValue(''); }
                     }}
-                    className="mt-0.5 w-4 h-4 accent-primary cursor-pointer"
+                    className="mt-1 w-4 h-4 accent-primary cursor-pointer shrink-0"
                   />
                   <div>
-                    <span className="text-sm font-bold text-slate-700">I would like a charitable tax receipt</span>
+                    <label 
+                      htmlFor="tax-receipt-checkbox" 
+                      className="text-sm font-bold text-slate-700 cursor-pointer select-none hover:text-slate-900 block"
+                    >
+                      I would like a charitable tax receipt
+                    </label>
                     <p className="text-[10px] text-slate-400 mt-0.5">
                       We will generate and email you a CRA compliant receipt in accordance with our{' '}
                       {termsLegalSlug ? (
@@ -527,8 +533,7 @@ export default function StripeDonationForm({
                           href={termsLegalSlug.startsWith('/') ? termsLegalSlug : `/legal/${termsLegalSlug}`} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="text-primary underline hover:text-primary/80 font-medium inline-flex items-center"
-                          onClick={(e) => e.stopPropagation()}
+                          className="text-primary underline hover:text-primary/80 font-medium inline"
                         >
                           CRA tax receipt terms & conditions
                         </Link>
@@ -538,7 +543,7 @@ export default function StripeDonationForm({
                       .
                     </p>
                   </div>
-                </label>
+                </div>
 
                 {wantsTaxReceipt && (
                   <div className="mt-4 space-y-3">
