@@ -84,7 +84,7 @@ function StripePaymentElementForm({ amount, name, email, onSuccess }: CheckoutFo
             <Loader2 className="w-5 h-5 animate-spin mr-2" /> Processing Donation...
           </>
         ) : (
-          `Complete Donation of $${amount.toFixed(2)} CAD`
+          `Complete Donation of $${amount.toFixed(2)}`
         )}
       </Button>
     </form>
@@ -165,7 +165,7 @@ export default function CatalogueDonationModal({
     if (item.type === 'variable') {
       const parsed = parseFloat(variableAmount);
       if (isNaN(parsed) || parsed < 10.01) {
-        setErrorMessage('The minimum contribution for this gift is $10.01 CAD.');
+        setErrorMessage('The minimum contribution for this gift is $10.01.');
         return false;
       }
     }
@@ -280,13 +280,13 @@ export default function CatalogueDonationModal({
           <DialogTitle className="text-2xl font-headline flex items-center justify-between flex-wrap gap-2">
             <span>{item.name}</span>
             <span className="text-lg font-bold text-primary">
-              ${totalAmount.toFixed(2)} CAD
+              ${totalAmount.toFixed(2)}
             </span>
           </DialogTitle>
           <DialogDescription className="text-sm">
             {item.type === 'variable'
-              ? 'Choose your contribution amount in Canadian Dollars (CAD).'
-              : `Base Donation: ${item.displayPrice} CAD${hasDedication ? ` + $${DEDICATION_ADDON_PRICE.toFixed(2)} Dedication` : ''}`}
+              ? 'Choose your contribution amount.'
+              : `Base Donation: ${item.displayPrice}${hasDedication ? ` + $${DEDICATION_ADDON_PRICE.toFixed(2)} Dedication` : ''}`}
           </DialogDescription>
         </DialogHeader>
 
@@ -297,7 +297,7 @@ export default function CatalogueDonationModal({
             </div>
             <h3 className="text-2xl font-bold font-headline">Thank You for Your Generosity!</h3>
             <p className="text-muted-foreground text-sm max-w-md mx-auto">
-              Your gift of <strong>${confirmedAmount.toFixed(2)} CAD</strong> for{' '}
+              Your gift of <strong>${confirmedAmount.toFixed(2)}</strong> for{' '}
               <strong>{item.name}</strong> will directly empower an Upbeat! musician in Peterborough.
             </p>
             {hasDedication && (
@@ -327,7 +327,7 @@ export default function CatalogueDonationModal({
                   </span>
                 )}
               </div>
-              <span className="font-bold text-primary text-base">${confirmedAmount.toFixed(2)} CAD</span>
+              <span className="font-bold text-primary text-base">${confirmedAmount.toFixed(2)}</span>
             </div>
             <Elements
               stripe={stripePromise}
@@ -359,7 +359,7 @@ export default function CatalogueDonationModal({
           <form onSubmit={handleProceedFromStep2} className="space-y-5 pt-2">
             <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl space-y-1">
               <div className="flex items-center gap-2 text-primary font-bold text-sm">
-                <Sparkles className="w-4 h-4" /> Dedication Plaque Details (+${DEDICATION_ADDON_PRICE.toFixed(2)} CAD)
+                <Sparkles className="w-4 h-4" /> Dedication Plaque Details (+${DEDICATION_ADDON_PRICE.toFixed(2)})
               </div>
               <p className="text-xs text-muted-foreground">
                 We will inscribe this dedication onto the physical instrument plaque to celebrate your support.
@@ -484,7 +484,7 @@ export default function CatalogueDonationModal({
                   </>
                 ) : (
                   <>
-                    Proceed to Payment (${totalAmount.toFixed(2)} CAD) <ArrowRight className="w-4 h-4" />
+                    Proceed to Payment (${totalAmount.toFixed(2)}) <ArrowRight className="w-4 h-4" />
                   </>
                 )}
               </Button>
@@ -505,7 +505,7 @@ export default function CatalogueDonationModal({
             {item.type === 'variable' && (
               <div>
                 <Label htmlFor="custom-amount" className="font-semibold text-sm">
-                  Contribution Amount (CAD) *
+                  Contribution Amount *
                 </Label>
                 <div className="relative mt-1">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">
@@ -524,7 +524,7 @@ export default function CatalogueDonationModal({
                   />
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Minimum contribution: $10.01 CAD. Every dollar directly funds this initiative.
+                  Minimum contribution: $10.01. Every dollar directly funds this initiative.
                 </p>
               </div>
             )}
@@ -616,8 +616,8 @@ export default function CatalogueDonationModal({
                   </label>
                   <p className="text-xs text-muted-foreground">
                     {isTaxReceiptEligible
-                      ? 'Eligible for cash donations over $20 CAD. CRA requires your full address and phone number.'
-                      : 'Tax receipts are available for donations exceeding $20.00 CAD.'}
+                      ? 'Eligible for cash donations over $20. CRA requires your full address and phone number.'
+                      : 'Tax receipts are available for donations exceeding $20.'}
                   </p>
                 </div>
               </div>
@@ -656,7 +656,7 @@ export default function CatalogueDonationModal({
 
             <div className="flex items-center gap-2 pt-1 text-xs text-muted-foreground">
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              <span>Payments processed securely via Stripe. CAD currency.</span>
+              <span>Payments processed securely via Stripe.</span>
             </div>
 
             <Button
@@ -670,10 +670,10 @@ export default function CatalogueDonationModal({
                 </>
               ) : hasDedication ? (
                 <span className="flex items-center justify-center gap-2">
-                  Continue to Dedication Details (${totalAmount.toFixed(2)} CAD) <ArrowRight className="w-4 h-4" />
+                  Continue to Dedication Details (${totalAmount.toFixed(2)}) <ArrowRight className="w-4 h-4" />
                 </span>
               ) : (
-                `Proceed to Payment ($${totalAmount.toFixed(2)} CAD)`
+                `Proceed to Payment ($${totalAmount.toFixed(2)})`
               )}
             </Button>
           </form>

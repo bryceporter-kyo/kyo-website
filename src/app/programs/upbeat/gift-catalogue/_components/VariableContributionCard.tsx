@@ -59,7 +59,7 @@ export default function VariableContributionCard({ item, onDonate }: VariableCon
             {item.name}
           </h3>
           <p className="text-xs font-medium text-primary">
-            Minimum contribution: $10.01 CAD
+            Minimum contribution: $10.01
           </p>
         </div>
 
@@ -67,10 +67,10 @@ export default function VariableContributionCard({ item, onDonate }: VariableCon
         <div className="p-4 rounded-xl bg-background border border-border/80 shadow-sm space-y-2">
           <div className="flex justify-between items-baseline text-sm">
             <span className="font-bold text-foreground">
-              ${campaign.raised.toLocaleString('en-CA')} CAD raised
+              ${campaign.raised.toLocaleString('en-CA')} raised
             </span>
             <span className="text-xs text-muted-foreground">
-              Goal: ${campaign.goal.toLocaleString('en-CA')} CAD
+              Goal: ${campaign.goal.toLocaleString('en-CA')}
             </span>
           </div>
           <Progress value={progressPercent} className="h-3 rounded-full" />

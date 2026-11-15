@@ -63,14 +63,14 @@ export default function InstructionSection({ items, onDonate }: InstructionSecti
               <GiftCard
                 item={monthItem}
                 onDonate={onDonate}
-                ctaText="Sponsor One Month ($257.99 CAD)"
+                ctaText={`Sponsor One Month (${monthItem.displayPrice})`}
               />
             )}
             {yearItem && (
               <GiftCard
                 item={yearItem}
                 onDonate={onDonate}
-                ctaText="Sponsor a Full Year ($2,574.99 CAD)"
+                ctaText={`Sponsor a Full Year (${yearItem.displayPrice})`}
               />
             )}
           </div>
@@ -119,7 +119,7 @@ export default function InstructionSection({ items, onDonate }: InstructionSecti
                         {snackItem.name}
                       </h4>
                       <Badge className="bg-primary text-white font-bold text-base px-4 py-1.5 shadow-sm">
-                        {snackItem.displayPrice} CAD
+                        {snackItem.displayPrice}
                       </Badge>
                     </div>
                     <p className="text-sm md:text-base text-muted-foreground leading-relaxed">

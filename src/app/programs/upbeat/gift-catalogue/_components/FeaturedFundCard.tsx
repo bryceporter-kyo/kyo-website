@@ -75,7 +75,7 @@ export default function FeaturedFundCard({ item, onDonate }: FeaturedFundCardPro
               <span>Contribute to The Pathways Fund</span>
             </Button>
             <span className="text-xs text-muted-foreground">
-              Min. $10.01 CAD • Tax receiptable over $20 CAD
+              Min. $10.01 • Tax receiptable over $20
             </span>
           </div>
         </div>
