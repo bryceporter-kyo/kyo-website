@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CATALOGUE_ITEMS, CatalogueItem } from '@/lib/catalogue-items';
 import GiftCatalogueHero from './_components/GiftCatalogueHero';
 import CampaignIntro from './_components/CampaignIntro';
@@ -12,12 +12,22 @@ import InstructionSection from './_components/InstructionSection';
 import CatalogueDonationModal from './_components/CatalogueDonationModal';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Heart } from 'lucide-react';
+import { Heart, CalendarOff } from 'lucide-react';
+import { getTaxReceiptSettings } from '@/lib/taxReceipts';
 
 export default function UpbeatGiftCataloguePage() {
   const [selectedItem, setSelectedItem] = useState<CatalogueItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [precheckDedication, setPrecheckDedication] = useState(false);
+  const [isHolidayCalendarHidden, setIsHolidayCalendarHidden] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    getTaxReceiptSettings().then((settings) => {
+      setIsHolidayCalendarHidden(Boolean(settings.hideHolidayCalendar));
+    }).catch(() => {
+      setIsHolidayCalendarHidden(false);
+    });
+  }, []);
 
   const handleOpenDonate = (item: CatalogueItem, withDedication = false) => {
     try {
@@ -36,6 +46,32 @@ export default function UpbeatGiftCataloguePage() {
     setSelectedItem(null);
     setPrecheckDedication(false);
   };
+
+  if (isHolidayCalendarHidden) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center bg-background px-4 py-16">
+        <div className="max-w-md text-center space-y-5">
+          <div className="inline-flex p-4 rounded-full bg-muted text-muted-foreground">
+            <CalendarOff className="w-10 h-10" />
+          </div>
+          <h1 className="text-3xl font-bold font-headline text-foreground">
+            Seasonal Campaign Concluded
+          </h1>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            The seasonal Holiday Gift Catalogue is currently offline. You can still support our youth musicians and community programs directly through general donations!
+          </p>
+          <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
+            <Button asChild size="lg" className="rounded-full font-bold">
+              <Link href="/support-us/donate">Make a Donation</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="rounded-full font-bold">
+              <Link href="/programs/upbeat">Back to Upbeat!</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Filter items by category & type
   const outfitItems = CATALOGUE_ITEMS.filter((i) =>

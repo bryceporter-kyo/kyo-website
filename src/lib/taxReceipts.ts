@@ -16,6 +16,7 @@ export interface TaxReceiptSettings {
   googleAccountUser?: string;// Google Workspace / Account Username (authenticating account)
   gmailAppPassword: string;  // 16-character Google App Password
   termsLegalSlug?: string;   // slug of the legal page for CRA terms (e.g. 'cra-tax-receipt-terms')
+  hideHolidayCalendar?: boolean; // Controls public visibility of the Holiday Gift Catalogue / Calendar
   smtpUser?: string;
   smtpHost?: string;
   smtpPort?: string;

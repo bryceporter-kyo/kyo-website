@@ -49,6 +49,7 @@ export default function DonationsAdminPage() {
     googleAccountUser: '',
     gmailAppPassword: '',
     termsLegalSlug: '',
+    hideHolidayCalendar: false,
   });
 
   const [origin, setOrigin] = useState('');
@@ -735,6 +736,36 @@ export default function DonationsAdminPage() {
                       placeholder="e.g. cra-tax-receipt-terms"
                       className="font-mono text-sm"
                     />
+                  </div>
+                </div>
+              </div>
+
+              {/* Holiday Calendar / Gift Catalogue Campaign Visibility */}
+              <div className="border-t border-slate-100 pt-4 space-y-3">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900">Holiday Calendar / Gift Catalogue Visibility</h4>
+                  <p className="text-xs text-slate-600">
+                    Toggle whether the seasonal Upbeat! Holiday Gift Catalogue campaign page (<code className="bg-slate-100 px-1 py-0.5 rounded">/programs/upbeat/gift-catalogue</code>) is publicly active or hidden when the season concludes.
+                  </p>
+                </div>
+
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                  <div className="flex items-start space-x-3">
+                    <input
+                      type="checkbox"
+                      id="hideHolidayCalendar"
+                      checked={Boolean(settings.hideHolidayCalendar)}
+                      onChange={(e) => setSettings(prev => ({ ...prev, hideHolidayCalendar: e.target.checked }))}
+                      className="mt-1 h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/20"
+                    />
+                    <div className="space-y-0.5 cursor-pointer" onClick={() => setSettings(prev => ({ ...prev, hideHolidayCalendar: !prev.hideHolidayCalendar }))}>
+                      <Label htmlFor="hideHolidayCalendar" className="text-xs font-bold text-slate-900 cursor-pointer">
+                        Hide the Holiday Calendar & Gift Catalogue Page
+                      </Label>
+                      <p className="text-[11px] text-muted-foreground">
+                        When enabled, visitors to <code className="font-mono text-slate-700">/programs/upbeat/gift-catalogue</code> will see a &quot;Seasonal Campaign Concluded&quot; notice and are redirected to general donations.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
