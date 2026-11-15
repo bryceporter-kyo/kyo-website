@@ -16,12 +16,22 @@ interface CataloguePaymentRequestBody {
   taxReceiptRequested?: boolean;
   dedicationText?: string;
   donorNote?: string;
+  hasDedicationAddon?: boolean;
+  dedicationType?: 'honour' | 'memory' | 'celebrate' | 'general';
+  honoureeName?: string;
+  dedicationMessage?: string;
+  notifyHonouree?: boolean;
+  honoureeEmail?: string;
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: CataloguePaymentRequestBody = await request.json();
-    const { itemId, donorAmount, name, email, address, phone, taxReceiptRequested, dedicationText, donorNote } = body;
+    const { 
+      itemId, donorAmount, name, email, address, phone, taxReceiptRequested, 
+      dedicationText, donorNote, hasDedicationAddon, dedicationType, honoureeName, 
+      dedicationMessage, notifyHonouree, honoureeEmail 
+    } = body;
 
     // 1. Validate catalogue item exists in trusted registry
     const item = getCatalogueItem(itemId);
@@ -58,6 +68,13 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Charge amount for this item is not configured.' }, { status: 500 });
       }
       finalAmountCAD = item.chargeAmount;
+    }
+
+    // If donor selected the Dedication Add-on, add $10.99 CAD
+    const DEDICATION_ADDON_PRICE = 10.99;
+    const isDedicationSelected = Boolean(hasDedicationAddon);
+    if (isDedicationSelected) {
+      finalAmountCAD = Math.round((finalAmountCAD + DEDICATION_ADDON_PRICE) * 100) / 100;
     }
 
     // 4. Tax receipt validation according to CRA rules:
@@ -105,11 +122,26 @@ export async function POST(request: NextRequest) {
     if (item.hasDedicationInscription && dedicationText && dedicationText.trim()) {
       metadata.dedication_text = dedicationText.trim().slice(0, 500);
     }
+    if (isDedicationSelected) {
+      metadata.has_dedication_addon = 'true';
+      metadata.dedication_addon_fee = DEDICATION_ADDON_PRICE.toFixed(2);
+      if (dedicationType) metadata.dedication_type = dedicationType;
+      if (honoureeName && honoureeName.trim()) metadata.honouree_name = honoureeName.trim().slice(0, 200);
+      if (dedicationMessage && dedicationMessage.trim()) metadata.dedication_message = dedicationMessage.trim().slice(0, 500);
+      if (notifyHonouree && honoureeEmail && honoureeEmail.trim()) {
+        metadata.notify_honouree = 'true';
+        metadata.honouree_email = honoureeEmail.trim().slice(0, 200);
+      }
+    }
     if (donorNote && donorNote.trim()) {
       metadata.donor_note = donorNote.trim().slice(0, 500);
     }
 
     // 7. Create PaymentIntent
+    const itemDescription = isDedicationSelected 
+      ? `Upbeat! Gift Catalogue: ${item.name} + Dedication Plaque Add-on ($${DEDICATION_ADDON_PRICE})`
+      : `Upbeat! Gift Catalogue: ${item.name}`;
+
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountInCents,
       currency: 'cad',
@@ -118,7 +150,7 @@ export async function POST(request: NextRequest) {
       },
       metadata,
       receipt_email: email.trim() || undefined,
-      description: `Upbeat! Gift Catalogue: ${item.name}`,
+      description: itemDescription,
     });
 
     return NextResponse.json({

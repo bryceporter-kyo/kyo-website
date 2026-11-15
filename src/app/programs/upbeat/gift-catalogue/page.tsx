@@ -17,21 +17,24 @@ import { Heart } from 'lucide-react';
 export default function UpbeatGiftCataloguePage() {
   const [selectedItem, setSelectedItem] = useState<CatalogueItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [precheckDedication, setPrecheckDedication] = useState(false);
 
-  const handleOpenDonate = (item: CatalogueItem) => {
+  const handleOpenDonate = (item: CatalogueItem, withDedication = false) => {
     try {
       // @ts-ignore
-      window.va?.track('gift_catalogue_donate_click', { item_id: item.id });
+      window.va?.track('gift_catalogue_donate_click', { item_id: item.id, with_dedication: withDedication });
     } catch (e) {
       // ignore
     }
     setSelectedItem(item);
+    setPrecheckDedication(withDedication);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedItem(null);
+    setPrecheckDedication(false);
   };
 
   // Filter items by category & type
@@ -81,13 +84,20 @@ export default function UpbeatGiftCataloguePage() {
             </div>
           </div>
 
-          {/* 5.2 Dedication Add-On */}
+          {/* 5.2 Dedication Add-On Feature */}
           {dedicationItem && (
             <div className="space-y-4">
               <h3 className="text-xl font-bold font-headline text-foreground">
-                Dedication Add-On
+                Dedication Plaque Add-On
               </h3>
-              <AddOnCard item={dedicationItem} onDonate={handleOpenDonate} />
+              <AddOnCard 
+                item={dedicationItem} 
+                onSelectAddOn={() => {
+                  // Default to first outfit item or open with dedication pre-checked
+                  const defaultTarget = outfitItems[0] || CATALOGUE_ITEMS[0];
+                  handleOpenDonate(defaultTarget, true);
+                }} 
+              />
             </div>
           )}
 
@@ -146,6 +156,7 @@ export default function UpbeatGiftCataloguePage() {
         item={selectedItem}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
+        initialAddDedication={precheckDedication}
       />
     </div>
   );
