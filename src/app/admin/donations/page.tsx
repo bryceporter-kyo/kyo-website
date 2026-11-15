@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { 
   ArrowLeft, Save, RefreshCw, ExternalLink, CheckCircle2, XCircle, 
-  Clock, Eye, EyeOff, Copy, Check, FileCode, Shield, Info, HelpCircle, AlertCircle
+  Clock, Eye, EyeOff, Copy, Check, FileCode, Shield, Info, HelpCircle, 
+  AlertCircle, Key, Sparkles, ChevronRight, CheckCircle, FileText, Send, FolderOpen
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ import { fetchLegalPages, LegalPage } from "@/lib/legal-pages";
 
 export default function DonationsAdminPage() {
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("setup");
   const [isSaving, setIsSaving] = useState(false);
   const [isLoadingReceipts, setIsLoadingReceipts] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
@@ -53,7 +55,16 @@ export default function DonationsAdminPage() {
   }, []);
 
   useEffect(() => {
-    getTaxReceiptSettings().then(setSettings).catch(console.error);
+    getTaxReceiptSettings().then((data) => {
+      // Auto-generate a shared secret key if none exists yet
+      if (!data.appsScriptSecret) {
+        const autoSecret = 'sec_' + Math.random().toString(36).substring(2, 12) + Math.random().toString(36).substring(2, 12);
+        setSettings({ ...data, appsScriptSecret: autoSecret });
+      } else {
+        setSettings(data);
+      }
+    }).catch(console.error);
+
     fetchLegalPages().then(setLegalPages).catch(console.error);
     fetchTaxReceipts()
       .then(setReceipts)
@@ -65,9 +76,9 @@ export default function DonationsAdminPage() {
     setIsSaving(true);
     try {
       await saveTaxReceiptSettings(settings);
-      toast({ title: "Settings saved", description: "Tax receipt settings have been updated." });
+      toast({ title: "Settings saved!", description: "Tax receipt settings have been successfully updated." });
     } catch (err) {
-      toast({ title: "Error", description: "Failed to save settings.", variant: "destructive" });
+      toast({ title: "Error saving", description: "Failed to save settings. Please try again.", variant: "destructive" });
     } finally {
       setIsSaving(false);
     }
@@ -88,8 +99,14 @@ export default function DonationsAdminPage() {
   const copyScriptToClipboard = () => {
     navigator.clipboard.writeText(dynamicAppsScriptCode);
     setCopiedCode(true);
-    toast({ title: "Copied!", description: "Customized Apps Script with your settings copied to clipboard." });
+    toast({ title: "Code Copied!", description: "Pre-configured Google Apps Script copied to clipboard." });
     setTimeout(() => setCopiedCode(false), 3000);
+  };
+
+  const generateNewSecret = () => {
+    const newSecret = 'sec_' + Math.random().toString(36).substring(2, 12) + Math.random().toString(36).substring(2, 12);
+    handleChange('appsScriptSecret', newSecret);
+    toast({ title: "New Secret Generated", description: "Remember to click 'Save All Settings' below." });
   };
 
   const statusBadge = (status: string) => {
@@ -99,263 +116,440 @@ export default function DonationsAdminPage() {
     return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
   };
 
+  // Quick validation helpers for visual checklist
+  const hasStep1Ids = !!(settings.googleDocTemplateId && settings.googleDriveFolderId && settings.googleSheetId && settings.appsScriptSecret);
+  const hasStep3Url = !!(settings.appsScriptWebAppUrl && settings.appsScriptWebAppUrl.startsWith('https://script.google.com'));
+
   return (
     <div className="container mx-auto py-8 max-w-5xl">
-      <div className="flex items-center gap-4 mb-8">
-        <Link href="/admin">
-          <Button variant="outline" size="sm"><ArrowLeft className="w-4 h-4 mr-2" />Back to Admin</Button>
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold font-headline">Donations & Tax Receipts</h1>
-          <p className="text-muted-foreground">Configure automated CRA charitable tax receipt generation, Google Apps Script bridge, and review logged receipts.</p>
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-slate-200">
+        <div className="flex items-center gap-4">
+          <Link href="/admin">
+            <Button variant="outline" size="sm"><ArrowLeft className="w-4 h-4 mr-2" />Back to Admin</Button>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold font-headline text-slate-900">Donations & Tax Receipts</h1>
+            <p className="text-sm text-slate-600">Automated CRA charitable receipts via Google Docs, Drive, Sheets & Stripe.</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button onClick={handleSave} disabled={isSaving} className="shadow-sm">
+            {isSaving ? <><RefreshCw className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />Save Settings</>}
+          </Button>
         </div>
       </div>
 
-      <Tabs defaultValue="settings">
-        <TabsList className="mb-6">
-          <TabsTrigger value="settings">Settings & Configuration</TabsTrigger>
-          <TabsTrigger value="appscript">Google Apps Script Code</TabsTrigger>
-          <TabsTrigger value="instructions">Setup Instructions</TabsTrigger>
-          <TabsTrigger value="receipts">Receipt Log</TabsTrigger>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-6 grid grid-cols-2 sm:grid-cols-4 max-w-2xl">
+          <TabsTrigger value="setup" className="font-medium">Setup Guide & Script</TabsTrigger>
+          <TabsTrigger value="email" className="font-medium">Email & Legal</TabsTrigger>
+          <TabsTrigger value="raw-code" className="font-medium">Script Code View</TabsTrigger>
+          <TabsTrigger value="receipts" className="font-medium">Receipt Log</TabsTrigger>
         </TabsList>
 
-        {/* 1. SETTINGS TAB */}
-        <TabsContent value="settings">
-          <div className="space-y-6">
-            {/* Google Drive / Docs / Sheets IDs */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Google Workspace Integration</CardTitle>
-                <CardDescription>
-                  Configure your Google Doc template, target Google Drive folder, and tracking spreadsheet. Receipts will be automatically categorized into year-based subfolders (e.g. /2026/).
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-1">
-                  <Label>Google Doc Template ID</Label>
+        {/* ═══════════════════════════════════════════════════════════════════════ */}
+        {/* TAB 1: STEP-BY-STEP SETUP GUIDE & CONFIGURATION */}
+        {/* ═══════════════════════════════════════════════════════════════════════ */}
+        <TabsContent value="setup" className="space-y-6">
+
+          {/* Quick Explainer Banner */}
+          <div className="p-5 bg-blue-50/70 border border-blue-200/80 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-blue-900 font-semibold text-sm">
+                <Sparkles className="w-4 h-4 text-primary" />
+                How the Automated Receipt System Works
+              </div>
+              <p className="text-xs text-blue-800 leading-relaxed max-w-2xl">
+                When a donor completes a payment on the website, our server calls your Google Apps Script Web App. 
+                Google creates a duplicate of your receipt template, fills it with donor details, saves it into that year’s Drive folder (e.g. <code className="bg-blue-100 px-1 py-0.5 rounded font-mono">/2026/</code>), logs it to your Google Sheet, and emails the official CRA PDF receipt to the donor.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 text-xs font-medium text-slate-700 bg-white/80 px-3 py-2 rounded-lg border border-blue-100 shrink-0">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              {hasStep1Ids && hasStep3Url ? "Fully Configured" : "Setup Incomplete"}
+            </div>
+          </div>
+
+          {/* STEP 1 */}
+          <Card className={`border-2 transition-colors ${hasStep1Ids ? 'border-emerald-200 bg-white' : 'border-primary/30 bg-slate-50/40'}`}>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${hasStep1Ids ? 'bg-emerald-600 text-white' : 'bg-primary text-white'}`}>
+                    1
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">Step 1: Fill in your Google Workspace IDs</CardTitle>
+                    <CardDescription>
+                      The script code below automatically adopts these IDs as you enter them.
+                    </CardDescription>
+                  </div>
+                </div>
+                {hasStep1Ids && (
+                  <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-300 gap-1">
+                    <Check className="w-3.5 h-3.5" /> IDs Ready
+                  </Badge>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-2">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Doc Template ID */}
+                <div className="space-y-1.5 p-3.5 bg-white border border-slate-200 rounded-xl">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                      <FileText className="w-3.5 h-3.5 text-primary" /> Google Doc Template ID
+                    </Label>
+                  </div>
                   <Input
                     value={settings.googleDocTemplateId || ''}
                     onChange={(e) => handleChange('googleDocTemplateId', e.target.value)}
-                    placeholder="e.g. 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms"
-                    className="font-mono text-sm"
+                    placeholder="1BxiMVs0XRA5nFMdKvBdBZjgm..."
+                    className="font-mono text-xs"
                   />
-                  <p className="text-[11px] text-muted-foreground">The ID from your template URL: docs.google.com/document/d/<b>[ID]</b>/edit</p>
+                  <p className="text-[11px] text-muted-foreground leading-normal">
+                    Open your Google Doc template &rarr; copy the string between <code className="bg-slate-100 px-1 py-0.5 rounded">/d/</code> and <code className="bg-slate-100 px-1 py-0.5 rounded">/edit</code> in your address bar.
+                  </p>
                 </div>
 
-                <div className="space-y-1">
-                  <Label>Google Drive Destination Folder ID</Label>
+                {/* Drive Folder ID */}
+                <div className="space-y-1.5 p-3.5 bg-white border border-slate-200 rounded-xl">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                      <FolderOpen className="w-3.5 h-3.5 text-primary" /> Drive Destination Folder ID
+                    </Label>
+                  </div>
                   <Input
                     value={settings.googleDriveFolderId || ''}
                     onChange={(e) => handleChange('googleDriveFolderId', e.target.value)}
-                    placeholder="e.g. 1a2b3c4d5e6f7g8h9i0j..."
-                    className="font-mono text-sm"
+                    placeholder="1a2b3c4d5e6f7g8h9i..."
+                    className="font-mono text-xs"
                   />
-                  <p className="text-[11px] text-muted-foreground">The folder where receipts are stored. The script automatically creates and sorts receipts into year folders (e.g., 2026).</p>
+                  <p className="text-[11px] text-muted-foreground leading-normal">
+                    Open the Google Drive folder where you want receipts saved &rarr; copy the ID at the end of the folder URL.
+                  </p>
                 </div>
 
-                <div className="space-y-1">
-                  <Label>Tracking Google Sheet ID</Label>
+                {/* Tracking Sheet ID */}
+                <div className="space-y-1.5 p-3.5 bg-white border border-slate-200 rounded-xl">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                      <Table className="w-3.5 h-3.5 text-primary inline" /> Tracking Google Sheet ID
+                    </Label>
+                  </div>
                   <Input
                     value={settings.googleSheetId || ''}
                     onChange={(e) => handleChange('googleSheetId', e.target.value)}
                     placeholder="1oMrFa1OgL6ghU3HlxeQv9QHPeOFqoYiWkQ9wazht3XI"
-                    className="font-mono text-sm"
+                    className="font-mono text-xs"
                   />
-                  <p className="text-[11px] text-muted-foreground">Every receipt generated (both automatic from website and manual from Docs) is logged as a new row here.</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Apps Script Web App Bridge */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Apps Script Webhook Integration</CardTitle>
-                <CardDescription>
-                  Deploy the Apps Script as a Web App to enable automatic receipt generation whenever Stripe payments succeed.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-1">
-                  <Label>Apps Script Web App URL</Label>
-                  <Input
-                    value={settings.appsScriptWebAppUrl || ''}
-                    onChange={(e) => handleChange('appsScriptWebAppUrl', e.target.value)}
-                    placeholder="https://script.google.com/macros/s/AKfycby.../exec"
-                    className="font-mono text-sm"
-                  />
-                  <p className="text-[11px] text-muted-foreground">Obtained when deploying your script as a Web App in Google Apps Script.</p>
-                </div>
-
-                <div className="space-y-1">
-                  <Label>Shared Secret Key</Label>
-                  <Input
-                    value={settings.appsScriptSecret || ''}
-                    onChange={(e) => handleChange('appsScriptSecret', e.target.value)}
-                    placeholder="e.g. kyo_receipt_sec_99384729184"
-                    className="font-mono text-sm"
-                  />
-                  <p className="text-[11px] text-muted-foreground">Must match the SHARED_SECRET configured in your Apps Script to prevent unauthorized requests.</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Email Sender Configuration & Google Workspace App Password */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Email Sender Configuration & Google Workspace App Password</CardTitle>
-                <CardDescription>
-                  Configure your sender display identity, From & Reply-To addresses, and Google Account credentials for delivering receipt PDFs.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="space-y-1 sm:col-span-1">
-                    <Label>Sender Display Name</Label>
-                    <Input
-                      value={settings.senderName || ''}
-                      onChange={(e) => handleChange('senderName', e.target.value)}
-                      placeholder="Kawartha Youth Orchestra"
-                    />
-                    <p className="text-[11px] text-muted-foreground">The friendly name donors see in their inbox.</p>
-                  </div>
-
-                  <div className="space-y-1 sm:col-span-1">
-                    <Label>From Email Address</Label>
-                    <Input
-                      type="email"
-                      value={settings.senderEmail || ''}
-                      onChange={(e) => handleChange('senderEmail', e.target.value)}
-                      placeholder="donations@thekyo.ca"
-                    />
-                    <p className="text-[11px] text-muted-foreground">The email address the receipt appears from.</p>
-                  </div>
-
-                  <div className="space-y-1 sm:col-span-1">
-                    <Label>Reply-To Email Address</Label>
-                    <Input
-                      type="email"
-                      value={settings.replyToEmail || ''}
-                      onChange={(e) => handleChange('replyToEmail', e.target.value)}
-                      placeholder="info@thekyo.ca or donations@thekyo.ca"
-                    />
-                    <p className="text-[11px] text-muted-foreground">Where donor replies will be directed.</p>
-                  </div>
-                </div>
-
-                <div className="border-t border-slate-100 pt-3">
-                  <h4 className="text-sm font-semibold text-slate-800 mb-2">Google Account Authentication</h4>
-                  <p className="text-xs text-muted-foreground mb-3">
-                    Connect the Google Workspace or Gmail account responsible for sending the emails and its 16-character App Password.
-                  </p>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <Label>Google Account / Username</Label>
-                      <Input
-                        type="email"
-                        value={settings.googleAccountUser || ''}
-                        onChange={(e) => handleChange('googleAccountUser', e.target.value)}
-                        placeholder="e.g. bryce@thekyo.ca or donations@thekyo.ca"
-                      />
-                      <p className="text-[11px] text-muted-foreground">The Google account generating the App Password.</p>
-                    </div>
-
-                    <div className="space-y-1">
-                      <Label>Google App Password</Label>
-                      <div className="relative">
-                        <Input
-                          type={showPassword ? 'text' : 'password'}
-                          value={settings.gmailAppPassword || ''}
-                          onChange={(e) => handleChange('gmailAppPassword', e.target.value)}
-                          placeholder="xxxx xxxx xxxx xxxx (16 characters)"
-                          className="pr-10 font-mono"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(p => !p)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                        >
-                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
-                      </div>
-                      <p className="text-[11px] text-muted-foreground">
-                        Generated in Google Account &rarr; Security &rarr; 2-Step Verification &rarr; App Passwords.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* CRA Terms & Conditions Legal Link */}
-            <Card>
-              <CardHeader>
-                <CardTitle>CRA Tax Receipt Terms & Conditions Legal Page</CardTitle>
-                <CardDescription>
-                  Select which Legal Page is linked in the donation form disclaimer: "in accordance with our CRA tax receipt terms & conditions [Link]".
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-1">
-                  <Label>Legal Page Link</Label>
-                  <select
-                    value={settings.termsLegalSlug || ''}
-                    onChange={(e) => handleChange('termsLegalSlug', e.target.value)}
-                    className="w-full h-10 px-3 py-2 bg-white border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  >
-                    <option value="">-- Select a Legal Page or enter slug below --</option>
-                    {legalPages.map((lp) => (
-                      <option key={lp.id} value={lp.slug}>
-                        {lp.title} (/legal/{lp.slug})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Or Custom Relative URL / Slug</Label>
-                  <Input
-                    value={settings.termsLegalSlug || ''}
-                    onChange={(e) => handleChange('termsLegalSlug', e.target.value)}
-                    placeholder="e.g. cra-tax-receipt-terms or /legal/terms"
-                    className="font-mono text-sm"
-                  />
-                  <p className="text-[11px] text-muted-foreground">
-                    Donors who check "I want a tax receipt" will be shown a link pointing to this page.
+                  <p className="text-[11px] text-muted-foreground leading-normal">
+                    Open the Google Sheet where all receipts are logged &rarr; copy the ID from between <code className="bg-slate-100 px-1 py-0.5 rounded">/d/</code> and <code className="bg-slate-100 px-1 py-0.5 rounded">/edit</code>.
                   </p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
 
-            <div className="flex justify-end pt-2">
-              <Button onClick={handleSave} disabled={isSaving} className="px-8 shadow-md">
-                {isSaving ? <><RefreshCw className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />Save All Settings</>}
-              </Button>
-            </div>
-          </div>
+              {/* Shared Security Secret */}
+              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <Label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                      <Shield className="w-3.5 h-3.5 text-primary" /> Webhook Security Key (Shared Secret)
+                    </Label>
+                    <p className="text-[11px] text-muted-foreground">
+                      This secret prevents anyone unauthorized from triggering your Apps Script. It is already automatically placed inside your script code below.
+                    </p>
+                  </div>
+                  <Button type="button" variant="outline" size="sm" onClick={generateNewSecret} className="text-xs h-7 gap-1">
+                    <RefreshCw className="w-3 h-3" /> Generate New
+                  </Button>
+                </div>
+                <Input
+                  value={settings.appsScriptSecret || ''}
+                  onChange={(e) => handleChange('appsScriptSecret', e.target.value)}
+                  placeholder="sec_..."
+                  className="font-mono text-xs bg-white max-w-md"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* STEP 2 */}
+          <Card className="border-2 border-slate-200 bg-white">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">
+                    2
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">Step 2: Copy Code & Paste into Google Apps Script</CardTitle>
+                    <CardDescription>
+                      Open your Google Doc template, open Apps Script, and paste this ready-to-run code.
+                    </CardDescription>
+                  </div>
+                </div>
+                <Button onClick={copyScriptToClipboard} variant="default" className="shadow-sm gap-2">
+                  {copiedCode ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
+                  {copiedCode ? "Copied to Clipboard!" : "Copy Full Script Code"}
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Detailed visual instructions */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs text-slate-700">
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                  <span className="font-bold text-primary block">Action 2.1</span>
+                  <p>In your Google Doc template, click <b>Extensions</b> in the top toolbar &rarr; select <b>Apps Script</b>.</p>
+                </div>
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                  <span className="font-bold text-primary block">Action 2.2</span>
+                  <p>Select everything in the code editor (<kbd className="bg-white px-1 border rounded">Ctrl+A</kbd> or <kbd className="bg-white px-1 border rounded">Cmd+A</kbd>) and delete it.</p>
+                </div>
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                  <span className="font-bold text-primary block">Action 2.3</span>
+                  <p>Click the blue <b>"Copy Full Script Code"</b> button above, paste it into the editor, and click <b>Save</b> (disk icon).</p>
+                </div>
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                  <span className="font-bold text-primary block">Action 2.4</span>
+                  <p>Click <b>Deploy</b> (top right) &rarr; <b>New deployment</b> &rarr; gear icon &rarr; <b>Web app</b> &rarr; Who has access: <b>Anyone</b> &rarr; <b>Deploy</b>.</p>
+                </div>
+              </div>
+
+              {/* Code preview accordion snippet */}
+              <div className="relative border border-slate-200 rounded-xl overflow-hidden bg-slate-900">
+                <div className="flex items-center justify-between px-4 py-2 bg-slate-800 border-b border-slate-700 text-slate-300 text-xs">
+                  <span className="font-mono flex items-center gap-1.5">
+                    <FileCode className="w-3.5 h-3.5 text-primary" />
+                    Auto-Configured Script Preview (IDs automatically injected)
+                  </span>
+                  <span className="text-[11px] text-slate-400">
+                    Full code also accessible under "Script Code View" tab
+                  </span>
+                </div>
+                <pre className="p-4 text-slate-200 font-mono text-xs overflow-x-auto max-h-48 leading-relaxed">
+                  <code>{dynamicAppsScriptCode.slice(0, 1600)}
+                    {"\n// ... [Remainder of code includes automatic PDF emailing, Drive year-subfolder sorting, Sheet logging, and modal dialog] ..."}
+                  </code>
+                </pre>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* STEP 3 */}
+          <Card className={`border-2 transition-colors ${hasStep3Url ? 'border-emerald-200 bg-white' : 'border-amber-300 bg-amber-50/20'}`}>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${hasStep3Url ? 'bg-emerald-600 text-white' : 'bg-amber-600 text-white'}`}>
+                    3
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">Step 3: Paste the Deployed Web App URL Here</CardTitle>
+                    <CardDescription>
+                      Once you click "Deploy" in Google Apps Script, Google gives you a Web App URL. Paste it here to connect the website!
+                    </CardDescription>
+                  </div>
+                </div>
+                {hasStep3Url && (
+                  <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-300 gap-1">
+                    <Check className="w-3.5 h-3.5" /> Webhook Connected
+                  </Badge>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 leading-relaxed flex items-start gap-2">
+                <Info className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                <div>
+                  <b>Why this happens in this order:</b> Google cannot generate a Web App URL until the script code is saved and deployed in Google. 
+                  Now that the script code in Step 2 is deployed, copy the <b>Web app URL</b> from Google’s confirmation window (it starts with <code className="bg-amber-100 px-1 py-0.5 rounded font-mono">https://script.google.com/macros/s/.../exec</code>) and paste it below:
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold text-slate-800">Apps Script Web App URL</Label>
+                <Input
+                  value={settings.appsScriptWebAppUrl || ''}
+                  onChange={(e) => handleChange('appsScriptWebAppUrl', e.target.value)}
+                  placeholder="https://script.google.com/macros/s/AKfycby.../exec"
+                  className="font-mono text-sm bg-white"
+                />
+              </div>
+
+              <div className="pt-2 flex justify-end">
+                <Button onClick={handleSave} disabled={isSaving} className="px-6 shadow-md">
+                  {isSaving ? <><RefreshCw className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />Save All Settings</>}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
-        {/* 2. APPS SCRIPT CODE TAB */}
-        <TabsContent value="appscript">
+        {/* ═══════════════════════════════════════════════════════════════════════ */}
+        {/* TAB 2: EMAIL SENDER & LEGAL DISCLOSURES */}
+        {/* ═══════════════════════════════════════════════════════════════════════ */}
+        <TabsContent value="email" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Email Sender & Google App Password</CardTitle>
+              <CardDescription>
+                Customize who donor receipts appear from, where replies are sent, and your Google account App Password.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-1 sm:col-span-1">
+                  <Label className="text-xs font-bold">Sender Display Name</Label>
+                  <Input
+                    value={settings.senderName || ''}
+                    onChange={(e) => handleChange('senderName', e.target.value)}
+                    placeholder="Kawartha Youth Orchestra"
+                  />
+                  <p className="text-[11px] text-muted-foreground">The friendly organization name donors see in their inbox.</p>
+                </div>
+
+                <div className="space-y-1 sm:col-span-1">
+                  <Label className="text-xs font-bold">From Email Address</Label>
+                  <Input
+                    type="email"
+                    value={settings.senderEmail || ''}
+                    onChange={(e) => handleChange('senderEmail', e.target.value)}
+                    placeholder="donations@thekyo.ca"
+                  />
+                  <p className="text-[11px] text-muted-foreground">The address the email receipt originates from.</p>
+                </div>
+
+                <div className="space-y-1 sm:col-span-1">
+                  <Label className="text-xs font-bold">Reply-To Email Address</Label>
+                  <Input
+                    type="email"
+                    value={settings.replyToEmail || ''}
+                    onChange={(e) => handleChange('replyToEmail', e.target.value)}
+                    placeholder="info@thekyo.ca"
+                  />
+                  <p className="text-[11px] text-muted-foreground">Where donor replies will be delivered.</p>
+                </div>
+              </div>
+
+              {/* Google App Password Box */}
+              <div className="border-t border-slate-100 pt-4 space-y-3">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900">Google Workspace / Gmail Account & App Password</h4>
+                  <p className="text-xs text-slate-600">
+                    Google App Passwords allow the server to deliver receipts through your Google Workspace without exposing your personal Google account password.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <Label className="text-xs font-bold">Google Account Username</Label>
+                    <Input
+                      type="email"
+                      value={settings.googleAccountUser || ''}
+                      onChange={(e) => handleChange('googleAccountUser', e.target.value)}
+                      placeholder="e.g. bryce@thekyo.ca or donations@thekyo.ca"
+                    />
+                    <p className="text-[11px] text-muted-foreground">The Google account generating the App Password.</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label className="text-xs font-bold">16-Character Google App Password</Label>
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? 'text' : 'password'}
+                        value={settings.gmailAppPassword || ''}
+                        onChange={(e) => handleChange('gmailAppPassword', e.target.value)}
+                        placeholder="xxxx xxxx xxxx xxxx"
+                        className="pr-10 font-mono"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(p => !p)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      Created in Google Account &rarr; Security &rarr; 2-Step Verification &rarr; App Passwords.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* CRA Legal Link Selector */}
+              <div className="border-t border-slate-100 pt-4 space-y-3">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900">CRA Tax Receipt Terms & Conditions Legal Link</h4>
+                  <p className="text-xs text-slate-600">
+                    Controls which legal policy is linked on the public donation checkout form (<code className="bg-slate-100 px-1 py-0.5 rounded">/support-us/donate</code>).
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <Label className="text-xs font-bold">Select Existing Legal Page</Label>
+                    <select
+                      value={settings.termsLegalSlug || ''}
+                      onChange={(e) => handleChange('termsLegalSlug', e.target.value)}
+                      className="w-full h-10 px-3 py-2 bg-white border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    >
+                      <option value="">-- Choose a Legal Page --</option>
+                      {legalPages.map((lp) => (
+                        <option key={lp.id} value={lp.slug}>
+                          {lp.title} (/legal/{lp.slug})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label className="text-xs font-bold">Or Enter Custom Relative URL / Slug</Label>
+                    <Input
+                      value={settings.termsLegalSlug || ''}
+                      onChange={(e) => handleChange('termsLegalSlug', e.target.value)}
+                      placeholder="e.g. cra-tax-receipt-terms"
+                      className="font-mono text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-3">
+                <Button onClick={handleSave} disabled={isSaving} className="px-6 shadow-md">
+                  {isSaving ? <><RefreshCw className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />Save All Settings</>}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ═══════════════════════════════════════════════════════════════════════ */}
+        {/* TAB 3: FULL APPS SCRIPT CODE VIEW */}
+        {/* ═══════════════════════════════════════════════════════════════════════ */}
+        <TabsContent value="raw-code">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-4">
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <FileCode className="w-5 h-5 text-primary" />
-                  Google Apps Script Code
+                  Full Google Apps Script Code
                 </CardTitle>
                 <CardDescription>
-                  Copy this script into your Google Doc/Drive Apps Script editor. It is dynamically pre-filled with your settings above.
+                  This code automatically incorporates your Google Doc Template ID, Drive Folder ID, Tracking Sheet ID, and Shared Secret.
                 </CardDescription>
               </div>
-              <Button onClick={copyScriptToClipboard} variant="default" className="gap-2">
-                {copiedCode ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                {copiedCode ? "Copied!" : "Copy Full Script"}
+              <Button onClick={copyScriptToClipboard} variant="default" className="gap-2 shadow-sm">
+                {copiedCode ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
+                {copiedCode ? "Copied to Clipboard!" : "Copy Full Script"}
               </Button>
             </CardHeader>
             <CardContent>
               <div className="relative">
-                <pre className="p-4 bg-slate-900 text-slate-100 rounded-xl overflow-x-auto text-xs font-mono max-h-[550px] leading-relaxed">
+                <pre className="p-4 bg-slate-900 text-slate-100 rounded-xl overflow-x-auto text-xs font-mono max-h-[600px] leading-relaxed">
                   <code>{dynamicAppsScriptCode}</code>
                 </pre>
               </div>
@@ -363,87 +557,14 @@ export default function DonationsAdminPage() {
           </Card>
         </TabsContent>
 
-        {/* 3. SETUP INSTRUCTIONS TAB */}
-        <TabsContent value="instructions">
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl">Step-by-Step Setup Instructions</CardTitle>
-                <CardDescription>Follow these 3 quick steps to complete your automated tax receipt setup.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6 text-sm text-slate-700 leading-relaxed">
-                
-                {/* Step 1 */}
-                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-                  <h4 className="font-bold text-base text-slate-900 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center font-bold">1</span>
-                    Deploy Google Apps Script
-                  </h4>
-                  <ol className="list-decimal list-inside space-y-1 pl-2 text-xs text-slate-600">
-                    <li>Open your Google Doc receipt template in Google Docs.</li>
-                    <li>Click <b>Extensions</b> &rarr; <b>Apps Script</b> in the top menu.</li>
-                    <li>Delete any existing code in the editor, switch to the <b>Google Apps Script Code</b> tab above, click <b>Copy Full Script</b>, and paste it in.</li>
-                    <li>Click <b>Save</b> (disk icon).</li>
-                    <li>Click <b>Deploy</b> (blue button top-right) &rarr; <b>New deployment</b>.</li>
-                    <li>Click the gear icon next to "Select type" and choose <b>Web app</b>.</li>
-                    <li>Configure the deployment:
-                      <ul className="list-disc list-inside pl-4 mt-1 space-y-0.5">
-                        <li><b>Description:</b> KYO Tax Receipt Webhook</li>
-                        <li><b>Execute as:</b> Me (your Google account)</li>
-                        <li><b>Who has access:</b> Anyone</li>
-                      </ul>
-                    </li>
-                    <li>Click <b>Deploy</b> and authorize permissions when prompted.</li>
-                    <li>Copy the <b>Web app URL</b> and paste it into the <b>Apps Script Web App URL</b> field in the Settings tab.</li>
-                  </ol>
-                </div>
-
-                {/* Step 2 */}
-                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-                  <h4 className="font-bold text-base text-slate-900 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center font-bold">2</span>
-                    How to Create a Google App Password
-                  </h4>
-                  <p className="text-xs text-slate-600">
-                    Google App Passwords allow automated services to send emails securely without giving away your personal account password.
-                  </p>
-                  <ol className="list-decimal list-inside space-y-1 pl-2 text-xs text-slate-600">
-                    <li>Sign in to your Google Account at <a href="https://myaccount.google.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">myaccount.google.com</a>.</li>
-                    <li>In the left navigation, click <b>Security</b>.</li>
-                    <li>Under "How you sign in to Google", ensure <b>2-Step Verification</b> is turned ON.</li>
-                    <li>Click on <b>2-Step Verification</b> &rarr; scroll to the very bottom and click <b>App passwords</b>.</li>
-                    <li>Enter an App name (e.g., <i>KYO Website Receipts</i>) and click <b>Create</b>.</li>
-                    <li>Google will display a 16-character password (e.g. <code className="bg-slate-200 px-1 py-0.5 rounded">abcd efgh ijkl mnop</code>).</li>
-                    <li>Copy that 16-character code and paste it into the <b>Gmail App Password</b> field in the Settings tab above.</li>
-                  </ol>
-                </div>
-
-                {/* Step 3 */}
-                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-                  <h4 className="font-bold text-base text-slate-900 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center font-bold">3</span>
-                    How Year Filtering & Storage Works
-                  </h4>
-                  <ul className="list-disc list-inside space-y-1 pl-2 text-xs text-slate-600">
-                    <li>All generated receipts are stored in the Google Drive folder specified in Settings.</li>
-                    <li>The script automatically checks for a subfolder named after the current calendar year (e.g. <b>2026</b>) and creates it if it doesn't already exist.</li>
-                    <li>Receipt files are named following the standard format: <br/><code className="bg-slate-200 px-1 py-0.5 rounded mt-1 inline-block">KYO_Charitable_Tax_Receipt_[DonorName]_[Date]_[ReceiptID].pdf</code></li>
-                    <li>Every transaction is automatically logged into your tracking Google Sheet.</li>
-                    <li>If a donor fills out the donation form without requesting a tax receipt, standard Stripe receipts are sent and no charitable receipt is generated.</li>
-                  </ul>
-                </div>
-
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        {/* 4. RECEIPT LOG TAB */}
+        {/* ═══════════════════════════════════════════════════════════════════════ */}
+        {/* TAB 4: RECEIPT LOG */}
+        {/* ═══════════════════════════════════════════════════════════════════════ */}
         <TabsContent value="receipts">
           <Card>
             <CardHeader>
               <CardTitle>Receipt Log</CardTitle>
-              <CardDescription>Live audit log of all tax receipts processed by the website.</CardDescription>
+              <CardDescription>Live audit log of all tax receipts processed by the website and Google Docs.</CardDescription>
             </CardHeader>
             <CardContent>
               {isLoadingReceipts ? (
