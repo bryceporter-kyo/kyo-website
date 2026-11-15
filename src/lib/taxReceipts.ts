@@ -38,8 +38,28 @@ export interface TaxReceiptRecord {
   createdAt?: Timestamp;
 }
 
+export interface TaxReceiptAuditLog {
+  id?: string;
+  eventType: 
+    | 'settings_saved' 
+    | 'settings_edited' 
+    | 'script_copied' 
+    | 'connection_test_initiated' 
+    | 'connection_test_success' 
+    | 'connection_test_failed' 
+    | 'webhook_received' 
+    | 'manual_receipt_synced' 
+    | 'monthly_held';
+  title: string;
+  description: string;
+  metadata?: Record<string, any>;
+  status?: 'success' | 'info' | 'warning' | 'error';
+  createdAt?: Timestamp;
+}
+
 const SETTINGS_DOC = 'settings/tax-receipts';
 const RECEIPTS_COLLECTION = 'tax_receipts';
+const AUDIT_LOGS_COLLECTION = 'tax_receipt_audit_logs';
 
 export async function getTaxReceiptSettings(): Promise<Partial<TaxReceiptSettings>> {
   const snap = await getDoc(doc(db, 'settings', 'tax-receipts'));
@@ -48,6 +68,30 @@ export async function getTaxReceiptSettings(): Promise<Partial<TaxReceiptSetting
 
 export async function saveTaxReceiptSettings(settings: Partial<TaxReceiptSettings>): Promise<void> {
   await setDoc(doc(db, 'settings', 'tax-receipts'), settings, { merge: true });
+}
+
+export async function logTaxReceiptAudit(log: Omit<TaxReceiptAuditLog, 'id' | 'createdAt'>): Promise<string> {
+  try {
+    const docRef = await addDoc(collection(db, AUDIT_LOGS_COLLECTION), {
+      ...log,
+      createdAt: serverTimestamp(),
+    });
+    return docRef.id;
+  } catch (err) {
+    console.error('Failed to log audit event:', err);
+    return '';
+  }
+}
+
+export async function fetchTaxReceiptAuditLogs(limitCount = 100): Promise<TaxReceiptAuditLog[]> {
+  try {
+    const q = query(collection(db, AUDIT_LOGS_COLLECTION), orderBy('createdAt', 'desc'));
+    const snap = await getDocs(q);
+    return snap.docs.slice(0, limitCount).map(d => ({ id: d.id, ...d.data() } as TaxReceiptAuditLog));
+  } catch (err) {
+    console.error('Failed to fetch audit logs:', err);
+    return [];
+  }
 }
 
 export async function logTaxReceipt(record: TaxReceiptRecord): Promise<string> {

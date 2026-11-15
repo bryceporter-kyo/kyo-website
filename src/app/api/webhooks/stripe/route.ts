@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
 
     // Handle tax receipt generation
     if (metadata.wants_tax_receipt === 'true') {
-      const { logTaxReceipt, updateTaxReceiptStatus, getTaxReceiptSettings } = 
+      const { logTaxReceipt, updateTaxReceiptStatus, getTaxReceiptSettings, logTaxReceiptAudit } = 
         await import('@/lib/taxReceipts');
       
       const isMonthly = metadata.frequency === 'monthly';
@@ -101,6 +101,13 @@ export async function POST(request: NextRequest) {
       let firestoreId: string | null = null;
       try {
         firestoreId = await logTaxReceipt(donorData);
+        await logTaxReceiptAudit({
+          eventType: 'webhook_received',
+          title: `Donation Received (${isMonthly ? 'Monthly' : 'One-Time'})`,
+          description: `Received payment of $${donorData.amount.toFixed(2)} from ${donorData.donorName}. wantsTaxReceipt=true.`,
+          metadata: { donorEmail: donorData.donorEmail, amount: donorData.amount, isMonthly, firestoreId },
+          status: 'info'
+        });
       } catch (err) {
         console.error('[Tax Receipt] Failed to log to Firestore:', err);
       }
@@ -128,6 +135,13 @@ export async function POST(request: NextRequest) {
               }),
             });
             console.log(`[Tax Receipt] Logged monthly donation for ${donorData.donorName} (Receipt held pending verification)`);
+            await logTaxReceiptAudit({
+              eventType: 'monthly_held',
+              title: 'Monthly Recurring Donation Held for Verification',
+              description: `Logged monthly donation for ${donorData.donorName} ($${donorData.assumedAnnualAmount.toFixed(2)} assumed annual). Receipt held pending 12-mo verification.`,
+              metadata: { donorName: donorData.donorName, amount: donorData.amount, assumedAnnual: donorData.assumedAnnualAmount },
+              status: 'warning'
+            });
           }
         } catch (monthlyErr) {
           console.error('[Tax Receipt] Error logging monthly donation to sheet:', monthlyErr);
@@ -170,6 +184,13 @@ export async function POST(request: NextRequest) {
               });
             }
             console.log(`[Tax Receipt] Receipt generated and emailed for ${donorData.donorName}`);
+            await logTaxReceiptAudit({
+              eventType: 'webhook_received',
+              title: 'Tax Receipt Generated & Emailed',
+              description: `Successfully processed receipt #${result.receiptId || 'N/A'} for ${donorData.donorName} ($${donorData.amount.toFixed(2)}).`,
+              metadata: { receiptId: result.receiptId, driveUrl: result.receiptUrl, donorName: donorData.donorName },
+              status: 'success'
+            });
           } else {
             const errText = await scriptResponse.text();
             console.error('[Tax Receipt] Apps Script error:', errText);
@@ -178,6 +199,13 @@ export async function POST(request: NextRequest) {
                 errorMessage: `Apps Script returned ${scriptResponse.status}: ${errText.slice(0, 200)}` 
               });
             }
+            await logTaxReceiptAudit({
+              eventType: 'webhook_received',
+              title: 'Apps Script Receipt Generation Failed',
+              description: `Apps Script returned HTTP ${scriptResponse.status}: ${errText.slice(0, 150)}`,
+              metadata: { status: scriptResponse.status, errText },
+              status: 'error'
+            });
           }
         }
       } catch (err: any) {

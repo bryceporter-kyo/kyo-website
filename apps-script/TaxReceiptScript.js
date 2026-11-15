@@ -76,6 +76,29 @@ function doPost(e) {
       donDate = `${parts[1]}/${parts[2]}/${parts[0]}`;
     }
 
+    // Handle action: 'ping' or 'test_connection'
+    if (params.action === 'ping' || params.action === 'test_connection') {
+      const testDate = donDate || formatTodayDate();
+      const testReceiptUrl = 'TEST_CONNECTION_VERIFIED';
+      const testRowData = {
+        donorName:    params.donorName || 'KYO Website Test Connection',
+        donorAddress: params.donorAddress || 'N/A (System Verification Ping)',
+        amount:       '0.00',
+        advantage:    '0.00',
+        eligible:     '0.00'
+      };
+
+      // Append verification ping row to tracking sheet
+      logToSheet(testRowData, testDate, testReceiptUrl, settings.trackingSheetId);
+
+      return jsonOutput({
+        status: 'connection_verified',
+        message: 'Two-way connection between website and Google Sheet verified successfully! Test row appended to Google Sheet.',
+        timestamp: new Date().toISOString(),
+        trackingSheetId: settings.trackingSheetId
+      }, 200);
+    }
+
     // Handle action: 'log_only' (used for monthly recurring donations pending 12-month verification)
     if (params.action === 'log_only') {
       const annualVal = params.assumedAnnualAmount || (parseFloat(params.amount || '0') * 12).toFixed(2);

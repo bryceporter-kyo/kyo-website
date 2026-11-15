@@ -4,7 +4,8 @@ import React, { useEffect, useState } from "react";
 import { 
   ArrowLeft, Save, RefreshCw, ExternalLink, CheckCircle2, XCircle, 
   Clock, Eye, EyeOff, Copy, Check, FileCode, Shield, Info, HelpCircle, 
-  AlertCircle, Key, Sparkles, ChevronRight, CheckCircle, FileText, Send, FolderOpen
+  AlertCircle, Key, Sparkles, ChevronRight, CheckCircle, FileText, Send, 
+  FolderOpen, Activity, History, Play
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -16,20 +17,24 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { 
-  getTaxReceiptSettings, saveTaxReceiptSettings, fetchTaxReceipts, 
-  TaxReceiptSettings, TaxReceiptRecord 
+  getTaxReceiptSettings, saveTaxReceiptSettings, fetchTaxReceipts, fetchTaxReceiptAuditLogs,
+  logTaxReceiptAudit, TaxReceiptSettings, TaxReceiptRecord, TaxReceiptAuditLog
 } from "@/lib/taxReceipts";
 import { generateAppsScriptCode } from "@/lib/appsScriptTemplate";
 import { fetchLegalPages, LegalPage } from "@/lib/legal-pages";
 
 export default function DonationsAdminPage() {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("setup");
+  // Tab order as requested: Receipt Log FIRST, Setup/Code/Email in between, Audit Log LAST
+  const [activeTab, setActiveTab] = useState("receipts");
   const [isSaving, setIsSaving] = useState(false);
+  const [isTestingConnection, setIsTestingConnection] = useState(false);
   const [isLoadingReceipts, setIsLoadingReceipts] = useState(true);
+  const [isLoadingAuditLogs, setIsLoadingAuditLogs] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
   const [receipts, setReceipts] = useState<TaxReceiptRecord[]>([]);
+  const [auditLogs, setAuditLogs] = useState<TaxReceiptAuditLog[]>([]);
   const [legalPages, setLegalPages] = useState<LegalPage[]>([]);
 
   const [settings, setSettings] = useState<Partial<TaxReceiptSettings>>({
@@ -54,9 +59,8 @@ export default function DonationsAdminPage() {
     }
   }, []);
 
-  useEffect(() => {
+  const loadData = () => {
     getTaxReceiptSettings().then((data) => {
-      // Auto-generate a shared secret key if none exists yet
       if (!data.appsScriptSecret) {
         const autoSecret = 'sec_' + Math.random().toString(36).substring(2, 12) + Math.random().toString(36).substring(2, 12);
         setSettings({ ...data, appsScriptSecret: autoSecret });
@@ -66,19 +70,52 @@ export default function DonationsAdminPage() {
     }).catch(console.error);
 
     fetchLegalPages().then(setLegalPages).catch(console.error);
+
+    setIsLoadingReceipts(true);
     fetchTaxReceipts()
       .then(setReceipts)
       .catch(console.error)
       .finally(() => setIsLoadingReceipts(false));
+
+    setIsLoadingAuditLogs(true);
+    fetchTaxReceiptAuditLogs()
+      .then(setAuditLogs)
+      .catch(console.error)
+      .finally(() => setIsLoadingAuditLogs(false));
+  };
+
+  useEffect(() => {
+    loadData();
   }, []);
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
       await saveTaxReceiptSettings(settings);
+      await logTaxReceiptAudit({
+        eventType: 'settings_saved',
+        title: 'Tax Receipt Settings Saved',
+        description: 'Updated tax receipt configuration in database.',
+        metadata: {
+          hasTemplate: !!settings.googleDocTemplateId,
+          hasFolder: !!settings.googleDriveFolderId,
+          hasSheet: !!settings.googleSheetId,
+          hasUrl: !!settings.appsScriptWebAppUrl,
+          senderEmail: settings.senderEmail,
+        },
+        status: 'success'
+      });
       toast({ title: "Settings saved!", description: "Tax receipt settings have been successfully updated." });
-    } catch (err) {
+      // Refresh audit logs
+      fetchTaxReceiptAuditLogs().then(setAuditLogs).catch(console.error);
+    } catch (err: any) {
       toast({ title: "Error saving", description: "Failed to save settings. Please try again.", variant: "destructive" });
+      await logTaxReceiptAudit({
+        eventType: 'settings_saved',
+        title: 'Failed to Save Settings',
+        description: err.message || 'Unknown error occurred while saving settings.',
+        status: 'error'
+      });
     } finally {
       setIsSaving(false);
     }
@@ -96,17 +133,84 @@ export default function DonationsAdminPage() {
     websiteUrl: origin,
   });
 
-  const copyScriptToClipboard = () => {
+  const copyScriptToClipboard = async () => {
     navigator.clipboard.writeText(dynamicAppsScriptCode);
     setCopiedCode(true);
     toast({ title: "Code Copied!", description: "Pre-configured Google Apps Script copied to clipboard." });
     setTimeout(() => setCopiedCode(false), 3000);
+
+    // Record copy action in audit logs
+    await logTaxReceiptAudit({
+      eventType: 'script_copied',
+      title: 'Google Apps Script Code Copied',
+      description: 'Admin user copied the generated Apps Script code to clipboard for deployment.',
+      metadata: { trackingSheetId: settings.googleSheetId, hasTemplate: !!settings.googleDocTemplateId },
+      status: 'info'
+    });
+    fetchTaxReceiptAuditLogs().then(setAuditLogs).catch(console.error);
   };
 
-  const generateNewSecret = () => {
+  const generateNewSecret = async () => {
     const newSecret = 'sec_' + Math.random().toString(36).substring(2, 12) + Math.random().toString(36).substring(2, 12);
     handleChange('appsScriptSecret', newSecret);
-    toast({ title: "New Secret Generated", description: "Remember to click 'Save All Settings' below." });
+    toast({ title: "New Secret Generated", description: "Remember to click 'Save Settings' to apply." });
+    await logTaxReceiptAudit({
+      eventType: 'settings_edited',
+      title: 'New Webhook Secret Generated',
+      description: 'Generated a fresh shared secret key.',
+      status: 'warning'
+    });
+    fetchTaxReceiptAuditLogs().then(setAuditLogs).catch(console.error);
+  };
+
+  const handleTestConnection = async () => {
+    if (!settings.appsScriptWebAppUrl) {
+      toast({ 
+        title: "Missing Web App URL", 
+        description: "Please paste your deployed Apps Script Web App URL first.", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    setIsTestingConnection(true);
+    try {
+      // First save current settings to ensure secret & URL match
+      await saveTaxReceiptSettings(settings);
+
+      const res = await fetch('/api/tax-receipts/test-connection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          appsScriptWebAppUrl: settings.appsScriptWebAppUrl,
+          appsScriptSecret: settings.appsScriptSecret,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Connection failed.');
+      }
+
+      toast({
+        title: "Connection Confirmed!",
+        description: "A handshake was sent: a test verification row was added to your Google Sheet and to the Receipt Log!",
+      });
+
+      // Reload both receipts and audit logs
+      fetchTaxReceipts().then(setReceipts).catch(console.error);
+      fetchTaxReceiptAuditLogs().then(setAuditLogs).catch(console.error);
+
+    } catch (err: any) {
+      toast({
+        title: "Connection Test Failed",
+        description: err.message || "Failed to reach Google Apps Script.",
+        variant: "destructive",
+      });
+      fetchTaxReceiptAuditLogs().then(setAuditLogs).catch(console.error);
+    } finally {
+      setIsTestingConnection(false);
+    }
   };
 
   const statusBadge = (status: string) => {
@@ -116,7 +220,13 @@ export default function DonationsAdminPage() {
     return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
   };
 
-  // Quick validation helpers for visual checklist
+  const auditBadge = (status?: string) => {
+    if (status === 'success') return <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Success</Badge>;
+    if (status === 'error') return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Error</Badge>;
+    if (status === 'warning') return <Badge className="bg-amber-100 text-amber-900 hover:bg-amber-100">Warning</Badge>;
+    return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Info</Badge>;
+  };
+
   const hasStep1Ids = !!(settings.googleDocTemplateId && settings.googleDriveFolderId && settings.googleSheetId && settings.appsScriptSecret);
   const hasStep3Url = !!(settings.appsScriptWebAppUrl && settings.appsScriptWebAppUrl.startsWith('https://script.google.com'));
 
@@ -142,15 +252,104 @@ export default function DonationsAdminPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="mb-6 grid grid-cols-2 sm:grid-cols-4 max-w-2xl">
-          <TabsTrigger value="setup" className="font-medium">Setup Guide & Script</TabsTrigger>
-          <TabsTrigger value="email" className="font-medium">Email & Legal</TabsTrigger>
-          <TabsTrigger value="raw-code" className="font-medium">Script Code View</TabsTrigger>
+        {/* TAB ORDER REQUESTED:
+            1. Receipt Log (FIRST)
+            2. Setup Guide & Script
+            3. Email & Legal
+            4. Script Code View
+            5. Audit Log (LAST)
+        */}
+        <TabsList className="mb-6 grid grid-cols-2 sm:grid-cols-5 max-w-3xl">
           <TabsTrigger value="receipts" className="font-medium">Receipt Log</TabsTrigger>
+          <TabsTrigger value="setup" className="font-medium">Setup Guide</TabsTrigger>
+          <TabsTrigger value="email" className="font-medium">Email & Legal</TabsTrigger>
+          <TabsTrigger value="raw-code" className="font-medium">Script Code</TabsTrigger>
+          <TabsTrigger value="audit-log" className="font-medium">Event & Audit Log</TabsTrigger>
         </TabsList>
 
         {/* ═══════════════════════════════════════════════════════════════════════ */}
-        {/* TAB 1: STEP-BY-STEP SETUP GUIDE & CONFIGURATION */}
+        {/* TAB 1: RECEIPT LOG (FIRST TAB) */}
+        {/* ═══════════════════════════════════════════════════════════════════════ */}
+        <TabsContent value="receipts">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-4">
+              <div>
+                <CardTitle>Receipt Log</CardTitle>
+                <CardDescription>Live audit record of all tax receipts processed by the website and Google Docs.</CardDescription>
+              </div>
+              <Button variant="outline" size="sm" onClick={loadData} className="gap-1 text-xs">
+                <RefreshCw className="w-3 h-3" /> Refresh
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {isLoadingReceipts ? (
+                <div className="text-center py-8 text-muted-foreground">Loading receipts...</div>
+              ) : receipts.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">No receipts generated yet. Receipts will appear here automatically when donations complete.</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Donor</TableHead>
+                        <TableHead>Phone / Address</TableHead>
+                        <TableHead>Donation</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Receipt Doc / Sheet</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {receipts.map((r) => {
+                        const isMonthly = r.frequency === 'monthly';
+                        return (
+                          <TableRow key={r.id}>
+                            <TableCell>
+                              <div className="font-medium text-slate-900">{r.donorName}</div>
+                              <div className="text-xs text-muted-foreground">{r.donorEmail}</div>
+                            </TableCell>
+                            <TableCell className="text-xs text-slate-600 max-w-[200px] truncate">
+                              <div>{r.donorPhone || 'No phone'}</div>
+                              <div className="truncate text-muted-foreground" title={r.donorAddress}>{r.donorAddress || 'No address'}</div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="font-semibold">${r.amount?.toFixed(2)} CAD</div>
+                              {isMonthly && (
+                                <div className="text-[11px] text-amber-700 font-medium">
+                                  Monthly (Assumed 12-Mo: ${(r.assumedAnnualAmount ?? (r.amount * 12)).toFixed(2)})
+                                </div>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-sm">{r.donationDate}</TableCell>
+                            <TableCell>{statusBadge(r.status)}</TableCell>
+                            <TableCell>
+                              {r.driveUrl ? (
+                                <a href={r.driveUrl} target="_blank" rel="noopener noreferrer">
+                                  <Button variant="ghost" size="sm" className="text-primary hover:text-primary">
+                                    <ExternalLink className="w-3.5 h-3.5 mr-1" />View
+                                  </Button>
+                                </a>
+                              ) : isMonthly && r.status === 'requires-verification' ? (
+                                <span className="text-[11px] text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200">
+                                  Held for 12-mo verification
+                                </span>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">{r.errorMessage?.slice(0, 45) || '—'}</span>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ═══════════════════════════════════════════════════════════════════════ */}
+        {/* TAB 2: SETUP GUIDE & SCRIPT */}
         {/* ═══════════════════════════════════════════════════════════════════════ */}
         <TabsContent value="setup" className="space-y-6">
 
@@ -298,7 +497,6 @@ export default function DonationsAdminPage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Detailed visual instructions */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs text-slate-700">
                 <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
                   <span className="font-bold text-primary block">Action 2.1</span>
@@ -318,7 +516,6 @@ export default function DonationsAdminPage() {
                 </div>
               </div>
 
-              {/* Code preview accordion snippet */}
               <div className="relative border border-slate-200 rounded-xl overflow-hidden bg-slate-900">
                 <div className="flex items-center justify-between px-4 py-2 bg-slate-800 border-b border-slate-700 text-slate-300 text-xs">
                   <span className="font-mono flex items-center gap-1.5">
@@ -326,7 +523,7 @@ export default function DonationsAdminPage() {
                     Auto-Configured Script Preview (IDs automatically injected)
                   </span>
                   <span className="text-[11px] text-slate-400">
-                    Full code also accessible under "Script Code View" tab
+                    Full code also accessible under "Script Code" tab
                   </span>
                 </div>
                 <pre className="p-4 text-slate-200 font-mono text-xs overflow-x-auto max-h-48 leading-relaxed">
@@ -347,25 +544,24 @@ export default function DonationsAdminPage() {
                     3
                   </div>
                   <div>
-                    <CardTitle className="text-lg">Step 3: Paste the Deployed Web App URL Here</CardTitle>
+                    <CardTitle className="text-lg">Step 3: Paste the Deployed Web App URL & Test Handshake</CardTitle>
                     <CardDescription>
-                      Once you click "Deploy" in Google Apps Script, Google gives you a Web App URL. Paste it here to connect the website!
+                      Once deployed in Google, paste your Web App URL here, then click "Test Two-Way Connection" to verify.
                     </CardDescription>
                   </div>
                 </div>
                 {hasStep3Url && (
                   <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-300 gap-1">
-                    <Check className="w-3.5 h-3.5" /> Webhook Connected
+                    <Check className="w-3.5 h-3.5" /> URL Configured
                   </Badge>
                 )}
               </div>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-4">
               <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 leading-relaxed flex items-start gap-2">
                 <Info className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
                 <div>
-                  <b>Why this happens in this order:</b> Google cannot generate a Web App URL until the script code is saved and deployed in Google. 
-                  Now that the script code in Step 2 is deployed, copy the <b>Web app URL</b> from Google’s confirmation window (it starts with <code className="bg-amber-100 px-1 py-0.5 rounded font-mono">https://script.google.com/macros/s/.../exec</code>) and paste it below:
+                  Copy the <b>Web app URL</b> from Google’s deployment window (starts with <code className="bg-amber-100 px-1 py-0.5 rounded font-mono">https://script.google.com/macros/s/.../exec</code>) and paste it below.
                 </div>
               </div>
 
@@ -379,6 +575,31 @@ export default function DonationsAdminPage() {
                 />
               </div>
 
+              {/* Handshake Verification Testing Card */}
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="space-y-0.5">
+                    <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                      <Activity className="w-4 h-4 text-primary" />
+                      Two-Way Connection Test (Handshake)
+                    </h4>
+                    <p className="text-[11px] text-muted-foreground">
+                      Sends a test ping from this website to your Apps Script Web App. The script verifies authorization, writes a test confirmation row to your Google Sheet, and logs the event in your website logs!
+                    </p>
+                  </div>
+                  <Button 
+                    type="button" 
+                    onClick={handleTestConnection} 
+                    disabled={isTestingConnection || !settings.appsScriptWebAppUrl}
+                    variant="outline"
+                    className="shrink-0 bg-white border-primary/30 text-primary hover:bg-primary/5 gap-1.5 shadow-sm text-xs"
+                  >
+                    {isTestingConnection ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+                    {isTestingConnection ? "Sending Test Ping..." : "Test Two-Way Connection"}
+                  </Button>
+                </div>
+              </div>
+
               <div className="pt-2 flex justify-end">
                 <Button onClick={handleSave} disabled={isSaving} className="px-6 shadow-md">
                   {isSaving ? <><RefreshCw className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />Save All Settings</>}
@@ -389,7 +610,7 @@ export default function DonationsAdminPage() {
         </TabsContent>
 
         {/* ═══════════════════════════════════════════════════════════════════════ */}
-        {/* TAB 2: EMAIL SENDER & LEGAL DISCLOSURES */}
+        {/* TAB 3: EMAIL SENDER & LEGAL DISCLOSURES */}
         {/* ═══════════════════════════════════════════════════════════════════════ */}
         <TabsContent value="email" className="space-y-6">
           <Card>
@@ -528,7 +749,7 @@ export default function DonationsAdminPage() {
         </TabsContent>
 
         {/* ═══════════════════════════════════════════════════════════════════════ */}
-        {/* TAB 3: FULL APPS SCRIPT CODE VIEW */}
+        {/* TAB 4: FULL APPS SCRIPT CODE VIEW */}
         {/* ═══════════════════════════════════════════════════════════════════════ */}
         <TabsContent value="raw-code">
           <Card>
@@ -558,70 +779,61 @@ export default function DonationsAdminPage() {
         </TabsContent>
 
         {/* ═══════════════════════════════════════════════════════════════════════ */}
-        {/* TAB 4: RECEIPT LOG */}
+        {/* TAB 5: EVENT & AUDIT LOG (LAST TAB) */}
         {/* ═══════════════════════════════════════════════════════════════════════ */}
-        <TabsContent value="receipts">
+        <TabsContent value="audit-log">
           <Card>
-            <CardHeader>
-              <CardTitle>Receipt Log</CardTitle>
-              <CardDescription>Live audit log of all tax receipts processed by the website and Google Docs.</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between pb-4">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <History className="w-5 h-5 text-primary" />
+                  System Event & Audit Log
+                </CardTitle>
+                <CardDescription>
+                  Tracks all configuration edits, script copies, connection handshake tests, webhook syncs, and manual receipts.
+                </CardDescription>
+              </div>
+              <Button variant="outline" size="sm" onClick={loadData} className="gap-1 text-xs">
+                <RefreshCw className="w-3 h-3" /> Refresh Logs
+              </Button>
             </CardHeader>
             <CardContent>
-              {isLoadingReceipts ? (
-                <div className="text-center py-8 text-muted-foreground">Loading receipts...</div>
-              ) : receipts.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">No receipts generated yet. Receipts will appear here automatically when donations complete.</div>
+              {isLoadingAuditLogs ? (
+                <div className="text-center py-8 text-muted-foreground">Loading audit log events...</div>
+              ) : auditLogs.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">No events recorded yet. Actions like saving settings, testing connections, or copying script will appear here.</div>
               ) : (
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Donor</TableHead>
-                        <TableHead>Phone / Address</TableHead>
-                        <TableHead>Donation</TableHead>
-                        <TableHead>Date</TableHead>
+                        <TableHead>Event</TableHead>
+                        <TableHead>Description</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Receipt Doc</TableHead>
+                        <TableHead>Timestamp</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {receipts.map((r) => {
-                        const isMonthly = r.frequency === 'monthly';
+                      {auditLogs.map((log) => {
+                        let dateStr = 'Just now';
+                        if (log.createdAt && typeof (log.createdAt as any).toDate === 'function') {
+                          dateStr = (log.createdAt as any).toDate().toLocaleString();
+                        }
                         return (
-                          <TableRow key={r.id}>
-                            <TableCell>
-                              <div className="font-medium text-slate-900">{r.donorName}</div>
-                              <div className="text-xs text-muted-foreground">{r.donorEmail}</div>
+                          <TableRow key={log.id}>
+                            <TableCell className="font-semibold text-slate-900 text-xs whitespace-nowrap">
+                              {log.title}
                             </TableCell>
-                            <TableCell className="text-xs text-slate-600 max-w-[200px] truncate">
-                              <div>{r.donorPhone || 'No phone'}</div>
-                              <div className="truncate text-muted-foreground" title={r.donorAddress}>{r.donorAddress || 'No address'}</div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="font-semibold">${r.amount?.toFixed(2)} CAD</div>
-                              {isMonthly && (
-                                <div className="text-[11px] text-amber-700 font-medium">
-                                  Monthly (Assumed 12-Mo: ${(r.assumedAnnualAmount ?? (r.amount * 12)).toFixed(2)})
+                            <TableCell className="text-xs text-slate-600 max-w-md">
+                              <div>{log.description}</div>
+                              {log.metadata && (
+                                <div className="text-[10px] text-muted-foreground font-mono mt-0.5 truncate">
+                                  {JSON.stringify(log.metadata)}
                                 </div>
                               )}
                             </TableCell>
-                            <TableCell className="text-sm">{r.donationDate}</TableCell>
-                            <TableCell>{statusBadge(r.status)}</TableCell>
-                            <TableCell>
-                              {r.driveUrl ? (
-                                <a href={r.driveUrl} target="_blank" rel="noopener noreferrer">
-                                  <Button variant="ghost" size="sm" className="text-primary hover:text-primary">
-                                    <ExternalLink className="w-3.5 h-3.5 mr-1" />View
-                                  </Button>
-                                </a>
-                              ) : isMonthly && r.status === 'requires-verification' ? (
-                                <span className="text-[11px] text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200">
-                                  Held for 12-mo verification
-                                </span>
-                              ) : (
-                                <span className="text-xs text-muted-foreground">{r.errorMessage?.slice(0, 45) || '—'}</span>
-                              )}
-                            </TableCell>
+                            <TableCell>{auditBadge(log.status)}</TableCell>
+                            <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{dateStr}</TableCell>
                           </TableRow>
                         );
                       })}
