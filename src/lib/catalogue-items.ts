@@ -159,9 +159,9 @@ export const CATALOGUE_ITEMS: CatalogueItem[] = [
     name: 'One Upbeat! Participant (One Month)',
     category: 'instruction',
     type: 'fixed',
-    basePrice: 100,
-    chargeAmount: 102.99, // $100 * 1.03 = $103 -> $102.99
-    displayPrice: '$102.99',
+    basePrice: 250,
+    chargeAmount: 257.99, // $250 * 1.03 = $257.50 -> $257.99
+    displayPrice: '$257.99',
     description: "At Upbeat!, we are proud to provide Peterborough's youth with high-quality, professional music instruction. Our teachers are incredible local musicians who are deeply dedicated to the success of every child in the program. By covering the cost of instruction for an Upbeat! participant for a month (or a full year!), you will make a lasting difference in the life of a deserving young person.",
     defaultImageId: 'gift-catalogue-instruction-month'
   },
@@ -171,9 +171,9 @@ export const CATALOGUE_ITEMS: CatalogueItem[] = [
     name: 'Instruction for One Upbeat! Participant (Full Year)',
     category: 'instruction',
     type: 'fixed',
-    basePrice: 800,
-    chargeAmount: 823.99, // $800 * 1.03 = $824 -> $823.99
-    displayPrice: '$823.99',
+    basePrice: 2500,
+    chargeAmount: 2574.99, // $2500 * 1.03 = $2575 -> $2,574.99
+    displayPrice: '$2,574.99',
     description: "At Upbeat!, we are proud to provide Peterborough's youth with high-quality, professional music instruction. Our teachers are incredible local musicians who are deeply dedicated to the success of every child in the program. By covering the cost of instruction for an Upbeat! participant for a month (or a full year!), you will make a lasting difference in the life of a deserving young person.",
     defaultImageId: 'gift-catalogue-instruction-year'
   },
