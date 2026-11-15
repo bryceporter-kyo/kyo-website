@@ -5,7 +5,6 @@ import { CATALOGUE_ITEMS, CatalogueItem } from '@/lib/catalogue-items';
 import GiftCatalogueHero from './_components/GiftCatalogueHero';
 import CampaignIntro from './_components/CampaignIntro';
 import GiftCard from './_components/GiftCard';
-import AddOnCard from './_components/AddOnCard';
 import BundleCard from './_components/BundleCard';
 import VariableContributionCard from './_components/VariableContributionCard';
 import InstructionSection from './_components/InstructionSection';
@@ -77,7 +76,6 @@ export default function UpbeatGiftCataloguePage() {
   const outfitItems = CATALOGUE_ITEMS.filter((i) =>
     ['small-violin-outfit', 'violin-outfit', 'viola-outfit', 'cello-outfit'].includes(i.id)
   );
-  const dedicationItem = CATALOGUE_ITEMS.find((i) => i.id === 'dedication');
   const standItem = CATALOGUE_ITEMS.find((i) => i.id === 'music-stand');
   const rosinItem = CATALOGUE_ITEMS.find((i) => i.id === 'shatterproof-rosin');
   const bundleItem = CATALOGUE_ITEMS.find((i) => i.id === 'practice-package');
@@ -120,24 +118,7 @@ export default function UpbeatGiftCataloguePage() {
             </div>
           </div>
 
-          {/* 5.2 Dedication Add-On Feature */}
-          {dedicationItem && (
-            <div className="space-y-4">
-              <h3 className="text-xl font-bold font-headline text-foreground">
-                Dedication Plaque Add-On
-              </h3>
-              <AddOnCard 
-                item={dedicationItem} 
-                onSelectAddOn={() => {
-                  // Default to first outfit item or open with dedication pre-checked
-                  const defaultTarget = outfitItems[0] || CATALOGUE_ITEMS[0];
-                  handleOpenDonate(defaultTarget, true);
-                }} 
-              />
-            </div>
-          )}
-
-          {/* 5.3 Supporting Equipment, Bundles, and Repairs */}
+          {/* 5.2 Supporting Equipment, Bundles, and Repairs */}
           <div className="space-y-6">
             <h3 className="text-xl font-bold font-headline text-foreground">
               Supporting Equipment & Maintenance
