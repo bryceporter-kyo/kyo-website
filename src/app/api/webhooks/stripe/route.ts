@@ -83,12 +83,33 @@ export async function POST(request: NextRequest) {
           honoureeName: metadata.honouree_name || 'Honouree',
           honoureeEmail: metadata.honouree_email,
           donorName: metadata.donor_name || 'Anonymous',
+          donorEmail: metadata.donor_email,
+          amount: paymentIntent.amount / 100,
+          date: metadata.donation_date || new Date().toLocaleDateString('en-CA'),
           dedicationType: metadata.dedication_type as any,
           dedicationMessage: metadata.dedication_message,
           giftName: metadata.gift_name || 'Instrument Outfit',
         });
       } catch (err) {
         console.error('[Stripe Webhook] Error triggering dedication notification email:', err);
+      }
+    }
+
+    // Send donor thank you email if configured
+    if (metadata.donor_email && metadata.donor_email.includes('@')) {
+      try {
+        const { sendDonationThankYouEmail } = await import('@/lib/email');
+        await sendDonationThankYouEmail({
+          donorName: metadata.donor_name || 'Generous Donor',
+          donorEmail: metadata.donor_email,
+          amount: paymentIntent.amount / 100,
+          date: metadata.donation_date || new Date().toLocaleDateString('en-CA'),
+          projectName: metadata.project || metadata.gift_name || 'Upbeat! Program Support',
+          frequency: metadata.frequency || 'one-time',
+          hasTaxReceipt: metadata.wants_tax_receipt === 'true' || metadata.tax_receipt_requested?.toLowerCase() === 'true',
+        });
+      } catch (err) {
+        console.error('[Stripe Webhook] Error sending donor thank you email:', err);
       }
     }
 
@@ -167,17 +188,39 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ received: true });
       }
 
-      // For single/one-time donations: proceed with automated receipt generation
+      // For single/one-time donations: check if automatic receipt generation is enabled
       try {
         const settings = await getTaxReceiptSettings();
         
+        // Check automatic receipt generation toggle (enabled by default unless explicitly false)
+        const isAutoReceiptsEnabled = settings.autoTaxReceipts !== false;
+
+        if (!isAutoReceiptsEnabled) {
+          console.log(`[Tax Receipt] Automatic tax receipts disabled in admin settings. Saved donation #${firestoreId} for manual review.`);
+          await logTaxReceiptAudit({
+            eventType: 'webhook_received',
+            title: 'Automatic Tax Receipt Held',
+            description: `Automatic receipt generation is toggled OFF. Saved donation from ${donorData.donorName} ($${donorData.amount.toFixed(2)}) as pending for manual generation.`,
+            metadata: { donorName: donorData.donorName, amount: donorData.amount, firestoreId },
+            status: 'info'
+          });
+          return NextResponse.json({ received: true });
+        }
+
         if (!settings.appsScriptWebAppUrl) {
           console.warn('[Tax Receipt] Apps Script URL not configured. Skipping receipt generation.');
           if (firestoreId) {
             await updateTaxReceiptStatus(firestoreId, 'failed', { 
-              errorMessage: 'Apps Script URL not configured in admin settings.' 
+              errorMessage: 'Apps Script URL not configured in admin settings. Please enter Web App URL in Admin -> Donations.' 
             });
           }
+          await logTaxReceiptAudit({
+            eventType: 'webhook_received',
+            title: 'Tax Receipt Apps Script Not Configured',
+            description: `Could not trigger receipt for ${donorData.donorName}: Apps Script Web App URL is blank in Admin Settings.`,
+            metadata: { donorName: donorData.donorName, amount: donorData.amount },
+            status: 'warning'
+          });
         } else {
           const scriptResponse = await fetch(settings.appsScriptWebAppUrl, {
             method: 'POST',

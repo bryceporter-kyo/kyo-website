@@ -5,12 +5,13 @@ import {
   ArrowLeft, Save, RefreshCw, ExternalLink, CheckCircle2, XCircle, 
   Clock, Eye, EyeOff, Copy, Check, FileCode, Shield, Info, HelpCircle, 
   AlertCircle, Key, Sparkles, ChevronRight, CheckCircle, FileText, Send, 
-  FolderOpen, Activity, History, Play
+  FolderOpen, Activity, History, Play, Mail, Heart, Settings as SettingsIcon
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +23,10 @@ import {
 } from "@/lib/taxReceipts";
 import { generateAppsScriptCode } from "@/lib/appsScriptTemplate";
 import { fetchLegalPages, LegalPage } from "@/lib/legal-pages";
+import { 
+  DEFAULT_DEDICATION_SUBJECT, DEFAULT_DEDICATION_MESSAGE, 
+  DEFAULT_THANK_YOU_SUBJECT, DEFAULT_THANK_YOU_MESSAGE 
+} from "@/lib/emailTemplates";
 
 export default function DonationsAdminPage() {
   const { toast } = useToast();
@@ -50,6 +55,18 @@ export default function DonationsAdminPage() {
     gmailAppPassword: '',
     termsLegalSlug: '',
     hideHolidayCalendar: false,
+    autoTaxReceipts: true,
+    dedicationSenderName: '',
+    dedicationSenderEmail: '',
+    dedicationReplyToEmail: '',
+    dedicationSubjectTemplate: '',
+    dedicationMessageTemplate: '',
+    sendThankYouEmail: true,
+    thankYouSenderName: '',
+    thankYouSenderEmail: '',
+    thankYouReplyToEmail: '',
+    thankYouSubjectTemplate: '',
+    thankYouMessageTemplate: '',
   });
 
   const [origin, setOrigin] = useState('');
@@ -736,6 +753,211 @@ export default function DonationsAdminPage() {
                       placeholder="e.g. cra-tax-receipt-terms"
                       className="font-mono text-sm"
                     />
+                  </div>
+                </div>
+              </div>
+
+              {/* Automatic Tax Receipt Toggle */}
+              <div className="border-t border-slate-100 pt-4 space-y-3">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900">Automatic Tax Receipt Generation</h4>
+                  <p className="text-xs text-slate-600">
+                    Controls whether eligible donations automatically trigger Google Apps Script to create and email official CRA PDF receipts immediately upon payment.
+                  </p>
+                </div>
+
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                  <div className="flex items-start space-x-3">
+                    <input
+                      type="checkbox"
+                      id="autoTaxReceipts"
+                      checked={settings.autoTaxReceipts !== false}
+                      onChange={(e) => setSettings(prev => ({ ...prev, autoTaxReceipts: e.target.checked }))}
+                      className="mt-1 h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/20"
+                    />
+                    <div className="space-y-0.5 cursor-pointer" onClick={() => setSettings(prev => ({ ...prev, autoTaxReceipts: prev.autoTaxReceipts === false ? true : false }))}>
+                      <Label htmlFor="autoTaxReceipts" className="text-xs font-bold text-slate-900 cursor-pointer">
+                        Enable Automatic Tax Receipt Generation & PDF Emailing
+                      </Label>
+                      <p className="text-[11px] text-muted-foreground">
+                        When enabled, one-time donations with tax receipts requested are automatically sent to your Google Apps Script, generated as a PDF in Drive, and emailed to the donor. If disabled, donations are logged as &quot;Pending&quot; in the Receipt Log for manual verification before sending.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Dedication Notification Email Settings & Template */}
+              <div className="border-t border-slate-100 pt-4 space-y-4">
+                <div className="flex items-center gap-2">
+                  <Heart className="w-4 h-4 text-amber-600" />
+                  <h4 className="text-sm font-bold text-slate-900">Dedication Notification Card Email Template</h4>
+                </div>
+                <p className="text-xs text-slate-600">
+                  Custom sender details and message for the digital card sent to honourees or their family when a donor checks &quot;Send an email notification card&quot; on an instrument dedication.
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <Label className="text-xs font-bold">Sender Name (Optional override)</Label>
+                    <Input
+                      value={settings.dedicationSenderName || ''}
+                      onChange={(e) => handleChange('dedicationSenderName', e.target.value)}
+                      placeholder={settings.senderName || 'Kawartha Youth Orchestra'}
+                    />
+                    <p className="text-[11px] text-muted-foreground">Defaults to organization sender name if left blank.</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label className="text-xs font-bold">From Email (Optional override)</Label>
+                    <Input
+                      type="email"
+                      value={settings.dedicationSenderEmail || ''}
+                      onChange={(e) => handleChange('dedicationSenderEmail', e.target.value)}
+                      placeholder={settings.senderEmail || 'donations@thekyo.ca'}
+                    />
+                    <p className="text-[11px] text-muted-foreground">From address displayed to honourees.</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label className="text-xs font-bold">Reply-To Email (Optional override)</Label>
+                    <Input
+                      type="email"
+                      value={settings.dedicationReplyToEmail || ''}
+                      onChange={(e) => handleChange('dedicationReplyToEmail', e.target.value)}
+                      placeholder={settings.replyToEmail || settings.senderEmail || 'info@thekyo.ca'}
+                    />
+                    <p className="text-[11px] text-muted-foreground">Where honouree replies will be sent.</p>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold">Email Subject</Label>
+                  <Input
+                    value={settings.dedicationSubjectTemplate || ''}
+                    onChange={(e) => handleChange('dedicationSubjectTemplate', e.target.value)}
+                    placeholder={DEFAULT_DEDICATION_SUBJECT}
+                    className="font-medium text-sm"
+                  />
+                  <p className="text-[11px] text-muted-foreground">
+                    Available placeholders: <code className="bg-slate-100 px-1 py-0.5 rounded text-[10px]">&#123;honouree_name&#125;</code>, <code className="bg-slate-100 px-1 py-0.5 rounded text-[10px]">&#123;first_name&#125;</code>, <code className="bg-slate-100 px-1 py-0.5 rounded text-[10px]">&#123;donor_name&#125;</code>, <code className="bg-slate-100 px-1 py-0.5 rounded text-[10px]">&#123;gift_name&#125;</code>, <code className="bg-slate-100 px-1 py-0.5 rounded text-[10px]">&#123;dedication_type_phrase&#125;</code>.
+                  </p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold">Email Message Body</Label>
+                  <Textarea
+                    value={settings.dedicationMessageTemplate !== undefined ? settings.dedicationMessageTemplate : ''}
+                    onChange={(e) => handleChange('dedicationMessageTemplate', e.target.value)}
+                    placeholder={DEFAULT_DEDICATION_MESSAGE}
+                    rows={8}
+                    className="font-mono text-xs leading-relaxed"
+                  />
+                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-[11px] text-slate-700 space-y-1">
+                    <div className="font-semibold text-slate-900">Supported Template Placeholders:</div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 font-mono text-[10px] text-primary">
+                      <span>&#123;honouree_name&#125;</span>
+                      <span>&#123;first_name&#125;</span>
+                      <span>&#123;donor_name&#125;</span>
+                      <span>&#123;donor_first_name&#125;</span>
+                      <span>&#123;donor_email&#125;</span>
+                      <span>&#123;gift_name&#125;</span>
+                      <span>&#123;amount&#125;</span>
+                      <span>&#123;date&#125;</span>
+                      <span>&#123;message_section&#125;</span>
+                      <span>&#123;message&#125;</span>
+                      <span>&#123;dedication_type_phrase&#125;</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Donor Thank You Email Settings & Template */}
+              <div className="border-t border-slate-100 pt-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Mail className="w-4 h-4 text-emerald-600" />
+                    <h4 className="text-sm font-bold text-slate-900">Donation Thank You Confirmation Email</h4>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="sendThankYouEmail"
+                      checked={settings.sendThankYouEmail !== false}
+                      onChange={(e) => setSettings(prev => ({ ...prev, sendThankYouEmail: e.target.checked }))}
+                      className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/20"
+                    />
+                    <Label htmlFor="sendThankYouEmail" className="text-xs font-semibold cursor-pointer">
+                      Send automated thank you emails
+                    </Label>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-600">
+                  Automatically sends an appreciative confirmation email to donors following a completed Stripe donation on either the general donation page or the Holiday Gift Catalogue.
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <Label className="text-xs font-bold">Thank You Sender Name</Label>
+                    <Input
+                      value={settings.thankYouSenderName || ''}
+                      onChange={(e) => handleChange('thankYouSenderName', e.target.value)}
+                      placeholder={settings.senderName || 'Kawartha Youth Orchestra'}
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label className="text-xs font-bold">From Email</Label>
+                    <Input
+                      type="email"
+                      value={settings.thankYouSenderEmail || ''}
+                      onChange={(e) => handleChange('thankYouSenderEmail', e.target.value)}
+                      placeholder={settings.senderEmail || 'donations@thekyo.ca'}
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label className="text-xs font-bold">Reply-To Email</Label>
+                    <Input
+                      type="email"
+                      value={settings.thankYouReplyToEmail || ''}
+                      onChange={(e) => handleChange('thankYouReplyToEmail', e.target.value)}
+                      placeholder={settings.replyToEmail || settings.senderEmail || 'info@thekyo.ca'}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold">Email Subject</Label>
+                  <Input
+                    value={settings.thankYouSubjectTemplate || ''}
+                    onChange={(e) => handleChange('thankYouSubjectTemplate', e.target.value)}
+                    placeholder={DEFAULT_THANK_YOU_SUBJECT}
+                    className="font-medium text-sm"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold">Email Message Body</Label>
+                  <Textarea
+                    value={settings.thankYouMessageTemplate !== undefined ? settings.thankYouMessageTemplate : ''}
+                    onChange={(e) => handleChange('thankYouMessageTemplate', e.target.value)}
+                    placeholder={DEFAULT_THANK_YOU_MESSAGE}
+                    rows={8}
+                    className="font-mono text-xs leading-relaxed"
+                  />
+                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-[11px] text-slate-700 space-y-1">
+                    <div className="font-semibold text-slate-900">Supported Template Placeholders:</div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 font-mono text-[10px] text-primary">
+                      <span>&#123;donor_name&#125;</span>
+                      <span>&#123;donor_first_name&#125;</span>
+                      <span>&#123;first_name&#125;</span>
+                      <span>&#123;donor_email&#125;</span>
+                      <span>&#123;amount&#125;</span>
+                      <span>&#123;date&#125;</span>
+                      <span>&#123;project_name&#125;</span>
+                      <span>&#123;frequency&#125;</span>
+                    </div>
                   </div>
                 </div>
               </div>

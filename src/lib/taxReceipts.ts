@@ -17,6 +17,23 @@ export interface TaxReceiptSettings {
   gmailAppPassword: string;  // 16-character Google App Password
   termsLegalSlug?: string;   // slug of the legal page for CRA terms (e.g. 'cra-tax-receipt-terms')
   hideHolidayCalendar?: boolean; // Controls public visibility of the Holiday Gift Catalogue / Calendar
+  autoTaxReceipts?: boolean; // Toggle: whether to automatically generate/email receipts via Google Apps Script (defaults to true if unset)
+  
+  // Dedication Card Email Custom Sender & Template
+  dedicationSenderName?: string;
+  dedicationSenderEmail?: string;
+  dedicationReplyToEmail?: string;
+  dedicationSubjectTemplate?: string;
+  dedicationMessageTemplate?: string;
+
+  // Donation Thank You Email Settings & Template
+  sendThankYouEmail?: boolean;
+  thankYouSenderName?: string;
+  thankYouSenderEmail?: string;
+  thankYouReplyToEmail?: string;
+  thankYouSubjectTemplate?: string;
+  thankYouMessageTemplate?: string;
+
   smtpUser?: string;
   smtpHost?: string;
   smtpPort?: string;
