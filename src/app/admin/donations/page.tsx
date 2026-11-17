@@ -845,7 +845,10 @@ export default function DonationsAdminPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-bold">Email Message Body</Label>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs font-bold">Email Message Body</Label>
+                    <span className="text-[11px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-medium">Supports Markdown (**bold**, *italics*, # headers, lists, [links](url))</span>
+                  </div>
                   <Textarea
                     value={settings.dedicationMessageTemplate !== undefined ? settings.dedicationMessageTemplate : ''}
                     onChange={(e) => handleChange('dedicationMessageTemplate', e.target.value)}
@@ -854,7 +857,10 @@ export default function DonationsAdminPage() {
                     className="font-mono text-xs leading-relaxed"
                   />
                   <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-[11px] text-slate-700 space-y-1">
-                    <div className="font-semibold text-slate-900">Supported Template Placeholders:</div>
+                    <div className="flex items-center justify-between font-semibold text-slate-900">
+                      <span>Supported Template Placeholders:</span>
+                      <span className="text-slate-500 font-normal">Markdown formatting enabled</span>
+                    </div>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 font-mono text-[10px] text-primary">
                       <span>&#123;honouree_name&#125;</span>
                       <span>&#123;first_name&#125;</span>
@@ -938,7 +944,10 @@ export default function DonationsAdminPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-bold">Email Message Body</Label>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs font-bold">Email Message Body</Label>
+                    <span className="text-[11px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-medium">Supports Markdown (**bold**, *italics*, # headers, lists, [links](url))</span>
+                  </div>
                   <Textarea
                     value={settings.thankYouMessageTemplate !== undefined ? settings.thankYouMessageTemplate : ''}
                     onChange={(e) => handleChange('thankYouMessageTemplate', e.target.value)}
@@ -947,7 +956,10 @@ export default function DonationsAdminPage() {
                     className="font-mono text-xs leading-relaxed"
                   />
                   <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-[11px] text-slate-700 space-y-1">
-                    <div className="font-semibold text-slate-900">Supported Template Placeholders:</div>
+                    <div className="flex items-center justify-between font-semibold text-slate-900">
+                      <span>Supported Template Placeholders:</span>
+                      <span className="text-slate-500 font-normal">Markdown formatting enabled</span>
+                    </div>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 font-mono text-[10px] text-primary">
                       <span>&#123;donor_name&#125;</span>
                       <span>&#123;donor_first_name&#125;</span>

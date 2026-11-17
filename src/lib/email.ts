@@ -3,6 +3,7 @@ import { getTaxReceiptSettings, logTaxReceiptAudit } from './taxReceipts';
 import {
   renderEmailTemplate,
   getFirstName,
+  markdownToEmailHtml,
   DEFAULT_DEDICATION_SUBJECT,
   DEFAULT_DEDICATION_MESSAGE,
   DEFAULT_THANK_YOU_SUBJECT,
@@ -12,6 +13,7 @@ import {
 export {
   renderEmailTemplate,
   getFirstName,
+  markdownToEmailHtml,
   DEFAULT_DEDICATION_SUBJECT,
   DEFAULT_DEDICATION_MESSAGE,
   DEFAULT_THANK_YOU_SUBJECT,
@@ -151,7 +153,7 @@ export async function sendDedicationNotificationEmail(opts: DedicationNotificati
           </div>
 
           <div class="custom-body">
-            ${plainTextBody.replace(/\n/g, '<br>')}
+            ${markdownToEmailHtml(plainTextBody)}
           </div>
         </div>
         <div class="footer">
@@ -283,7 +285,7 @@ export async function sendDonationThankYouEmail(opts: DonationThankYouOptions) {
           </div>
 
           <div class="custom-body">
-            ${plainTextBody.replace(/\n/g, '<br>')}
+            ${markdownToEmailHtml(plainTextBody)}
           </div>
         </div>
         <div class="footer">
