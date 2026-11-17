@@ -70,9 +70,9 @@ export async function POST(request: NextRequest) {
       finalAmountCAD = item.chargeAmount;
     }
 
-    // If donor selected the Dedication Add-on, add $10.99 CAD
+    // If donor selected the Dedication Add-on, add $10.99 CAD (only if item supports dedications)
     const DEDICATION_ADDON_PRICE = 10.99;
-    const isDedicationSelected = Boolean(hasDedicationAddon);
+    const isDedicationSelected = Boolean(hasDedicationAddon && item.supportsDedication);
     if (isDedicationSelected) {
       finalAmountCAD = Math.round((finalAmountCAD + DEDICATION_ADDON_PRICE) * 100) / 100;
     }
@@ -109,8 +109,11 @@ export async function POST(request: NextRequest) {
       gift_category: item.category,
       donor_name: name.trim(),
       donor_email: email.trim(),
-      tax_receipt_requested: requestedTaxReceipt ? 'True' : 'False',
+      wants_tax_receipt: requestedTaxReceipt ? 'true' : 'false',
+      tax_receipt_requested: requestedTaxReceipt ? 'true' : 'false',
       is_tax_receipt_eligible: isTaxReceiptEligible ? 'True' : 'False',
+      frequency: 'one-time',
+      project: `Upbeat! Gift Catalogue: ${item.name}`,
     };
 
     if (address && address.trim()) {

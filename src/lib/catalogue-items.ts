@@ -25,6 +25,7 @@ export interface CatalogueItem {
   defaultImageId: string;
   minAmount?: number;
   hasDedicationInscription?: boolean;
+  supportsDedication?: boolean;
   isMatchingOpportunity?: boolean;
 }
 
@@ -40,7 +41,8 @@ export const CATALOGUE_ITEMS: CatalogueItem[] = [
     displayPrice: '$513.99',
     inclusionLine: 'Includes Case, Strings, and Bow',
     description: "Variable-sized small instruments are essential for giving our youngest Upbeat! musicians the chance to get started early. As musicians grow, we swap them for instruments that fit their hands—sizing up is always an exciting moment! We need a variety of instrument sizes on hand to support this growth, and as an added bonus, there's something undeniably adorable about a tiny violin.",
-    defaultImageId: 'gift-catalogue-violin-small'
+    defaultImageId: 'gift-catalogue-violin-small',
+    supportsDedication: true
   },
   // 2. Violin Outfit
   {
@@ -53,7 +55,8 @@ export const CATALOGUE_ITEMS: CatalogueItem[] = [
     displayPrice: '$925.99',
     inclusionLine: 'Includes Case, Strings, and Bow',
     description: "As Upbeat! has grown, we've realized just how much the quality of student instruments matters. A student instrument needs to be comfortable, easy to play, and capable of producing a beautiful sound that keeps a young musician excited about making music. Help us provide high-quality, durable Violin to keep the music going for years to come.",
-    defaultImageId: 'gift-catalogue-violin'
+    defaultImageId: 'gift-catalogue-violin',
+    supportsDedication: true
   },
   // 3. Viola Outfit
   {
@@ -66,7 +69,8 @@ export const CATALOGUE_ITEMS: CatalogueItem[] = [
     displayPrice: '$1,028.99',
     inclusionLine: 'Includes Case, Strings, and Bow',
     description: "The often-neglected big sibling of the violin, the viola is the heart and soul of that full, warm orchestral sound. Its darker, more mellow tone attracts musicians who are ready to be true team players. Currently, all 14 of KYO's violas are on loan! Our long-time single violist in IKYO has recently been joined by an Upbeat! peer, and with so many Upbeat! violists hard at work, we can't wait to see a full Senior Viola section. To keep this dream alive, we need more quality violas in a wider range of sizes as our musicians grow.",
-    defaultImageId: 'gift-catalogue-viola'
+    defaultImageId: 'gift-catalogue-viola',
+    supportsDedication: true
   },
   // 4. Cello Outfit
   {
@@ -79,7 +83,8 @@ export const CATALOGUE_ITEMS: CatalogueItem[] = [
     displayPrice: '$1,544.99',
     inclusionLine: 'Includes Case, Strings, and Bow',
     description: "We so often see young cellists get hooked from the very first note—for kids who resonate with the rich sound of the cello, nothing else compares. Our cello program has expanded rapidly, and as our young cellists grow taller and advance musically, we have an increasing demand for high-quality, full-sized cellos. By choosing to purchase a new cello for Upbeat!, your generous donation will put a beautifully crafted instrument into the hands of a committed young player who will cherish and be inspired by it for years to come.",
-    defaultImageId: 'gift-catalogue-cello'
+    defaultImageId: 'gift-catalogue-cello',
+    supportsDedication: true
   },
   // 5. Dedication Add-On
   {

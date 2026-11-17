@@ -139,15 +139,18 @@ export default function CatalogueDonationModal({
   // Sync initial dedication state when opening modal
   React.useEffect(() => {
     if (isOpen) {
-      setHasDedication(initialAddDedication);
+      setHasDedication(Boolean(initialAddDedication && item?.supportsDedication));
       setModalStep(1);
     }
-  }, [isOpen, initialAddDedication]);
+  }, [isOpen, initialAddDedication, item]);
 
   if (!item) return null;
 
+  const canHaveDedication = Boolean(item.supportsDedication);
+  const effectiveDedication = hasDedication && canHaveDedication;
+
   const baseAmount = item.type === 'variable' ? parseFloat(variableAmount) || 0 : item.chargeAmount || 0;
-  const totalAmount = hasDedication ? baseAmount + DEDICATION_ADDON_PRICE : baseAmount;
+  const totalAmount = effectiveDedication ? baseAmount + DEDICATION_ADDON_PRICE : baseAmount;
   const isTaxReceiptEligible = totalAmount > 20;
 
   // Validation before going to Step 2 or directly initializing payment
@@ -200,7 +203,7 @@ export default function CatalogueDonationModal({
     e.preventDefault();
     if (!validateStep1()) return;
 
-    if (hasDedication) {
+    if (effectiveDedication) {
       // Advance to Dedication Details page
       setModalStep(2);
     } else {
@@ -231,12 +234,12 @@ export default function CatalogueDonationModal({
           address: address.trim(),
           phone: phone.trim(),
           taxReceiptRequested: taxReceiptRequested && isTaxReceiptEligible,
-          hasDedicationAddon: hasDedication,
-          dedicationType: hasDedication ? dedicationType : undefined,
-          honoureeName: hasDedication ? honoureeName.trim() : undefined,
-          dedicationMessage: hasDedication ? dedicationMessage.trim() : undefined,
-          notifyHonouree: hasDedication ? notifyHonouree : false,
-          honoureeEmail: hasDedication && notifyHonouree ? honoureeEmail.trim() : undefined,
+          hasDedicationAddon: effectiveDedication,
+          dedicationType: effectiveDedication ? dedicationType : undefined,
+          honoureeName: effectiveDedication ? honoureeName.trim() : undefined,
+          dedicationMessage: effectiveDedication ? dedicationMessage.trim() : undefined,
+          notifyHonouree: effectiveDedication ? notifyHonouree : false,
+          honoureeEmail: effectiveDedication && notifyHonouree ? honoureeEmail.trim() : undefined,
           donorNote: donorNote.trim() ? donorNote.trim() : undefined,
         }),
       });
@@ -286,7 +289,7 @@ export default function CatalogueDonationModal({
           <DialogDescription className="text-sm">
             {item.type === 'variable'
               ? 'Choose your contribution amount.'
-              : `Base Donation: ${item.displayPrice}${hasDedication ? ` + $${DEDICATION_ADDON_PRICE.toFixed(2)} Dedication` : ''}`}
+              : `Base Donation: ${item.displayPrice}${effectiveDedication ? ` + $${DEDICATION_ADDON_PRICE.toFixed(2)} Dedication` : ''}`}
           </DialogDescription>
         </DialogHeader>
 
@@ -300,7 +303,7 @@ export default function CatalogueDonationModal({
               Your gift of <strong>${confirmedAmount.toFixed(2)}</strong> for{' '}
               <strong>{item.name}</strong> will directly empower an Upbeat! musician in Peterborough.
             </p>
-            {hasDedication && (
+            {effectiveDedication && (
               <div className="p-3 bg-primary/10 text-primary-900 rounded-lg text-xs max-w-md mx-auto border border-primary/20">
                 ✨ <strong>Dedication Plaque Confirmed:</strong> Inscribed for &quot;{honoureeName}&quot; ({dedicationType}).
               </div>
@@ -321,7 +324,7 @@ export default function CatalogueDonationModal({
             <div className="p-3 bg-muted/60 rounded-lg text-sm flex justify-between items-center">
               <div>
                 <span className="font-semibold">{item.name}</span>
-                {hasDedication && (
+                {effectiveDedication && (
                   <span className="block text-xs text-primary font-medium">
                     + Inscribed Dedication for {honoureeName}
                   </span>
@@ -560,26 +563,27 @@ export default function CatalogueDonationModal({
               </div>
             </div>
 
-            {/* DEDICATION ADD-ON CHECKBOX (Adds $10.99 & unlocks Step 2) */}
-            <div className="p-3.5 bg-gradient-to-r from-amber-500/10 via-primary/5 to-transparent border border-amber-300/60 rounded-xl space-y-2">
-              <div className="flex items-start space-x-3">
-                <Checkbox
-                  id="add-dedication"
-                  checked={hasDedication}
-                  onCheckedChange={(checked) => setHasDedication(Boolean(checked))}
-                  className="mt-0.5 border-amber-500 data-[state=checked]:bg-amber-600 data-[state=checked]:border-amber-600"
-                />
-                <div className="grid gap-0.5 leading-tight cursor-pointer" onClick={() => setHasDedication(!hasDedication)}>
-                  <div className="flex items-center gap-1.5 font-bold text-sm text-slate-900">
-                    <Sparkles className="w-4 h-4 text-amber-600" />
-                    <span>Add an Inscribed Dedication Plaque (+${DEDICATION_ADDON_PRICE.toFixed(2)})</span>
+            {canHaveDedication && (
+              <div className="p-3.5 bg-gradient-to-r from-amber-500/10 via-primary/5 to-transparent border border-amber-300/60 rounded-xl space-y-2">
+                <div className="flex items-start space-x-3">
+                  <Checkbox
+                    id="add-dedication"
+                    checked={hasDedication}
+                    onCheckedChange={(checked) => setHasDedication(Boolean(checked))}
+                    className="mt-0.5 border-amber-500 data-[state=checked]:bg-amber-600 data-[state=checked]:border-amber-600"
+                  />
+                  <div className="grid gap-0.5 leading-tight cursor-pointer" onClick={() => setHasDedication(!hasDedication)}>
+                    <div className="flex items-center gap-1.5 font-bold text-sm text-slate-900">
+                      <Sparkles className="w-4 h-4 text-amber-600" />
+                      <span>Add an Inscribed Dedication Plaque (+${DEDICATION_ADDON_PRICE.toFixed(2)})</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Inscribe your name or honour a loved one with a custom plaque affixed to this instrument. You will be prompted for your dedication details on the next step.
+                    </p>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    Inscribe your name or honour a loved one with a custom plaque affixed to this instrument. You will be prompted for your dedication details on the next step.
-                  </p>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Optional Donor Note */}
             <div>
@@ -668,7 +672,7 @@ export default function CatalogueDonationModal({
                 <>
                   <Loader2 className="w-5 h-5 animate-spin mr-2" /> Initializing Payment...
                 </>
-              ) : hasDedication ? (
+              ) : effectiveDedication ? (
                 <span className="flex items-center justify-center gap-2">
                   Continue to Dedication Details (${totalAmount.toFixed(2)}) <ArrowRight className="w-4 h-4" />
                 </span>

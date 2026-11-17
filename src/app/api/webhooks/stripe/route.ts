@@ -75,8 +75,26 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Check if this donation requested a dedication notification email
+    if (metadata.notify_honouree === 'true' && metadata.honouree_email) {
+      try {
+        const { sendDedicationNotificationEmail } = await import('@/lib/email');
+        await sendDedicationNotificationEmail({
+          honoureeName: metadata.honouree_name || 'Honouree',
+          honoureeEmail: metadata.honouree_email,
+          donorName: metadata.donor_name || 'Anonymous',
+          dedicationType: metadata.dedication_type as any,
+          dedicationMessage: metadata.dedication_message,
+          giftName: metadata.gift_name || 'Instrument Outfit',
+        });
+      } catch (err) {
+        console.error('[Stripe Webhook] Error triggering dedication notification email:', err);
+      }
+    }
+
     // Handle tax receipt generation
-    if (metadata.wants_tax_receipt === 'true') {
+    const isTaxReceiptWanted = metadata.wants_tax_receipt === 'true' || metadata.tax_receipt_requested?.toLowerCase() === 'true';
+    if (isTaxReceiptWanted) {
       const { logTaxReceipt, updateTaxReceiptStatus, getTaxReceiptSettings, logTaxReceiptAudit } = 
         await import('@/lib/taxReceipts');
       
