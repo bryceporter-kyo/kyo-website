@@ -11,28 +11,41 @@ export function middleware(request: NextRequest) {
     hostname.includes("grants.localhost") ||
     hostname.includes("grants.thekyo.ca");
 
-  if (isGrantsSubdomain) {
-    // Avoid double rewriting if already under /admin/grants or api/static files
-    if (
-      pathname.startsWith("/_next") ||
-      pathname.startsWith("/api") ||
-      pathname.includes(".")
-    ) {
-      return NextResponse.next();
-    }
+  // Skip Next.js internal files, static assets, and api
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/api") ||
+    pathname.includes(".")
+  ) {
+    return NextResponse.next();
+  }
 
-    // Rewrite root "/" on grants subdomain to "/admin/grants"
+  // 1. If accessing via main domain (thekyo.ca or localhost:3000):
+  // Block /admin/grants - it does not exist on the main domain
+  if (!isGrantsSubdomain && pathname.startsWith("/admin/grants")) {
+    return NextResponse.rewrite(new URL("/not-found", request.url));
+  }
+
+  // 2. If accessing via grants subdomain (grants.thekyo.ca or grants.localhost:3000):
+  if (isGrantsSubdomain) {
+    // grants.thekyo.ca/ -> Grants pipeline / homepage
     if (pathname === "/") {
       return NextResponse.rewrite(new URL("/admin/grants", request.url));
     }
 
-    // If accessing "/admin/setup" or "/setup" on grants subdomain, route to settings
-    if (pathname === "/admin/setup" || pathname === "/setup") {
+    // grants.thekyo.ca/admin -> Settings & Google setup
+    if (pathname === "/admin" || pathname === "/admin/" || pathname === "/admin/setup" || pathname === "/setup") {
       return NextResponse.rewrite(new URL("/admin/grants/settings", request.url));
     }
 
-    // If accessing other routes like "/funders", rewrite to "/admin/grants/funders"
-    if (!pathname.startsWith("/admin/grants") && !pathname.startsWith("/admin/login")) {
+    // Allow login page through
+    if (pathname === "/admin/login") {
+      return NextResponse.next();
+    }
+
+    // Direct routing for internal sections on grants subdomain:
+    // e.g. /funders -> /admin/grants/funders, /triage -> /admin/grants/triage
+    if (!pathname.startsWith("/admin/grants")) {
       return NextResponse.rewrite(new URL(`/admin/grants${pathname}`, request.url));
     }
   }
@@ -42,12 +55,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all paths except:
-     * 1. /api routes
-     * 2. /_next (Next.js internals)
-     * 3. Static files (e.g. /favicon.ico, sitemap.xml, images)
-     */
     "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 };

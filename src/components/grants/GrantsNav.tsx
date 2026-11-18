@@ -17,21 +17,32 @@ export function GrantsNav() {
   const pathname = usePathname();
 
   const links = [
-    { href: "/admin/grants", label: "Grants Pipeline", icon: FolderKanban, exact: true },
-    { href: "/admin/grants/funders", label: "Funders & Programs", icon: Building2 },
-    { href: "/admin/grants/triage", label: "Triage Queue", icon: Sparkles },
-    { href: "/admin/grants/reports", label: "Reports & AGM", icon: Layers },
-    { href: "/admin/grants/settings", label: "Settings & Google Setup", icon: SettingsIcon },
+    { href: "/", label: "Grants Pipeline", icon: FolderKanban, exact: true },
+    { href: "/funders", label: "Funders & Programs", icon: Building2 },
+    { href: "/triage", label: "Triage Queue", icon: Sparkles },
+    { href: "/reports", label: "Reports & AGM", icon: Layers },
+    { href: "/admin", label: "Settings & Google Setup", icon: SettingsIcon },
   ];
+
+  const isActiveLink = (linkHref: string, exact?: boolean) => {
+    if (exact) {
+      return pathname === "/" || pathname === "/admin/grants";
+    }
+    return (
+      pathname.startsWith(linkHref) ||
+      pathname.startsWith(`/admin/grants${linkHref}`) ||
+      (linkHref === "/admin" && (pathname.includes("/settings") || pathname === "/admin"))
+    );
+  };
 
   return (
     <div className="border-b bg-card/60 backdrop-blur-sm sticky top-0 z-30 mb-8">
       <div className="container mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Button asChild variant="ghost" size="sm" className="h-8 px-2 text-muted-foreground hover:text-foreground">
-            <Link href="/admin">
-              <ArrowLeft className="w-4 h-4 mr-1" /> Admin
-            </Link>
+            <a href={typeof window !== 'undefined' && window.location.hostname.includes('localhost') ? 'http://localhost:3000/internal' : 'https://thekyo.ca/internal'}>
+              <ArrowLeft className="w-4 h-4 mr-1" /> KYO Internal
+            </a>
           </Button>
           <div className="h-4 w-px bg-border" />
           <div className="flex items-center gap-2">
@@ -47,9 +58,7 @@ export function GrantsNav() {
 
         <nav className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
           {links.map((link) => {
-            const isActive = link.exact 
-              ? pathname === link.href 
-              : pathname.startsWith(link.href);
+            const isActive = isActiveLink(link.href, link.exact);
             return (
               <Button
                 key={link.href}

@@ -252,6 +252,13 @@ export default function InternalPage() {
                                     </Link>
                                 </Button>
                             )}
+                            {userRoles.includes('Grants Portal') && (
+                                <Button asChild variant="outline" size="sm" className="rounded-full shadow-sm border-primary/30 text-primary hover:bg-primary/5">
+                                    <a href={typeof window !== 'undefined' && window.location.hostname.includes('localhost') ? 'http://grants.localhost:3000' : 'https://grants.thekyo.ca'}>
+                                        <Briefcase className="w-4 h-4 mr-2" /> Grants Portal
+                                    </a>
+                                </Button>
+                            )}
                         </div>
 
                         {/* Hero Search */}

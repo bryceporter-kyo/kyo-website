@@ -4,7 +4,6 @@ import { Newspaper, Users, Image as ImageIcon, Calendar, UsersRound, Link2, Poin
 import Link from "next/link";
 
 const adminTiles = [
-    { href: "/admin/grants", label: "Grants Management", icon: Layers },
     { href: "/admin/donations", label: "Donations & Tax Receipts", icon: Receipt },
     { href: "/admin/announcements", label: "Announcements", icon: Newspaper },
     { href: "/admin/images", label: "Images", icon: ImageIcon },
