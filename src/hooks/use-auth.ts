@@ -19,6 +19,32 @@ export interface AuthState {
   error: string | null;
 }
 
+/**
+ * Exchange the Firebase ID token for a cross-domain session cookie scoped to .thekyo.ca.
+ * Fire-and-forget — the cookie is best-effort; local Firebase state is the source of truth.
+ */
+async function setSessionCookie(user: User): Promise<void> {
+  try {
+    const idToken = await user.getIdToken();
+    await fetch("/api/auth/session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken }),
+    });
+  } catch (err) {
+    console.warn("[useAuth] Failed to set session cookie:", err);
+  }
+}
+
+/** Remove the cross-domain session cookie. */
+async function clearSessionCookie(): Promise<void> {
+  try {
+    await fetch("/api/auth/session", { method: "DELETE" });
+  } catch (err) {
+    console.warn("[useAuth] Failed to clear session cookie:", err);
+  }
+}
+
 export function useAuth() {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
@@ -57,6 +83,8 @@ export function useAuth() {
         loading: false,
         error: null,
       });
+      // Persist auth across subdomains after first activation.
+      await setSessionCookie(userCredential.user);
       return { success: true, user: userCredential.user };
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Sign up failed";
@@ -78,6 +106,8 @@ export function useAuth() {
         loading: false,
         error: null,
       });
+      // Persist auth across subdomains (grants.thekyo.ca) via a root-domain session cookie.
+      await setSessionCookie(userCredential.user);
       return { success: true, user: userCredential.user };
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Sign in failed";
@@ -94,6 +124,8 @@ export function useAuth() {
     setAuthState((prev) => ({ ...prev, loading: true, error: null }));
     try {
       await firebaseSignOut(auth);
+      // Clear the cross-domain session cookie so grants.thekyo.ca also signs out.
+      await clearSessionCookie();
       setAuthState({
         user: null,
         loading: false,
