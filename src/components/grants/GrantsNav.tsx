@@ -20,6 +20,7 @@ export function GrantsNav() {
     { href: "/admin/grants", label: "Grants Pipeline", icon: FolderKanban, exact: true },
     { href: "/admin/grants/funders", label: "Funders & Programs", icon: Building2 },
     { href: "/admin/grants/triage", label: "Triage Queue", icon: Sparkles },
+    { href: "/admin/grants/reports", label: "Reports & AGM", icon: Layers },
     { href: "/admin/grants/settings", label: "Settings & Google Setup", icon: SettingsIcon },
   ];
 
