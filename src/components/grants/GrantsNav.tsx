@@ -16,16 +16,16 @@ export function GrantsNav() {
   const pathname = usePathname();
 
   const links = [
-    { href: "/admin/grants", label: "Grants Pipeline", icon: FolderKanban, exact: true },
-    { href: "/admin/grants/funders", label: "Funders & Programs", icon: Building2 },
-    { href: "/admin/grants/triage", label: "Triage Queue", icon: Sparkles },
-    { href: "/admin/grants/reports", label: "Reports & AGM", icon: Layers },
-    { href: "/admin/grants/settings", label: "Settings & Google Setup", icon: SettingsIcon },
+    { href: "/grants", label: "Grants Pipeline", icon: FolderKanban, exact: true },
+    { href: "/grants/funders", label: "Funders & Programs", icon: Building2 },
+    { href: "/grants/triage", label: "Triage Queue", icon: Sparkles },
+    { href: "/grants/reports", label: "Reports & AGM", icon: Layers },
+    { href: "/grants/admin", label: "Grants Admin & Setup", icon: SettingsIcon },
   ];
 
   const isActiveLink = (linkHref: string, exact?: boolean) => {
     if (exact) {
-      return pathname === "/admin/grants" || pathname === "/admin/grants/";
+      return pathname === "/grants" || pathname === "/grants/";
     }
     return pathname === linkHref || pathname.startsWith(linkHref + "/");
   };

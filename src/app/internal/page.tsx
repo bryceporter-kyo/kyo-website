@@ -266,7 +266,7 @@ export default function InternalPage() {
                             )}
                             {userRoles.includes('Grants Portal') && (
                                 <Button asChild variant="outline" size="sm" className="rounded-full shadow-sm border-primary/30 text-primary hover:bg-primary/5">
-                                    <Link href="/admin/grants">
+                                    <Link href="/grants">
                                         <Briefcase className="w-4 h-4 mr-2" /> Grants Portal
                                     </Link>
                                 </Button>

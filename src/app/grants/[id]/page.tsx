@@ -171,7 +171,7 @@ export default function GrantDetailPage() {
         description: `Created new application record: ${cloned.funderName}.`,
       });
 
-      router.push(`/admin/grants/${cloned.id}`);
+      router.push(`/grants/${cloned.id}`);
     } catch (err: any) {
       toast({
         title: "Clone error",
@@ -200,7 +200,7 @@ export default function GrantDetailPage() {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Button asChild variant="ghost" size="sm" className="h-7 px-2">
-              <Link href="/admin/grants">
+              <Link href="/grants">
                 <ArrowLeft className="w-3.5 h-3.5 mr-1" /> Pipeline
               </Link>
             </Button>

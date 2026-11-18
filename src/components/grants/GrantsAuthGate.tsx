@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/components/providers/AuthProvider";
 import { getUserRolesByEmail, UserRole } from "@/lib/users";
 import { Loader2, ShieldAlert } from "lucide-react";
@@ -14,29 +15,33 @@ interface GrantsAuthGateProps {
 type GateState = "loading" | "allowed" | "denied";
 
 export function GrantsAuthGate({ children }: GrantsAuthGateProps) {
-  const { user, loading } = useAuthContext();
+  const { user, loading, isAuthenticated } = useAuthContext();
+  const router = useRouter();
   const [gateState, setGateState] = useState<GateState>("loading");
 
   useEffect(() => {
     if (loading) return;
 
-    // The admin layout's ProtectedRoute already redirects unauthenticated users
-    // to /admin/login. By the time this component mounts, `user` is always set.
-    // We just need to verify the Grants Portal role.
+    if (!isAuthenticated || !user?.email) {
+      // User is not logged in, redirect to login
+      router.push("/admin/login?redirect=/grants");
+      return;
+    }
+
     async function checkRole() {
-      if (!user?.email) {
-        // Shouldn't reach here (ProtectedRoute handles it), but guard anyway.
+      try {
+        const roles: UserRole[] = await getUserRolesByEmail(user!.email!).catch(() => []);
+        setGateState(roles.includes("Grants Portal") ? "allowed" : "denied");
+      } catch (err) {
+        console.error("Failed to verify user roles:", err);
         setGateState("denied");
-        return;
       }
-      const roles: UserRole[] = await getUserRolesByEmail(user.email).catch(() => []);
-      setGateState(roles.includes("Grants Portal") ? "allowed" : "denied");
     }
 
     checkRole();
-  }, [loading, user]);
+  }, [loading, isAuthenticated, user, router]);
 
-  if (gateState === "loading") {
+  if (loading || gateState === "loading") {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -62,7 +67,7 @@ export function GrantsAuthGate({ children }: GrantsAuthGateProps) {
         </p>
         <div className="pt-4 flex justify-center gap-3">
           <Button asChild variant="outline">
-            <Link href="/admin">Return to Admin</Link>
+            <Link href="/internal">Return to KYO Internal</Link>
           </Button>
         </div>
       </div>
