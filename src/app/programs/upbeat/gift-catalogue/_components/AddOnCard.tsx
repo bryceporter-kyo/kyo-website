@@ -47,7 +47,7 @@ export default function AddOnCard({ item, onSelectAddOn }: AddOnCardProps) {
               </p>
             </div>
             <Badge className="bg-primary text-white font-bold text-sm px-3 py-1">
-              +$10.99 CAD
+              +$10.99
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground leading-relaxed">

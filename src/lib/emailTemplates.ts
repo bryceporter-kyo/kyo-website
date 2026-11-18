@@ -172,13 +172,13 @@ export const DEFAULT_THANK_YOU_SUBJECT = 'Thank You for Your Generous Donation t
 
 export const DEFAULT_THANK_YOU_MESSAGE = `Dear {donor_first_name},
 
-Thank you so much for your generous donation of **\${amount} CAD** to the Kawartha Youth Orchestra on {date}.
+Thank you so much for your generous donation of **\${amount}** to the Kawartha Youth Orchestra on {date}.
 
 Your support directly empowers young musicians in our community to access high-quality music instruction, durable instruments, and life-changing ensemble experiences.
 
 ### Contribution Details:
 - **Project:** {project_name}
-- **Amount:** \${amount} CAD
+- **Amount:** \${amount}
 - **Date:** {date}
 - **Frequency:** {frequency}
 

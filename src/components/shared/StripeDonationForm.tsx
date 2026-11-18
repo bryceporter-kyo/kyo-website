@@ -428,7 +428,7 @@ export default function StripeDonationForm({
             {/* Presets Grid */}
             <div className="space-y-3">
               <Label className="text-slate-600 font-bold uppercase tracking-wider text-xs">
-                Select {frequency === 'monthly' ? 'Monthly' : 'One-Time'} Amount (CAD)
+                Select {frequency === 'monthly' ? 'Monthly' : 'One-Time'} Amount
               </Label>
               <div className="grid grid-cols-4 gap-3">
                 {presets.map((preset, index) => (
@@ -656,7 +656,7 @@ export default function StripeDonationForm({
               <div className="flex justify-between items-center p-4 bg-slate-50 border border-slate-200 rounded-xl">
                 <div>
                   <div className="text-xs text-slate-400 uppercase tracking-widest font-semibold">Donation Total</div>
-                  <div className="text-xl font-bold text-slate-800">${amount.toFixed(2)} CAD ({frequency === 'monthly' ? 'Monthly' : 'One-time'})</div>
+                  <div className="text-xl font-bold text-slate-800">${amount.toFixed(2)} ({frequency === 'monthly' ? 'Monthly' : 'One-time'})</div>
                 </div>
                 <Button 
                   variant="ghost" 

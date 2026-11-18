@@ -279,7 +279,7 @@ export async function sendDonationThankYouEmail(opts: DonationThankYouOptions) {
         <div class="content">
           <div class="details-box">
             <div style="font-size: 12px; font-weight: 700; color: #047857; text-transform: uppercase; margin-bottom: 8px;">Donation Summary</div>
-            <div style="font-size: 20px; font-weight: 800; color: #065f46;">$${formattedAmount} CAD</div>
+            <div style="font-size: 20px; font-weight: 800; color: #065f46;">$${formattedAmount}</div>
             <div style="font-size: 13px; color: #065f46; margin-top: 4px;">${projectName || 'Kawartha Youth Orchestra Support'} • ${formattedDate}</div>
             ${hasTaxReceipt ? '<div style="margin-top: 8px; font-size: 12px; color: #047857;">📄 Official CRA Tax Receipt requested & logged</div>' : ''}
           </div>
