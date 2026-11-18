@@ -1,9 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { signInWithCustomToken } from "firebase/auth";
-import { auth } from "@/lib/firebase";
 import { useAuthContext } from "@/components/providers/AuthProvider";
 import { getUserRolesByEmail, UserRole } from "@/lib/users";
 import { Loader2, ShieldAlert } from "lucide-react";
@@ -14,59 +11,36 @@ interface GrantsAuthGateProps {
   children: React.ReactNode;
 }
 
-type GateState = "loading" | "sso-check" | "allowed" | "denied" | "unauthenticated";
+type GateState = "loading" | "allowed" | "denied";
 
 export function GrantsAuthGate({ children }: GrantsAuthGateProps) {
   const { user, loading } = useAuthContext();
-  const router = useRouter();
   const [gateState, setGateState] = useState<GateState>("loading");
 
   useEffect(() => {
     if (loading) return;
 
-    async function checkAccess() {
-      // ── 1. Already signed in locally via Firebase SDK ──────────────────────
-      if (user?.email) {
-        const roles: UserRole[] = await getUserRolesByEmail(user.email).catch(() => []);
-        setGateState(roles.includes("Grants Portal") ? "allowed" : "denied");
+    // The admin layout's ProtectedRoute already redirects unauthenticated users
+    // to /admin/login. By the time this component mounts, `user` is always set.
+    // We just need to verify the Grants Portal role.
+    async function checkRole() {
+      if (!user?.email) {
+        // Shouldn't reach here (ProtectedRoute handles it), but guard anyway.
+        setGateState("denied");
         return;
       }
-
-      // ── 2. No local session — try cross-domain SSO via __session cookie ────
-      setGateState("sso-check");
-      try {
-        const res = await fetch("/api/auth/session-status");
-        const data = await res.json();
-
-        if (data.isAuthenticated && data.customToken) {
-          // Sign in to the local Firebase SDK on this subdomain using the custom token.
-          await signInWithCustomToken(auth, data.customToken);
-          // onAuthStateChanged in AuthProvider will update `user`; re-run effect.
-          return;
-        }
-      } catch (err) {
-        console.warn("[GrantsAuthGate] SSO check failed:", err);
-      }
-
-      // ── 3. No session at all — send to login ───────────────────────────────
-      setGateState("unauthenticated");
-      router.push("/admin/login?redirect=/admin/grants");
+      const roles: UserRole[] = await getUserRolesByEmail(user.email).catch(() => []);
+      setGateState(roles.includes("Grants Portal") ? "allowed" : "denied");
     }
 
-    checkAccess();
-  }, [loading, user, router]);
+    checkRole();
+  }, [loading, user]);
 
-  // ── Render states ──────────────────────────────────────────────────────────
-
-  if (gateState === "loading" || gateState === "sso-check") {
-    const label =
-      gateState === "sso-check"
-        ? "Signing you in automatically..."
-        : "Verifying Grants Portal permissions...";
+  if (gateState === "loading") {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">{label}</p>
+        <p className="text-sm text-muted-foreground">Verifying Grants Portal permissions...</p>
       </div>
     );
   }
@@ -93,11 +67,6 @@ export function GrantsAuthGate({ children }: GrantsAuthGateProps) {
         </div>
       </div>
     );
-  }
-
-  if (gateState === "unauthenticated") {
-    // Will redirect; show nothing.
-    return null;
   }
 
   // gateState === "allowed"
