@@ -4,7 +4,7 @@ import { sendPasswordResetEmail } from 'firebase/auth';
 import data from './users.json';
 import { sendUserAddedEmail } from './mail';
 
-export type UserRole = 'Website Editor' | 'Internal Editor' | 'Internal Viewer';
+export type UserRole = 'Website Editor' | 'Internal Editor' | 'Internal Viewer' | 'Grants Portal';
 
 export type LinkedProfile = {
   type: 'staff' | 'board';

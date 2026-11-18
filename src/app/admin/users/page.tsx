@@ -46,6 +46,7 @@ const roles: { id: UserRole; label: string }[] = [
     { id: 'Website Editor', label: 'Website Editor' },
     { id: 'Internal Editor', label: 'Internal Editor' },
     { id: 'Internal Viewer', label: 'Internal Viewer' },
+    { id: 'Grants Portal', label: 'Grants Portal' },
 ];
 
 const userSchema = z.object({
