@@ -131,7 +131,7 @@ export default function InternalPage() {
                     eventsData = await fetchEventsFromFirebase();
                 }
                 
-                // Filter events for next 30 days
+                // Filter events for next 30 days, showing only concerts and special events
                 const now = new Date();
                 now.setHours(0, 0, 0, 0);
                 const thirtyDaysFromNow = addDays(now, 30);
@@ -139,7 +139,19 @@ export default function InternalPage() {
                 const upcoming = eventsData.filter(event => {
                     const eventDate = new Date(event.date); // Event dates are usually YYYY-MM-DD
                     eventDate.setHours(0, 0, 0, 0);
-                    return !isBefore(eventDate, now) && !isAfter(eventDate, thirtyDaysFromNow);
+                    const isIn30Days = !isBefore(eventDate, now) && !isAfter(eventDate, thirtyDaysFromNow);
+                    if (!isIn30Days) return false;
+
+                    // Match concerts and special events
+                    const isSpecialType = event.type === 'special';
+                    const nameLower = (event.name || '').toLowerCase();
+                    const isConcertOrSpecial = isSpecialType || 
+                        nameLower.includes('concert') || 
+                        nameLower.includes('showcase') || 
+                        nameLower.includes('performance') || 
+                        nameLower.includes('gala');
+
+                    return isConcertOrSpecial;
                 });
 
                 setInternalSections(sectionsData);
@@ -315,39 +327,48 @@ export default function InternalPage() {
                                     </CardContent>
                                 </Card>
 
-                                {/* Key Dates */}
-                                <Card className="rounded-[1.5rem] bg-white border-slate-100 shadow-sm overflow-hidden">
-                                    <CardHeader className="bg-slate-50 pb-4 border-b border-slate-100">
-                                        <CardTitle className="font-headline text-xl flex items-center text-slate-700">
-                                            <Calendar className="w-5 h-5 mr-2" /> Upcoming 30 Days
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="p-0">
-                                        {upcomingEvents.length === 0 ? (
-                                            <div className="p-6 text-slate-500 text-center text-sm">No upcoming events in the next 30 days.</div>
-                                        ) : (
-                                            <div className="divide-y divide-slate-100">
-                                                {upcomingEvents.map(event => (
-                                                    <div key={event.id} className="p-4 flex gap-4 items-start">
-                                                        <div className="text-center w-12 shrink-0">
-                                                            <div className="text-[10px] uppercase font-bold text-primary tracking-widest">{format(new Date(event.date), 'MMM')}</div>
-                                                            <div className="text-xl font-headline font-bold text-slate-900">{format(new Date(event.date), 'd')}</div>
+                                {/* Key Dates / Upcoming Concerts */}
+                                <Card className="rounded-[1.5rem] bg-white border-slate-100 shadow-sm overflow-hidden flex flex-col justify-between">
+                                    <div>
+                                        <CardHeader className="bg-slate-50 pb-4 border-b border-slate-100">
+                                            <CardTitle className="font-headline text-xl flex items-center text-slate-700">
+                                                <Calendar className="w-5 h-5 mr-2" /> Upcoming 30 Days
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="p-0">
+                                            {upcomingEvents.length === 0 ? (
+                                                <div className="p-6 text-slate-500 text-center text-sm">No upcoming concerts or special events in the next 30 days.</div>
+                                            ) : (
+                                                <div className="divide-y divide-slate-100">
+                                                    {upcomingEvents.map(event => (
+                                                        <div key={event.id} className="p-4 flex gap-4 items-start">
+                                                            <div className="text-center w-12 shrink-0">
+                                                                <div className="text-[10px] uppercase font-bold text-primary tracking-widest">{format(new Date(event.date), 'MMM')}</div>
+                                                                <div className="text-xl font-headline font-bold text-slate-900">{format(new Date(event.date), 'd')}</div>
+                                                            </div>
+                                                            <div>
+                                                                <div className="font-semibold text-slate-900 text-sm">{event.name}</div>
+                                                                {(event.time || event.location) && (
+                                                                    <div className="text-xs text-slate-500 mt-1">
+                                                                        {event.time && <span>{event.time}</span>}
+                                                                        {event.time && event.location && <span className="mx-1">•</span>}
+                                                                        {event.location && <span>{event.location}</span>}
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </div>
-                                                        <div>
-                                                            <div className="font-semibold text-slate-900 text-sm">{event.name}</div>
-                                                            {(event.time || event.location) && (
-                                                                <div className="text-xs text-slate-500 mt-1">
-                                                                    {event.time && <span>{event.time}</span>}
-                                                                    {event.time && event.location && <span className="mx-1">•</span>}
-                                                                    {event.location && <span>{event.location}</span>}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </CardContent>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </CardContent>
+                                    </div>
+                                    <div className="p-4 bg-slate-50/70 border-t border-slate-100">
+                                        <Button asChild variant="outline" size="sm" className="w-full rounded-full bg-white hover:bg-slate-50 border-slate-200 text-slate-700">
+                                            <Link href="/calendar">
+                                                <Calendar className="w-3.5 h-3.5 mr-2 text-primary" /> View Calendar
+                                            </Link>
+                                        </Button>
+                                    </div>
                                 </Card>
                             </div>
                         )}

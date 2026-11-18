@@ -21,6 +21,11 @@ export function middleware(request: NextRequest) {
   }
 
   // 1. If accessing via main domain (thekyo.ca or localhost:3000):
+  // Shortcut /calendar -> /programs/calendar
+  if (!isGrantsSubdomain && (pathname === "/calendar" || pathname === "/calendar/")) {
+    return NextResponse.rewrite(new URL("/programs/calendar", request.url));
+  }
+
   // Block /admin/grants - it does not exist on the main domain
   if (!isGrantsSubdomain && pathname.startsWith("/admin/grants")) {
     return NextResponse.rewrite(new URL("/not-found", request.url));
