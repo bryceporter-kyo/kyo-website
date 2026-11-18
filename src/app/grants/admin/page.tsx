@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { 
   Save, RefreshCw, Copy, Check, Sparkles, Activity, Play, 
   Settings as SettingsIcon, FileText, FolderOpen, Calendar, Shield,
-  Layers, Plus, Trash2, GripVertical
+  Layers, Plus, Trash2, GripVertical, FileCode, CheckCircle2, Info
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -88,14 +88,23 @@ export default function GrantsSettingsPage() {
     setSettings((prev) => (prev ? { ...prev, [key]: value } : prev));
   };
 
-  const dynamicAppsScriptCode = generateGrantsAppsScriptCode({
-    grantApplicationsFolderId: settings?.grantApplicationsFolderId,
-    letterheadTemplateDocId: settings?.letterheadTemplateDocId,
-    qaTemplateDocId: settings?.qaTemplateDocId,
-    grantsCalendarId: settings?.grantsCalendarId,
-    secret: settings?.appsScriptSecret,
-    websiteUrl: origin,
-  });
+  const dynamicAppsScriptCode = useMemo(() => {
+    return generateGrantsAppsScriptCode({
+      grantApplicationsFolderId: settings?.grantApplicationsFolderId || '',
+      letterheadTemplateDocId: settings?.letterheadTemplateDocId || '',
+      qaTemplateDocId: settings?.qaTemplateDocId || '',
+      grantsCalendarId: settings?.grantsCalendarId || '',
+      secret: settings?.appsScriptSecret || '',
+      websiteUrl: origin || 'https://thekyo.ca',
+    });
+  }, [
+    settings?.grantApplicationsFolderId,
+    settings?.letterheadTemplateDocId,
+    settings?.qaTemplateDocId,
+    settings?.grantsCalendarId,
+    settings?.appsScriptSecret,
+    origin,
+  ]);
 
   const copyScriptToClipboard = () => {
     navigator.clipboard.writeText(dynamicAppsScriptCode);
@@ -278,6 +287,29 @@ export default function GrantsSettingsPage() {
                   onChange={(e) => handleChange("appsScriptSecret", e.target.value)}
                   className="font-mono text-xs bg-card max-w-md"
                 />
+              </div>
+
+              {/* Step 2: Auto-Configured Code Preview in Google Setup tab */}
+              <div className="p-4 border rounded-xl bg-card space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                      <FileCode className="w-4 h-4 text-primary" />
+                      Auto-Configured Script Preview
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      IDs and secrets typed above are automatically embedded into your script in real time.
+                    </p>
+                  </div>
+                  <Button onClick={copyScriptToClipboard} size="sm" variant="outline" className="gap-2 shrink-0">
+                    {copiedCode ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                    <span>{copiedCode ? "Copied!" : "Copy Generated Code"}</span>
+                  </Button>
+                </div>
+
+                <div className="bg-slate-900 text-slate-100 rounded-lg p-3 font-mono text-xs overflow-x-auto max-h-44 border border-slate-800">
+                  <pre>{dynamicAppsScriptCode.slice(0, 1500) + "\n// ... [Full code with handlers visible in 'Script Code' tab] ..."}</pre>
+                </div>
               </div>
 
               {/* Web App URL & Handshake */}
