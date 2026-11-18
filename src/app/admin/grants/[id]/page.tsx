@@ -20,10 +20,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { 
-  getGrantById, saveGrant, getGrantsSettings, fetchGrantAuditLogs 
+  saveGrant, getGrantsSettings, fetchGrantAuditLogs 
 } from "@/lib/grants/grants-service";
 import { 
-  transitionGrantStage, pullAnswersFromGoogleDoc, cloneGrantForNewCycle, callGrantsAppsScript 
+  getGrantById, transitionGrantStage, pullAnswersFromGoogleDoc, cloneGrantForNewCycle, callGrantsAppsScript 
 } from "@/lib/grants/grant-actions";
 import { Grant, GrantsSettings, GrantAuditLogEntry } from "@/lib/grants/types";
 import { useAuthContext } from "@/components/providers/AuthProvider";

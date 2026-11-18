@@ -6,6 +6,7 @@ import {
 import { 
   GrantsSettings, Funder, Grant, GrantAuditLogEntry 
 } from './types';
+export { getGrantById } from './grant-actions';
 import { 
   DEFAULT_GRANTS_SETTINGS, computeSortName, sanitizeSlug, 
   normalizeFunderName, extractDomain, levenshteinDistance 
