@@ -38,12 +38,40 @@ export default function GrantsReportsPage() {
   // Program breakdowns
   const programTotals: Record<string, number> = {};
   wonGrants.forEach(g => {
-    const progs = g.kyoPrograms || ["Upbeat!"];
+    const progs = g.kyoPrograms && g.kyoPrograms.length > 0 ? g.kyoPrograms : ["General"];
     const perProg = (g.amountAwarded || 0) / progs.length;
     progs.forEach(p => {
       programTotals[p] = (programTotals[p] || 0) + perProg;
     });
   });
+
+  // Dynamic program allocation narrative based on actual data
+  const programRankings = Object.entries(programTotals)
+    .filter(([_, amount]) => amount > 0)
+    .sort((a, b) => b[1] - a[1]);
+
+  const programAllocationSummary = (() => {
+    if (totalAwarded === 0 || programRankings.length === 0) {
+      if (totalApplied === 0) {
+        return "No grant applications or awards have been recorded for this period yet.";
+      }
+      return `${pendingGrants.length} application(s) currently pending review across designated KYO programs.`;
+    }
+
+    const topProgram = programRankings[0];
+    const topPercent = Math.round((topProgram[1] / totalAwarded) * 100);
+
+    if (programRankings.length === 1) {
+      return `All awarded funding ($${Math.round(topProgram[1]).toLocaleString()}) is currently allocated to ${topProgram[0]}.`;
+    }
+
+    const secondaryPrograms = programRankings
+      .slice(1)
+      .map(([name, amt]) => `${name} ($${Math.round(amt).toLocaleString()})`)
+      .join(", ");
+
+    return `${topProgram[0]} accounts for the largest share of secured funding ($${Math.round(topProgram[1]).toLocaleString()}, ${topPercent}%), followed by ${secondaryPrograms}.`;
+  })();
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -158,10 +186,10 @@ export default function GrantsReportsPage() {
         <CardContent className="space-y-4">
           <div className="p-4 bg-muted/40 border rounded-xl text-xs space-y-2 leading-relaxed text-foreground">
             <p>
-              In the current {yearType} period, Kawartha Youth Orchestra submitted <strong>{totalApplied} grant applications</strong>, successfully securing <strong>${totalAwarded.toLocaleString()}</strong> in funding across local, provincial, and national partners.
+              In the current {yearType} period, Kawartha Youth Orchestra submitted <strong>{totalApplied} grant application{totalApplied === 1 ? "" : "s"}</strong>, successfully securing <strong>${totalAwarded.toLocaleString()}</strong> in funding across local, provincial, and national partners.
             </p>
             <p>
-              Upbeat! Peterborough nutritional and instrument support accounts for the majority of requested program allocations, followed by Senior Orchestras and Conservatory Mentorship scholarships.
+              {programAllocationSummary}
             </p>
           </div>
         </CardContent>
