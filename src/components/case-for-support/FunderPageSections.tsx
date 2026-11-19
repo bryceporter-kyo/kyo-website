@@ -526,8 +526,11 @@ export function BoardGovernanceSection({ board }: { board?: any[] | null }) {
                           Bio ↗
                         </a>
                       ) : (
-                        <a href="/team" className="text-xs text-slate-400 hover:text-primary transition-colors">
-                          View
+                        <a 
+                          href={`/team?member=${encodeURIComponent(member.id || member.name)}`}
+                          className="text-xs text-primary hover:underline font-medium transition-colors"
+                        >
+                          View Profile →
                         </a>
                       )}
                     </td>

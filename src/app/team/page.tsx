@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import InstructorCard from "@/components/shared/InstructorCard";
 import PageHeader from "@/components/shared/PageHeader";
 import { useImages } from "@/components/providers/ImageProvider";
@@ -11,9 +12,13 @@ import { Users, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-export default function TeamPage() {
+// Inner component that uses useSearchParams (must be inside Suspense)
+function TeamPageContent() {
     const { getImage } = useImages();
     const headerImage = getImage('page-header-support');
+    const searchParams = useSearchParams();
+    const targetMemberId = searchParams.get('member');
+
     const [staff, setStaff] = useState<StaffMember[]>([]);
     const [board, setBoard] = useState<BoardMember[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -43,9 +48,7 @@ export default function TeamPage() {
         hidden: { opacity: 0 },
         visible: {
             opacity: 1,
-            transition: {
-                staggerChildren: 0.1
-            }
+            transition: { staggerChildren: 0.1 }
         }
     } as const;
 
@@ -57,6 +60,13 @@ export default function TeamPage() {
             transition: { type: "spring", stiffness: 100, damping: 15 }
         }
     } as const;
+
+    const resolveImage = (member: StaffMember | BoardMember) => {
+        const img = member.image;
+        if (!img) return undefined;
+        if (img.startsWith('http') || img.startsWith('/') || img.startsWith('data:')) return img;
+        return getImage(img) || undefined;
+    };
 
     return (
         <div className="relative overflow-hidden bg-background">
@@ -80,7 +90,7 @@ export default function TeamPage() {
                                 <Users className="w-6 h-6" />
                             </div>
                             <div>
-                                <h2 className="text-3xl font-headline font-bold">Teaching & Program Staff</h2>
+                                <h2 className="text-3xl font-headline font-bold">Teaching &amp; Program Staff</h2>
                                 <p className="text-muted-foreground text-[10px] uppercase tracking-[0.3em] font-bold mt-1 opacity-70">The Heart of our Education</p>
                             </div>
                         </div>
@@ -105,16 +115,19 @@ export default function TeamPage() {
                                             name={instructor.name}
                                             title={instructor.title}
                                             bio={instructor.bio ?? ''}
-                                            image={instructor.image?.startsWith('http') || instructor.image?.startsWith('/') || instructor.image?.startsWith('data:') ? instructor.image : getImage(instructor.image || '')}
+                                            image={resolveImage(instructor)}
                                             links={instructor.links}
                                             isOnLeave={instructor.isOnLeave}
                                             leaveNote={instructor.leaveNote}
+                                            memberId={instructor.id}
+                                            initialOpen={!isLoading && targetMemberId === instructor.id}
                                         />
                                     </motion.div>
                                 ))}
                             </motion.div>
                         )}
                     </div>
+
                     {/* Board Section */}
                     <div>
                         <div className="flex items-center gap-4 mb-10 border-b border-primary/10 pb-4">
@@ -123,7 +136,7 @@ export default function TeamPage() {
                             </div>
                             <div>
                                 <h2 className="text-3xl font-headline font-bold">Board of Directors</h2>
-                                <p className="text-muted-foreground text-[10px] uppercase tracking-[0.3em] font-bold mt-1 opacity-70">Strategic Vision & Governance</p>
+                                <p className="text-muted-foreground text-[10px] uppercase tracking-[0.3em] font-bold mt-1 opacity-70">Strategic Vision &amp; Governance</p>
                             </div>
                         </div>
 
@@ -147,10 +160,12 @@ export default function TeamPage() {
                                             name={member.name}
                                             title={member.title}
                                             bio={member.bio ?? ''}
-                                            image={member.image?.startsWith('http') || member.image?.startsWith('/') || member.image?.startsWith('data:') ? member.image : getImage(member.image || '')}
+                                            image={resolveImage(member)}
                                             links={member.links}
                                             isOnLeave={member.isOnLeave}
                                             leaveNote={member.leaveNote}
+                                            memberId={member.id}
+                                            initialOpen={!isLoading && targetMemberId === member.id}
                                         />
                                     </motion.div>
                                 ))}
@@ -181,5 +196,21 @@ export default function TeamPage() {
                 </motion.div>
             </section>
         </div>
+    );
+}
+
+export default function TeamPage() {
+    return (
+        <Suspense fallback={
+            <div className="container mx-auto py-20 px-4">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                        <Skeleton key={i} className="h-[450px] w-full rounded-2xl" />
+                    ))}
+                </div>
+            </div>
+        }>
+            <TeamPageContent />
+        </Suspense>
     );
 }

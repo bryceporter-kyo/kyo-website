@@ -258,6 +258,16 @@ export default function TeamAdminPage() {
             setEditingMember(null);
             setIsDialogOpen(false);
             form.reset();
+
+            // Revalidate case-for-support and team pages so board order changes appear immediately
+            fetch('/api/revalidate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    secret: 'kyo-revalidate-secret-token-2026',
+                    paths: ['/support-us/case-for-support', '/team'],
+                }),
+            }).catch(() => {});
         } catch (error: any) {
             console.error('Error saving member:', error);
             

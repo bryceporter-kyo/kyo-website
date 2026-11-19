@@ -125,7 +125,14 @@ export async function fetchBoardMembersServer(): Promise<any[]> {
     const data = await res.json();
     if (!data.documents || data.documents.length === 0) return [];
 
-    return data.documents.map(decodeFirestoreDocument);
+    const members = data.documents.map(decodeFirestoreDocument);
+    // Sort by `order` field (ascending), fallback to name alphabetically
+    return members.sort((a: any, b: any) => {
+      const orderA = (a.order !== undefined && a.order !== null) ? Number(a.order) : 999999;
+      const orderB = (b.order !== undefined && b.order !== null) ? Number(b.order) : 999999;
+      if (orderA !== orderB) return orderA - orderB;
+      return (a.name || '').localeCompare(b.name || '');
+    });
   } catch (error) {
     console.error('[CaseForSupportServer] Error fetching board members:', error);
     return [];
