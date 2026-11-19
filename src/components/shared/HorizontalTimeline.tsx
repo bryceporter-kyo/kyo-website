@@ -15,10 +15,16 @@ interface Milestone {
 
 const timelineData: Milestone[] = [
   {
-    year: "2007-2012",
+    year: "2002-2006",
     title: "The Founding Years",
     content: "KYO was established by Karen Lauder, Ben Bell, and Steven Brown, with Michael Newnham of the Peterborough Symphony Orchestra as the first conductor. This first iteration of the orchestra grew to a tight knit group of 30 players but further growth was slow as local school music programs were reduced.",
     highlight: "Initial orchestra of 30 youth players established with Peterborough Symphony Orchestra leadership."
+  },
+  {
+    year: "2006-2012",
+    title: "Charitable Status & Regional Expansion",
+    content: "KYO officially registered as a charity with the Canada Revenue Agency (CRA), expanding its mandate to support youth music education across Peterborough and the entire Kawarthas. This pivotal era marked the introduction of the first KYO scholarships and bursary funds, ensuring that financial barriers would never prevent a child from playing.",
+    highlight: "Registered charitable status with the CRA and the launch of the first KYO scholarships and regional access initiatives."
   },
   {
     year: "2013-2016",
@@ -105,10 +111,6 @@ export default function HorizontalTimeline() {
                 
                 {/* Left Column: Year Badge & Milestone Tag */}
                 <div className="lg:col-span-4 flex flex-col justify-center border-b lg:border-b-0 lg:border-r border-slate-100 pb-6 lg:pb-0 lg:pr-8">
-                  <div className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest w-fit mb-3">
-                    Era {activeIndex + 1} of {timelineData.length}
-                  </div>
-                  
                   <div className="font-headline font-bold text-4xl md:text-5xl text-primary leading-tight tracking-tight">
                     {yearParts[0]}
                     {yearParts[1] && (
