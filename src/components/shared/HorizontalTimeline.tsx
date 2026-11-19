@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -54,6 +54,16 @@ const timelineData: Milestone[] = [
 
 export default function HorizontalTimeline() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  // Auto-rotate timeline every 5 seconds, paused when hovered or interacting
+  useEffect(() => {
+    if (isPaused) return;
+    const timer = setInterval(() => {
+      setActiveIndex((prev) => (prev < timelineData.length - 1 ? prev + 1 : 0));
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [isPaused]);
 
   const handlePrev = () => {
     setActiveIndex((prev) => (prev > 0 ? prev - 1 : timelineData.length - 1));
@@ -67,7 +77,11 @@ export default function HorizontalTimeline() {
   const yearParts = activeEvent.year.split("-");
 
   return (
-    <div className="w-full py-10 md:py-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+    <div
+      className="w-full py-10 md:py-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
       {/* Interactive Era Selector Pills */}
       <div className="flex flex-wrap md:flex-nowrap justify-center items-center gap-2 md:gap-3 mb-8 md:mb-10">
         {timelineData.map((event, idx) => {
@@ -109,19 +123,19 @@ export default function HorizontalTimeline() {
             <Card className="border border-slate-100 bg-white shadow-xl rounded-[2.5rem] p-8 md:p-12 transition-all">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
                 
-                {/* Left Column: Year Badge & Milestone Tag */}
-                <div className="lg:col-span-4 flex flex-col justify-center border-b lg:border-b-0 lg:border-r border-slate-100 pb-6 lg:pb-0 lg:pr-8">
-                  <div className="font-headline font-bold text-4xl md:text-5xl text-primary leading-tight tracking-tight">
+                {/* Left Column: Year Badge & Milestone Tag (Center justified & larger) */}
+                <div className="lg:col-span-4 flex flex-col justify-center items-center text-center border-b lg:border-b-0 lg:border-r border-slate-100 pb-6 lg:pb-0 lg:pr-8">
+                  <div className="font-headline font-bold text-5xl md:text-6xl lg:text-7xl text-primary leading-tight tracking-tight text-center">
                     {yearParts[0]}
                     {yearParts[1] && (
-                      <span className="text-2xl md:text-3xl font-headline font-semibold text-slate-400 block mt-0.5">
+                      <span className="text-2xl md:text-3xl lg:text-4xl font-headline font-semibold text-slate-400 block mt-1 text-center">
                         to {yearParts[1]}
                       </span>
                     )}
                   </div>
 
                   {activeEvent.highlight && (
-                    <div className="mt-5 p-4 rounded-2xl bg-slate-50 border border-slate-100/80 text-xs md:text-sm text-slate-600 leading-relaxed">
+                    <div className="mt-6 p-4 rounded-2xl bg-slate-50 border border-slate-100/80 text-xs md:text-sm text-slate-600 leading-relaxed text-center w-full">
                       <span className="font-bold text-primary block mb-1 uppercase tracking-wider text-[10px]">
                         Milestone Impact
                       </span>

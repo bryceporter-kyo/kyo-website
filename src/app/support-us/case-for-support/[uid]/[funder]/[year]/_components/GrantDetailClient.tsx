@@ -287,11 +287,10 @@ export default function GrantDetailClient({ grant, board, documents }: GrantDeta
                     initial: { opacity: 0, y: 20 },
                     whileInView: { opacity: 1, y: 0, transition: { duration: 0.5 } }
                   }}
-                  whileHover={{ y: -8, scale: 1.03, transition: { duration: 0.2 } }}
-                  className="cursor-pointer"
+                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
                 >
                   <Card
-                    className="rounded-[2.2rem] border border-white/20 bg-white/60 backdrop-blur-md p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-lg hover:border-primary/20 transition-all duration-300 flex flex-col justify-center items-center text-center relative overflow-hidden group h-full"
+                    className="rounded-[2.2rem] border border-white/20 bg-white/60 backdrop-blur-md p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-lg hover:border-primary/20 transition-all duration-300 flex flex-col justify-center items-center text-center relative overflow-hidden group h-full cursor-default"
                   >
                     <div className="p-3 rounded-full bg-primary/5 text-primary mb-3 transition-transform duration-300 group-hover:scale-110">
                       <stat.icon className="w-5 h-5" />

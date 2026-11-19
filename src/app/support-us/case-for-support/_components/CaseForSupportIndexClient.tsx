@@ -203,11 +203,10 @@ export default function CaseForSupportIndexClient({ board, documents }: CaseForS
                   initial: { opacity: 0, y: 20 },
                   whileInView: { opacity: 1, y: 0, transition: { duration: 0.5 } }
                 }}
-                whileHover={{ y: -8, scale: 1.03, transition: { duration: 0.2 } }}
-                className="cursor-pointer"
+                whileHover={{ y: -4, transition: { duration: 0.2 } }}
               >
                 <Card
-                  className="rounded-[2.2rem] border border-white/20 bg-white/60 backdrop-blur-md p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-lg hover:border-primary/20 transition-all duration-300 flex flex-col justify-center items-center text-center relative overflow-hidden group h-full"
+                  className="rounded-[2.2rem] border border-white/20 bg-white/60 backdrop-blur-md p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-lg hover:border-primary/20 transition-all duration-300 flex flex-col justify-center items-center text-center relative overflow-hidden group h-full cursor-default"
                 >
                   <div className="p-3 rounded-full bg-primary/5 text-primary mb-3 transition-transform duration-300 group-hover:scale-110">
                     <stat.icon className="w-5 h-5" />
@@ -416,7 +415,7 @@ export default function CaseForSupportIndexClient({ board, documents }: CaseForS
       </section>
 
       {/* 5. Program Navigation tabs */}
-      <div className="sticky top-0 z-30 bg-white/70 backdrop-blur-xl border-b border-primary/5 shadow-sm">
+      <div className="sticky top-16 md:top-20 xl:top-24 z-30 bg-white/80 backdrop-blur-xl border-b border-primary/5 shadow-xs">
         <div className="container mx-auto max-w-4xl px-4 py-4 flex justify-center gap-6 md:gap-10 text-xs uppercase tracking-wider font-bold">
           <a href="#orchestras" className="text-slate-500 hover:text-primary transition-colors py-1 flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full bg-primary/20" /> The Orchestras
@@ -433,7 +432,7 @@ export default function CaseForSupportIndexClient({ board, documents }: CaseForS
       {/* 6. Programs */}
       <section className="py-24 px-4 space-y-24">
         {/* Orchestras */}
-        <div id="orchestras" className="container mx-auto max-w-4xl">
+        <div id="orchestras" className="container mx-auto max-w-4xl scroll-mt-32 md:scroll-mt-40">
           <ProgramSection
             title="The Orchestras Program"
             summary="A structured, progressive suite of orchestras, group lessons, and creative courses guiding youth from their first note to professional level performance."
@@ -459,7 +458,7 @@ export default function CaseForSupportIndexClient({ board, documents }: CaseForS
         </div>
 
         {/* UpBeat! */}
-        <div id="upbeat" className="container mx-auto max-w-4xl">
+        <div id="upbeat" className="container mx-auto max-w-4xl scroll-mt-32 md:scroll-mt-40">
           <ProgramSection
             title="UpBeat!"
             summary="A fully subsidized after school music and social development program for children ages 8 to 14 who face economic and systemic barriers to arts participation, rooted in the El Sistema model."
@@ -485,7 +484,7 @@ export default function CaseForSupportIndexClient({ board, documents }: CaseForS
         </div>
 
         {/* Lessons Program */}
-        <div id="lessons" className="container mx-auto max-w-4xl">
+        <div id="lessons" className="container mx-auto max-w-4xl scroll-mt-32 md:scroll-mt-40">
           <ProgramSection
             title="The Lessons Program"
             summary="Weekly instrumental instruction delivered by conservatory trained teachers, building the technical foundation that feeds directly into KYO's ensemble programs."
