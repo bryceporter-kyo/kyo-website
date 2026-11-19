@@ -25,13 +25,13 @@ export default function ValuesOrbiter({ values }: ValuesOrbiterProps) {
         const handleResize = () => {
             const width = window.innerWidth;
             if (width < 768) {
-                setDimensions({ radiusX: 150, radiusY: 150, isMobile: true });
+                setDimensions({ radiusX: 160, radiusY: 170, isMobile: true });
             } else if (width < 1024) {
-                setDimensions({ radiusX: 340, radiusY: 190, isMobile: false });
+                setDimensions({ radiusX: 380, radiusY: 200, isMobile: false });
             } else if (width < 1280) {
-                setDimensions({ radiusX: 460, radiusY: 230, isMobile: false });
+                setDimensions({ radiusX: 480, radiusY: 220, isMobile: false });
             } else {
-                setDimensions({ radiusX: 540, radiusY: 260, isMobile: false });
+                setDimensions({ radiusX: 560, radiusY: 240, isMobile: false });
             }
         };
 
@@ -52,33 +52,33 @@ export default function ValuesOrbiter({ values }: ValuesOrbiterProps) {
     const ActiveIcon = values[activeIndex].icon;
 
     return (
-        <div className="relative w-full max-w-7xl mx-auto min-h-[520px] md:min-h-[640px] flex items-center justify-center py-6 md:py-10">
+        <div className="relative w-full max-w-7xl mx-auto min-h-[480px] md:min-h-[580px] flex items-center justify-center py-6 md:py-10">
             <div className="relative w-full h-full flex items-center justify-center">
                 
-                {/* Center Stage Circle */}
+                {/* Center Stage Card — Horizontally Oblong Rounded Rectangle */}
                 <motion.div 
-                    className="relative z-20 w-64 h-64 md:w-96 md:h-96 rounded-full bg-white shadow-2xl border border-primary/10 flex flex-col items-center justify-center p-6 md:p-12 text-center"
+                    className="relative z-20 w-[90vw] max-w-[340px] md:max-w-[560px] lg:max-w-[620px] rounded-[2.5rem] md:rounded-[3rem] bg-white shadow-2xl border border-primary/10 flex flex-col items-center justify-center px-6 py-8 md:px-12 md:py-10 text-center"
                 >
-                    <div className="absolute inset-0 bg-white rounded-full" />
-                    <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-primary/5 rounded-full" />
+                    <div className="absolute inset-0 bg-white rounded-[2.5rem] md:rounded-[3rem]" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-primary/5 rounded-[2.5rem] md:rounded-[3rem]" />
                     
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeIndex}
-                            initial={{ opacity: 0, y: 15, scale: 0.9 }}
+                            initial={{ opacity: 0, y: 15, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: -15, scale: 0.9 }}
-                            transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-                            className="relative z-10 flex flex-col items-center justify-center"
+                            exit={{ opacity: 0, y: -15, scale: 0.95 }}
+                            transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
+                            className="relative z-10 flex flex-col items-center justify-center w-full"
                         >
                             {/* Animated Value Icon in the Center */}
-                            <div className="p-3.5 md:p-4 bg-primary/10 rounded-full text-primary mb-3 md:mb-4">
-                                <ActiveIcon className="w-8 h-8 md:w-10 md:h-10 animate-pulse" />
+                            <div className="p-3 md:p-3.5 bg-primary/10 rounded-2xl text-primary mb-3">
+                                <ActiveIcon className="w-7 h-7 md:w-9 md:h-9 animate-pulse" />
                             </div>
                             <h3 className="text-2xl md:text-4xl font-headline font-bold text-primary mb-2 md:mb-3">
                                 {values[activeIndex].title}
                             </h3>
-                            <p className="text-xs md:text-base text-muted-foreground leading-relaxed max-w-[220px] md:max-w-[300px] mx-auto">
+                            <p className="text-xs md:text-base text-muted-foreground leading-relaxed max-w-[280px] md:max-w-[480px] mx-auto font-normal">
                                 {values[activeIndex].description}
                             </p>
                         </motion.div>
@@ -87,9 +87,9 @@ export default function ValuesOrbiter({ values }: ValuesOrbiterProps) {
                     {/* Subtle pulse border matching current category color */}
                     <motion.div 
                         key={`pulse-${activeIndex}`}
-                        animate={{ scale: [1, 1.04, 1], opacity: [0.15, 0.05, 0.15] }}
+                        animate={{ scale: [1, 1.025, 1], opacity: [0.2, 0.05, 0.2] }}
                         transition={{ duration: 3, repeat: Infinity }}
-                        className={`absolute inset-0 rounded-full border-2 ${values[activeIndex].color.replace('bg-', 'border-')} opacity-20`}
+                        className={`absolute inset-0 rounded-[2.5rem] md:rounded-[3rem] border-2 ${values[activeIndex].color.replace('bg-', 'border-')} opacity-20 pointer-events-none`}
                     />
                 </motion.div>
 
