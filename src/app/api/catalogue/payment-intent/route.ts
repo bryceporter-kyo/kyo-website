@@ -114,6 +114,7 @@ export async function POST(request: NextRequest) {
       is_tax_receipt_eligible: isTaxReceiptEligible ? 'True' : 'False',
       frequency: 'one-time',
       project: `Upbeat! Gift Catalogue: ${item.name}`,
+      donation_date: new Date().toLocaleDateString('en-CA'),
     };
 
     if (address && address.trim()) {

@@ -235,6 +235,7 @@ export default function DonationsAdminPage() {
     if (status === 'emailed') return <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100"><CheckCircle2 className="w-3 h-3 mr-1" />Emailed</Badge>;
     if (status === 'failed') return <Badge className="bg-red-100 text-red-800 hover:bg-red-100"><XCircle className="w-3 h-3 mr-1" />Failed</Badge>;
     if (status === 'requires-verification') return <Badge className="bg-amber-100 text-amber-900 hover:bg-amber-100"><AlertCircle className="w-3 h-3 mr-1" />Requires Verification (Monthly)</Badge>;
+    if (status === 'no-receipt') return <Badge className="bg-slate-100 text-slate-600 hover:bg-slate-100"><Heart className="w-3 h-3 mr-1" />Donated (No Receipt)</Badge>;
     return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
   };
 
@@ -278,7 +279,7 @@ export default function DonationsAdminPage() {
             5. Audit Log (LAST)
         */}
         <TabsList className="mb-6 grid grid-cols-2 sm:grid-cols-5 max-w-3xl">
-          <TabsTrigger value="receipts" className="font-medium">Receipt Log</TabsTrigger>
+          <TabsTrigger value="receipts" className="font-medium">Donation Log</TabsTrigger>
           <TabsTrigger value="setup" className="font-medium">Setup Guide</TabsTrigger>
           <TabsTrigger value="email" className="font-medium">Email & Legal</TabsTrigger>
           <TabsTrigger value="raw-code" className="font-medium">Script Code</TabsTrigger>
@@ -292,8 +293,8 @@ export default function DonationsAdminPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-4">
               <div>
-                <CardTitle>Receipt Log</CardTitle>
-                <CardDescription>Live audit record of all tax receipts processed by the website and Google Docs.</CardDescription>
+                <CardTitle>Donation Log</CardTitle>
+                <CardDescription>All donations received — including those with and without tax receipts.</CardDescription>
               </div>
               <Button variant="outline" size="sm" onClick={loadData} className="gap-1 text-xs">
                 <RefreshCw className="w-3 h-3" /> Refresh
@@ -303,18 +304,18 @@ export default function DonationsAdminPage() {
               {isLoadingReceipts ? (
                 <div className="text-center py-8 text-muted-foreground">Loading receipts...</div>
               ) : receipts.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">No receipts generated yet. Receipts will appear here automatically when donations complete.</div>
+                <div className="text-center py-8 text-muted-foreground">No donations yet. All donations will appear here automatically when payments complete.</div>
               ) : (
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead>Donor</TableHead>
-                        <TableHead>Phone / Address</TableHead>
+                        <TableHead>Project / Gift</TableHead>
                         <TableHead>Donation</TableHead>
                         <TableHead>Date</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Receipt Doc / Sheet</TableHead>
+                        <TableHead>Receipt Doc</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -325,10 +326,15 @@ export default function DonationsAdminPage() {
                             <TableCell>
                               <div className="font-medium text-slate-900">{r.donorName}</div>
                               <div className="text-xs text-muted-foreground">{r.donorEmail}</div>
+                              {(r.donorPhone || r.donorAddress) && (
+                                <div className="text-[11px] text-slate-400 mt-0.5 truncate max-w-[180px]">
+                                  {r.donorPhone}{r.donorPhone && r.donorAddress ? ' · ' : ''}{r.donorAddress}
+                                </div>
+                              )}
                             </TableCell>
-                            <TableCell className="text-xs text-slate-600 max-w-[200px] truncate">
-                              <div>{r.donorPhone || 'No phone'}</div>
-                              <div className="truncate text-muted-foreground" title={r.donorAddress}>{r.donorAddress || 'No address'}</div>
+                            <TableCell className="text-xs text-slate-600 max-w-[180px]">
+                              <div className="truncate" title={(r as any).projectName || ''}>{(r as any).projectName || '—'}</div>
+                              <div className="text-[11px] text-muted-foreground capitalize">{r.frequency}</div>
                             </TableCell>
                             <TableCell>
                               <div className="font-semibold">${r.amount?.toFixed(2)} CAD</div>
@@ -351,6 +357,8 @@ export default function DonationsAdminPage() {
                                 <span className="text-[11px] text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200">
                                   Held for 12-mo verification
                                 </span>
+                              ) : r.status === 'no-receipt' ? (
+                                <span className="text-[11px] text-slate-400">No receipt requested</span>
                               ) : (
                                 <span className="text-xs text-muted-foreground">{r.errorMessage?.slice(0, 45) || '—'}</span>
                               )}

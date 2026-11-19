@@ -49,9 +49,11 @@ export interface TaxReceiptRecord {
   assumedAnnualAmount?: number; // 12-month value for monthly donations
   frequency: string;
   donationDate: string;
+  wantsTaxReceipt?: boolean; // true = donor requested CRA receipt; false = no receipt needed
+  projectName?: string; // gift name or project (e.g. "Upbeat! Gift Catalogue: Instrument Outfit")
   receiptId?: string;
   driveUrl?: string;
-  status: 'pending' | 'emailed' | 'failed' | 'requires-verification';
+  status: 'pending' | 'emailed' | 'failed' | 'requires-verification' | 'no-receipt';
   errorMessage?: string;
   createdAt?: Timestamp;
 }
@@ -122,7 +124,7 @@ export async function logTaxReceipt(record: TaxReceiptRecord): Promise<string> {
 
 export async function updateTaxReceiptStatus(
   id: string, 
-  status: 'emailed' | 'failed', 
+  status: 'emailed' | 'failed' | 'no-receipt', 
   extra?: { receiptId?: string; driveUrl?: string; errorMessage?: string }
 ): Promise<void> {
   await updateDoc(doc(db, RECEIPTS_COLLECTION, id), { status, ...extra });

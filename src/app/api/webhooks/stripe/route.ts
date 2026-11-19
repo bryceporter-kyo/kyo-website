@@ -113,9 +113,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Handle tax receipt generation
+    // Log ALL donations to Firestore (not just tax-receipt ones)
     const isTaxReceiptWanted = metadata.wants_tax_receipt === 'true' || metadata.tax_receipt_requested?.toLowerCase() === 'true';
-    if (isTaxReceiptWanted) {
+    {
       const { logTaxReceipt, updateTaxReceiptStatus, getTaxReceiptSettings, logTaxReceiptAudit } = 
         await import('@/lib/taxReceipts');
       
@@ -131,24 +131,35 @@ export async function POST(request: NextRequest) {
         amount: donationAmount,
         assumedAnnualAmount: assumedAnnualAmount,
         frequency: metadata.frequency || 'one-time',
-        donationDate: metadata.donation_date || new Date().toLocaleDateString('en-US'),
-        // Monthly donations require admin verification before generating receipts
-        status: isMonthly ? ('requires-verification' as const) : ('pending' as const),
+        donationDate: metadata.donation_date || new Date().toLocaleDateString('en-CA'),
+        wantsTaxReceipt: isTaxReceiptWanted,
+        projectName: metadata.project || metadata.gift_name || 'General Donation',
+        // No-receipt donations get status 'no-receipt'; monthly require admin verification
+        status: !isTaxReceiptWanted
+          ? ('no-receipt' as const)
+          : isMonthly
+          ? ('requires-verification' as const)
+          : ('pending' as const),
       };
 
-      // Log to Firestore immediately
+      // Log to Firestore immediately (all donations)
       let firestoreId: string | null = null;
       try {
         firestoreId = await logTaxReceipt(donorData);
         await logTaxReceiptAudit({
           eventType: 'webhook_received',
           title: `Donation Received (${isMonthly ? 'Monthly' : 'One-Time'})`,
-          description: `Received payment of $${donorData.amount.toFixed(2)} from ${donorData.donorName}. wantsTaxReceipt=true.`,
-          metadata: { donorEmail: donorData.donorEmail, amount: donorData.amount, isMonthly, firestoreId },
+          description: `Received payment of $${donorData.amount.toFixed(2)} from ${donorData.donorName}. wantsTaxReceipt=${isTaxReceiptWanted}.`,
+          metadata: { donorEmail: donorData.donorEmail, amount: donorData.amount, isMonthly, isTaxReceiptWanted, firestoreId },
           status: 'info'
         });
       } catch (err) {
         console.error('[Tax Receipt] Failed to log to Firestore:', err);
+      }
+
+      // If no tax receipt wanted, we're done — donation is logged but no Apps Script call needed
+      if (!isTaxReceiptWanted) {
+        return NextResponse.json({ received: true });
       }
 
       // If it's a monthly donation, log to Google Sheet with assumed annual value,
