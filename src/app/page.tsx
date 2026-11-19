@@ -25,32 +25,26 @@ const missionStatement = "To provide youth with access to high-quality music edu
 
 const coreValues = [
     {
-        icon: Heart,
         title: "Artistry",
         description: "We are committed to musical excellence. We cultivate a deep love of music and inspire young musicians to pursue their craft with ambition, expression, and pride."
     },
     {
-        icon: Music,
         title: "Joy",
         description: "We believe music should be fun. We bring energy, positivity, and inspiration to everything we do, celebrating the joy of making music together."
     },
     {
-        icon: Users,
         title: "Inclusion",
         description: "We welcome every young person, regardless of background or experience. We are committed to accessibility, fairness, and building a community where everyone belongs."
     },
     {
-        icon: GraduationCap,
         title: "Growth",
         description: "We support young musicians in developing not just their musical skills, but their confidence and resilience. We encourage responsibility, authenticity, and a commitment to continuous improvement on and off the stage."
     },
     {
-        icon: Handshake,
         title: "Connection",
         description: "We believe in the power of music to bring people together. Through collaboration, mentorship, and community partnerships, we create meaningful relationships that extend beyond the concert hall."
     },
     {
-        icon: Eye,
         title: "Nurture",
         description: "We are a safe and caring community. We lead with encouragement and heart, supporting every young person in discovering what they are capable of."
     }
@@ -338,12 +332,11 @@ export default function Home() {
                                 {coreValues.map(value => (
                                     <StaggerItem key={value.title} direction="left" distance={20}>
                                         <Card className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1 mb-4 border-l-4 border-l-transparent hover:border-l-primary group">
-                                            <CardHeader className="flex flex-row items-center gap-4">
-                                                <value.icon className="w-8 h-8 text-primary transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 group-hover:text-primary"/>
-                                                <CardTitle className="font-headline text-xl">{value.title}</CardTitle>
+                                            <CardHeader className="pb-2">
+                                                <CardTitle className="font-headline text-xl text-primary">{value.title}</CardTitle>
                                             </CardHeader>
                                             <CardContent>
-                                                <p className="text-muted-foreground">{value.description}</p>
+                                                <p className="text-muted-foreground leading-relaxed">{value.description}</p>
                                             </CardContent>
                                         </Card>
                                     </StaggerItem>

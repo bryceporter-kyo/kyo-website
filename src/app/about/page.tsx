@@ -20,37 +20,31 @@ const values = [
     { 
         title: 'Artistry', 
         description: 'We are committed to musical excellence. We cultivate a deep love of music and inspire young musicians to pursue their craft with ambition, expression, and pride.',
-        icon: Music,
         color: 'bg-blue-500'
     },
     { 
         title: 'Joy', 
         description: 'We believe music should be fun. We bring energy, positivity, and inspiration to everything we do, celebrating the joy of making music together.',
-        icon: Smile,
         color: 'bg-yellow-500'
     },
     { 
         title: 'Inclusion', 
         description: 'We welcome every young person, regardless of background or experience. We are committed to accessibility, fairness, and building a community where everyone belongs.',
-        icon: Users,
         color: 'bg-green-500'
     },
     { 
         title: 'Growth', 
         description: 'We support young musicians in developing not just their musical skills, but their confidence and resilience. We encourage responsibility, authenticity, and a commitment to continuous improvement on and off the stage.',
-        icon: TrendingUp,
         color: 'bg-purple-500'
     },
     { 
         title: 'Connection', 
         description: 'We believe in the power of music to bring people together. Through collaboration, mentorship, and community partnerships, we create meaningful relationships that extend beyond the concert hall.',
-        icon: Handshake,
         color: 'bg-orange-500'
     },
     { 
         title: 'Nurture', 
         description: 'We are a safe and caring community. We lead with encouragement and heart, supporting every young person in discovering what they are capable of.',
-        icon: Heart,
         color: 'bg-red-500'
     },
 ];

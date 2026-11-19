@@ -2,12 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LucideIcon } from 'lucide-react';
 
 interface Value {
     title: string;
     description: string;
-    icon: LucideIcon;
     color: string;
 }
 
@@ -49,8 +47,6 @@ export default function ValuesOrbiter({ values }: ValuesOrbiterProps) {
         return () => clearInterval(interval);
     }, [isHovering, values.length]);
 
-    const ActiveIcon = values[activeIndex].icon;
-
     return (
         <div className="relative w-full max-w-7xl mx-auto min-h-[480px] md:min-h-[580px] flex items-center justify-center py-6 md:py-10">
             <div className="relative w-full h-full flex items-center justify-center">
@@ -71,14 +67,13 @@ export default function ValuesOrbiter({ values }: ValuesOrbiterProps) {
                             transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
                             className="relative z-10 flex flex-col items-center justify-center w-full"
                         >
-                            {/* Animated Value Icon in the Center */}
-                            <div className="p-3 md:p-3.5 bg-primary/10 rounded-2xl text-primary mb-3">
-                                <ActiveIcon className="w-7 h-7 md:w-9 md:h-9 animate-pulse" />
-                            </div>
-                            <h3 className="text-2xl md:text-4xl font-headline font-bold text-primary mb-2 md:mb-3">
+                            <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary/70 mb-2">
+                                Core Value
+                            </span>
+                            <h3 className="text-3xl md:text-5xl font-headline font-bold text-primary mb-3 md:mb-4">
                                 {values[activeIndex].title}
                             </h3>
-                            <p className="text-xs md:text-base text-muted-foreground leading-relaxed max-w-[280px] md:max-w-[480px] mx-auto font-normal">
+                            <p className="text-sm md:text-base text-muted-foreground leading-relaxed max-w-[280px] md:max-w-[480px] mx-auto font-normal">
                                 {values[activeIndex].description}
                             </p>
                         </motion.div>
@@ -120,13 +115,12 @@ export default function ValuesOrbiter({ values }: ValuesOrbiterProps) {
                             transition={{ type: "spring", stiffness: 300, damping: 25 }}
                         >
                             <div className={`
-                                px-5 py-2.5 md:px-7 md:py-3.5 rounded-full border-2 shadow-md transition-all duration-300 flex items-center gap-2.5
+                                px-6 py-2.5 md:px-8 md:py-3.5 rounded-full border-2 shadow-md transition-all duration-300 flex items-center justify-center
                                 ${isActive 
                                     ? `${value.color} text-white border-transparent shadow-xl shadow-${value.color.split('-')[1]}-500/30 scale-105` 
                                     : 'bg-white text-slate-700 border-primary/15 hover:border-primary/40 hover:text-primary hover:shadow-lg'}
                             `}>
-                                <value.icon className={`w-4 h-4 md:w-5 md:h-5 ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-primary'}`} />
-                                <span className="text-xs md:text-sm font-bold uppercase tracking-[0.15em] whitespace-nowrap pl-0.5">
+                                <span className="text-xs md:text-sm font-bold uppercase tracking-[0.18em] whitespace-nowrap">
                                     {value.title}
                                 </span>
                             </div>
