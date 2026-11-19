@@ -71,7 +71,7 @@
     @apply bg-background text-foreground;
   }
   section {
-    @apply w-full px-4 py-12 md:px-6 md:py-24 lg:py-32;
+    @apply w-full px-4 py-8 md:px-6 md:py-14 lg:py-16;
   }
 }
 

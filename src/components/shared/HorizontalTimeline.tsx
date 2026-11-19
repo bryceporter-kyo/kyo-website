@@ -182,29 +182,25 @@ export default function HorizontalTimeline() {
     );
   }
 
-  // Desktop Version: Premium Sticky Scroll Timeline
+  // Interactive Clickable Timeline
   return (
-    <div
-      ref={containerRef}
-      className="relative w-full"
-      style={{ height: `${timelineData.length * 100}vh` }}
-    >
-      <div className="sticky top-0 h-screen w-full flex flex-col items-center justify-center overflow-hidden">
+    <div className="w-full py-12 md:py-16">
+      <div className="w-full flex flex-col items-center justify-center">
         {/* Navigation Section */}
-        <div className="text-center mb-10 max-w-4xl px-4 z-20">
-          <h2 className="text-4xl font-headline font-bold">Our Journey</h2>
-          <p className="mx-auto max-w-2xl text-muted-foreground md:text-lg mt-3">
+        <div className="text-center mb-6 max-w-4xl px-4 z-20">
+          <h2 className="text-3xl md:text-4xl font-headline font-bold">Our Journey</h2>
+          <p className="mx-auto max-w-2xl text-muted-foreground text-sm md:text-base mt-2">
             Tracing our history of growth, innovation, and musical achievement.
           </p>
 
-          {/* Interactive Navigation Sidebar/Tabs */}
-          <div className="flex justify-center gap-3 mt-8">
+          {/* Interactive Navigation Pills */}
+          <div className="flex flex-wrap justify-center gap-2 md:gap-3 mt-6">
             {timelineData.map((event, idx) => (
               <button
                 key={`tab-${idx}`}
-                onClick={() => scrollToIndex(idx)}
+                onClick={() => setActiveIndex(idx)}
                 className={cn(
-                  "group px-5 py-2.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all duration-300 border flex items-center gap-2",
+                  "group px-4 py-2 md:px-5 md:py-2.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all duration-300 border flex items-center gap-2",
                   activeIndex === idx
                     ? "bg-primary text-white border-transparent shadow-lg shadow-primary/25 scale-105"
                     : "bg-white/80 hover:bg-white text-muted-foreground border-primary/10 hover:border-primary/20 hover:text-primary"
@@ -223,25 +219,7 @@ export default function HorizontalTimeline() {
         </div>
 
         {/* Content Box Area */}
-        <div className="relative w-full max-w-4xl px-6 flex items-center justify-center" style={{ height: "420px" }}>
-          
-          {/* Progress Indicators Sidebar */}
-          <div className="absolute left-8 top-1/2 -translate-y-1/2 flex flex-col items-center gap-5 z-20">
-            {timelineData.map((_, idx) => (
-              <button
-                key={`dot-${idx}`}
-                onClick={() => scrollToIndex(idx)}
-                className={cn(
-                  "w-3 h-3 rounded-full transition-all duration-300",
-                  activeIndex === idx 
-                    ? "bg-primary scale-150 ring-4 ring-primary/25" 
-                    : "bg-primary/20 hover:bg-primary/45"
-                )}
-                aria-label={`Jump to phase ${idx + 1}`}
-              />
-            ))}
-          </div>
-
+        <div className="relative w-full max-w-4xl px-4 md:px-6 flex items-center justify-center min-h-[300px]">
           <AnimatePresence mode="wait">
             {timelineData.map((event, index) => {
               const isActive = activeIndex === index;
@@ -252,37 +230,37 @@ export default function HorizontalTimeline() {
               return (
                 <motion.div
                   key={event.title}
-                  initial={{ opacity: 0, x: 50, scale: 0.98 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: -50, scale: 0.98 }}
-                  transition={{ duration: 0.45, ease: [0.25, 1, 0.5, 1] }}
-                  className="absolute inset-x-0 mx-auto max-w-3xl px-4"
+                  initial={{ opacity: 0, y: 15, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -15, scale: 0.98 }}
+                  transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
+                  className="w-full max-w-3xl"
                 >
-                  <Card className="w-full border-primary/5 bg-white/95 backdrop-blur-md shadow-2xl p-6 md:p-8 rounded-[2rem] flex flex-col justify-center min-h-[300px]">
-                    <CardHeader className="pb-4">
-                      <div className="flex items-start gap-5">
-                        <div className="bg-primary/5 px-4 py-3 rounded-2xl flex flex-col items-center justify-center border border-primary/10">
-                          <span className="text-xl font-bold text-primary leading-tight font-headline">
+                  <Card className="w-full border-primary/10 bg-white shadow-xl p-6 md:p-8 rounded-[2rem] flex flex-col justify-center">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start gap-4 md:gap-5">
+                        <div className="bg-primary/5 px-4 py-2.5 rounded-2xl flex flex-col items-center justify-center border border-primary/10 shrink-0">
+                          <span className="text-lg md:text-xl font-bold text-primary leading-tight font-headline">
                             {yearParts[0]}
                           </span>
                           {yearParts[1] && (
-                            <span className="text-xs text-muted-foreground font-semibold mt-1">
+                            <span className="text-[11px] text-muted-foreground font-semibold mt-0.5">
                               to {yearParts[1]}
                             </span>
                           )}
                         </div>
-                        <div className="space-y-1">
+                        <div className="space-y-0.5">
                           <span className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">
                             Milestone Phase
                           </span>
-                          <CardTitle className="font-headline text-3xl md:text-4xl text-slate-800">
+                          <CardTitle className="font-headline text-2xl md:text-3xl text-slate-800">
                             {event.title}
                           </CardTitle>
                         </div>
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-muted-foreground leading-relaxed text-base md:text-lg font-light">
+                      <p className="text-muted-foreground leading-relaxed text-sm md:text-base font-light">
                         {event.content}
                       </p>
                     </CardContent>

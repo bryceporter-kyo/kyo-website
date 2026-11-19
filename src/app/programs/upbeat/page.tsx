@@ -432,7 +432,7 @@ export default function UpbeatPage() {
         </section>
 
       {/* Support CTA */}
-      <section id="support" className="py-32 px-4">
+      <section id="support" className="py-16 md:py-20 px-4">
           <div className="container mx-auto">
             <motion.div 
                 initial={{ opacity: 0, y: 40 }}

@@ -112,32 +112,32 @@ export default function AboutPage() {
                 subtitle="An ever growing community dedicated to nurturing the next generation of musicians."
                 image={headerImage}
             />
-            <section className="container mx-auto overflow-hidden relative py-20 md:py-28">
+            <section className="container mx-auto overflow-hidden relative py-12 md:py-16">
                 {/* Decorative background element */}
                 <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl -z-10" />
                 
-                <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
-                    <SlideIn direction="right" className="space-y-8">
+                <div className="grid md:grid-cols-2 gap-8 lg:gap-14 items-center">
+                    <SlideIn direction="right" className="space-y-6">
                         <div>
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-6">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-4">
                                 <Award className="w-3 h-3" /> Our Legacy
                             </div>
-                            <h2 className="text-4xl md:text-5xl font-headline font-bold leading-tight">
+                            <h2 className="text-3xl md:text-5xl font-headline font-bold leading-tight">
                                 {seasonsOfExcellence ? `${seasonsOfExcellence} Seasons of Excellence` : 'Seasons of Excellence'}
                             </h2>
                         </div>
-                        <div className="space-y-6">
-                            <p className="text-muted-foreground text-lg leading-relaxed">
+                        <div className="space-y-4">
+                            <p className="text-muted-foreground text-base md:text-lg leading-relaxed">
                                 Kawartha Youth Orchestra is a vibrant community organization offering music and orchestra training to youth from elementary to post-secondary levels. Drawing students from across the Kawartha Region, we provide opportunities for young musicians seeking to go beyond their school music programs.
                             </p>
-                            <p className="text-muted-foreground text-lg leading-relaxed">
+                            <p className="text-muted-foreground text-base md:text-lg leading-relaxed">
                                 What began as a single ensemble for advanced young musicians has grown into a complete musical pathway. From a student&apos;s very first notes to a lifetime of music, the KYO is here for every step of the journey. We are guided at every step by a deep commitment to accessibility and inclusion for all.
                             </p>
-                            <p className="text-muted-foreground text-lg leading-relaxed">
+                            <p className="text-muted-foreground text-base md:text-lg leading-relaxed">
                                As a registered non-profit, KYO proudly collaborates with local schools, private instructors, and community organizations to support and develop our student musicians under the guidance of seasoned conductors and faculty.
                             </p>
                         </div>
-                        <div className="pt-4">
+                        <div className="pt-2">
                             <Button asChild variant="outline" className="group">
                                 <Link href='/programs/orchestras' className="flex items-center gap-2">
                                     Explore Our Programs <Music className="w-4 h-4 transition-transform group-hover:rotate-12" />
@@ -165,34 +165,33 @@ export default function AboutPage() {
                 </div>
             </section>
             
-            <section className="bg-secondary relative overflow-hidden py-24">
+            <section className="bg-secondary relative overflow-hidden py-14 md:py-20 border-y border-border/50">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/20 via-primary to-primary/20" />
-                <div className="container mx-auto relative z-10">
-                     <FadeIn className="text-center mb-24 md:mb-32">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-4">
+                <div className="container mx-auto px-4 relative z-10">
+                     <FadeIn className="text-center mb-8 md:mb-12">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-3">
                             <Sparkles className="w-3 h-3" /> Our Foundation
                         </div>
-                        <h2 className="text-4xl md:text-5xl font-headline font-bold">Our Core Values</h2>
-                        <p className="mx-auto max-w-2xl text-muted-foreground md:text-xl mt-6">
+                        <h2 className="text-3xl md:text-5xl font-headline font-bold">Our Core Values</h2>
+                        <p className="mx-auto max-w-2xl text-muted-foreground text-sm md:text-lg mt-3">
                             Interact with our values to see what drives the Kawartha Youth Orchestra.
                         </p>
                     </FadeIn>
                     
                     <FadeIn>
-                        {/* Values Orbiter - Icons removed & layout fixed */}
                         <ValuesOrbiter values={values} />
                     </FadeIn>
                 </div>
             </section>
             
 
-             <section className="bg-secondary">
+             <section className="bg-background border-b border-border/50">
                 <HorizontalTimeline />
             </section>
 
-            <section className="py-24">
+            <section className="py-12 md:py-16">
                  <FadeIn className="container mx-auto px-4 md:px-0">
-                    <div className="relative rounded-[2.5rem] bg-[#0a3d2c] text-white p-10 md:p-20 text-center overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+                    <div className="relative rounded-[2.5rem] bg-[#0a3d2c] text-white p-8 md:p-14 text-center overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
                         {/* Decorative background elements for CTA */}
                         <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-[100px] -mr-48 -mt-48" />
                         <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/5 rounded-full blur-[100px] -ml-48 -mb-48" />

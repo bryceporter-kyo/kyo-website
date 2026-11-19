@@ -537,7 +537,7 @@ export default function OrchestrasPage() {
       </section>
 
       {/* Join the Orchestra CTA */}
-      <section className="py-32 px-4 bg-background">
+      <section className="py-16 md:py-20 px-4 bg-background">
         <div className="container mx-auto">
             <motion.div 
                 initial={{ opacity: 0, y: 30 }}

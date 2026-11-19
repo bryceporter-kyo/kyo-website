@@ -277,7 +277,7 @@ export default function VolunteerPage() {
       </section>
 
       {/* Impact Section */}
-      <section className="py-32 px-4">
+      <section className="py-16 md:py-20 px-4">
         <div className="container mx-auto">
           <div className="grid lg:grid-cols-2 gap-20 items-center">
             <motion.div
@@ -375,7 +375,7 @@ export default function VolunteerPage() {
       </section>
 
       {/* Roles Section */}
-      <section className="py-32 bg-primary relative overflow-hidden">
+      <section className="py-16 md:py-20 bg-primary relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[url('/grid.svg')]" />
         <div className="container mx-auto px-4 relative z-10">
           <motion.div 
@@ -434,7 +434,7 @@ export default function VolunteerPage() {
       </section>
 
       {/* The Journey Map */}
-      <section ref={journeyRef} className="py-32 bg-white px-4 relative overflow-hidden">
+      <section ref={journeyRef} className="py-16 md:py-20 bg-white px-4 relative overflow-hidden">
         <div className="container mx-auto max-w-5xl">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -573,7 +573,7 @@ export default function VolunteerPage() {
       </section>
 
       {/* Board of Directors Section */}
-      <section className="py-32 px-4 bg-background">
+      <section className="py-16 md:py-20 px-4 bg-background">
         <div className="container mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -803,7 +803,7 @@ export default function VolunteerPage() {
       </section>
 
       {/* Final Volunteer CTA */}
-      <section className="py-32 px-4">
+      <section className="py-16 md:py-20 px-4">
         <div className="container mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 40 }}

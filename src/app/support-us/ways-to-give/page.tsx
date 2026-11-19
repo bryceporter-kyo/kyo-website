@@ -82,7 +82,7 @@ export default function SupportPage() {
             />
 
             {/* Narrative Section */}
-            <section className="py-32 px-4">
+            <section className="py-16 md:py-20 px-4">
                 <div className="container mx-auto">
                     <div className="grid lg:grid-cols-2 gap-20 items-center">
                         <motion.div 
@@ -159,7 +159,7 @@ export default function SupportPage() {
             </section>
 
             {/* Ways to Give Section */}
-            <section className="py-32 relative bg-primary/[0.02]">
+            <section className="py-16 md:py-20 relative bg-primary/[0.02]">
                 <div className="container mx-auto px-4">
                     <motion.div 
                         initial={{ opacity: 0, y: 20 }}
@@ -222,7 +222,7 @@ export default function SupportPage() {
             </section>
 
             {/* Benefactor CTA */}
-            <section className="py-32 px-4">
+            <section className="py-16 md:py-20 px-4">
                 <div className="container mx-auto">
                     <motion.div 
                         initial={{ opacity: 0, y: 40 }}

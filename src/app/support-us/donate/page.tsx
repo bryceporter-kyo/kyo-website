@@ -150,7 +150,7 @@ export default function DonatePage() {
             />
 
             {/* Why Support Matters */}
-            <section className="py-32 px-4">
+            <section className="py-16 md:py-20 px-4">
                 <div className="container mx-auto">
                     <div className="grid lg:grid-cols-2 gap-20 items-center">
                         <motion.div
@@ -210,7 +210,7 @@ export default function DonatePage() {
             </section>
 
             {/* Donation Methods Section with Embedded Stripe Elements Checkout */}
-            <section className="py-32 bg-primary/[0.02]">
+            <section className="py-16 md:py-20 bg-primary/[0.02]">
                 <div className="container mx-auto px-4">
                     <div className="text-center mb-16 space-y-4">
                         <h2 className="text-5xl font-headline font-bold">Invest in a Student</h2>
@@ -326,7 +326,7 @@ export default function DonatePage() {
             </section>
 
             {/* Online Giving Hub */}
-            <section className="py-32 px-4">
+            <section className="py-16 md:py-20 px-4">
                 <div className="container mx-auto">
                     <div className="text-center mb-20 space-y-4">
                         <div className="flex justify-center items-center gap-2 text-primary">
@@ -456,7 +456,7 @@ export default function DonatePage() {
             </section>
 
             {/* Special Funds & Gifts - Forest Green Background with White Cards */}
-            <section className="py-32 bg-primary relative overflow-hidden">
+            <section className="py-16 md:py-20 bg-primary relative overflow-hidden">
                 <div className="absolute inset-0 opacity-10 bg-[url('/grid.svg')]" />
                 <div className="container mx-auto px-4 relative z-10">
                     <div className="text-center mb-20 space-y-4">
@@ -712,7 +712,7 @@ export default function DonatePage() {
             </section>
 
             {/* Corporate Thank You */}
-            <section className="py-32 px-4">
+            <section className="py-16 md:py-20 px-4">
                 <div className="container mx-auto">
                     <div className="text-center mb-20 space-y-4">
                         <div className="flex justify-center items-center gap-2 text-primary">
@@ -743,7 +743,7 @@ export default function DonatePage() {
             </section>
 
             {/* Volunteer CTA */}
-            <section className="py-32 px-4">
+            <section className="py-16 md:py-20 px-4">
                 <div className="container mx-auto">
                     <motion.div
                         initial={{ opacity: 0, y: 40 }}
