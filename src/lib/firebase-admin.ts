@@ -5,6 +5,7 @@
  */
 import { getApps, initializeApp, cert, App } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
+import { getFirestore, Firestore } from "firebase-admin/firestore";
 
 function getAdminApp(): App {
   const existing = getApps().find((a) => a.name === "admin");
@@ -30,4 +31,13 @@ function getAdminApp(): App {
 
 export function getAdminAuth() {
   return getAuth(getAdminApp());
+}
+
+/**
+ * Returns the Admin Firestore instance (bypasses security rules, server-side only).
+ * Use this in all API routes and webhook handlers — NEVER use the client SDK on the server.
+ */
+export function getAdminFirestore(): Firestore {
+  const app = getAdminApp();
+  return getFirestore(app);
 }

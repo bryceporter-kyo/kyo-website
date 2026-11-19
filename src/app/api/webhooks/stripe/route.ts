@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { db } from '@/lib/firebase';
-import { doc, runTransaction } from 'firebase/firestore';
+import { collection, addDoc, doc, updateDoc, getDoc, serverTimestamp, runTransaction } from 'firebase/firestore';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'dummy_key_for_build', {
   apiVersion: '2025-01-27.acacia' as any
@@ -23,7 +23,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
     }
   } else {
-    // If webhook secret is not set, parse event body with warning (e.g. dev testing)
+    // If webhook secret is not set, parse event body (dev/test only)
+    if (webhookSecret && !signature) {
+      console.warn('[Stripe Webhook] Secret is set but no signature header received — possible misconfiguration.');
+    }
     try {
       event = JSON.parse(body) as Stripe.Event;
     } catch (err: any) {
@@ -36,38 +39,27 @@ export async function POST(request: NextRequest) {
     const paymentIntent = event.data.object as Stripe.PaymentIntent;
     const metadata = paymentIntent.metadata || {};
 
-    // Check if this donation is for Bass Repairs
+    // ── Bass Repairs campaign tracker ──────────────────────────────────────────
     if (metadata.catalogue_item_id === 'bass-repairs') {
       const donatedAmountCAD = paymentIntent.amount / 100;
-
       try {
-        const campaignDocRef = doc(db, 'campaigns', 'bass-repairs');
-        await runTransaction(db, async (transaction) => {
-          const campaignSnap = await transaction.get(campaignDocRef);
-          let currentRaised = 1000;
-          let currentGoal = 2800;
-
-          if (campaignSnap.exists()) {
-            const data = campaignSnap.data();
-            currentRaised = typeof data.raised === 'number' ? data.raised : 1000;
-            currentGoal = typeof data.goal === 'number' ? data.goal : 2800;
-          }
-
-          transaction.set(
-            campaignDocRef,
-            {
-              raised: Math.round((currentRaised + donatedAmountCAD) * 100) / 100,
-              goal: currentGoal,
-              updatedAt: new Date().toISOString(),
-              lastDonation: {
-                id: paymentIntent.id,
-                amount: donatedAmountCAD,
-                donor_name: metadata.donor_name || 'Anonymous',
-                timestamp: new Date().toISOString(),
-              }
+        const campaignRef = doc(db, 'campaigns', 'bass-repairs');
+        await runTransaction(db, async (tx) => {
+          const snap = await tx.get(campaignRef);
+          const data = snap.exists() ? snap.data() : {};
+          const currentRaised = typeof data.raised === 'number' ? data.raised : 1000;
+          const currentGoal   = typeof data.goal   === 'number' ? data.goal   : 2800;
+          tx.set(campaignRef, {
+            raised: Math.round((currentRaised + donatedAmountCAD) * 100) / 100,
+            goal: currentGoal,
+            updatedAt: new Date().toISOString(),
+            lastDonation: {
+              id: paymentIntent.id,
+              amount: donatedAmountCAD,
+              donor_name: metadata.donor_name || 'Anonymous',
+              timestamp: new Date().toISOString(),
             },
-            { merge: true }
-          );
+          }, { merge: true });
         });
         console.log(`[Stripe Webhook] Updated Bass Repairs raised amount by +$${donatedAmountCAD} CAD`);
       } catch (err) {
@@ -75,7 +67,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check if this donation requested a dedication notification email
+    // ── Dedication notification email ──────────────────────────────────────────
     if (metadata.notify_honouree === 'true' && metadata.honouree_email) {
       try {
         const { sendDedicationNotificationEmail } = await import('@/lib/email');
@@ -95,7 +87,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Send donor thank you email if configured
+    // ── Thank you email ────────────────────────────────────────────────────────
     if (metadata.donor_email && metadata.donor_email.includes('@')) {
       try {
         const { sendDonationThankYouEmail } = await import('@/lib/email');
@@ -113,61 +105,64 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Log ALL donations to Firestore (not just tax-receipt ones)
+    // ── Log ALL donations to Firestore ─────────────────────────────────────────
     const isTaxReceiptWanted = metadata.wants_tax_receipt === 'true' || metadata.tax_receipt_requested?.toLowerCase() === 'true';
-    {
-      const { logTaxReceipt, updateTaxReceiptStatus, getTaxReceiptSettings, logTaxReceiptAudit } = 
-        await import('@/lib/taxReceipts');
-      
-      const isMonthly = metadata.frequency === 'monthly';
-      const donationAmount = paymentIntent.amount / 100;
-      const assumedAnnualAmount = isMonthly ? donationAmount * 12 : donationAmount;
+    const isMonthly = metadata.frequency === 'monthly';
+    const donationAmount = paymentIntent.amount / 100;
+    const assumedAnnualAmount = isMonthly ? donationAmount * 12 : donationAmount;
 
-      const donorData = {
-        donorName: metadata.donor_name || 'Anonymous',
-        donorEmail: metadata.donor_email || '',
-        donorPhone: metadata.donor_phone || '',
-        donorAddress: metadata.donor_address || '',
-        amount: donationAmount,
-        assumedAnnualAmount: assumedAnnualAmount,
-        frequency: metadata.frequency || 'one-time',
-        donationDate: metadata.donation_date || new Date().toLocaleDateString('en-CA'),
-        wantsTaxReceipt: isTaxReceiptWanted,
-        projectName: metadata.project || metadata.gift_name || 'General Donation',
-        // No-receipt donations get status 'no-receipt'; monthly require admin verification
-        status: !isTaxReceiptWanted
-          ? ('no-receipt' as const)
-          : isMonthly
-          ? ('requires-verification' as const)
-          : ('pending' as const),
-      };
+    const donorData = {
+      donorName:    metadata.donor_name    || 'Anonymous',
+      donorEmail:   metadata.donor_email   || '',
+      donorPhone:   metadata.donor_phone   || '',
+      donorAddress: metadata.donor_address || '',
+      amount:              donationAmount,
+      assumedAnnualAmount: assumedAnnualAmount,
+      frequency:    metadata.frequency || 'one-time',
+      donationDate: metadata.donation_date || new Date().toLocaleDateString('en-CA'),
+      wantsTaxReceipt: isTaxReceiptWanted,
+      projectName:  metadata.project || metadata.gift_name || 'General Donation',
+      stripePaymentIntentId: paymentIntent.id,
+      status: !isTaxReceiptWanted
+        ? 'no-receipt'
+        : isMonthly
+        ? 'requires-verification'
+        : 'pending',
+      createdAt: serverTimestamp(),
+    };
 
-      // Log to Firestore immediately (all donations)
-      let firestoreId: string | null = null;
-      try {
-        firestoreId = await logTaxReceipt(donorData);
-        await logTaxReceiptAudit({
-          eventType: 'webhook_received',
-          title: `Donation Received (${isMonthly ? 'Monthly' : 'One-Time'})`,
-          description: `Received payment of $${donorData.amount.toFixed(2)} from ${donorData.donorName}. wantsTaxReceipt=${isTaxReceiptWanted}.`,
-          metadata: { donorEmail: donorData.donorEmail, amount: donorData.amount, isMonthly, isTaxReceiptWanted, firestoreId },
-          status: 'info'
-        });
-      } catch (err) {
-        console.error('[Tax Receipt] Failed to log to Firestore:', err);
-      }
+    let firestoreId: string | null = null;
+    try {
+      const docRef = await addDoc(collection(db, 'tax_receipts'), donorData);
+      firestoreId = docRef.id;
+      console.log(`[Stripe Webhook] Donation logged to Firestore: ${firestoreId} ($${donationAmount} from ${donorData.donorName})`);
 
-      // If no tax receipt wanted, we're done — donation is logged but no Apps Script call needed
-      if (!isTaxReceiptWanted) {
-        return NextResponse.json({ received: true });
-      }
+      await addDoc(collection(db, 'tax_receipt_audit_logs'), {
+        eventType: 'webhook_received',
+        title: `Donation Received (${isMonthly ? 'Monthly' : 'One-Time'})`,
+        description: `Received payment of $${donationAmount.toFixed(2)} from ${donorData.donorName}. wantsTaxReceipt=${isTaxReceiptWanted}.`,
+        metadata: { donorEmail: donorData.donorEmail, amount: donationAmount, isMonthly, isTaxReceiptWanted, firestoreId },
+        status: 'info',
+        createdAt: serverTimestamp(),
+      });
+    } catch (err) {
+      console.error('[Stripe Webhook] CRITICAL: Failed to write donation to Firestore:', err);
+    }
 
-      // If it's a monthly donation, log to Google Sheet with assumed annual value,
-      // but DISALLOW auto-generating or emailing the receipt until verified
+    // If no tax receipt wanted, we're done
+    if (!isTaxReceiptWanted) {
+      return NextResponse.json({ received: true });
+    }
+
+    // ── Tax receipt generation (Apps Script) ───────────────────────────────────
+    try {
+      const settingsSnap = await getDoc(doc(db, 'settings', 'tax-receipts'));
+      const settings = settingsSnap.exists() ? (settingsSnap.data() as any) : {};
+
+      // Monthly donations: log to sheet but hold receipt pending 12-month verification
       if (isMonthly) {
-        try {
-          const settings = await getTaxReceiptSettings();
-          if (settings.appsScriptWebAppUrl) {
+        if (settings.appsScriptWebAppUrl) {
+          try {
             await fetch(settings.appsScriptWebAppUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -177,114 +172,121 @@ export async function POST(request: NextRequest) {
                 donorName: donorData.donorName,
                 donorEmail: donorData.donorEmail,
                 donorAddress: donorData.donorAddress,
-                amount: donorData.amount.toFixed(2),
-                assumedAnnualAmount: donorData.assumedAnnualAmount.toFixed(2),
+                amount: donationAmount.toFixed(2),
+                assumedAnnualAmount: assumedAnnualAmount.toFixed(2),
                 donationDate: donorData.donationDate,
                 frequency: 'monthly',
-                notes: 'Monthly Recurring (Assumed 12-Month Annual Total: $' + donorData.assumedAnnualAmount.toFixed(2) + ' CAD) - Requires Verification',
+                notes: `Monthly Recurring (Assumed 12-Month Annual Total: $${assumedAnnualAmount.toFixed(2)} CAD) — Requires Verification`,
               }),
             });
             console.log(`[Tax Receipt] Logged monthly donation for ${donorData.donorName} (Receipt held pending verification)`);
-            await logTaxReceiptAudit({
-              eventType: 'monthly_held',
-              title: 'Monthly Recurring Donation Held for Verification',
-              description: `Logged monthly donation for ${donorData.donorName} ($${donorData.assumedAnnualAmount.toFixed(2)} assumed annual). Receipt held pending 12-mo verification.`,
-              metadata: { donorName: donorData.donorName, amount: donorData.amount, assumedAnnual: donorData.assumedAnnualAmount },
-              status: 'warning'
-            });
+          } catch (monthlyErr) {
+            console.error('[Tax Receipt] Error logging monthly donation to sheet:', monthlyErr);
           }
-        } catch (monthlyErr) {
-          console.error('[Tax Receipt] Error logging monthly donation to sheet:', monthlyErr);
         }
+        await addDoc(collection(db, 'tax_receipt_audit_logs'), {
+          eventType: 'monthly_held',
+          title: 'Monthly Recurring Donation Held for Verification',
+          description: `Logged monthly donation for ${donorData.donorName} ($${assumedAnnualAmount.toFixed(2)} assumed annual). Receipt held pending 12-mo verification.`,
+          metadata: { donorName: donorData.donorName, amount: donationAmount, assumedAnnual: assumedAnnualAmount },
+          status: 'warning',
+          createdAt: serverTimestamp(),
+        });
         return NextResponse.json({ received: true });
       }
 
-      // For single/one-time donations: check if automatic receipt generation is enabled
-      try {
-        const settings = await getTaxReceiptSettings();
-        
-        // Check automatic receipt generation toggle (enabled by default unless explicitly false)
-        const isAutoReceiptsEnabled = settings.autoTaxReceipts !== false;
+      // One-time: check auto-receipt toggle
+      const isAutoReceiptsEnabled = settings.autoTaxReceipts !== false;
+      if (!isAutoReceiptsEnabled) {
+        console.log(`[Tax Receipt] Auto receipts disabled. Donation #${firestoreId} saved as pending for manual review.`);
+        await addDoc(collection(db, 'tax_receipt_audit_logs'), {
+          eventType: 'webhook_received',
+          title: 'Automatic Tax Receipt Held',
+          description: `Auto receipt generation is OFF. Saved donation from ${donorData.donorName} ($${donationAmount.toFixed(2)}) as pending for manual generation.`,
+          metadata: { donorName: donorData.donorName, amount: donationAmount, firestoreId },
+          status: 'info',
+          createdAt: serverTimestamp(),
+        });
+        return NextResponse.json({ received: true });
+      }
 
-        if (!isAutoReceiptsEnabled) {
-          console.log(`[Tax Receipt] Automatic tax receipts disabled in admin settings. Saved donation #${firestoreId} for manual review.`);
-          await logTaxReceiptAudit({
-            eventType: 'webhook_received',
-            title: 'Automatic Tax Receipt Held',
-            description: `Automatic receipt generation is toggled OFF. Saved donation from ${donorData.donorName} ($${donorData.amount.toFixed(2)}) as pending for manual generation.`,
-            metadata: { donorName: donorData.donorName, amount: donorData.amount, firestoreId },
-            status: 'info'
+      if (!settings.appsScriptWebAppUrl) {
+        console.warn('[Tax Receipt] Apps Script URL not configured. Skipping receipt generation.');
+        if (firestoreId) {
+          await updateDoc(doc(db, 'tax_receipts', firestoreId), {
+            status: 'failed',
+            errorMessage: 'Apps Script URL not configured in admin settings.',
           });
-          return NextResponse.json({ received: true });
         }
+        await addDoc(collection(db, 'tax_receipt_audit_logs'), {
+          eventType: 'webhook_received',
+          title: 'Tax Receipt Apps Script Not Configured',
+          description: `Could not trigger receipt for ${donorData.donorName}: Apps Script Web App URL is blank.`,
+          metadata: { donorName: donorData.donorName, amount: donationAmount },
+          status: 'warning',
+          createdAt: serverTimestamp(),
+        });
+      } else {
+        const scriptResponse = await fetch(settings.appsScriptWebAppUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            secret: settings.appsScriptSecret || '',
+            donorName: donorData.donorName,
+            donorEmail: donorData.donorEmail,
+            donorAddress: donorData.donorAddress,
+            amount: donationAmount.toFixed(2),
+            donationDate: donorData.donationDate,
+            frequency: donorData.frequency,
+          }),
+        });
 
-        if (!settings.appsScriptWebAppUrl) {
-          console.warn('[Tax Receipt] Apps Script URL not configured. Skipping receipt generation.');
+        if (scriptResponse.ok) {
+          const result = await scriptResponse.json();
           if (firestoreId) {
-            await updateTaxReceiptStatus(firestoreId, 'failed', { 
-              errorMessage: 'Apps Script URL not configured in admin settings. Please enter Web App URL in Admin -> Donations.' 
+            await updateDoc(doc(db, 'tax_receipts', firestoreId), {
+              status: 'emailed',
+              receiptId: result.receiptId || '',
+              driveUrl: result.receiptUrl || '',
             });
           }
-          await logTaxReceiptAudit({
+          console.log(`[Tax Receipt] Receipt generated and emailed for ${donorData.donorName}`);
+          await addDoc(collection(db, 'tax_receipt_audit_logs'), {
             eventType: 'webhook_received',
-            title: 'Tax Receipt Apps Script Not Configured',
-            description: `Could not trigger receipt for ${donorData.donorName}: Apps Script Web App URL is blank in Admin Settings.`,
-            metadata: { donorName: donorData.donorName, amount: donorData.amount },
-            status: 'warning'
+            title: 'Tax Receipt Generated & Emailed',
+            description: `Successfully processed receipt #${result.receiptId || 'N/A'} for ${donorData.donorName} ($${donationAmount.toFixed(2)}).`,
+            metadata: { receiptId: result.receiptId, driveUrl: result.receiptUrl, donorName: donorData.donorName },
+            status: 'success',
+            createdAt: serverTimestamp(),
           });
         } else {
-          const scriptResponse = await fetch(settings.appsScriptWebAppUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              secret: settings.appsScriptSecret || '',
-              donorName: donorData.donorName,
-              donorEmail: donorData.donorEmail,
-              donorAddress: donorData.donorAddress,
-              amount: donorData.amount.toFixed(2),
-              donationDate: donorData.donationDate,
-              frequency: donorData.frequency,
-            }),
-          });
-
-          if (scriptResponse.ok) {
-            const result = await scriptResponse.json();
-            if (firestoreId) {
-              await updateTaxReceiptStatus(firestoreId, 'emailed', {
-                receiptId: result.receiptId || '',
-                driveUrl: result.receiptUrl || '',
-              });
-            }
-            console.log(`[Tax Receipt] Receipt generated and emailed for ${donorData.donorName}`);
-            await logTaxReceiptAudit({
-              eventType: 'webhook_received',
-              title: 'Tax Receipt Generated & Emailed',
-              description: `Successfully processed receipt #${result.receiptId || 'N/A'} for ${donorData.donorName} ($${donorData.amount.toFixed(2)}).`,
-              metadata: { receiptId: result.receiptId, driveUrl: result.receiptUrl, donorName: donorData.donorName },
-              status: 'success'
-            });
-          } else {
-            const errText = await scriptResponse.text();
-            console.error('[Tax Receipt] Apps Script error:', errText);
-            if (firestoreId) {
-              await updateTaxReceiptStatus(firestoreId, 'failed', { 
-                errorMessage: `Apps Script returned ${scriptResponse.status}: ${errText.slice(0, 200)}` 
-              });
-            }
-            await logTaxReceiptAudit({
-              eventType: 'webhook_received',
-              title: 'Apps Script Receipt Generation Failed',
-              description: `Apps Script returned HTTP ${scriptResponse.status}: ${errText.slice(0, 150)}`,
-              metadata: { status: scriptResponse.status, errText },
-              status: 'error'
+          const errText = await scriptResponse.text();
+          console.error('[Tax Receipt] Apps Script error:', errText);
+          if (firestoreId) {
+            await updateDoc(doc(db, 'tax_receipts', firestoreId), {
+              status: 'failed',
+              errorMessage: `Apps Script returned ${scriptResponse.status}: ${errText.slice(0, 200)}`,
             });
           }
+          await addDoc(collection(db, 'tax_receipt_audit_logs'), {
+            eventType: 'webhook_received',
+            title: 'Apps Script Receipt Generation Failed',
+            description: `Apps Script returned HTTP ${scriptResponse.status}: ${errText.slice(0, 150)}`,
+            metadata: { status: scriptResponse.status, errText },
+            status: 'error',
+            createdAt: serverTimestamp(),
+          });
         }
-      } catch (err: any) {
-        console.error('[Tax Receipt] Error triggering Apps Script:', err);
-        if (firestoreId) {
-          await updateTaxReceiptStatus(firestoreId, 'failed', { errorMessage: err.message });
-        }
+      }
+    } catch (err: any) {
+      console.error('[Tax Receipt] Error in receipt generation flow:', err);
+      if (firestoreId) {
+        try {
+          await updateDoc(doc(db, 'tax_receipts', firestoreId), {
+            status: 'failed',
+            errorMessage: err.message,
+          });
+        } catch (_) {}
       }
     }
   }
