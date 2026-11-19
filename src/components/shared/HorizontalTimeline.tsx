@@ -1,274 +1,218 @@
 "use client";
 
-import * as React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const timelineData = [
+interface Milestone {
+  year: string;
+  title: string;
+  content: string;
+  highlight?: string;
+}
+
+const timelineData: Milestone[] = [
   {
     year: "2007-2012",
     title: "The Founding Years",
     content: "KYO was established by Karen Lauder, Ben Bell, and Steven Brown, with Michael Newnham of the Peterborough Symphony Orchestra as the first conductor. This first iteration of the orchestra grew to a tight knit group of 30 players but further growth was slow as local school music programs were reduced.",
+    highlight: "Initial orchestra of 30 youth players established with Peterborough Symphony Orchestra leadership."
   },
   {
     year: "2013-2016",
     title: "Outreach & Recruitment",
     content: "A new strategic plan led to the hiring of Ann Millen for recruitment. She successfully established bursaries and an instrument library through community donations, significantly lowering barriers to entry. Outreach events in schools helped attract a new generation of musicians.",
+    highlight: "Creation of the community instrument library & bursary fund, lowering barriers for regional youth."
   },
   {
     year: "2017-2019",
     title: "Expanding Ensembles",
     content: "To cater to diverse skill levels, the Junior (JKYO) and Intermediate (IKYO) orchestras were launched under the leadership of Marilyn Chalk and later John Fautley. The Community Foundation of Greater Peterborough provided crucial support by managing dedicated funds for KYO.",
+    highlight: "Expansion into multi-tiered ensembles (Junior and Intermediate) with permanent endowment support."
   },
   {
     year: "2020-2021",
     title: "Pandemic Adaptation",
     content: "Inspired by the El Sistema model, the Upbeat! after-school program was launched in 2020. In response to the COVID-19 pandemic, KYO pivoted to virtual e-orchestras and online concerts to keep the music playing. Marilyn Chalk became the Acting Conductor for The Orchestras during this period.",
+    highlight: "Launch of the El Sistema-inspired Upbeat! program and digital virtual orchestras."
   },
   {
     year: "2022-Present",
     title: "Growth & New Leadership",
     content: "The organization has continued its growth trajectory, welcoming new artistic leaders like Dr. Alexander Cannon, Maziar Heidari, and current lead conductor Murray Lefebvre. With expanded faculty and the addition of a Jazz Ensemble and Folk Ensemble, KYO has solidified its role as a comprehensive centre for youth music education in the Kawarthas.",
+    highlight: "Comprehensive youth music academy with Orchestras, Jazz, Folk Ensembles, and conservatory coaching."
   },
 ];
 
 export default function HorizontalTimeline() {
-  const [activeIndex, setActiveIndex] = React.useState(0);
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const [isMobile, setIsMobile] = React.useState(false);
-  const [isClient, setIsClient] = React.useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  React.useEffect(() => {
-    setIsClient(true);
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  React.useEffect(() => {
-    if (!isClient || isMobile) return;
-
-    const handleScroll = () => {
-      const container = containerRef.current;
-      if (!container) return;
-
-      const scrollY = window.scrollY;
-      const containerTop = container.offsetTop;
-      const containerHeight = container.offsetHeight;
-      const viewportHeight = window.innerHeight;
-
-      const scrollableAreaStart = containerTop - viewportHeight / 2 + 200;
-      const scrollProgress = scrollY - scrollableAreaStart;
-      const itemScrollSpace = (containerHeight - viewportHeight) / timelineData.length;
-
-      let newIndex = Math.floor(scrollProgress / itemScrollSpace);
-      newIndex = Math.max(0, Math.min(newIndex, timelineData.length - 1));
-
-      setActiveIndex(newIndex);
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [isClient, isMobile]);
-
-  const scrollToIndex = (idx: number) => {
-    if (isMobile) {
-      setActiveIndex(idx);
-      const element = document.getElementById(`timeline-card-${idx}`);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-      return;
-    }
-
-    const container = containerRef.current;
-    if (!container) return;
-
-    const containerTop = container.offsetTop;
-    const containerHeight = container.offsetHeight;
-    const viewportHeight = window.innerHeight;
-
-    const scrollableAreaStart = containerTop - viewportHeight / 2 + 200;
-    const itemScrollSpace = (containerHeight - viewportHeight) / timelineData.length;
-
-    const targetScrollY = scrollableAreaStart + idx * itemScrollSpace + itemScrollSpace / 2;
-    window.scrollTo({
-      top: targetScrollY,
-      behavior: "smooth",
-    });
+  const handlePrev = () => {
+    setActiveIndex((prev) => (prev > 0 ? prev - 1 : timelineData.length - 1));
   };
 
-  if (!isClient) {
-    return null;
-  }
+  const handleNext = () => {
+    setActiveIndex((prev) => (prev < timelineData.length - 1 ? prev + 1 : 0));
+  };
 
-  // Mobile Version: Vertical Chronological Feed
-  if (isMobile) {
-    return (
-      <div className="py-12 px-4 space-y-12">
-        <div className="text-center space-y-2 mb-8">
-          <h2 className="text-3xl font-headline font-bold">Our Journey</h2>
-          <p className="text-sm text-muted-foreground">
-            Tracing our history of growth, innovation, and musical achievement.
-          </p>
-        </div>
+  const activeEvent = timelineData[activeIndex];
+  const yearParts = activeEvent.year.split("-");
 
-        {/* Clickable Mobile Year Tabs */}
-        <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-none px-2 justify-start">
-          {timelineData.map((event, idx) => (
-            <button
-              key={`tab-mob-${idx}`}
-              onClick={() => scrollToIndex(idx)}
-              className={cn(
-                "px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border shrink-0",
-                activeIndex === idx
-                  ? "bg-primary text-white border-transparent shadow-md"
-                  : "bg-white text-muted-foreground border-slate-200"
-              )}
-            >
-              {event.year}
-            </button>
-          ))}
-        </div>
+  return (
+    <div className="w-full py-16 md:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="text-center mb-12 md:mb-16">
+        <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary bg-primary/10 px-4 py-1.5 rounded-full inline-block mb-3">
+          Our History
+        </span>
+        <h2 className="text-3xl md:text-5xl font-headline font-bold text-slate-900 tracking-tight">
+          Our Journey
+        </h2>
+        <p className="mx-auto max-w-2xl text-muted-foreground text-base md:text-lg mt-3 leading-relaxed">
+          Tracing our history of growth, community outreach, and musical achievement across Peterborough and the Kawarthas.
+        </p>
+      </div>
 
-        {/* Vertical List with Connective Line */}
-        <div className="relative border-l-2 border-primary/20 pl-6 ml-4 space-y-12">
-          {timelineData.map((event, index) => {
-            const isActive = activeIndex === index;
+      {/* Interactive Horizontal Timeline Navigation Track */}
+      <div className="relative mb-10 md:mb-14">
+        {/* Horizontal Track Line */}
+        <div className="hidden md:block absolute top-1/2 left-4 right-4 -translate-y-1/2 h-1 bg-slate-200 -z-0" />
+        
+        {/* Active Progress Line */}
+        <div 
+          className="hidden md:block absolute top-1/2 left-4 -translate-y-1/2 h-1 bg-primary transition-all duration-500 -z-0"
+          style={{ width: `${(activeIndex / (timelineData.length - 1)) * 96}%` }}
+        />
+
+        {/* Timeline Year Badges */}
+        <div className="flex flex-wrap md:flex-nowrap justify-between items-center gap-3 relative z-10">
+          {timelineData.map((event, idx) => {
+            const isActive = activeIndex === idx;
             return (
-              <div
-                key={`mob-card-${index}`}
-                id={`timeline-card-${index}`}
-                className="relative scroll-mt-24"
+              <button
+                key={event.year}
+                onClick={() => setActiveIndex(idx)}
+                className="group flex flex-col items-center focus:outline-none transition-all flex-1 min-w-[120px]"
               >
-                {/* Year Marker Point */}
+                {/* Visual Node / Pill */}
                 <div
                   className={cn(
-                    "absolute -left-[31px] top-1.5 w-4 h-4 rounded-full border-2 border-white transition-all duration-350 shadow-sm",
-                    isActive ? "bg-primary scale-125 ring-4 ring-primary/20" : "bg-slate-300"
+                    "px-4 py-2.5 md:px-6 md:py-3 rounded-full text-xs md:text-sm font-bold uppercase tracking-wider transition-all duration-300 border-2 shadow-sm flex items-center justify-center gap-2",
+                    isActive
+                      ? "bg-primary text-white border-primary shadow-xl shadow-primary/25 scale-105 ring-4 ring-primary/15"
+                      : "bg-white text-slate-600 border-slate-200 hover:border-primary/40 hover:text-primary hover:bg-slate-50"
                   )}
-                />
-                <Card className={cn(
-                  "transition-all duration-300 border border-slate-100 shadow-sm",
-                  isActive ? "ring-2 ring-primary/20 border-primary/30 bg-slate-50/50" : ""
+                >
+                  <span className={cn(
+                    "w-2 h-2 rounded-full transition-all",
+                    isActive ? "bg-white animate-pulse" : "bg-slate-300 group-hover:bg-primary"
+                  )} />
+                  <span>{event.year}</span>
+                </div>
+
+                {/* Subtitle preview beneath pill on desktop */}
+                <span className={cn(
+                  "hidden lg:block text-[11px] font-semibold mt-2.5 transition-colors text-center line-clamp-1 max-w-[140px]",
+                  isActive ? "text-primary font-bold" : "text-muted-foreground group-hover:text-slate-800"
                 )}>
-                  <CardHeader className="pb-2">
-                    <span className="text-xs font-bold text-primary tracking-wider uppercase mb-1 flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5" />
-                      {event.year}
-                    </span>
-                    <CardTitle className="font-headline text-xl leading-tight">
-                      {event.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {event.content}
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
+                  {event.title}
+                </span>
+              </button>
             );
           })}
         </div>
       </div>
-    );
-  }
 
-  // Interactive Clickable Timeline
-  return (
-    <div className="w-full py-12 md:py-16">
-      <div className="w-full flex flex-col items-center justify-center">
-        {/* Navigation Section */}
-        <div className="text-center mb-6 max-w-4xl px-4 z-20">
-          <h2 className="text-3xl md:text-4xl font-headline font-bold">Our Journey</h2>
-          <p className="mx-auto max-w-2xl text-muted-foreground text-sm md:text-base mt-2">
-            Tracing our history of growth, innovation, and musical achievement.
-          </p>
+      {/* Main Showcase Stage (Large Screen Filling Card) */}
+      <div className="relative">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeEvent.year}
+            initial={{ opacity: 0, y: 15, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -15, scale: 0.98 }}
+            transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
+            className="w-full"
+          >
+            <Card className="border border-slate-200/80 bg-white shadow-2xl rounded-[2.5rem] overflow-hidden p-8 md:p-14 transition-all">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+                
+                {/* Left Column: Big Year & Phase Indicator */}
+                <div className="lg:col-span-4 flex flex-col justify-center border-b lg:border-b-0 lg:border-r border-slate-100 pb-6 lg:pb-0 lg:pr-8">
+                  <div className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest w-fit mb-4">
+                    Era {activeIndex + 1} of {timelineData.length}
+                  </div>
+                  
+                  <div className="font-headline font-bold text-5xl md:text-6xl text-primary leading-none tracking-tight">
+                    {yearParts[0]}
+                  </div>
+                  {yearParts[1] && (
+                    <div className="text-xl md:text-2xl font-headline font-semibold text-slate-500 mt-1">
+                      to {yearParts[1]}
+                    </div>
+                  )}
 
-          {/* Interactive Navigation Pills */}
-          <div className="flex flex-wrap justify-center gap-2 md:gap-3 mt-6">
-            {timelineData.map((event, idx) => (
+                  {activeEvent.highlight && (
+                    <div className="mt-6 p-4 rounded-2xl bg-slate-50 border border-slate-100 text-xs md:text-sm text-slate-700 leading-relaxed font-medium">
+                      <span className="font-bold text-primary block mb-1 uppercase tracking-wider text-[10px]">
+                        Milestone Impact
+                      </span>
+                      {activeEvent.highlight}
+                    </div>
+                  )}
+                </div>
+
+                {/* Right Column: Title & Full Story */}
+                <div className="lg:col-span-8 flex flex-col justify-center space-y-4">
+                  <h3 className="text-2xl md:text-4xl font-headline font-bold text-slate-900 leading-tight">
+                    {activeEvent.title}
+                  </h3>
+                  
+                  <p className="text-slate-600 text-base md:text-xl leading-relaxed font-light">
+                    {activeEvent.content}
+                  </p>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Bottom Pagination & Navigation Controls */}
+        <div className="flex items-center justify-between mt-8 pt-4 border-t border-slate-100">
+          <button
+            onClick={handlePrev}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-slate-200 text-slate-700 hover:border-primary hover:text-primary transition-all text-xs md:text-sm font-bold bg-white shadow-sm hover:shadow"
+            aria-label="Previous era"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            <span>Previous Era</span>
+          </button>
+
+          {/* Quick Indicator Dots */}
+          <div className="flex gap-2">
+            {timelineData.map((_, idx) => (
               <button
-                key={`tab-${idx}`}
+                key={`dot-btn-${idx}`}
                 onClick={() => setActiveIndex(idx)}
                 className={cn(
-                  "group px-4 py-2 md:px-5 md:py-2.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all duration-300 border flex items-center gap-2",
-                  activeIndex === idx
-                    ? "bg-primary text-white border-transparent shadow-lg shadow-primary/25 scale-105"
-                    : "bg-white/80 hover:bg-white text-muted-foreground border-primary/10 hover:border-primary/20 hover:text-primary"
+                  "h-2.5 rounded-full transition-all duration-300",
+                  activeIndex === idx ? "w-8 bg-primary" : "w-2.5 bg-slate-200 hover:bg-slate-300"
                 )}
-              >
-                {event.year}
-                <ChevronRight
-                  className={cn(
-                    "w-3.5 h-3.5 transition-transform duration-300",
-                    activeIndex === idx ? "rotate-90 text-white" : "group-hover:translate-x-0.5 text-slate-400"
-                  )}
-                />
-              </button>
+                aria-label={`Go to era ${idx + 1}`}
+              />
             ))}
           </div>
-        </div>
 
-        {/* Content Box Area */}
-        <div className="relative w-full max-w-4xl px-4 md:px-6 flex items-center justify-center min-h-[300px]">
-          <AnimatePresence mode="wait">
-            {timelineData.map((event, index) => {
-              const isActive = activeIndex === index;
-              if (!isActive) return null;
-
-              const yearParts = event.year.split("-");
-
-              return (
-                <motion.div
-                  key={event.title}
-                  initial={{ opacity: 0, y: 15, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -15, scale: 0.98 }}
-                  transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
-                  className="w-full max-w-3xl"
-                >
-                  <Card className="w-full border-primary/10 bg-white shadow-xl p-6 md:p-8 rounded-[2rem] flex flex-col justify-center">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start gap-4 md:gap-5">
-                        <div className="bg-primary/5 px-4 py-2.5 rounded-2xl flex flex-col items-center justify-center border border-primary/10 shrink-0">
-                          <span className="text-lg md:text-xl font-bold text-primary leading-tight font-headline">
-                            {yearParts[0]}
-                          </span>
-                          {yearParts[1] && (
-                            <span className="text-[11px] text-muted-foreground font-semibold mt-0.5">
-                              to {yearParts[1]}
-                            </span>
-                          )}
-                        </div>
-                        <div className="space-y-0.5">
-                          <span className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">
-                            Milestone Phase
-                          </span>
-                          <CardTitle className="font-headline text-2xl md:text-3xl text-slate-800">
-                            {event.title}
-                          </CardTitle>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-muted-foreground leading-relaxed text-sm md:text-base font-light">
-                        {event.content}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
+          <button
+            onClick={handleNext}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-slate-200 text-slate-700 hover:border-primary hover:text-primary transition-all text-xs md:text-sm font-bold bg-white shadow-sm hover:shadow"
+            aria-label="Next era"
+          >
+            <span>Next Era</span>
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </div>
