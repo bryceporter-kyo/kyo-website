@@ -12,7 +12,7 @@ import CatalogueDonationModal from './_components/CatalogueDonationModal';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Heart, CalendarOff } from 'lucide-react';
-import { getTaxReceiptSettings } from '@/lib/taxReceipts';
+import { getTaxReceiptSettings, logTaxReceiptAudit } from '@/lib/taxReceipts';
 
 export default function UpbeatGiftCataloguePage() {
   const [selectedItem, setSelectedItem] = useState<CatalogueItem | null>(null);
@@ -29,6 +29,26 @@ export default function UpbeatGiftCataloguePage() {
   }, []);
 
   const handleOpenDonate = (item: CatalogueItem, withDedication = false) => {
+    // 1. Client console logging for live inspect debugging
+    console.log(`[Gift Catalogue] "Give This Gift" clicked: ${item.name} (${item.id}) - Price: ${item.displayPrice}`);
+
+    // 2. Persist audit log event to Firestore so administrators can track interest in /admin/donations
+    logTaxReceiptAudit({
+      eventType: 'gift_selection_started',
+      title: `Gift Selected: ${item.name}`,
+      description: `Donor opened the gift donation modal for "${item.name}" (${item.displayPrice})${withDedication ? ' with Dedication Add-on preselected' : ''}.`,
+      metadata: {
+        itemId: item.id,
+        itemName: item.name,
+        displayPrice: item.displayPrice,
+        category: item.category,
+        withDedication,
+      },
+      status: 'info',
+    }).catch((err) => {
+      console.warn('[Gift Catalogue] Failed to record audit log for gift selection:', err);
+    });
+
     try {
       // @ts-ignore
       window.va?.track('gift_catalogue_donate_click', { item_id: item.id, with_dedication: withDedication });

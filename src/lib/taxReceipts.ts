@@ -69,7 +69,10 @@ export interface TaxReceiptAuditLog {
     | 'connection_test_failed' 
     | 'webhook_received' 
     | 'manual_receipt_synced' 
-    | 'monthly_held';
+    | 'monthly_held'
+    | 'gift_selection_started'
+    | 'payment_intent_created'
+    | 'payment_submitted';
   title: string;
   description: string;
   metadata?: Record<string, any>;

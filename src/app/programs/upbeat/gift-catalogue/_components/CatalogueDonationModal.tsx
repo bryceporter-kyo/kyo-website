@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CatalogueItem } from '@/lib/catalogue-items';
 import { Loader2, CheckCircle2, ShieldCheck, Heart, Sparkles, ArrowRight, ArrowLeft } from 'lucide-react';
+import { logTaxReceiptAudit } from '@/lib/taxReceipts';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
@@ -58,9 +59,25 @@ function StripePaymentElementForm({ amount, name, email, onSuccess }: CheckoutFo
     });
 
     if (error) {
+      console.error('[Gift Catalogue Checkout] Payment failed:', error.message);
+      logTaxReceiptAudit({
+        eventType: 'payment_submitted',
+        title: 'Payment Confirmation Failed',
+        description: `Stripe confirmPayment failed for ${name} ($${amount.toFixed(2)}): ${error.message}`,
+        metadata: { error: error.message, amount, name, email },
+        status: 'error',
+      }).catch(console.warn);
       setErrorMessage(error.message || 'Payment confirmation failed. Please check your card details.');
       setIsProcessing(false);
     } else {
+      console.log(`[Gift Catalogue Checkout] Payment succeeded for ${name} ($${amount.toFixed(2)})`);
+      logTaxReceiptAudit({
+        eventType: 'payment_submitted',
+        title: 'Payment Succeeded (Client)',
+        description: `Donor ${name} completed payment of $${amount.toFixed(2)} CAD via Stripe Elements. Waiting for webhook processing.`,
+        metadata: { amount, name, email },
+        status: 'success',
+      }).catch(console.warn);
       setIsProcessing(false);
       onSuccess();
     }
@@ -248,6 +265,23 @@ export default function CatalogueDonationModal({
       if (!res.ok) {
         throw new Error(data.error || 'Failed to initialize payment.');
       }
+
+      console.log(`[Gift Catalogue] Stripe payment intent created for ${name.trim()} ($${data.amount})`);
+      logTaxReceiptAudit({
+        eventType: 'payment_intent_created',
+        title: `Payment Intent Created: ${item.name}`,
+        description: `Created Stripe PaymentIntent for ${name.trim()} ($${data.amount} CAD). Item: ${item.name}. Tax receipt requested: ${taxReceiptRequested && isTaxReceiptEligible}.`,
+        metadata: {
+          itemId: item.id,
+          itemName: item.name,
+          amount: data.amount,
+          donorEmail: email.trim(),
+          donorName: name.trim(),
+          taxReceiptRequested: taxReceiptRequested && isTaxReceiptEligible,
+          effectiveDedication,
+        },
+        status: 'info',
+      }).catch(console.warn);
 
       setClientSecret(data.clientSecret);
       setConfirmedAmount(data.amount);
