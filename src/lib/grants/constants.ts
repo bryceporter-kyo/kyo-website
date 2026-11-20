@@ -135,6 +135,31 @@ export function sanitizeSlug(text: string): string {
 }
 
 /**
+ * Generate canonical public Case for Support URL for a Grant
+ * /support-us/case-for-support/{uid6}/{funder-slug}/{year}
+ * or with optional programSlug:
+ * /support-us/case-for-support/{uid6}/{funder-slug}/{year}/{program-slug}
+ */
+export function getGrantPublicUrl(grant: {
+  id?: string;
+  funderName?: string;
+  slug?: string;
+  grantCycleYear?: string;
+  startedAt?: string;
+  createdAt?: string;
+  programSlug?: string;
+}): string {
+  const uid6 = grant.id ? grant.id.substring(0, 6) : 'grantx';
+  const funderSlug = grant.slug || sanitizeSlug(grant.funderName || 'funder');
+  const year = grant.grantCycleYear || new Date(grant.startedAt || grant.createdAt || Date.now()).getFullYear().toString();
+  const base = `/support-us/case-for-support/${uid6}/${funderSlug}/${year}`;
+  if (grant.programSlug && grant.programSlug.trim()) {
+    return `${base}/${sanitizeSlug(grant.programSlug)}`;
+  }
+  return base;
+}
+
+/**
  * Calculate Levenshtein distance between two strings
  */
 export function levenshteinDistance(a: string, b: string): number {

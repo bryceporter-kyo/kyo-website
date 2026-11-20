@@ -79,6 +79,9 @@ function doPost(e) {
       case "pullQaDoc":
         return handlePullQaDoc(payload);
 
+      case "pushQaDoc":
+        return handlePushQaDoc(payload);
+
       case "syncCalendarEvent":
         return handleSyncCalendarEvent(payload);
 
@@ -256,6 +259,65 @@ function handlePullQaDoc(payload) {
     success: true,
     rowCount: pulledData.length,
     rows: pulledData,
+    syncedAt: new Date().toISOString(),
+  });
+}
+
+/**
+ * Push Questions to Q&A Doc (Website -> Doc)
+ * Updates questions in Column A, preserves existing draft answers in Column B,
+ * and appends any newly added questions.
+ */
+function handlePushQaDoc(payload) {
+  const docId = payload.docId;
+  const questions = payload.questions || [];
+
+  if (!docId) {
+    return jsonResponse({ success: false, error: "Missing docId" }, 400);
+  }
+
+  const doc = DocumentApp.openById(docId);
+  const body = doc.getBody();
+  const tables = body.getTables();
+
+  let table;
+  if (tables.length === 0) {
+    // If no table exists, create one
+    const tableData = [["Question", "Draft Answer"]];
+    questions.forEach(function(q) {
+      const qLabel = q.charLimit ? q.question + " (Limit: " + q.charLimit + " chars)" : q.question;
+      tableData.push([qLabel, ""]);
+    });
+    table = body.appendTable(tableData);
+    table.getRow(0).editAsText().setBold(true);
+  } else {
+    table = tables[0];
+    const existingRowCount = table.getNumRows();
+
+    // Map existing answers in Column B by index
+    for (let i = 0; i < questions.length; i++) {
+      const q = questions[i];
+      const qLabel = q.charLimit ? q.question + " (Limit: " + q.charLimit + " chars)" : q.question;
+      const targetRowIndex = i + 1; // row 0 is header
+
+      if (targetRowIndex < existingRowCount) {
+        // Update Column A, preserve Column B answer
+        table.getRow(targetRowIndex).getCell(0).setText(qLabel);
+      } else {
+        // Append row
+        const newRow = table.appendTableRow();
+        newRow.appendTableCell(qLabel);
+        newRow.appendTableCell("");
+      }
+    }
+  }
+
+  doc.saveAndClose();
+
+  return jsonResponse({
+    success: true,
+    rowsPushed: questions.length,
+    syncedAt: new Date().toISOString(),
   });
 }
 

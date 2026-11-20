@@ -16,7 +16,7 @@ const adminTiles = [
     { href: "/admin/registrations", label: "Registration Forms", icon: ClipboardList },
     { href: "/admin/legal", label: "Legal Pages", icon: Gavel },
     { href: "/admin/sitemap", label: "Sitemap & SEO", icon: Map },
-    { href: "/admin/case-for-support", label: "Case For Support", icon: Sparkles },
+    { href: "/grants", label: "Grants & Proposals", icon: Sparkles },
 ]
 
 export default function AdminDashboardPage() {

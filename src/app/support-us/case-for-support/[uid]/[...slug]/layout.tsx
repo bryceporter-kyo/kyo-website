@@ -1,19 +1,21 @@
 import { Metadata } from 'next';
 import { fetchGrantByTruncatedUidServer } from '@/lib/case-for-support-server';
+import { getGrantPublicUrl } from '@/lib/grants/constants';
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ uid: string; funder: string; year: string }>;
+  params: Promise<{ uid: string; slug: string[] }>;
 }): Promise<Metadata> {
   let noIndex = true;
   let noFollow = false;
   let title = "Case for Support | Kawartha Youth Orchestra";
   let description = "Confidential funding proposal and case for support for Kawartha Youth Orchestra.";
+  let canonical = "https://kyo.ca/support-us/case-for-support";
   
   try {
-    const resolvedParams = await params;
-    const grant = await fetchGrantByTruncatedUidServer(resolvedParams.uid);
+    const { uid } = await params;
+    const grant = await fetchGrantByTruncatedUidServer(uid);
     if (grant) {
       if (grant.published) {
         noIndex = false;
@@ -25,14 +27,14 @@ export async function generateMetadata({
         noFollow = grant.noFollow;
       }
 
-      title = `${grant.funderName} (${grant.grantCycleYear}) — Case for Support | KYO`;
-      description = `Case for Support proposal for ${grant.funderName} requesting support for KYO's ${grant.programOfSupport || 'music education'} programs.`;
+      const year = grant.grantCycleYear || new Date(grant.startedAt || grant.createdAt || Date.now()).getFullYear().toString();
+      title = `${grant.funderName} (${year}) — Case for Support | KYO`;
+      description = `Case for Support proposal for ${grant.funderName} requesting support for KYO's ${grant.programName || 'music education'} programs.`;
+      canonical = `https://kyo.ca${getGrantPublicUrl(grant)}`;
     }
   } catch (error) {
     console.error("Error fetching grant for metadata:", error);
   }
-
-  const { uid, funder, year } = await params;
 
   return {
     title,
@@ -44,7 +46,7 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
-      url: `https://kyo.ca/support-us/case-for-support/${uid}/${funder}/${year}`,
+      url: canonical,
       siteName: 'Kawartha Youth Orchestra',
       type: 'article',
     },
@@ -54,7 +56,7 @@ export async function generateMetadata({
       description,
     },
     alternates: {
-      canonical: `https://kyo.ca/support-us/case-for-support/${uid}/${funder}/${year}`,
+      canonical,
     },
   };
 }

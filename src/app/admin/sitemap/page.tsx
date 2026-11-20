@@ -19,7 +19,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { fetchPageMetadata, savePageMetadata, type PageMetadata } from "@/lib/metadata";
-import { fetchAllGrants, getGrantUrlPath } from "@/lib/case-for-support";
+import { fetchAllGrants } from "@/lib/grants/grants-service";
+import { getGrantPublicUrl } from "@/lib/grants/constants";
 
 type SitemapNode = {
   path: string;
@@ -43,8 +44,8 @@ export default function SitemapAdminPage() {
         const published = grants.filter((g) => g.published);
         setGrantNodes(
           published.map((g) => ({
-            path: getGrantUrlPath(g),
-            title: `${g.funderName} (${g.grantCycleYear})`,
+            path: getGrantPublicUrl(g),
+            title: `${g.funderName} (${g.grantCycleYear || new Date(g.startedAt || g.createdAt || Date.now()).getFullYear()})`,
           }))
         );
       })

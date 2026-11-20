@@ -186,9 +186,12 @@ export async function pullAnswersFromGoogleDoc(
       publicVisible: true,
     }));
 
+    const syncedAt = result.syncedAt || new Date().toISOString();
+
     await saveGrant({
       id: grant.id,
       questions: updatedQuestions,
+      qaLastSyncedAt: syncedAt,
     }, user);
 
     if (user) {
@@ -205,6 +208,42 @@ export async function pullAnswersFromGoogleDoc(
   }
 
   return { success: false, rowsUpdated: 0, rows: [] };
+}
+
+/**
+ * Push questions from website to Google Doc (Website -> Doc)
+ * Updates Column A and appends new questions, preserving existing Column B draft answers.
+ */
+export async function pushQuestionsToGoogleDoc(
+  grant: Grant,
+  docId: string,
+  user?: { id: string; email: string; name?: string }
+): Promise<{ success: boolean; rowsPushed: number }> {
+  const questions = grant.questions || [];
+  const result = await callGrantsAppsScript('pushQaDoc', { docId, questions });
+
+  if (result.success) {
+    const syncedAt = result.syncedAt || new Date().toISOString();
+
+    await saveGrant({
+      id: grant.id,
+      qaLastSyncedAt: syncedAt,
+    }, user);
+
+    if (user) {
+      await logGrantAudit({
+        userId: user.id,
+        userEmail: user.email,
+        userName: user.name,
+        action: 'PUSH_QA_DOC',
+        summary: `Pushed ${questions.length} questions to Google Doc (${docId}). Preserved draft answers.`,
+      });
+    }
+
+    return { success: true, rowsPushed: questions.length };
+  }
+
+  return { success: false, rowsPushed: 0 };
 }
 
 /**

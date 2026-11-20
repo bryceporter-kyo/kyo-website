@@ -1,4 +1,4 @@
-import { GrantCase } from './case-for-support';
+import { Grant } from './grants/types';
 
 /**
  * Decodes Firestore REST field types into standard JavaScript values.
@@ -37,13 +37,13 @@ function decodeFirestoreDocument(doc: any): any {
 }
 
 /**
- * Fetch all published grants via Firestore REST API (Server Component safe)
+ * Fetch all published grants from grant_records collection via Firestore REST API (Server Component safe)
  */
-export async function fetchPublishedGrantsServer(): Promise<GrantCase[]> {
+export async function fetchPublishedGrantsServer(): Promise<Grant[]> {
   const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
   if (!projectId) return [];
 
-  const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/default/documents/grants`;
+  const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/default/documents/grant_records`;
 
   try {
     const res = await fetch(url, {
@@ -58,7 +58,7 @@ export async function fetchPublishedGrantsServer(): Promise<GrantCase[]> {
     const data = await res.json();
     if (!data.documents || data.documents.length === 0) return [];
 
-    const grants: GrantCase[] = data.documents
+    const grants: Grant[] = data.documents
       .map(decodeFirestoreDocument)
       .filter((g: any) => g.published === true);
 
@@ -70,13 +70,13 @@ export async function fetchPublishedGrantsServer(): Promise<GrantCase[]> {
 }
 
 /**
- * Fetch a single grant by truncated UID via Firestore REST API
+ * Fetch a single grant by truncated UID from grant_records via Firestore REST API
  */
-export async function fetchGrantByTruncatedUidServer(truncatedUid: string): Promise<GrantCase | null> {
+export async function fetchGrantByTruncatedUidServer(truncatedUid: string): Promise<Grant | null> {
   const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
   if (!projectId || !truncatedUid) return null;
 
-  const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/default/documents/grants`;
+  const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/default/documents/grant_records`;
 
   try {
     const res = await fetch(url, {
@@ -94,7 +94,7 @@ export async function fetchGrantByTruncatedUidServer(truncatedUid: string): Prom
     for (const doc of data.documents) {
       const id = doc.name.split('/').pop();
       if (id && id.substring(0, 6) === truncatedUid) {
-        return decodeFirestoreDocument(doc) as GrantCase;
+        return decodeFirestoreDocument(doc) as Grant;
       }
     }
 

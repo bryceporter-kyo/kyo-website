@@ -4,6 +4,7 @@ import {
   fetchBoardMembersServer,
   fetchGovernanceDocumentsServer 
 } from '@/lib/case-for-support-server';
+import { getGrantPublicUrl } from '@/lib/grants/constants';
 import { CaseForSupportIndexJsonLd } from '@/components/shared/JsonLd';
 import CaseForSupportIndexClient from './_components/CaseForSupportIndexClient';
 import Link from 'next/link';
@@ -21,16 +22,16 @@ export default async function CaseForSupportPage() {
 
   const grantParts = publishedGrants.map((g) => {
     const uid = g.id ? g.id.substring(0, 6) : 'grant';
-    const funder = (g.funderName || 'funder')
+    const funder = (g.slug || g.funderName || 'funder')
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
-    const year = g.grantCycleYear || '2026';
+    const year = g.grantCycleYear || new Date(g.startedAt || g.createdAt || Date.now()).getFullYear().toString();
     return {
       uid,
       funder,
       year,
-      name: `${g.funderName} (${g.grantCycleYear}) — ${g.programOfSupport || 'Case for Support'}`,
+      name: `${g.funderName} (${year}) — ${g.programName || 'Case for Support'}`,
     };
   });
 
@@ -67,16 +68,11 @@ export default async function CaseForSupportPage() {
             <h2>Published Grant Cases</h2>
             <ul>
               {publishedGrants.map((grant) => {
-                const uid = grant.id ? grant.id.substring(0, 6) : 'grant';
-                const funderSlug = (grant.funderName || 'funder')
-                  .toLowerCase()
-                  .replace(/[^a-z0-9]+/g, '-')
-                  .replace(/(^-|-$)/g, '');
-                const year = grant.grantCycleYear || '2026';
+                const year = grant.grantCycleYear || new Date(grant.startedAt || grant.createdAt || Date.now()).getFullYear().toString();
                 return (
                   <li key={grant.id}>
-                    <Link href={`/support-us/case-for-support/${uid}/${funderSlug}/${year}`}>
-                      {grant.funderName} ({grant.grantCycleYear}) — {grant.programOfSupport} Case for Support
+                    <Link href={getGrantPublicUrl(grant)}>
+                      {grant.funderName} ({year}) — {grant.programName || 'General Fund'} Case for Support
                     </Link>
                   </li>
                 );

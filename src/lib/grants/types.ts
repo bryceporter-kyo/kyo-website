@@ -159,17 +159,27 @@ export interface ProgramSplit {
   amount: number;
 }
 
+export type PrimaryProgram = 'general' | 'orchestras' | 'upbeat' | 'lessons';
+export type FundingType = 'one-time' | 'multi-year' | 'matching';
+export type BudgetLineItem = { item: string; amount: string; category?: string; subcategory?: string };
+export type TimelineMilestone = { milestone: string; date: string; description?: string };
+export type PastSupportRecord = { year: string; amount: string; note?: string };
+export type GrantQAPair = { question: string; answer: string };
+
 export interface Grant {
   id: string;
   funderId: string;
   funderName: string;
   programId: string;
   programName: string;
+  grantName?: string | null;
   stage: string;
   stageEnteredAt: string;
   assignedOwnerEmail: string;
   assignedOwnerName?: string;
   kyoPrograms: string[]; // ["The Orchestras", "Upbeat!", "Chamber Music", "Lessons"]
+  primaryProgram?: PrimaryProgram;
+  grantCycleYear?: string;
   
   // Dates
   startedAt?: string;
@@ -191,6 +201,10 @@ export interface Grant {
 
   // Money & allocation
   amountRequested?: number;
+  fundingType?: FundingType | null;
+  numberOfYears?: number | null;
+  matchRequired?: boolean | null;
+  matchAmount?: string | null;
   awardMode?: 'total' | 'per-year';
   amountAwarded?: number;
   yearlyAllocations?: YearlyAllocation[];
@@ -203,12 +217,49 @@ export interface Grant {
   loiLetterDocId?: string;
   loiQuestionsDocId?: string;
   qaDocId?: string;
+  qaLastSyncedAt?: string | null;
 
-  // Public portal publishing
+  // Public portal publishing & URLs
   slug: string;
   slugLocked?: boolean;
   published?: boolean;
-  programSlug?: string; // used for disambiguation
+  programSlug?: string; // used for disambiguation / subprogram
+
+  // Case for Support Narrative Overrides (Public CFS)
+  customLetterBody?: string[] | null;
+  valuesAlignment?: string | null;
+  reportingPlan?: string | null;
+  recognitionPlan?: string | null;
+  impactStatement?: string | null;
+  programDescription?: string | null;
+  communityNeed?: string | null;
+  organizationalCapacity?: string | null;
+
+  // Case for Support Structured Content
+  pastSupport?: PastSupportRecord[] | null;
+  budgetBreakdown?: BudgetLineItem[] | null;
+  timeline?: TimelineMilestone[] | null;
+
+  // Media & Documents
+  headerImageUrl?: string | null;
+  caseForSupportPdfUrl?: string | null;
+  grantApplicationPdfUrl?: string | null;
+
+  // Contact & Signer Overrides
+  contactName?: string | null;
+  contactEmail?: string | null;
+  signerName?: string | null;
+  signerTitle?: string | null;
+  signerImageUrl?: string | null;
+
+  // SEO & Indexing
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  noIndex?: boolean | null;
+  noFollow?: boolean | null;
+
+  // Internal Notes
+  internalNotes?: string | null;
 
   // Clones
   clonedFromGrantId?: string;

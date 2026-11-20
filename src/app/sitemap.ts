@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { fetchPublishedGrantsServer } from '@/lib/case-for-support-server';
+import { getGrantPublicUrl } from '@/lib/grants/constants';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://kyo.ca';
@@ -44,16 +45,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // Exclude any grant where the admin has toggled noIndex = true
       .filter((g) => !g.noIndex)
       .map((g) => {
-        const uid = g.id ? g.id.substring(0, 6) : 'grant';
-        const funderSlug = (g.funderName || 'funder')
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/(^-|-$)/g, '');
-        const year = g.grantCycleYear || new Date().getFullYear().toString();
-
         return {
-          url: `${baseUrl}/support-us/case-for-support/${uid}/${funderSlug}/${year}`,
-          lastModified: g.submissionDate ? new Date(g.submissionDate) : new Date(),
+          url: `${baseUrl}${getGrantPublicUrl(g)}`,
+          lastModified: g.submittedOn ? new Date(g.submittedOn) : new Date(),
           changeFrequency: 'weekly' as const,
           priority: 0.7,
         };

@@ -9,7 +9,7 @@ import type {
   PastSupportRecord,
   PrimaryProgram,
   TimelineMilestone,
-} from '@/lib/case-for-support';
+} from '@/lib/grants/types';
 import { getLinkById } from '@/lib/links';
 
 const PROGRAM_LABELS: Record<PrimaryProgram, string> = {

@@ -8,6 +8,20 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  async redirects() {
+    return [
+      {
+        source: '/admin/case-for-support',
+        destination: '/grants',
+        permanent: false,
+      },
+      {
+        source: '/admin/case-for-support/:path*',
+        destination: '/grants',
+        permanent: false,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {

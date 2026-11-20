@@ -9,8 +9,28 @@ import {
 export { getGrantById } from './grant-actions';
 import { 
   DEFAULT_GRANTS_SETTINGS, computeSortName, sanitizeSlug, 
-  normalizeFunderName, extractDomain, levenshteinDistance 
+  normalizeFunderName, extractDomain, levenshteinDistance,
+  getGrantPublicUrl
 } from './constants';
+
+async function triggerGrantRevalidation(grant: Partial<Grant>) {
+  try {
+    const paths = ['/support-us/case-for-support'];
+    if (grant.id) {
+      paths.push(getGrantPublicUrl(grant));
+    }
+    await fetch('/api/revalidate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        secret: 'kyo-revalidate-secret-token-2026',
+        paths,
+      }),
+    });
+  } catch (err) {
+    console.warn('[GrantService] Revalidation notice:', err);
+  }
+}
 
 const GRANTS_SETTINGS_COLL = 'grants_settings';
 const GRANTS_SETTINGS_DOC = 'config';
@@ -276,6 +296,8 @@ export async function saveGrant(
       });
     }
 
+    triggerGrantRevalidation({ id: grant.id, ...dataToSave });
+
     return { id: grant.id, ...dataToSave } as Grant;
   } else {
     const dataToSave: Omit<Grant, 'id'> = {
@@ -308,6 +330,8 @@ export async function saveGrant(
         summary: `Created grant for ${grant.funderName} (${dataToSave.stage})`,
       });
     }
+
+    triggerGrantRevalidation({ id: docRef.id, ...dataToSave });
 
     return { id: docRef.id, ...dataToSave } as Grant;
   }

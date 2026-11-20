@@ -1,18 +1,17 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { 
   fetchGrantByTruncatedUidServer, 
-  fetchPublishedGrantsServer,
   fetchBoardMembersServer,
   fetchGovernanceDocumentsServer 
 } from '@/lib/case-for-support-server';
+import { getGrantPublicUrl } from '@/lib/grants/constants';
 import { GrantDocumentJsonLd } from '@/components/shared/JsonLd';
 import GrantDetailClient from './_components/GrantDetailClient';
 
 interface Props {
   params: Promise<{
     uid: string;
-    funder: string;
-    year: string;
+    slug: string[];
   }>;
 }
 
@@ -20,59 +19,56 @@ interface Props {
 export const revalidate = 86400;
 export const dynamicParams = true;
 
-export async function generateStaticParams() {
-  try {
-    const grants = await fetchPublishedGrantsServer();
-    return grants.map((grant) => {
-      const uid = grant.id ? grant.id.substring(0, 6) : 'grant';
-      const funder = (grant.funderName || 'funder')
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
-      const year = grant.grantCycleYear || '2026';
-      return { uid, funder, year };
-    });
-  } catch (err) {
-    console.error('[DynamicGrantPage] Error generating static params:', err);
-    return [];
-  }
-}
-
 export default async function DynamicCaseForSupportPage(props: Props) {
-  const { uid, funder, year } = await props.params;
+  const { uid, slug = [] } = await props.params;
+
   const [grant, board, documents] = await Promise.all([
     fetchGrantByTruncatedUidServer(uid),
     fetchBoardMembersServer(),
     fetchGovernanceDocumentsServer(),
   ]);
 
-  if (!grant) {
+  if (!grant || !grant.published) {
     notFound();
   }
 
-  const canonicalUrl = `https://kyo.ca/support-us/case-for-support/${uid}/${funder}/${year}`;
+  // Canonical URL calculation
+  const canonicalPath = getGrantPublicUrl(grant);
+  const currentPath = `/support-us/case-for-support/${uid}/${slug.join('/')}`;
+
+  // If the human-readable slug/year in URL does not match canonical (e.g. funder renamed or year changed),
+  // redirect permanently/canonically to prevent link rot
+  if (currentPath !== canonicalPath) {
+    redirect(canonicalPath);
+  }
+
+  const canonicalUrl = `https://kyo.ca${canonicalPath}`;
+  const year = grant.grantCycleYear || new Date(grant.startedAt || grant.createdAt || Date.now()).getFullYear().toString();
+  const visibleQuestions = (grant.questions || []).filter(q => q.publicVisible !== false);
 
   return (
     <>
       {/* Schema.org DigitalDocument Structured Data */}
       <GrantDocumentJsonLd
-        title={`Case for Support: ${grant.funderName} (${grant.grantCycleYear})`}
+        title={`Case for Support: ${grant.funderName} (${year})`}
         funderName={grant.funderName}
-        year={grant.grantCycleYear}
-        summary={`Funding proposal by Kawartha Youth Orchestra requesting support for ${grant.programOfSupport || 'youth music education'}.`}
+        year={year}
+        summary={`Funding proposal by Kawartha Youth Orchestra requesting support for ${grant.programName || 'youth music education'}.`}
         url={canonicalUrl}
-        datePublished={grant.submissionDate}
-        amountRequested={grant.amountRequested}
-        programArea={grant.programOfSupport || grant.primaryProgram}
+        datePublished={grant.submittedOn || grant.createdAt || new Date().toISOString()}
+        amountRequested={grant.amountRequested || 0}
+        programArea={grant.programName || 'Youth Music Education'}
       />
 
       {/* Crawlable Semantic Content for Search Engines & AI Crawlers */}
       <section className="sr-only" aria-label="Grant Case for Support Proposal Document">
         <h1>Kawartha Youth Orchestra Case for Support — {grant.funderName}</h1>
         <p><strong>Funder:</strong> {grant.funderName}</p>
-        <p><strong>Grant Cycle:</strong> {grant.grantCycleYear}</p>
-        <p><strong>Program Area:</strong> {grant.primaryProgram} ({grant.programOfSupport})</p>
-        <p><strong>Amount Requested:</strong> ${grant.amountRequested.toLocaleString('en-CA')}</p>
+        <p><strong>Grant Cycle:</strong> {year}</p>
+        <p><strong>Program Area:</strong> {grant.programName}</p>
+        {grant.amountRequested ? (
+          <p><strong>Amount Requested:</strong> ${(grant.amountRequested).toLocaleString('en-CA')}</p>
+        ) : null}
         {grant.valuesAlignment && (
           <div>
             <h2>Alignment with {grant.funderName}</h2>
@@ -87,13 +83,13 @@ export default async function DynamicCaseForSupportPage(props: Props) {
             ))}
           </div>
         )}
-        {grant.grantQA && grant.grantQA.length > 0 && (
+        {visibleQuestions.length > 0 && (
           <div>
-            <h2>Grant Questions & Answers</h2>
-            {grant.grantQA.map((qa, i) => (
-              <div key={i}>
+            <h2>Grant Questions &amp; Answers</h2>
+            {visibleQuestions.map((qa, i) => (
+              <div key={qa.id || i}>
                 <h3>{qa.question}</h3>
-                <p>{qa.answer}</p>
+                <p>{qa.answerHtml || (qa as any).answer || ''}</p>
               </div>
             ))}
           </div>
