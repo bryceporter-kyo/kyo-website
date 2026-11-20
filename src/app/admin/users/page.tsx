@@ -9,15 +9,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Pencil, Trash2, User as UserIcon, Download, Upload, Loader2, Camera, Link as LinkIcon, Unlink, UserCheck, Shield, KeyRound, Mail, Send } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, User as UserIcon, Download, Upload, Loader2, Camera, Link as LinkIcon, Unlink, UserCheck, Shield, KeyRound, Mail, Send, Globe } from "lucide-react";
 import Link from "next/link";
 import { fetchUsersFromFirebase, addUserToFirebase, deleteUserFromFirebase, updateUserInFirebase, sendUserPasswordReset } from "@/lib/users";
 import type { User as UserType, UserRole, LinkedProfile } from "@/lib/users";
-import { fetchStaffFromFirebase, fetchBoardFromFirebase, StaffMember, BoardMember } from "@/lib/staff";
+import { fetchStaffFromFirebase, fetchBoardFromFirebase, addStaffToFirebase, addBoardToFirebase, StaffMember, BoardMember } from "@/lib/staff";
 import { uploadImage } from "@/lib/image-service";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CsvManagerDialog } from "@/components/shared/CsvManagerDialog";
@@ -57,6 +59,10 @@ const userSchema = z.object({
   }),
   linkedProfileKey: z.string().optional(),
   photo: z.any().optional(),
+  createPublicProfile: z.boolean().default(false),
+  publicProfileType: z.enum(["staff", "board"]).default("staff"),
+  publicProfileTitle: z.string().optional(),
+  publicProfileBio: z.string().optional(),
 });
 
 function getInitials(name: string): string {
@@ -81,6 +87,10 @@ export default function UsersAdminPage() {
     const [editingUser, setEditingUser] = React.useState<UserType | null>(null);
     const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
 
+    // Auto-match link state
+    const [pendingAutoLink, setPendingAutoLink] = React.useState<{ user: UserType; member: (StaffMember | BoardMember) & { type: 'staff' | 'board' } } | null>(null);
+    const [isAutoLinking, setIsAutoLinking] = React.useState(false);
+
     const form = useForm<z.infer<typeof userSchema>>({
         resolver: zodResolver(userSchema),
         defaultValues: {
@@ -89,6 +99,10 @@ export default function UsersAdminPage() {
             roles: [],
             linkedProfileKey: "none",
             photo: undefined,
+            createPublicProfile: false,
+            publicProfileType: "staff",
+            publicProfileTitle: "",
+            publicProfileBio: "",
         },
     });
 
@@ -100,6 +114,10 @@ export default function UsersAdminPage() {
             roles: [],
             linkedProfileKey: "none",
             photo: undefined,
+            createPublicProfile: false,
+            publicProfileType: "staff",
+            publicProfileTitle: "",
+            publicProfileBio: "",
         },
     });
 
@@ -123,6 +141,10 @@ export default function UsersAdminPage() {
                 roles: editingUser.roles,
                 linkedProfileKey: key,
                 photo: undefined,
+                createPublicProfile: false,
+                publicProfileType: "staff",
+                publicProfileTitle: "",
+                publicProfileBio: "",
             });
         }
     }, [editingUser, editForm]);
@@ -179,7 +201,59 @@ export default function UsersAdminPage() {
         return undefined;
     }
 
-    // When linked profile is changed in the Create form, auto-fill name/email if empty
+    // Helper to find an unlinked team member with exact matching name
+    function findMatchingUnlinkedTeamMember(user: UserType): ((StaffMember | BoardMember) & { type: 'staff' | 'board' }) | null {
+        if (user.linkedProfile) return null; // already linked
+        const normalizedUserName = user.name.trim().toLowerCase();
+        if (!normalizedUserName) return null;
+
+        // Check staff first
+        const matchedStaff = staff.find(s => s.name.trim().toLowerCase() === normalizedUserName);
+        if (matchedStaff) {
+            return { ...matchedStaff, type: 'staff' };
+        }
+
+        // Check board next
+        const matchedBoard = board.find(b => b.name.trim().toLowerCase() === normalizedUserName);
+        if (matchedBoard) {
+            return { ...matchedBoard, type: 'board' };
+        }
+
+        return null;
+    }
+
+    // Confirm auto-link user to team member
+    async function handleConfirmAutoLink() {
+        if (!pendingAutoLink) return;
+        const { user, member } = pendingAutoLink;
+        setIsAutoLinking(true);
+        try {
+            const linkedProfile: LinkedProfile = {
+                type: member.type,
+                id: member.id,
+                name: member.name,
+                title: member.title,
+            };
+
+            await updateUserInFirebase(user.id, { linkedProfile });
+
+            setUsers(prev => prev.map(u => u.id === user.id ? { ...u, linkedProfile } : u));
+            toast({
+                title: "Profile Linked!",
+                description: `Successfully linked user "${user.name}" to ${member.type === 'staff' ? 'staff' : 'board'} member "${member.name}".`,
+            });
+            setPendingAutoLink(null);
+        } catch (error) {
+            console.error("Failed to link profile:", error);
+            toast({
+                title: "Linking Error",
+                description: "Failed to link user to team profile. Please try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsAutoLinking(false);
+        }
+    }
     const handleCreateProfileSelect = (key: string) => {
         form.setValue("linkedProfileKey", key);
         if (key && key !== "none") {
@@ -272,7 +346,57 @@ export default function UsersAdminPage() {
                 photoUrl = await uploadImage(file, imageId);
             }
 
-            const linkedProfile = resolveLinkedProfile(values.linkedProfileKey);
+            let linkedProfile = resolveLinkedProfile(values.linkedProfileKey);
+
+            // If user checked option to create a public profile on /team and /admin/team
+            if (values.createPublicProfile && (!linkedProfile || values.linkedProfileKey === "none")) {
+                const teamTitle = values.publicProfileTitle?.trim() || "Team Member";
+                const teamBio = values.publicProfileBio?.trim() || "";
+
+                if (values.publicProfileType === "staff") {
+                    const newStaffMember = await addStaffToFirebase({
+                        name: values.name,
+                        title: teamTitle,
+                        email: values.email,
+                        bio: teamBio,
+                        image: photoUrl || "",
+                        isOnLeave: false,
+                    });
+                    setStaff(prev => [...prev, newStaffMember]);
+                    linkedProfile = {
+                        type: 'staff',
+                        id: newStaffMember.id,
+                        name: newStaffMember.name,
+                        title: newStaffMember.title,
+                    };
+                } else {
+                    const newBoardMember = await addBoardToFirebase({
+                        name: values.name,
+                        title: teamTitle,
+                        email: values.email,
+                        bio: teamBio,
+                        image: photoUrl || "",
+                        isOnLeave: false,
+                    });
+                    setBoard(prev => [...prev, newBoardMember]);
+                    linkedProfile = {
+                        type: 'board',
+                        id: newBoardMember.id,
+                        name: newBoardMember.name,
+                        title: newBoardMember.title,
+                    };
+                }
+
+                // Revalidate team pages so the new public profile appears immediately
+                fetch('/api/revalidate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        secret: 'kyo-revalidate-secret-token-2026',
+                        paths: ['/team', '/admin/team', '/support-us/case-for-support'],
+                    }),
+                }).catch(() => {});
+            }
 
             const newUser = await addUserToFirebase({
                 name: values.name,
@@ -285,7 +409,9 @@ export default function UsersAdminPage() {
             setUsers([...users, newUser]);
             toast({
                 title: "User Created!",
-                description: `"${values.name}" has been added with their permissions.`,
+                description: values.createPublicProfile 
+                    ? `"${values.name}" has been added with permissions and a public profile on /team.`
+                    : `"${values.name}" has been added with their permissions.`,
             });
             form.reset({
                 name: "",
@@ -293,6 +419,10 @@ export default function UsersAdminPage() {
                 roles: [],
                 linkedProfileKey: "none",
                 photo: undefined,
+                createPublicProfile: false,
+                publicProfileType: "staff",
+                publicProfileTitle: "",
+                publicProfileBio: "",
             });
         } catch (error) {
             console.error(error);
@@ -353,11 +483,28 @@ export default function UsersAdminPage() {
 
     async function handleDelete(userToDelete: UserType) {
         try {
+            // 1. Delete Firestore user document
             await deleteUserFromFirebase(userToDelete.id);
             setUsers(users.filter(user => user.id !== userToDelete.id));
+
+            // 2. Remove Firebase Auth user via server admin endpoint
+            try {
+                const res = await fetch("/api/admin/users/delete-auth", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email: userToDelete.email }),
+                });
+                const authResult = await res.json();
+                if (!res.ok) {
+                    console.warn("Failed to delete Firebase Auth user:", authResult.error);
+                }
+            } catch (authErr) {
+                console.warn("Error calling delete-auth API:", authErr);
+            }
+
             toast({
                 title: "User Deleted",
-                description: `"${userToDelete.name}" has been deleted.`,
+                description: `"${userToDelete.name}" (${userToDelete.email}) and their Firebase account have been deleted.`,
             });
         } catch (error) {
             console.error(error);
@@ -465,6 +612,7 @@ export default function UsersAdminPage() {
                                 ) : (
                                     users.map((user) => {
                                         const avatarSrc = getUserAvatarUrl(user);
+                                        const matchingTeamMember = findMatchingUnlinkedTeamMember(user);
                                         return (
                                             <TableRow key={user.id} className="group/row">
                                                 <TableCell className="font-medium">
@@ -491,6 +639,20 @@ export default function UsersAdminPage() {
                                                                 {user.linkedProfile.type === 'staff' ? 'Staff' : 'Board'}
                                                                 {user.linkedProfile.title ? `: ${user.linkedProfile.title}` : ''}
                                                             </Badge>
+                                                        </div>
+                                                    ) : matchingTeamMember ? (
+                                                        <div className="flex items-center gap-1.5">
+                                                            <span className="text-xs text-amber-600 italic">Unlinked</span>
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() => setPendingAutoLink({ user, member: matchingTeamMember })}
+                                                                className="h-6 px-2 text-[10px] bg-amber-50 text-amber-700 border-amber-300 hover:bg-amber-100 font-semibold gap-1"
+                                                                title={`Match found: ${matchingTeamMember.name} (${matchingTeamMember.type})`}
+                                                            >
+                                                                <LinkIcon className="w-2.5 h-2.5" />
+                                                                Link to {matchingTeamMember.type === 'staff' ? 'Staff' : 'Board'}
+                                                            </Button>
                                                         </div>
                                                     ) : (
                                                         <span className="text-xs text-muted-foreground italic">Unlinked</span>
@@ -538,6 +700,19 @@ export default function UsersAdminPage() {
                                                         <Button variant="ghost" size="icon" onClick={() => openEditDialog(user)} title="Edit User">
                                                             <Pencil className="h-4 w-4" />
                                                         </Button>
+
+                                                        {/* Auto-link button if match exists and unlinked */}
+                                                        {matchingTeamMember && (
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => setPendingAutoLink({ user, member: matchingTeamMember })}
+                                                                title={`Link to ${matchingTeamMember.name} (${matchingTeamMember.type})`}
+                                                                className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                                                            >
+                                                                <LinkIcon className="h-4 w-4" />
+                                                            </Button>
+                                                        )}
 
                                                         {/* Delete */}
                                                         <AlertDialog>
@@ -666,6 +841,100 @@ export default function UsersAdminPage() {
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
+
+                            {/* Option to create a public profile on /team and /admin/team */}
+                            <div className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/[0.03] space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-0.5">
+                                        <div className="flex items-center gap-2">
+                                            <Globe className="w-4 h-4 text-emerald-600" />
+                                            <FormLabel className="text-sm font-bold text-foreground cursor-pointer">
+                                                Create Public Profile on /team &amp; /admin/team
+                                            </FormLabel>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            Automatically create a public staff or board profile that appears on the website&apos;s Team page and Team Admin table.
+                                        </p>
+                                    </div>
+                                    <FormField
+                                        control={form.control}
+                                        name="createPublicProfile"
+                                        render={({ field }) => (
+                                            <FormControl>
+                                                <Switch
+                                                    checked={field.value}
+                                                    onCheckedChange={(checked) => {
+                                                        field.onChange(checked);
+                                                        if (checked) {
+                                                            // Clear existing linked profile selection since we're creating a new one
+                                                            form.setValue("linkedProfileKey", "none");
+                                                        }
+                                                    }}
+                                                />
+                                            </FormControl>
+                                        )}
+                                    />
+                                </div>
+
+                                {form.watch("createPublicProfile") && (
+                                    <div className="pt-2 border-t border-emerald-500/20 space-y-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <FormField
+                                                control={form.control}
+                                                name="publicProfileType"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel className="text-xs font-semibold">Team Category</FormLabel>
+                                                        <Select onValueChange={field.onChange} value={field.value}>
+                                                            <FormControl>
+                                                                <SelectTrigger className="bg-white">
+                                                                    <SelectValue placeholder="Select type" />
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent>
+                                                                <SelectItem value="staff">Teaching &amp; Program Staff (/team)</SelectItem>
+                                                                <SelectItem value="board">Governing Board (/team)</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="publicProfileTitle"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel className="text-xs font-semibold">Public Title / Role</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder="e.g., 'Music Director' or 'Treasurer'" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+
+                                        <FormField
+                                            control={form.control}
+                                            name="publicProfileBio"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel className="text-xs font-semibold">Public Bio (Markdown supported)</FormLabel>
+                                                    <FormControl>
+                                                        <Textarea
+                                                            placeholder="Add a bio describing their experience, musical journey, or role with KYO..."
+                                                            className="min-h-[80px]"
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                )}
+                            </div>
 
                             <FormField
                                 control={form.control}
@@ -913,6 +1182,38 @@ export default function UsersAdminPage() {
                     </Form>
                 </DialogContent>
             </Dialog>
+
+            {/* Auto-Link Confirmation Dialog */}
+            <AlertDialog open={!!pendingAutoLink} onOpenChange={(open) => !open && setPendingAutoLink(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Link User to Team Profile?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            You are going to link user <strong>{pendingAutoLink?.user.name}</strong> ({pendingAutoLink?.user.email}) to {pendingAutoLink?.member.type === 'staff' ? 'staff' : 'board'} person <strong>{pendingAutoLink?.member.name}</strong> ({pendingAutoLink?.member.title}), are you sure?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isAutoLinking}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={(e) => {
+                                e.preventDefault();
+                                handleConfirmAutoLink();
+                            }}
+                            disabled={isAutoLinking}
+                            className="bg-primary text-primary-foreground"
+                        >
+                            {isAutoLinking ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Linking...
+                                </>
+                            ) : (
+                                "Confirm & Link"
+                            )}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

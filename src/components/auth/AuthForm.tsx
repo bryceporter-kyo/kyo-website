@@ -176,15 +176,24 @@ export default function AuthForm({ redirectUrl = "/admin", title = "Admin Access
 
     if (result.success) {
       toast({
-        title: "Reset email sent",
-        description: "Check your inbox for password reset instructions.",
+        title: "Reset link sent",
+        description: `We've sent a password reset link to ${resetEmail}. Please check your inbox and spam folder.`,
       });
       setResetDialogOpen(false);
       setResetEmail("");
     } else {
+      let resetError = "Failed to send reset email. Please try again.";
+      const rawError = result.error || "";
+      if (rawError.includes("user-not-found")) {
+        resetError = "No account found with this email address. Please make sure the email is registered.";
+      } else if (rawError.includes("invalid-email")) {
+        resetError = "Please enter a valid email address.";
+      } else if (rawError.includes("too-many-requests")) {
+        resetError = "Too many reset requests. Please wait a few moments before trying again.";
+      }
       toast({
-        title: "Reset failed",
-        description: getAuthErrorMessage(result.error || "Unknown error"),
+        title: "Reset Request Failed",
+        description: resetError,
         variant: "destructive",
       });
     }
@@ -383,22 +392,25 @@ export default function AuthForm({ redirectUrl = "/admin", title = "Admin Access
 // Helper function to convert Firebase error codes to user-friendly messages
 function getAuthErrorMessage(error: string): string {
   if (error.includes("user-not-found")) {
-    return "No account found with this email address.";
+    return "No account exists with this email address. Please check your spelling or contact an administrator.";
   }
   if (error.includes("wrong-password")) {
-    return "Incorrect password. Please try again.";
+    return "Incorrect password. Please double-check your password and try again.";
   }
   if (error.includes("invalid-credential")) {
-    return "Invalid email or password. Please try again.";
+    return "Incorrect email or password. Please verify your credentials and try again.";
+  }
+  if (error.includes("invalid-email")) {
+    return "The email address entered is not valid. Please enter a valid email format.";
   }
   if (error.includes("too-many-requests")) {
-    return "Too many failed attempts. Please try again later.";
+    return "Too many failed attempts. Access to this account has been temporarily disabled. Please reset your password or try again later.";
   }
   if (error.includes("user-disabled")) {
-    return "This account has been disabled.";
+    return "This user account has been disabled. Please contact an administrator.";
   }
   if (error.includes("network-request-failed")) {
-    return "Network error. Please check your connection.";
+    return "Network error. Please check your internet connection and try again.";
   }
-  return "An error occurred. Please try again.";
+  return "Unable to sign in. Please verify your email and password.";
 }

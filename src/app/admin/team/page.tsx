@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Pencil, Trash2, UserPlus, X, Loader2, Download, Upload } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, UserPlus, X, Loader2, Download, Upload, ShieldCheck, Mail, Send, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { 
     fetchStaffFromFirebase, 
@@ -22,7 +22,7 @@ import {
     sortTeamMembers
 } from "@/lib/staff";
 import type { StaffMember, BoardMember } from "@/lib/staff";
-import { addUserToFirebase, UserRole } from "@/lib/users";
+import { fetchUsersFromFirebase, addUserToFirebase, UserRole, User as UserType } from "@/lib/users";
 import { uploadImage } from "@/lib/image-service";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
@@ -79,22 +79,30 @@ export default function TeamAdminPage() {
     const { toast } = useToast();
     const [staff, setStaff] = React.useState<StaffMember[]>([]);
     const [board, setBoard] = React.useState<BoardMember[]>([]);
+    const [users, setUsers] = React.useState<UserType[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [isSaving, setIsSaving] = React.useState(false);
     const [editingMember, setEditingMember] = React.useState<MemberWithId | null>(null);
     const [isDialogOpen, setIsDialogOpen] = React.useState(false);
     const [saveStatus, setSaveStatus] = React.useState<"idle" | "uploading" | "saving">("idle");
 
+    // Create User from Team Member modal state
+    const [createUserMember, setCreateUserMember] = React.useState<MemberWithId | null>(null);
+    const [selectedUserRoles, setSelectedUserRoles] = React.useState<UserRole[]>(["Website Editor"]);
+    const [isCreatingUser, setIsCreatingUser] = React.useState(false);
+
     // Load data from Firebase
     React.useEffect(() => {
         const loadData = async () => {
             try {
-                const [staffData, boardData] = await Promise.all([
+                const [staffData, boardData, usersData] = await Promise.all([
                     fetchStaffFromFirebase(),
-                    fetchBoardFromFirebase()
+                    fetchBoardFromFirebase(),
+                    fetchUsersFromFirebase()
                 ]);
                 setStaff(staffData);
                 setBoard(boardData);
+                setUsers(usersData);
             } catch (error) {
                 console.error('Error loading team data:', error);
                 toast({
@@ -109,6 +117,65 @@ export default function TeamAdminPage() {
         loadData();
     }, [toast]);
 
+    // Check if team member is already linked or has a matching user account
+    function getLinkedUserForMember(member: MemberWithId): UserType | undefined {
+        // 1. Direct link by type + id
+        const directMatch = users.find(u => u.linkedProfile?.type === member.type && (u.linkedProfile?.id === member.id || u.linkedProfile?.name?.toLowerCase() === member.name.toLowerCase()));
+        if (directMatch) return directMatch;
+
+        // 2. Exact email match
+        const emailMatch = users.find(u => u.email.trim().toLowerCase() === member.email.trim().toLowerCase());
+        if (emailMatch) return emailMatch;
+
+        // 3. Exact name match
+        return users.find(u => u.name.trim().toLowerCase() === member.name.trim().toLowerCase());
+    }
+
+    // Handle creating a user account and emailing credentials from team screen
+    async function handleCreateUserFromTeam() {
+        if (!createUserMember) return;
+        if (selectedUserRoles.length === 0) {
+            toast({
+                title: "Role Required",
+                description: "Please select at least one role for the user account.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        setIsCreatingUser(true);
+        try {
+            const newUser = await addUserToFirebase({
+                name: createUserMember.name,
+                email: createUserMember.email,
+                roles: selectedUserRoles,
+                photoUrl: createUserMember.image || undefined,
+                linkedProfile: {
+                    type: createUserMember.type,
+                    id: createUserMember.id,
+                    name: createUserMember.name,
+                    title: createUserMember.title,
+                },
+            });
+
+            setUsers(prev => [...prev, newUser]);
+            toast({
+                title: "User Account Created!",
+                description: `Created portal user for ${createUserMember.name} and sent onboarding email to ${createUserMember.email}.`,
+            });
+            setCreateUserMember(null);
+            setSelectedUserRoles(["Website Editor"]);
+        } catch (error: any) {
+            console.error("Failed to create user from team member:", error);
+            toast({
+                title: "Error Creating User",
+                description: error?.message || "Failed to create portal user account.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsCreatingUser(false);
+        }
+    }
     const sortedStaff = sortTeamMembers(staff);
     const sortedBoard = sortTeamMembers(board);
 
@@ -116,6 +183,42 @@ export default function TeamAdminPage() {
         ...sortedStaff.map(s => ({...s, type: 'staff' as const})), 
         ...sortedBoard.map(b => ({...b, type: 'board' as const}))
     ];
+
+    // Prepare full CSV export data including tenure, professional expertise, order, links, bio, and linked user info
+    const teamExportData = React.useMemo(() => {
+        return allMembers.map(member => {
+            const linkedUser = getLinkedUserForMember(member);
+            const tenure = 'tenure' in member ? (member as any).tenure || '' : '';
+            const professionPosition = 'professionPosition' in member ? (member as any).professionPosition || '' : '';
+            const professionCompany = 'professionCompany' in member ? (member as any).professionCompany || '' : '';
+            const bioUrl = 'bioUrl' in member ? (member as any).bioUrl || '' : '';
+
+            return {
+                Name: member.name || '',
+                Type: member.type || '',
+                Title: member.title || '',
+                Email: member.email || '',
+                Tenure: tenure,
+                "Professional Position": professionPosition,
+                "Professional Company / Expertise": professionCompany,
+                "Bio URL": bioUrl,
+                Biography: member.bio || '',
+                "On Leave": member.isOnLeave ? 'yes' : 'no',
+                "Leave Note": member.leaveNote || '',
+                Order: member.order !== undefined ? member.order : '',
+                "Linked User Account": linkedUser ? `${linkedUser.name} (${linkedUser.email})` : 'Unlinked',
+                "User Roles": linkedUser ? linkedUser.roles.join(', ') : '',
+                Website: member.links?.website || '',
+                LinkedIn: member.links?.linkedin || '',
+                Spotify: member.links?.spotify || '',
+                Instagram: member.links?.instagram || '',
+                Facebook: member.links?.facebook || '',
+                YouTube: member.links?.youtube || '',
+                Twitter: member.links?.twitter || '',
+                Other: member.links?.other || '',
+            };
+        });
+    }, [allMembers, users]);
 
     const form = useForm<z.infer<typeof memberSchema>>({
         resolver: zodResolver(memberSchema),
@@ -428,11 +531,12 @@ export default function TeamAdminPage() {
                 <div className="flex flex-wrap gap-3">
                     <CsvManagerDialog
                         title="Import Team Data"
-                        description="Upload a CSV file to add staff and board members in bulk with bios, leave status, and social links."
-                        triggerButtonText="Import Members"
-                        templateHeaders={["Name", "Type", "Title", "Email", "Permissions", "OnLeave", "LeaveNote", "Bio", "Website", "Spotify", "LinkedIn", "Instagram", "Facebook", "YouTube", "Twitter", "Order"]}
-                        templateSampleRow={["Jane Doe", "staff", "Artistic Director", "jane.doe@thekyo.ca", "Website Editor", "no", "", "Jane is a dedicated musician and educator...", "https://janedoe.com", "https://open.spotify.com/artist/...", "https://linkedin.com/in/jane", "https://instagram.com/jane", "https://facebook.com/jane", "", "", "1"]}
-                        instructionText="Use the template to bulk-add members with bios, sabbatical/leave status, and social links. 'Type' should be 'staff' or 'board'. Set 'OnLeave' to 'yes' or 'no'. Adding 'Permissions' (e.g. Website Editor, Internal Editor) will automatically create an admin user linked to this profile."
+                        description="Upload a CSV file to add staff and board members in bulk with bios, leave status, and social links. You can also export existing data including tenure and professional expertise."
+                        triggerButtonText="Manage CSV / Export"
+                        existingData={teamExportData}
+                        templateHeaders={["Name", "Type", "Title", "Email", "Tenure", "Professional Position", "Professional Company / Expertise", "Bio URL", "Permissions", "OnLeave", "LeaveNote", "Bio", "Website", "Spotify", "LinkedIn", "Instagram", "Facebook", "YouTube", "Twitter", "Order"]}
+                        templateSampleRow={["Jane Doe", "staff", "Artistic Director", "jane.doe@thekyo.ca", "2018 - Present", "Principal Cellist", "Peterborough Symphony", "https://janedoe.com/bio", "Website Editor", "no", "", "Jane is a dedicated musician and educator...", "https://janedoe.com", "https://open.spotify.com/artist/...", "https://linkedin.com/in/jane", "https://instagram.com/jane", "https://facebook.com/jane", "", "", "1"]}
+                        instructionText="Use the template to bulk-add or export members with bios, sabbatical/leave status, tenure, professional expertise, and social links. 'Type' should be 'staff' or 'board'. Set 'OnLeave' to 'yes' or 'no'. Adding 'Permissions' (e.g. Website Editor, Internal Editor) will automatically create an admin user linked to this profile. Click 'Export Current Data' inside this dialog to download all existing members including blank and filled fields."
                         onUpload={handleCsvUpload}
                     />
                     <Button onClick={handleAddClick}>
@@ -456,11 +560,14 @@ export default function TeamAdminPage() {
                                 <TableHead>Title</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead>Email</TableHead>
-                                <TableHead className="text-right w-[150px]">Actions</TableHead>
+                                <TableHead>User Account</TableHead>
+                                <TableHead className="text-right w-[180px]">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {allMembers.map((member) => (
+                            {allMembers.map((member) => {
+                                const linkedUser = getLinkedUserForMember(member);
+                                return (
                                 <TableRow key={member.id} className="group/row">
                                     <TableCell className="font-medium">
                                         <div className="flex items-center gap-3">
@@ -493,35 +600,76 @@ export default function TeamAdminPage() {
                                         )}
                                     </TableCell>
                                     <TableCell>{member.email}</TableCell>
+                                    <TableCell>
+                                        {linkedUser ? (
+                                            <div className="flex items-center gap-1.5">
+                                                <Badge variant="outline" className="text-[10px] font-semibold bg-emerald-50 text-emerald-700 border-emerald-200">
+                                                    <CheckCircle2 className="w-3 h-3 mr-1 text-emerald-600" />
+                                                    Active User
+                                                </Badge>
+                                            </div>
+                                        ) : (
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => {
+                                                    setCreateUserMember(member);
+                                                    setSelectedUserRoles(["Website Editor"]);
+                                                }}
+                                                className="h-6 px-2 text-[10px] border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100 font-semibold gap-1"
+                                                title="Create a portal user account for this member and email login credentials"
+                                            >
+                                                <UserPlus className="w-2.5 h-2.5" />
+                                                Create User
+                                            </Button>
+                                        )}
+                                    </TableCell>
                                     <TableCell className="text-right">
-                                        <Button variant="ghost" size="icon" onClick={() => handleEditClick(member)}>
-                                            <Pencil className="h-4 w-4" />
-                                        </Button>
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                                                    <Trash2 className="h-4 w-4" />
+                                        <div className="flex items-center justify-end gap-1">
+                                            {!linkedUser && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => {
+                                                        setCreateUserMember(member);
+                                                        setSelectedUserRoles(["Website Editor"]);
+                                                    }}
+                                                    title="Create User & Email Credentials"
+                                                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                >
+                                                    <UserPlus className="h-4 w-4" />
                                                 </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                <AlertDialogDescription>
-                                                    This action cannot be undone. This will permanently delete the member
-                                                    "{member.name}".
-                                                </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => handleDelete(member)}>
-                                                    Delete
-                                                </AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
+                                            )}
+                                            <Button variant="ghost" size="icon" onClick={() => handleEditClick(member)}>
+                                                <Pencil className="h-4 w-4" />
+                                            </Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        This action cannot be undone. This will permanently delete the member
+                                                        "{member.name}".
+                                                    </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => handleDelete(member)}>
+                                                        Delete
+                                                    </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                                );
+                            })}
                         </TableBody>
                     </Table>
                 </CardContent>
@@ -814,6 +962,94 @@ export default function TeamAdminPage() {
                             </div>
                         </form>
                     </Form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Create User & Send Credentials Modal */}
+            <Dialog open={!!createUserMember} onOpenChange={(open) => !open && setCreateUserMember(null)}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="font-headline text-xl flex items-center gap-2">
+                            <ShieldCheck className="w-5 h-5 text-blue-600" />
+                            Create User Account
+                        </DialogTitle>
+                        <DialogDescription>
+                            Create an authorized portal account for <strong>{createUserMember?.name}</strong> and email them login credentials.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-4 py-2">
+                        <div className="p-3 bg-slate-50 border rounded-lg text-xs space-y-1">
+                            <p><strong>Name:</strong> {createUserMember?.name}</p>
+                            <p><strong>Email:</strong> {createUserMember?.email}</p>
+                            <p><strong>Role / Title:</strong> {createUserMember?.title} ({createUserMember?.type === 'staff' ? 'Staff' : 'Board'})</p>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-foreground">Select User Permissions</label>
+                            <div className="space-y-2">
+                                {(["Website Editor", "Internal Editor", "Internal Viewer", "Grants Portal"] as UserRole[]).map((role) => (
+                                    <div
+                                        key={role}
+                                        onClick={() => {
+                                            setSelectedUserRoles(prev => 
+                                                prev.includes(role) 
+                                                    ? prev.filter(r => r !== role)
+                                                    : [...prev, role]
+                                            );
+                                        }}
+                                        className="flex items-center space-x-2 p-2.5 rounded-lg border bg-white hover:bg-slate-50 cursor-pointer text-xs"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedUserRoles.includes(role)}
+                                            onChange={() => {}} // handled by parent div
+                                            className="h-4 w-4 rounded border-gray-300 text-primary"
+                                        />
+                                        <span className="font-medium text-slate-800">{role}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="p-3 rounded-lg bg-blue-50/70 border border-blue-200 text-xs text-blue-800 space-y-1">
+                            <p className="font-semibold flex items-center gap-1.5">
+                                <Mail className="w-3.5 h-3.5 text-blue-600" />
+                                Onboarding Email Notice
+                            </p>
+                            <p>
+                                An email will immediately be sent to <strong>{createUserMember?.email}</strong> with setup instructions to activate their account and choose their password via <em>First Time Login</em>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setCreateUserMember(null)}
+                            disabled={isCreatingUser}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleCreateUserFromTeam}
+                            disabled={isCreatingUser || selectedUserRoles.length === 0}
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                            {isCreatingUser ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Creating &amp; Sending...
+                                </>
+                            ) : (
+                                <>
+                                    <Send className="mr-2 h-4 w-4" />
+                                    Create User &amp; Send Email
+                                </>
+                            )}
+                        </Button>
+                    </div>
                 </DialogContent>
             </Dialog>
         </div>

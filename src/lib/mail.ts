@@ -26,7 +26,7 @@ export async function sendEmail(email: EmailMessage): Promise<string> {
 }
 
 /**
- * Send a notification email to a new user about their website editor permissions.
+ * Send a notification email to a new user with onboarding / credential setup instructions.
  */
 export async function sendUserAddedEmail(
     recipientEmail: string,
@@ -38,17 +38,25 @@ export async function sendUserAddedEmail(
     const email: EmailMessage = {
         to: recipientEmail,
         message: {
-            subject: 'Welcome! You have been added as a user',
-            text: `Hello ${userName},\n\nYou have been added as a user and given the following permissions: ${rolesText}.\n\nYou can now access the website editor and manage content based on your assigned roles.\n\nBest regards,\nThe KYO Team`,
+            subject: 'Welcome to KYO! Set Up Your Account',
+            text: `Hello ${userName},\n\nYou have been added as an authorized user for the KYO website & portals with the following roles: ${rolesText}.\n\nTo activate your account and set up your login password:\n1. Visit https://thekyo.ca/admin/login\n2. Click on the "First Time Login" tab\n3. Enter your email (${recipientEmail}) and choose your password\n\nBest regards,\nThe KYO Team`,
             html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h2>Welcome, ${userName}!</h2>
-                    <p>You have been added as a user and given the following permissions:</p>
-                    <ul>
-                        ${roles.map(role => `<li><strong>${role}</strong></li>`).join('')}
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1e293b; line-height: 1.6;">
+                    <h2 style="color: #0f172a; margin-bottom: 8px;">Welcome, ${userName}!</h2>
+                    <p>You have been added as an authorized user for the KYO website &amp; portal with the following permissions:</p>
+                    <ul style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 24px; margin: 16px 0;">
+                        ${roles.map(role => `<li style="margin: 4px 0;"><strong>${role}</strong></li>`).join('')}
                     </ul>
-                    <p>You can now access the website editor and manage content based on your assigned roles.</p>
-                    <p>Best regards,<br/>The KYO Team</p>
+                    <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 14px 18px; margin: 20px 0; border-radius: 4px;">
+                        <h4 style="margin: 0 0 6px 0; color: #166534; font-size: 15px;">How to Set Up Your Password &amp; Login</h4>
+                        <ol style="margin: 0; padding-left: 20px; color: #14532d; font-size: 14px;">
+                            <li style="margin: 4px 0;">Go to <a href="https://thekyo.ca/admin/login" style="color: #047857; font-weight: bold;">thekyo.ca/admin/login</a></li>
+                            <li style="margin: 4px 0;">Click the <strong>First Time Login</strong> tab</li>
+                            <li style="margin: 4px 0;">Enter your email (<strong>${recipientEmail}</strong>) and choose your new password</li>
+                        </ol>
+                    </div>
+                    <p style="font-size: 13px; color: #64748b; margin-top: 24px;">If you have any questions or require assistance, please contact the KYO team.</p>
+                    <p style="font-size: 14px; margin-top: 16px;">Best regards,<br/><strong>The KYO Team</strong></p>
                 </div>
             `,
         },
