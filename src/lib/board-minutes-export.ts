@@ -69,18 +69,22 @@ function drawHeader(
   doc.setFillColor(...KYO.green);
   doc.rect(0, 0, pageWidth, BAND_H, "F");
 
-  // Try to place the logo in the left side of the band
+  // Place logo with a white background card so it's visible against the green band
   let textLeft = 12;
   if (logoData) {
     try {
-      // Aim for logo height = 18mm, aspect ratio preserved
       const logoH = 18;
-      doc.addImage(logoData.data, logoData.format, 8, (BAND_H - logoH) / 2, 0, logoH);
-      // Determine actual rendered width by checking where it landed
-      // We just reserve ~36mm for the logo area
-      textLeft = 48;
+      const logoPad = 2;
+      const logoX = 7;
+      const logoY = (BAND_H - logoH) / 2;
+      // White backing card
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(logoX - logoPad, logoY - logoPad, 40, logoH + logoPad * 2, 1.5, 1.5, "F");
+      // Logo on top
+      doc.addImage(logoData.data, logoData.format, logoX, logoY, 0, logoH);
+      textLeft = 52;
     } catch {
-      // logo failed silently
+      // logo failed silently — text shifts back to default
     }
   }
 
@@ -190,7 +194,7 @@ export async function generateBoardMeetingPdf(meeting: BoardMeeting): Promise<js
       ],
       [
         "Location",
-        `${meeting.locationType}${meeting.locationDetails ? `  —  ${meeting.locationDetails}` : ""}`,
+        `${meeting.locationType.charAt(0).toUpperCase() + meeting.locationType.slice(1)}${meeting.locationDetails ? `  —  ${meeting.locationDetails}` : ""}`,
         "Next Meeting",
         meeting.nextMeetingDate || "TBD",
       ],
@@ -255,7 +259,7 @@ export async function generateBoardMeetingPdf(meeting: BoardMeeting): Promise<js
     doc.setFontSize(10);
     doc.setTextColor(...KYO.green);
     doc.text("AGENDA, DISCUSSION & DECISIONS", 14, currentY);
-    currentY += 5;
+    currentY += 10;
   }
 
   meeting.agendaItems.forEach((item, index) => {
@@ -401,8 +405,8 @@ export async function generateBoardMeetingPdf(meeting: BoardMeeting): Promise<js
  */
 export async function downloadMeetingPdf(meeting: BoardMeeting): Promise<void> {
   const doc = await generateBoardMeetingPdf(meeting);
-  const safeTitle = (meeting.title || `Board_Minutes_${meeting.date}`).replace(/[^a-zA-Z0-9_-]/g, "_");
-  doc.save(`${safeTitle}.pdf`);
+  const filename = `${meeting.date}_Board_Meeting`;
+  doc.save(`${filename}.pdf`);
 }
 
 /**
