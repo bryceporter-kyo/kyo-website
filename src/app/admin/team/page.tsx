@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Pencil, Trash2, UserPlus, X, Loader2, Download, Upload, ShieldCheck, Mail, Send, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, UserPlus, X, Loader2, Download, Upload, ShieldCheck, Mail, Send, CheckCircle2, Unlink } from "lucide-react";
 import Link from "next/link";
 import { 
     fetchStaffFromFirebase, 
@@ -22,7 +22,7 @@ import {
     sortTeamMembers
 } from "@/lib/staff";
 import type { StaffMember, BoardMember } from "@/lib/staff";
-import { fetchUsersFromFirebase, addUserToFirebase, UserRole, User as UserType } from "@/lib/users";
+import { fetchUsersFromFirebase, addUserToFirebase, unlinkProfileFromUser, UserRole, User as UserType } from "@/lib/users";
 import { uploadImage } from "@/lib/image-service";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
@@ -41,10 +41,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { CsvManagerDialog } from "@/components/shared/CsvManagerDialog";
 
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 
 const memberSchema = z.object({
@@ -88,8 +89,21 @@ export default function TeamAdminPage() {
 
     // Create User from Team Member modal state
     const [createUserMember, setCreateUserMember] = React.useState<MemberWithId | null>(null);
+    const [createUserEmail, setCreateUserEmail] = React.useState<string>("");
     const [selectedUserRoles, setSelectedUserRoles] = React.useState<UserRole[]>(["Website Editor"]);
     const [isCreatingUser, setIsCreatingUser] = React.useState(false);
+
+    // Bulk selection state
+    const [selectedMemberIds, setSelectedMemberIds] = React.useState<string[]>([]);
+    const [isBulkEditDialogOpen, setIsBulkEditDialogOpen] = React.useState(false);
+    const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = React.useState(false);
+    const [bulkStatusAction, setBulkStatusAction] = React.useState<"active" | "leave">("active");
+    const [bulkLeaveNote, setBulkLeaveNote] = React.useState("");
+    const [isProcessingBulk, setIsProcessingBulk] = React.useState(false);
+
+    // Unlink User state
+    const [pendingUnlinkUser, setPendingUnlinkUser] = React.useState<{ user: UserType; member: MemberWithId } | null>(null);
+    const [isUnlinking, setIsUnlinking] = React.useState(false);
 
     // Load data from Firebase
     React.useEffect(() => {
@@ -119,21 +133,133 @@ export default function TeamAdminPage() {
 
     // Check if team member is already linked or has a matching user account
     function getLinkedUserForMember(member: MemberWithId): UserType | undefined {
-        // 1. Direct link by type + id
-        const directMatch = users.find(u => u.linkedProfile?.type === member.type && (u.linkedProfile?.id === member.id || u.linkedProfile?.name?.toLowerCase() === member.name.toLowerCase()));
-        if (directMatch) return directMatch;
-
-        // 2. Exact email match
-        const emailMatch = users.find(u => u.email.trim().toLowerCase() === member.email.trim().toLowerCase());
-        if (emailMatch) return emailMatch;
-
-        // 3. Exact name match
-        return users.find(u => u.name.trim().toLowerCase() === member.name.trim().toLowerCase());
+        // Direct link ONLY: matched by explicit type + id, or by explicit type + exact name
+        if (!member.id && !member.name) return undefined;
+        return users.find(u => {
+            if (!u.linkedProfile) return false;
+            if (u.linkedProfile.type !== member.type) return false;
+            // Match by unique ID if available
+            if (u.linkedProfile.id && member.id && u.linkedProfile.id === member.id) {
+                return true;
+            }
+            // Strict name match only if name is populated and non-empty
+            if (u.linkedProfile.name && member.name && u.linkedProfile.name.trim().toLowerCase() === member.name.trim().toLowerCase()) {
+                return true;
+            }
+            return false;
+        });
     }
+
+    // Bulk actions helpers
+    const toggleSelectAllMembers = () => {
+        if (selectedMemberIds.length === allMembers.length) {
+            setSelectedMemberIds([]);
+        } else {
+            setSelectedMemberIds(allMembers.map(m => `${m.type}:${m.id}`));
+        }
+    };
+
+    const toggleSelectMember = (memberKey: string) => {
+        setSelectedMemberIds(prev =>
+            prev.includes(memberKey) ? prev.filter(k => k !== memberKey) : [...prev, memberKey]
+        );
+    };
+
+    const handleBulkDeleteMembers = async () => {
+        if (selectedMemberIds.length === 0) return;
+        setIsProcessingBulk(true);
+        try {
+            for (const key of selectedMemberIds) {
+                const [type, id] = key.split(":");
+                if (type === "staff") {
+                    await deleteStaffFromFirebase(id);
+                } else if (type === "board") {
+                    await deleteBoardFromFirebase(id);
+                }
+            }
+
+            setStaff(prev => prev.filter(s => !selectedMemberIds.includes(`staff:${s.id}`)));
+            setBoard(prev => prev.filter(b => !selectedMemberIds.includes(`board:${b.id}`)));
+
+            toast({
+                title: "Members Deleted",
+                description: `Successfully deleted ${selectedMemberIds.length} team members.`,
+                variant: "destructive",
+            });
+            setSelectedMemberIds([]);
+            setIsBulkDeleteDialogOpen(false);
+        } catch (error) {
+            console.error("Bulk delete failed:", error);
+            toast({
+                title: "Bulk Delete Error",
+                description: "Failed to delete some members.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsProcessingBulk(false);
+        }
+    };
+
+    const handleBulkEditStatus = async () => {
+        if (selectedMemberIds.length === 0) return;
+        setIsProcessingBulk(true);
+        try {
+            const isOnLeave = bulkStatusAction === "leave";
+            const leaveNote = isOnLeave ? bulkLeaveNote : "";
+
+            for (const key of selectedMemberIds) {
+                const [type, id] = key.split(":");
+                if (type === "staff") {
+                    await updateStaffInFirebase(id, { isOnLeave, leaveNote });
+                } else if (type === "board") {
+                    await updateBoardInFirebase(id, { isOnLeave, leaveNote });
+                }
+            }
+
+            setStaff(prev => prev.map(s => {
+                if (selectedMemberIds.includes(`staff:${s.id}`)) {
+                    return { ...s, isOnLeave, leaveNote };
+                }
+                return s;
+            }));
+
+            setBoard(prev => prev.map(b => {
+                if (selectedMemberIds.includes(`board:${b.id}`)) {
+                    return { ...b, isOnLeave, leaveNote };
+                }
+                return b;
+            }));
+
+            toast({
+                title: "Status Updated",
+                description: `Updated status for ${selectedMemberIds.length} members to ${isOnLeave ? "On Leave" : "Active"}.`,
+            });
+            setSelectedMemberIds([]);
+            setIsBulkEditDialogOpen(false);
+        } catch (error) {
+            console.error("Bulk status update failed:", error);
+            toast({
+                title: "Bulk Edit Error",
+                description: "Failed to update member statuses.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsProcessingBulk(false);
+        }
+    };
 
     // Handle creating a user account and emailing credentials from team screen
     async function handleCreateUserFromTeam() {
         if (!createUserMember) return;
+        const targetEmail = createUserEmail.trim() || createUserMember.email.trim();
+        if (!targetEmail || !targetEmail.includes("@")) {
+            toast({
+                title: "Invalid Email",
+                description: "Please enter a valid email address for the user account.",
+                variant: "destructive",
+            });
+            return;
+        }
         if (selectedUserRoles.length === 0) {
             toast({
                 title: "Role Required",
@@ -147,7 +273,7 @@ export default function TeamAdminPage() {
         try {
             const newUser = await addUserToFirebase({
                 name: createUserMember.name,
-                email: createUserMember.email,
+                email: targetEmail,
                 roles: selectedUserRoles,
                 photoUrl: createUserMember.image || undefined,
                 linkedProfile: {
@@ -161,9 +287,10 @@ export default function TeamAdminPage() {
             setUsers(prev => [...prev, newUser]);
             toast({
                 title: "User Account Created!",
-                description: `Created portal user for ${createUserMember.name} and sent onboarding email to ${createUserMember.email}.`,
+                description: `Created portal user for ${createUserMember.name} and sent onboarding email to ${targetEmail}.`,
             });
             setCreateUserMember(null);
+            setCreateUserEmail("");
             setSelectedUserRoles(["Website Editor"]);
         } catch (error: any) {
             console.error("Failed to create user from team member:", error);
@@ -174,6 +301,31 @@ export default function TeamAdminPage() {
             });
         } finally {
             setIsCreatingUser(false);
+        }
+    }
+
+    // Handle unlinking a user from a team profile
+    async function handleConfirmUnlink() {
+        if (!pendingUnlinkUser) return;
+        const { user, member } = pendingUnlinkUser;
+        setIsUnlinking(true);
+        try {
+            await unlinkProfileFromUser(user.id);
+            setUsers(prev => prev.map(u => u.id === user.id ? { ...u, linkedProfile: undefined } : u));
+            toast({
+                title: "Profile Unlinked",
+                description: `Successfully unlinked user "${user.name}" from ${member.type === 'staff' ? 'staff' : 'board'} member "${member.name}".`,
+            });
+            setPendingUnlinkUser(null);
+        } catch (error) {
+            console.error("Failed to unlink user:", error);
+            toast({
+                title: "Unlink Failed",
+                description: "Failed to unlink user account. Please try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsUnlinking(false);
         }
     }
     const sortedStaff = sortTeamMembers(staff);
@@ -479,11 +631,14 @@ export default function TeamAdminPage() {
                 };
 
                 // 1. Add to Staff or Board
+                let createdMemberId = "";
                 if (type === 'board') {
                     const newBoard = await addBoardToFirebase(memberData);
+                    createdMemberId = newBoard.id;
                     setBoard(prev => [...prev, newBoard]);
                 } else {
                     const newStaff = await addStaffToFirebase(memberData);
+                    createdMemberId = newStaff.id;
                     setStaff(prev => [...prev, newStaff]);
                 }
 
@@ -497,7 +652,7 @@ export default function TeamAdminPage() {
                             roles: rolesArray,
                             linkedProfile: {
                                 type: type === 'board' ? 'board' : 'staff',
-                                id: name,
+                                id: createdMemberId,
                                 name,
                                 title,
                             }
@@ -552,9 +707,60 @@ export default function TeamAdminPage() {
                     <CardDescription>Manage current staff and board members, sabbatical statuses, and social links.</CardDescription>
                 </CardHeader>
                 <CardContent>
+                    {/* Bulk Actions Toolbar */}
+                    {selectedMemberIds.length > 0 && (
+                        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 p-3 bg-muted/50 rounded-lg border border-border">
+                            <div className="flex items-center gap-2">
+                                <Badge variant="secondary" className="font-semibold">
+                                    {selectedMemberIds.length} selected
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">of {allMembers.length} members</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                        setBulkStatusAction("active");
+                                        setBulkLeaveNote("");
+                                        setIsBulkEditDialogOpen(true);
+                                    }}
+                                    className="h-8 text-xs gap-1.5"
+                                >
+                                    <Pencil className="h-3.5 w-3.5" />
+                                    Bulk Edit Status / Leave
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => setIsBulkDeleteDialogOpen(true)}
+                                    className="h-8 text-xs gap-1.5"
+                                >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                    Delete Selected ({selectedMemberIds.length})
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setSelectedMemberIds([])}
+                                    className="h-8 text-xs"
+                                >
+                                    Clear
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+
                     <Table>
                         <TableHeader>
                             <TableRow>
+                                <TableHead className="w-[40px]">
+                                    <Checkbox
+                                        checked={allMembers.length > 0 && selectedMemberIds.length === allMembers.length}
+                                        onCheckedChange={toggleSelectAllMembers}
+                                        aria-label="Select all members"
+                                    />
+                                </TableHead>
                                 <TableHead>Name</TableHead>
                                 <TableHead>Type</TableHead>
                                 <TableHead>Title</TableHead>
@@ -569,6 +775,13 @@ export default function TeamAdminPage() {
                                 const linkedUser = getLinkedUserForMember(member);
                                 return (
                                 <TableRow key={member.id} className="group/row">
+                                    <TableCell className="w-[40px]">
+                                        <Checkbox
+                                            checked={selectedMemberIds.includes(`${member.type}:${member.id}`)}
+                                            onCheckedChange={() => toggleSelectMember(`${member.type}:${member.id}`)}
+                                            aria-label={`Select ${member.name}`}
+                                        />
+                                    </TableCell>
                                     <TableCell className="font-medium">
                                         <div className="flex items-center gap-3">
                                             <Avatar className="h-9 w-9 bg-primary/10 border border-primary/20 shrink-0">
@@ -603,10 +816,21 @@ export default function TeamAdminPage() {
                                     <TableCell>
                                         {linkedUser ? (
                                             <div className="flex items-center gap-1.5">
-                                                <Badge variant="outline" className="text-[10px] font-semibold bg-emerald-50 text-emerald-700 border-emerald-200">
+                                                <Badge variant="outline" className="text-[10px] font-semibold bg-emerald-50 text-emerald-700 border-emerald-200" title={`Linked to ${linkedUser.name} (${linkedUser.email})`}>
                                                     <CheckCircle2 className="w-3 h-3 mr-1 text-emerald-600" />
                                                     Active User
                                                 </Badge>
+                                                {linkedUser.linkedProfile && (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-5 w-5 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                                        onClick={() => setPendingUnlinkUser({ user: linkedUser, member })}
+                                                        title={`Unlink user account (${linkedUser.email})`}
+                                                    >
+                                                        <Unlink className="h-3 w-3" />
+                                                    </Button>
+                                                )}
                                             </div>
                                         ) : (
                                             <Button
@@ -614,6 +838,7 @@ export default function TeamAdminPage() {
                                                 size="sm"
                                                 onClick={() => {
                                                     setCreateUserMember(member);
+                                                    setCreateUserEmail(member.email || "");
                                                     setSelectedUserRoles(["Website Editor"]);
                                                 }}
                                                 className="h-6 px-2 text-[10px] border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100 font-semibold gap-1"
@@ -626,12 +851,13 @@ export default function TeamAdminPage() {
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex items-center justify-end gap-1">
-                                            {!linkedUser && (
+                                            {!linkedUser ? (
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
                                                     onClick={() => {
                                                         setCreateUserMember(member);
+                                                        setCreateUserEmail(member.email || "");
                                                         setSelectedUserRoles(["Website Editor"]);
                                                     }}
                                                     title="Create User & Email Credentials"
@@ -639,7 +865,17 @@ export default function TeamAdminPage() {
                                                 >
                                                     <UserPlus className="h-4 w-4" />
                                                 </Button>
-                                            )}
+                                            ) : linkedUser.linkedProfile ? (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => setPendingUnlinkUser({ user: linkedUser, member })}
+                                                    title={`Unlink from user account (${linkedUser.email})`}
+                                                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                                >
+                                                    <Unlink className="h-4 w-4" />
+                                                </Button>
+                                            ) : null}
                                             <Button variant="ghost" size="icon" onClick={() => handleEditClick(member)}>
                                                 <Pencil className="h-4 w-4" />
                                             </Button>
@@ -981,8 +1217,19 @@ export default function TeamAdminPage() {
                     <div className="space-y-4 py-2">
                         <div className="p-3 bg-slate-50 border rounded-lg text-xs space-y-1">
                             <p><strong>Name:</strong> {createUserMember?.name}</p>
-                            <p><strong>Email:</strong> {createUserMember?.email}</p>
-                            <p><strong>Role / Title:</strong> {createUserMember?.title} ({createUserMember?.type === 'staff' ? 'Staff' : 'Board'})</p>
+                            <p><strong>Team Role:</strong> {createUserMember?.title} ({createUserMember?.type === 'staff' ? 'Staff' : 'Board'})</p>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-foreground">User Login Email</label>
+                            <Input
+                                type="email"
+                                value={createUserEmail}
+                                onChange={(e) => setCreateUserEmail(e.target.value)}
+                                placeholder="name@thekyo.ca"
+                                className="h-9 text-xs"
+                            />
+                            <p className="text-[11px] text-muted-foreground">Credentials and login instructions will be sent to this email address.</p>
                         </div>
 
                         <div className="space-y-2">
@@ -1012,13 +1259,27 @@ export default function TeamAdminPage() {
                             </div>
                         </div>
 
-                        <div className="p-3 rounded-lg bg-blue-50/70 border border-blue-200 text-xs text-blue-800 space-y-1">
+                        <div className="p-3 rounded-lg bg-blue-50/70 border border-blue-200 text-xs text-blue-800 space-y-1.5">
                             <p className="font-semibold flex items-center gap-1.5">
                                 <Mail className="w-3.5 h-3.5 text-blue-600" />
                                 Onboarding Email Notice
                             </p>
                             <p>
-                                An email will immediately be sent to <strong>{createUserMember?.email}</strong> with setup instructions to activate their account and choose their password via <em>First Time Login</em>.
+                                An email will immediately be sent to <strong>{createUserEmail || createUserMember?.email}</strong> informing them of their new profile and access to:
+                            </p>
+                            <ul className="list-disc pl-4 space-y-0.5 text-[11px] text-blue-900 font-medium">
+                                {selectedUserRoles.includes("Website Editor") && (
+                                    <li>KYO Admin Panel (https://thekyo.ca/admin)</li>
+                                )}
+                                {(selectedUserRoles.includes("Internal Editor") || selectedUserRoles.includes("Internal Viewer")) && (
+                                    <li>KYO Internal Portal (https://thekyo.ca/internal)</li>
+                                )}
+                                {selectedUserRoles.includes("Grants Portal") && (
+                                    <li>KYO Grants Portal (https://thekyo.ca/grants)</li>
+                                )}
+                            </ul>
+                            <p className="text-[11px] text-blue-900 pt-0.5">
+                                They will be asked to choose their password via <em>First Time Login</em> when first accessing the page.
                             </p>
                         </div>
                     </div>
@@ -1052,6 +1313,118 @@ export default function TeamAdminPage() {
                     </div>
                 </DialogContent>
             </Dialog>
+
+            {/* Bulk Edit Status / Sabbatical Dialog */}
+            <Dialog open={isBulkEditDialogOpen} onOpenChange={setIsBulkEditDialogOpen}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Bulk Edit Member Status</DialogTitle>
+                        <DialogDescription>
+                            Update active status or sabbatical/leave notes for <strong>{selectedMemberIds.length}</strong> selected members.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-4 py-2">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Status</label>
+                            <Select value={bulkStatusAction} onValueChange={(val: any) => setBulkStatusAction(val)}>
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="active">Active (Not on Leave)</SelectItem>
+                                    <SelectItem value="leave">On Sabbatical / Leave</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        {bulkStatusAction === "leave" && (
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Sabbatical / Leave Note</label>
+                                <Input
+                                    placeholder="e.g. On Leave - Fall 2026"
+                                    value={bulkLeaveNote}
+                                    onChange={(e) => setBulkLeaveNote(e.target.value)}
+                                />
+                            </div>
+                        )}
+                    </div>
+
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsBulkEditDialogOpen(false)} disabled={isProcessingBulk}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleBulkEditStatus} disabled={isProcessingBulk}>
+                            {isProcessingBulk ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                            Apply to {selectedMemberIds.length} Members
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Bulk Delete Confirmation Dialog */}
+            <AlertDialog open={isBulkDeleteDialogOpen} onOpenChange={setIsBulkDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete {selectedMemberIds.length} Team Members?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to permanently delete <strong>{selectedMemberIds.length}</strong> selected staff and board profiles from the database? This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isProcessingBulk}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={(e) => {
+                                e.preventDefault();
+                                handleBulkDeleteMembers();
+                            }}
+                            disabled={isProcessingBulk}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            {isProcessingBulk ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Deleting {selectedMemberIds.length} Members...
+                                </>
+                            ) : (
+                                `Delete ${selectedMemberIds.length} Members`
+                            )}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Unlink Confirmation Dialog */}
+            <AlertDialog open={!!pendingUnlinkUser} onOpenChange={(open) => !open && setPendingUnlinkUser(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Unlink User Account?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to unlink user account <strong>{pendingUnlinkUser?.user.name}</strong> ({pendingUnlinkUser?.user.email}) from {pendingUnlinkUser?.member.type === "staff" ? "staff" : "board"} member <strong>{pendingUnlinkUser?.member.name}</strong>? Both the user and team records will remain, but will no longer be connected.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isUnlinking}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={(e) => {
+                                e.preventDefault();
+                                handleConfirmUnlink();
+                            }}
+                            disabled={isUnlinking}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            {isUnlinking ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Unlinking...
+                                </>
+                            ) : (
+                                "Unlink User"
+                            )}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

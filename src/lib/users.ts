@@ -1,5 +1,5 @@
 import { db, auth, sanitizeForFirestore } from './firebase';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc, query, where } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc, query, where, deleteField } from 'firebase/firestore';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import data from './users.json';
 import { sendUserAddedEmail } from './mail';
@@ -85,6 +85,16 @@ export async function updateUserInFirebase(id: string, user: Partial<User>): Pro
     const { id: _id, ...userData } = user;
     const cleanUserData = sanitizeForFirestore(userData);
     await updateDoc(userRef, cleanUserData);
+}
+
+/**
+ * Explicitly unlink a profile from a user
+ */
+export async function unlinkProfileFromUser(id: string): Promise<void> {
+    const userRef = doc(db, USERS_COLLECTION, id);
+    await updateDoc(userRef, {
+        linkedProfile: deleteField(),
+    });
 }
 
 /**

@@ -7,9 +7,10 @@ import { useImages } from "@/components/providers/ImageProvider";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Folder, ExternalLink as ExternalLinkIcon, Pencil, Users, DollarSign, Handshake, Cpu, Settings, Briefcase, FileText, Loader2, Lock, Search, Copy, Check, Mail, Calendar } from "lucide-react";
+import { Folder, ExternalLink as ExternalLinkIcon, Pencil, Users, DollarSign, Handshake, Cpu, Settings, Briefcase, FileText, Loader2, Lock, Search, Copy, Check, Mail, Calendar, Shield } from "lucide-react";
 import { fetchStaffFromFirebase, fetchBoardFromFirebase } from "@/lib/staff";
 import type { StaffMember, BoardMember } from "@/lib/staff";
+import { fetchUsersFromFirebase } from "@/lib/users";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -86,16 +87,22 @@ export default function InternalPage() {
     // Auth & Permissions
     const { user, loading: authLoading } = useAuth();
     const [userRoles, setUserRoles] = useState<string[]>([]);
+    const [isBoardMember, setIsBoardMember] = useState(false);
     const [checkingRoles, setCheckingRoles] = useState(true);
 
     useEffect(() => {
         async function checkPermissions() {
             if (user?.email) {
                 try {
-                    const roles = await getUserRolesByEmail(user.email);
+                    const [roles, allUsers] = await Promise.all([
+                        getUserRolesByEmail(user.email),
+                        fetchUsersFromFirebase()
+                    ]);
                     setUserRoles(roles);
+                    const userRecord = allUsers.find(u => u.email.trim().toLowerCase() === user.email?.trim().toLowerCase());
+                    setIsBoardMember(Boolean(userRecord?.linkedProfile && userRecord.linkedProfile.type === 'board'));
                 } catch (e) {
-                    console.error("Failed to fetch roles", e);
+                    console.error("Failed to fetch roles or users", e);
                 }
             }
             setCheckingRoles(false);
@@ -271,6 +278,13 @@ export default function InternalPage() {
                                     </Link>
                                 </Button>
                             )}
+                            {isBoardMember && (
+                                <Button asChild variant="outline" size="sm" className="rounded-full shadow-sm border-indigo-300 text-indigo-700 bg-indigo-50/50 hover:bg-indigo-100">
+                                    <Link href="/internal/board-meetings">
+                                        <Shield className="w-4 h-4 mr-2 text-indigo-600" /> Board Meetings
+                                    </Link>
+                                </Button>
+                            )}
                         </div>
 
                         {/* Hero Search */}
@@ -426,6 +440,30 @@ export default function InternalPage() {
                                 )
                             })}
                         </div>
+
+                        {/* Board of Directors Section (Visible to Board Members Only) */}
+                        {isBoardMember && (
+                            <div className="bg-gradient-to-r from-indigo-50/80 via-purple-50/50 to-indigo-50/80 border border-indigo-100 rounded-[1.5rem] p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                        <Badge className="bg-indigo-600 hover:bg-indigo-700 text-white border-0 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">
+                                            Board of Directors
+                                        </Badge>
+                                        <h3 className="font-headline text-lg font-bold text-slate-900">
+                                            Board Meetings &amp; Minutes Archive
+                                        </h3>
+                                    </div>
+                                    <p className="text-sm text-slate-600 max-w-2xl">
+                                        Take live meeting minutes with real-time auto-saving, manage roll-call motions &amp; action items, sync to the board calendar, and export audit-ready PDF archives.
+                                    </p>
+                                </div>
+                                <Button asChild className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-sm shrink-0">
+                                    <Link href="/internal/board-meetings">
+                                        <FileText className="w-4 h-4 mr-2" /> Open Minutes Portal
+                                    </Link>
+                                </Button>
+                            </div>
+                        )}
 
                         <Card className="mt-8 rounded-[1.5rem] shadow-sm border-slate-100">
                             <CardHeader className="pb-4">

@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Pencil, Trash2, User as UserIcon, Download, Upload, Loader2, Camera, Link as LinkIcon, Unlink, UserCheck, Shield, KeyRound, Mail, Send, Globe } from "lucide-react";
 import Link from "next/link";
-import { fetchUsersFromFirebase, addUserToFirebase, deleteUserFromFirebase, updateUserInFirebase, sendUserPasswordReset } from "@/lib/users";
+import { fetchUsersFromFirebase, addUserToFirebase, deleteUserFromFirebase, updateUserInFirebase, unlinkProfileFromUser, sendUserPasswordReset } from "@/lib/users";
 import type { User as UserType, UserRole, LinkedProfile } from "@/lib/users";
 import { fetchStaffFromFirebase, fetchBoardFromFirebase, addStaffToFirebase, addBoardToFirebase, StaffMember, BoardMember } from "@/lib/staff";
 import { uploadImage } from "@/lib/image-service";
@@ -89,6 +89,16 @@ export default function UsersAdminPage() {
 
     // Auto-match link state
     const [pendingAutoLink, setPendingAutoLink] = React.useState<{ user: UserType; member: (StaffMember | BoardMember) & { type: 'staff' | 'board' } } | null>(null);
+    const [pendingUnlinkUser, setPendingUnlinkUser] = React.useState<UserType | null>(null);
+    const [isUnlinking, setIsUnlinking] = React.useState(false);
+
+    // Bulk selection state
+    const [selectedUserIds, setSelectedUserIds] = React.useState<string[]>([]);
+    const [isBulkEditDialogOpen, setIsBulkEditDialogOpen] = React.useState(false);
+    const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = React.useState(false);
+    const [bulkSelectedRoles, setBulkSelectedRoles] = React.useState<UserRole[]>([]);
+    const [bulkRoleAction, setBulkRoleAction] = React.useState<"replace" | "add" | "remove">("replace");
+    const [isProcessingBulk, setIsProcessingBulk] = React.useState(false);
     const [isAutoLinking, setIsAutoLinking] = React.useState(false);
 
     const form = useForm<z.infer<typeof userSchema>>({
@@ -207,14 +217,27 @@ export default function UsersAdminPage() {
         const normalizedUserName = user.name.trim().toLowerCase();
         if (!normalizedUserName) return null;
 
+        // Collect all IDs of team members already linked to any user
+        const alreadyLinkedIds = new Set(
+            users
+                .filter(u => u.linkedProfile && u.id !== user.id)
+                .map(u => `${u.linkedProfile?.type}:${u.linkedProfile?.id}`)
+        );
+
         // Check staff first
-        const matchedStaff = staff.find(s => s.name.trim().toLowerCase() === normalizedUserName);
+        const matchedStaff = staff.find(s => 
+            s.name.trim().toLowerCase() === normalizedUserName &&
+            !alreadyLinkedIds.has(`staff:${s.id}`)
+        );
         if (matchedStaff) {
             return { ...matchedStaff, type: 'staff' };
         }
 
         // Check board next
-        const matchedBoard = board.find(b => b.name.trim().toLowerCase() === normalizedUserName);
+        const matchedBoard = board.find(b => 
+            b.name.trim().toLowerCase() === normalizedUserName &&
+            !alreadyLinkedIds.has(`board:${b.id}`)
+        );
         if (matchedBoard) {
             return { ...matchedBoard, type: 'board' };
         }
@@ -252,6 +275,31 @@ export default function UsersAdminPage() {
             });
         } finally {
             setIsAutoLinking(false);
+        }
+    }
+
+    // Confirm unlinking a user from their team profile
+    async function handleConfirmUnlink() {
+        if (!pendingUnlinkUser) return;
+        const user = pendingUnlinkUser;
+        setIsUnlinking(true);
+        try {
+            await unlinkProfileFromUser(user.id);
+            setUsers(prev => prev.map(u => u.id === user.id ? { ...u, linkedProfile: undefined } : u));
+            toast({
+                title: "Profile Unlinked",
+                description: `Successfully unlinked profile from "${user.name}".`,
+            });
+            setPendingUnlinkUser(null);
+        } catch (error) {
+            console.error("Failed to unlink profile:", error);
+            toast({
+                title: "Unlinking Error",
+                description: "Failed to unlink profile. Please try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsUnlinking(false);
         }
     }
     const handleCreateProfileSelect = (key: string) => {
@@ -450,18 +498,22 @@ export default function UsersAdminPage() {
 
             const linkedProfile = resolveLinkedProfile(values.linkedProfileKey);
 
+            if (values.linkedProfileKey === "none" && editingUser.linkedProfile) {
+                await unlinkProfileFromUser(editingUser.id);
+            }
+
             const updateData: Partial<UserType> = {
                 name: values.name,
                 email: values.email,
                 roles: values.roles as UserRole[],
                 photoUrl: photoUrl || undefined,
-                linkedProfile: linkedProfile || undefined,
+                linkedProfile: values.linkedProfileKey === "none" ? undefined : (linkedProfile || undefined),
             };
 
             await updateUserInFirebase(editingUser.id, updateData);
             
             // Update local state
-            setUsers(users.map(u => u.id === editingUser.id ? { ...u, ...updateData } : u));
+            setUsers(users.map(u => u.id === editingUser.id ? { ...u, ...updateData, linkedProfile: updateData.linkedProfile } : u));
             
             setIsEditDialogOpen(false);
             setEditingUser(null);
@@ -554,6 +606,105 @@ export default function UsersAdminPage() {
         }
     }
 
+    // Bulk selection helpers
+    const toggleSelectAllUsers = () => {
+        if (selectedUserIds.length === users.length) {
+            setSelectedUserIds([]);
+        } else {
+            setSelectedUserIds(users.map(u => u.id));
+        }
+    };
+
+    const toggleSelectUser = (id: string) => {
+        setSelectedUserIds(prev =>
+            prev.includes(id) ? prev.filter(userId => userId !== id) : [...prev, id]
+        );
+    };
+
+    const handleBulkDeleteUsers = async () => {
+        if (selectedUserIds.length === 0) return;
+        setIsProcessingBulk(true);
+        try {
+            const usersToDelete = users.filter(u => selectedUserIds.includes(u.id));
+            for (const user of usersToDelete) {
+                try {
+                    await deleteUserFromFirebase(user.id);
+                    // Also attempt Firebase Auth deletion
+                    await fetch("/api/admin/users/delete-auth", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email: user.email }),
+                    }).catch(e => console.warn("Error deleting auth in bulk:", e));
+                } catch (err) {
+                    console.error("Error deleting user in bulk:", user.email, err);
+                }
+            }
+
+            setUsers(prev => prev.filter(u => !selectedUserIds.includes(u.id)));
+            toast({
+                title: "Users Deleted",
+                description: `Successfully deleted ${selectedUserIds.length} users.`,
+            });
+            setSelectedUserIds([]);
+            setIsBulkDeleteDialogOpen(false);
+        } catch (error) {
+            console.error("Bulk delete failed:", error);
+            toast({
+                title: "Bulk Delete Error",
+                description: "Failed to delete some users.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsProcessingBulk(false);
+        }
+    };
+
+    const handleBulkEditRoles = async () => {
+        if (selectedUserIds.length === 0) return;
+        setIsProcessingBulk(true);
+        try {
+            const targetUsers = users.filter(u => selectedUserIds.includes(u.id));
+            const updatedUsersMap = new Map<string, UserRole[]>();
+
+            for (const user of targetUsers) {
+                let newRoles: UserRole[] = [];
+                if (bulkRoleAction === "replace") {
+                    newRoles = [...bulkSelectedRoles];
+                } else if (bulkRoleAction === "add") {
+                    newRoles = Array.from(new Set([...user.roles, ...bulkSelectedRoles]));
+                } else if (bulkRoleAction === "remove") {
+                    newRoles = user.roles.filter(r => !bulkSelectedRoles.includes(r));
+                }
+
+                await updateUserInFirebase(user.id, { roles: newRoles });
+                updatedUsersMap.set(user.id, newRoles);
+            }
+
+            setUsers(prev => prev.map(u => {
+                if (updatedUsersMap.has(u.id)) {
+                    return { ...u, roles: updatedUsersMap.get(u.id)! };
+                }
+                return u;
+            }));
+
+            toast({
+                title: "Roles Updated",
+                description: `Updated permissions for ${selectedUserIds.length} users.`,
+            });
+            setSelectedUserIds([]);
+            setIsBulkEditDialogOpen(false);
+        } catch (error) {
+            console.error("Bulk edit failed:", error);
+            toast({
+                title: "Bulk Edit Error",
+                description: "Failed to update roles for selected users.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsProcessingBulk(false);
+        }
+    };
+
     function openEditDialog(user: UserType) {
         setEditingUser(user);
         setIsEditDialogOpen(true);
@@ -587,6 +738,50 @@ export default function UsersAdminPage() {
                     <CardDescription>Manage user accounts, admin permissions, and staff/board profile linkage.</CardDescription>
                 </CardHeader>
                 <CardContent>
+                    {/* Bulk Actions Toolbar */}
+                    {selectedUserIds.length > 0 && (
+                        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 p-3 bg-muted/50 rounded-lg border border-border">
+                            <div className="flex items-center gap-2">
+                                <Badge variant="secondary" className="font-semibold">
+                                    {selectedUserIds.length} selected
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">of {users.length} users</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                        setBulkSelectedRoles([]);
+                                        setBulkRoleAction("replace");
+                                        setIsBulkEditDialogOpen(true);
+                                    }}
+                                    className="h-8 text-xs gap-1.5"
+                                >
+                                    <Pencil className="h-3.5 w-3.5" />
+                                    Bulk Edit Roles
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => setIsBulkDeleteDialogOpen(true)}
+                                    className="h-8 text-xs gap-1.5"
+                                >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                    Delete Selected ({selectedUserIds.length})
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setSelectedUserIds([])}
+                                    className="h-8 text-xs"
+                                >
+                                    Clear
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+
                     {isLoading ? (
                         <div className="flex justify-center py-8">
                             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -595,6 +790,13 @@ export default function UsersAdminPage() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
+                                    <TableHead className="w-[40px]">
+                                        <Checkbox
+                                            checked={users.length > 0 && selectedUserIds.length === users.length}
+                                            onCheckedChange={toggleSelectAllUsers}
+                                            aria-label="Select all users"
+                                        />
+                                    </TableHead>
                                     <TableHead>User</TableHead>
                                     <TableHead>Email</TableHead>
                                     <TableHead>Linked Profile</TableHead>
@@ -605,7 +807,7 @@ export default function UsersAdminPage() {
                             <TableBody>
                                 {users.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                                        <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                                             No users found. Create one below or import via CSV.
                                         </TableCell>
                                     </TableRow>
@@ -615,6 +817,13 @@ export default function UsersAdminPage() {
                                         const matchingTeamMember = findMatchingUnlinkedTeamMember(user);
                                         return (
                                             <TableRow key={user.id} className="group/row">
+                                                <TableCell className="w-[40px]">
+                                                    <Checkbox
+                                                        checked={selectedUserIds.includes(user.id)}
+                                                        onCheckedChange={() => toggleSelectUser(user.id)}
+                                                        aria-label={`Select ${user.name}`}
+                                                    />
+                                                </TableCell>
                                                 <TableCell className="font-medium">
                                                     <div className="flex items-center gap-3">
                                                         <Avatar className="h-9 w-9 bg-primary/10 border border-primary/20">
@@ -639,20 +848,19 @@ export default function UsersAdminPage() {
                                                                 {user.linkedProfile.type === 'staff' ? 'Staff' : 'Board'}
                                                                 {user.linkedProfile.title ? `: ${user.linkedProfile.title}` : ''}
                                                             </Badge>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-5 w-5 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                                                onClick={() => setPendingUnlinkUser(user)}
+                                                                title={`Unlink from ${user.linkedProfile.name || (user.linkedProfile.type === 'staff' ? 'Staff' : 'Board')}`}
+                                                            >
+                                                                <Unlink className="h-3 w-3" />
+                                                            </Button>
                                                         </div>
                                                     ) : matchingTeamMember ? (
                                                         <div className="flex items-center gap-1.5">
-                                                            <span className="text-xs text-amber-600 italic">Unlinked</span>
-                                                            <Button
-                                                                variant="outline"
-                                                                size="sm"
-                                                                onClick={() => setPendingAutoLink({ user, member: matchingTeamMember })}
-                                                                className="h-6 px-2 text-[10px] bg-amber-50 text-amber-700 border-amber-300 hover:bg-amber-100 font-semibold gap-1"
-                                                                title={`Match found: ${matchingTeamMember.name} (${matchingTeamMember.type})`}
-                                                            >
-                                                                <LinkIcon className="w-2.5 h-2.5" />
-                                                                Link to {matchingTeamMember.type === 'staff' ? 'Staff' : 'Board'}
-                                                            </Button>
+                                                            <span className="text-xs text-amber-600 italic">Match found</span>
                                                         </div>
                                                     ) : (
                                                         <span className="text-xs text-muted-foreground italic">Unlinked</span>
@@ -711,6 +919,19 @@ export default function UsersAdminPage() {
                                                                 className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
                                                             >
                                                                 <LinkIcon className="h-4 w-4" />
+                                                            </Button>
+                                                        )}
+
+                                                        {/* Unlink button if linked */}
+                                                        {user.linkedProfile && (
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => setPendingUnlinkUser(user)}
+                                                                title={`Unlink from ${user.linkedProfile.name || (user.linkedProfile.type === 'staff' ? 'Staff' : 'Board')}`}
+                                                                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                                            >
+                                                                <Unlink className="h-4 w-4" />
                                                             </Button>
                                                         )}
 
@@ -1209,6 +1430,132 @@ export default function UsersAdminPage() {
                                 </>
                             ) : (
                                 "Confirm & Link"
+                            )}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Bulk Edit Roles Dialog */}
+            <Dialog open={isBulkEditDialogOpen} onOpenChange={setIsBulkEditDialogOpen}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Bulk Edit Permissions</DialogTitle>
+                        <DialogDescription>
+                            Update roles and access permissions for <strong>{selectedUserIds.length}</strong> selected users.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-4 py-2">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Action Mode</label>
+                            <Select value={bulkRoleAction} onValueChange={(val: any) => setBulkRoleAction(val)}>
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="replace">Replace all roles with selected</SelectItem>
+                                    <SelectItem value="add">Add selected roles to existing</SelectItem>
+                                    <SelectItem value="remove">Remove selected roles from users</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Select Roles</label>
+                            <div className="grid grid-cols-1 gap-2 pt-1">
+                                {roles.map(r => (
+                                    <div key={r.id} className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id={`bulk-role-${r.id}`}
+                                            checked={bulkSelectedRoles.includes(r.id)}
+                                            onCheckedChange={(checked) => {
+                                                if (checked) {
+                                                    setBulkSelectedRoles(prev => [...prev, r.id]);
+                                                } else {
+                                                    setBulkSelectedRoles(prev => prev.filter(x => x !== r.id));
+                                                }
+                                            }}
+                                        />
+                                        <label htmlFor={`bulk-role-${r.id}`} className="text-sm cursor-pointer">
+                                            {r.label}
+                                        </label>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsBulkEditDialogOpen(false)} disabled={isProcessingBulk}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleBulkEditRoles} disabled={isProcessingBulk || (bulkRoleAction !== "remove" && bulkSelectedRoles.length === 0)}>
+                            {isProcessingBulk ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                            Apply to {selectedUserIds.length} Users
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Bulk Delete Confirmation Dialog */}
+            <AlertDialog open={isBulkDeleteDialogOpen} onOpenChange={setIsBulkDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete {selectedUserIds.length} Users?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to permanently delete <strong>{selectedUserIds.length}</strong> selected users and their associated portal accounts? This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isProcessingBulk}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={(e) => {
+                                e.preventDefault();
+                                handleBulkDeleteUsers();
+                            }}
+                            disabled={isProcessingBulk}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            {isProcessingBulk ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Deleting {selectedUserIds.length} Users...
+                                </>
+                            ) : (
+                                `Delete ${selectedUserIds.length} Users`
+                            )}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Unlink Confirmation Dialog */}
+            <AlertDialog open={!!pendingUnlinkUser} onOpenChange={(open) => !open && setPendingUnlinkUser(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Unlink Profile?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to unlink user <strong>{pendingUnlinkUser?.name}</strong> from their {pendingUnlinkUser?.linkedProfile?.type === 'staff' ? 'staff' : 'board'} profile {pendingUnlinkUser?.linkedProfile?.name ? <strong>"{pendingUnlinkUser?.linkedProfile?.name}"</strong> : ''}? The user account and team profile will remain, but will no longer be connected.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isUnlinking}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={(e) => {
+                                e.preventDefault();
+                                handleConfirmUnlink();
+                            }}
+                            disabled={isUnlinking}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            {isUnlinking ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Unlinking...
+                                </>
+                            ) : (
+                                "Unlink Profile"
                             )}
                         </AlertDialogAction>
                     </AlertDialogFooter>
