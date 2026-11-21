@@ -529,31 +529,31 @@ export default function BoardMeetingEditorPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-slate-50/70 p-4 rounded-xl border border-slate-200/80 text-xs">
-            {/* Meeting Date & Time */}
-            <div className="space-y-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3.5 bg-slate-50/70 p-4 rounded-xl border border-slate-200/80 text-xs">
+            {/* Meeting Date & Time (4 cols) */}
+            <div className="space-y-1 lg:col-span-4">
               <label className="font-bold text-slate-700 flex items-center gap-1.5">
                 <CalendarIcon className="w-3.5 h-3.5 text-indigo-500" /> Date &amp; Time
               </label>
-              <div className="grid grid-cols-5 gap-1.5">
+              <div className="flex items-center gap-1.5">
                 <Input
                   type="date"
                   value={meeting.date}
                   onChange={(e) => handleUpdateMeta("date", e.target.value)}
-                  className="h-8 text-xs bg-white col-span-3"
+                  className="h-8 text-xs bg-white flex-1 min-w-[130px]"
                 />
                 <Input
                   type="text"
                   value={meeting.time}
                   onChange={(e) => handleUpdateMeta("time", e.target.value)}
                   placeholder="7:00 PM"
-                  className="h-8 text-xs bg-white col-span-2 text-center"
+                  className="h-8 text-xs bg-white w-24 shrink-0 text-center"
                 />
               </div>
             </div>
 
-            {/* Meeting Type */}
-            <div className="space-y-1">
+            {/* Meeting Type (3 cols) */}
+            <div className="space-y-1 lg:col-span-3">
               <label className="font-bold text-slate-700">Meeting Type</label>
               <Select 
                 value={meeting.meetingType} 
@@ -571,17 +571,17 @@ export default function BoardMeetingEditorPage() {
               </Select>
             </div>
 
-            {/* Location Type & Details */}
-            <div className="space-y-1 md:col-span-2">
+            {/* Location Type & Details (5 cols) */}
+            <div className="space-y-1 md:col-span-2 lg:col-span-5">
               <label className="font-bold text-slate-700 flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5 text-indigo-500" /> Location Details
               </label>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <Select 
                   value={meeting.locationType} 
                   onValueChange={(val: any) => handleUpdateMeta("locationType", val)}
                 >
-                  <SelectTrigger className="h-8 text-xs bg-white w-28 shrink-0 capitalize">
+                  <SelectTrigger className="h-8 text-xs bg-white w-24 shrink-0 capitalize">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -595,13 +595,13 @@ export default function BoardMeetingEditorPage() {
                   value={meeting.locationDetails || ""}
                   onChange={(e) => handleUpdateMeta("locationDetails", e.target.value)}
                   placeholder="Google Meet & KYO Boardroom, New Canadians Centre"
-                  className="h-8 text-xs bg-white flex-1"
+                  className="h-8 text-xs bg-white flex-1 min-w-0"
                 />
               </div>
             </div>
 
-            {/* Meeting Chair & Secretary */}
-            <div className="space-y-1">
+            {/* Meeting Chair & Secretary (3 cols each) */}
+            <div className="space-y-1 lg:col-span-3">
               <label className="font-bold text-slate-700">Meeting Chair</label>
               <PersonCombobox
                 value={meeting.chair || ""}
@@ -612,7 +612,7 @@ export default function BoardMeetingEditorPage() {
               />
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1 lg:col-span-3">
               <label className="font-bold text-slate-700">Recording Secretary</label>
               <PersonCombobox
                 value={meeting.secretary || ""}
@@ -623,8 +623,8 @@ export default function BoardMeetingEditorPage() {
               />
             </div>
 
-            {/* Next Meeting Date */}
-            <div className="space-y-1 md:col-span-2">
+            {/* Next Meeting Date (6 cols) */}
+            <div className="space-y-1 md:col-span-2 lg:col-span-6">
               <label className="font-bold text-slate-700 flex items-center justify-between">
                 <span>Next Board Meeting Date (Action Items Due Date Default)</span>
               </label>
