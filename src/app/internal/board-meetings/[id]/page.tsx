@@ -45,6 +45,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PersonCombobox, PersonOption } from "@/components/shared/PersonCombobox";
 import { MarkdownEditor } from "@/components/shared/MarkdownEditor";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 
 export default function BoardMeetingEditorPage() {
@@ -528,25 +529,25 @@ export default function BoardMeetingEditorPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 bg-slate-50/70 p-4 rounded-xl border border-slate-200/80 text-xs">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-slate-50/70 p-4 rounded-xl border border-slate-200/80 text-xs">
             {/* Meeting Date & Time */}
             <div className="space-y-1">
               <label className="font-bold text-slate-700 flex items-center gap-1.5">
                 <CalendarIcon className="w-3.5 h-3.5 text-indigo-500" /> Date &amp; Time
               </label>
-              <div className="flex items-center gap-2">
+              <div className="grid grid-cols-5 gap-1.5">
                 <Input
                   type="date"
                   value={meeting.date}
                   onChange={(e) => handleUpdateMeta("date", e.target.value)}
-                  className="h-8 text-xs bg-white"
+                  className="h-8 text-xs bg-white col-span-3"
                 />
                 <Input
                   type="text"
                   value={meeting.time}
                   onChange={(e) => handleUpdateMeta("time", e.target.value)}
                   placeholder="7:00 PM"
-                  className="h-8 text-xs bg-white w-24"
+                  className="h-8 text-xs bg-white col-span-2 text-center"
                 />
               </div>
             </div>
@@ -558,7 +559,7 @@ export default function BoardMeetingEditorPage() {
                 value={meeting.meetingType} 
                 onValueChange={(val: any) => handleUpdateMeta("meetingType", val)}
               >
-                <SelectTrigger className="h-8 text-xs bg-white">
+                <SelectTrigger className="h-8 text-xs bg-white w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -571,7 +572,7 @@ export default function BoardMeetingEditorPage() {
             </div>
 
             {/* Location Type & Details */}
-            <div className="space-y-1 sm:col-span-2">
+            <div className="space-y-1 md:col-span-2">
               <label className="font-bold text-slate-700 flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5 text-indigo-500" /> Location Details
               </label>
@@ -623,7 +624,7 @@ export default function BoardMeetingEditorPage() {
             </div>
 
             {/* Next Meeting Date */}
-            <div className="space-y-1 sm:col-span-2">
+            <div className="space-y-1 md:col-span-2">
               <label className="font-bold text-slate-700 flex items-center justify-between">
                 <span>Next Board Meeting Date (Action Items Due Date Default)</span>
               </label>
@@ -711,7 +712,12 @@ export default function BoardMeetingEditorPage() {
                       size="icon"
                       onClick={() => handleToggleAttendeeIneligibility(attendee.id)}
                       title={attendee.isIneligibleToVote ? "Mark as Eligible to Vote" : "Mark as Ineligible to Vote (conflict or non-voting attendee)"}
-                      className="h-7 w-7 text-xs bg-white"
+                      className={cn(
+                        "h-7 w-7 text-xs",
+                        attendee.isIneligibleToVote 
+                          ? "bg-rose-600 hover:bg-rose-700 text-white border-rose-600" 
+                          : "bg-white hover:bg-slate-100 text-slate-700 border-slate-200"
+                      )}
                     >
                       <Vote className="h-3.5 w-3.5" />
                     </Button>
@@ -1095,6 +1101,53 @@ export default function BoardMeetingEditorPage() {
               </div>
             )))}
           </div>
+
+          {/* Bottom Add Agenda Item Controls (convenient once items are added) */}
+          {meeting.agendaItems.length > 0 && (
+            <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/60 p-4 rounded-xl border">
+              <div>
+                <p className="font-bold text-xs text-slate-800">Add Another Agenda Item</p>
+                <p className="text-[11px] text-muted-foreground">Select from common items or enter a custom title</p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <Select onValueChange={(val) => handleAddAgendaItem(val)}>
+                  <SelectTrigger className="h-8 text-xs bg-white w-48">
+                    <SelectValue placeholder="+ Add Standard Item..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DEFAULT_AGENDA_ITEMS.map((item) => (
+                      <SelectItem key={item} value={item}>
+                        {item}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <div className="flex items-center gap-1">
+                  <Input
+                    placeholder="Custom Item Title..."
+                    value={customItemTitle}
+                    onChange={(e) => setCustomItemTitle(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && customItemTitle.trim()) {
+                        handleAddAgendaItem(customItemTitle);
+                      }
+                    }}
+                    className="h-8 text-xs w-44 bg-white"
+                  />
+                  <Button
+                    onClick={() => handleAddAgendaItem(customItemTitle)}
+                    disabled={!customItemTitle.trim()}
+                    size="sm"
+                    className="h-8 px-2.5 text-xs bg-indigo-600 hover:bg-indigo-700 text-white"
+                  >
+                    <Plus className="h-3.5 w-3.5 mr-1" /> Add
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
       </div>
