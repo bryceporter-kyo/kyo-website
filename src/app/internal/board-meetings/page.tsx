@@ -159,14 +159,9 @@ export default function BoardMeetingsListPage() {
       isIneligibleToVote: false,
     }));
 
-    // Pre-populate default agenda items
-    const initialItems = DEFAULT_AGENDA_ITEMS.map((title, idx) => ({
-      id: `item-${Date.now()}-${idx}`,
-      title,
-      discussion: "",
-      motions: [],
-      actionItems: [],
-    }));
+    // Create new meeting without pre-populating blank agenda items
+    // Users will add items one-by-one as the meeting progresses
+    const initialItems: any[] = [];
 
     try {
       const newMeeting = await createBoardMeeting({
@@ -175,7 +170,7 @@ export default function BoardMeetingsListPage() {
         time: timeStr,
         meetingType: "Standing",
         locationType: "hybrid",
-        locationDetails: "Zoom / Art Gallery of Peterborough",
+        locationDetails: "Google Meet & KYO Boardroom, New Canadians Centre",
         chair: "",
         secretary: user?.displayName || user?.email || "",
         attendees: initialAttendees,

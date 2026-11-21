@@ -18,7 +18,8 @@ import {
   ShieldAlert,
   CalendarCheck2,
   MapPin,
-  Users
+  Users,
+  FileText
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchUsersFromFirebase, User as UserType } from "@/lib/users";
@@ -592,7 +593,7 @@ export default function BoardMeetingEditorPage() {
                   type="text"
                   value={meeting.locationDetails || ""}
                   onChange={(e) => handleUpdateMeta("locationDetails", e.target.value)}
-                  placeholder="e.g. Art Gallery of Peterborough / Zoom link"
+                  placeholder="Google Meet & KYO Boardroom, New Canadians Centre"
                   className="h-8 text-xs bg-white flex-1"
                 />
               </div>
@@ -660,39 +661,39 @@ export default function BoardMeetingEditorPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 pt-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
             {meeting.attendees.map((attendee) => (
               <div 
                 key={attendee.id} 
-                className={`p-2.5 rounded-lg border text-xs flex items-center justify-between transition-colors ${
+                className={`p-3 rounded-lg border text-xs flex flex-col justify-between gap-2.5 transition-colors ${
                   attendee.status === 'present' 
-                    ? 'bg-slate-50 border-slate-200' 
+                    ? 'bg-slate-50/90 border-slate-200' 
                     : attendee.status === 'regrets'
-                    ? 'bg-amber-50/50 border-amber-200 opacity-75'
+                    ? 'bg-amber-50/50 border-amber-200 opacity-80'
                     : 'bg-purple-50/50 border-purple-200'
                 }`}
               >
-                <div className="flex flex-col truncate pr-2">
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-bold text-slate-900 truncate">{attendee.name}</span>
-                    {attendee.isIneligibleToVote && (
-                      <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 bg-rose-50 text-rose-700 border-rose-300">
-                        Ineligible
-                      </Badge>
-                    )}
+                <div className="flex items-start justify-between gap-2 min-w-0">
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-bold text-slate-900 truncate text-[13px]">{attendee.name}</span>
+                    <span className="text-[11px] text-muted-foreground truncate">
+                      {attendee.role || "Director"}
+                    </span>
                   </div>
-                  <span className="text-[10px] text-muted-foreground truncate">
-                    {attendee.role || "Director"}
-                  </span>
+                  {attendee.isIneligibleToVote && (
+                    <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 bg-rose-50 text-rose-700 border-rose-300 shrink-0">
+                      Ineligible
+                    </Badge>
+                  )}
                 </div>
 
-                <div className="flex items-center gap-1">
+                <div className="flex items-center justify-between border-t border-slate-200/60 pt-2 gap-1.5">
                   {/* Status Toggle */}
                   <Select
                     value={attendee.status}
                     onValueChange={(val: any) => handleUpdateAttendeeStatus(attendee.id, val)}
                   >
-                    <SelectTrigger className="h-6 w-20 text-[10px] px-1 bg-white capitalize font-medium">
+                    <SelectTrigger className="h-7 text-xs px-2 bg-white capitalize font-medium flex-1">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -702,28 +703,31 @@ export default function BoardMeetingEditorPage() {
                     </SelectContent>
                   </Select>
 
-                  {/* Toggle Ineligible to vote */}
-                  <Button
-                    type="button"
-                    variant={attendee.isIneligibleToVote ? "destructive" : "ghost"}
-                    size="icon"
-                    onClick={() => handleToggleAttendeeIneligibility(attendee.id)}
-                    title={attendee.isIneligibleToVote ? "Mark as Eligible to Vote" : "Mark as Ineligible to Vote (conflict or non-voting attendee)"}
-                    className="h-6 w-6 text-[10px]"
-                  >
-                    <Vote className="h-3 w-3" />
-                  </Button>
+                  <div className="flex items-center gap-1 shrink-0">
+                    {/* Toggle Ineligible to vote */}
+                    <Button
+                      type="button"
+                      variant={attendee.isIneligibleToVote ? "destructive" : "outline"}
+                      size="icon"
+                      onClick={() => handleToggleAttendeeIneligibility(attendee.id)}
+                      title={attendee.isIneligibleToVote ? "Mark as Eligible to Vote" : "Mark as Ineligible to Vote (conflict or non-voting attendee)"}
+                      className="h-7 w-7 text-xs bg-white"
+                    >
+                      <Vote className="h-3.5 w-3.5" />
+                    </Button>
 
-                  {/* Remove */}
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleRemoveAttendee(attendee.id)}
-                    className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
+                    {/* Remove */}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRemoveAttendee(attendee.id)}
+                      className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                      title="Remove attendee"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -782,11 +786,34 @@ export default function BoardMeetingEditorPage() {
 
           {/* Agenda Items List */}
           <div className="space-y-8">
-            {meeting.agendaItems.map((item, index) => (
-              <div 
-                key={item.id}
-                className="rounded-xl border border-slate-200 p-5 bg-slate-50/40 hover:bg-slate-50/70 transition-all space-y-4"
-              >
+            {meeting.agendaItems.length === 0 ? (
+              <div className="border border-dashed border-slate-300 rounded-xl p-8 text-center bg-slate-50/50">
+                <FileText className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                <h4 className="font-semibold text-slate-800 text-sm mb-1">No Agenda Items Added Yet</h4>
+                <p className="text-xs text-muted-foreground max-w-md mx-auto mb-4">
+                  Add items as your meeting progresses using the <strong>"+ Add Standard Item..."</strong> dropdown or by typing a custom title above.
+                </p>
+                <div className="flex flex-wrap justify-center gap-1.5 max-w-xl mx-auto">
+                  {["Call to Order", "Approval of Agenda", "Approval of Past Meeting Minutes", "Operations Report"].map((defaultTitle) => (
+                    <Button
+                      key={defaultTitle}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddAgendaItem(defaultTitle)}
+                      className="text-xs h-7 bg-white hover:bg-slate-100 border-slate-200"
+                    >
+                      + {defaultTitle}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              meeting.agendaItems.map((item, index) => (
+                <div 
+                  key={item.id}
+                  className="rounded-xl border border-slate-200 p-5 bg-slate-50/40 hover:bg-slate-50/70 transition-all space-y-4"
+                >
                 {/* Item Title & Ordering */}
                 <div className="flex items-center justify-between gap-2 border-b border-slate-200 pb-3">
                   <div className="flex items-center gap-3">
@@ -1066,7 +1093,7 @@ export default function BoardMeetingEditorPage() {
                 </div>
 
               </div>
-            ))}
+            )))}
           </div>
         </div>
 
