@@ -464,7 +464,7 @@ export default function BoardMeetingEditorPage() {
   return (
     <div className="container mx-auto py-8 px-4 max-w-5xl">
       {/* Top Floating Control Bar */}
-      <div className="sticky top-16 z-30 mb-6 bg-white/95 backdrop-blur-md border border-slate-200/80 shadow-md rounded-xl p-3 flex flex-wrap items-center justify-between gap-3">
+      <div className="sticky top-20 md:top-24 xl:top-28 z-30 mb-6 bg-white/95 backdrop-blur-md border border-slate-200/80 shadow-md rounded-xl p-3 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Button asChild variant="ghost" size="sm" className="h-8 text-slate-600 hover:text-slate-900">
             <Link href="/internal/board-meetings">
