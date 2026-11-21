@@ -63,56 +63,75 @@ function drawHeader(
   pageWidth: number,
   logoData: { data: string; format: "PNG" | "JPEG" } | null
 ): number {
-  const BAND_H = 28; // mm — green header band height
+  const BAND_H = 32; // mm — slightly taller for balanced breathing room
 
-  // Green banner
+  // Deep green banner
   doc.setFillColor(...KYO.green);
   doc.rect(0, 0, pageWidth, BAND_H, "F");
 
-  // Place logo with a white background card so it's visible against the green band
-  let textLeft = 12;
+  // Place logo with a neat, snug white card
+  let textLeft = 14;
   if (logoData) {
     try {
-      const logoH = 18;
-      const logoPad = 2;
-      const logoX = 7;
-      const logoY = (BAND_H - logoH) / 2;
-      // White backing card
+      const cardW = 24;
+      const cardH = 24;
+      const cardX = 12;
+      const cardY = (BAND_H - cardH) / 2;
+
+      // Clean white rounded card with soft border
       doc.setFillColor(255, 255, 255);
-      doc.roundedRect(logoX - logoPad, logoY - logoPad, 40, logoH + logoPad * 2, 1.5, 1.5, "F");
-      // Logo on top
-      doc.addImage(logoData.data, logoData.format, logoX, logoY, 0, logoH);
-      textLeft = 52;
+      doc.roundedRect(cardX, cardY, cardW, cardH, 2, 2, "F");
+
+      // Center the logo inside the card
+      const logoH = 18;
+      const logoW = 18;
+      const logoX = cardX + (cardW - logoW) / 2;
+      const logoY = cardY + (cardH - logoH) / 2;
+
+      doc.addImage(logoData.data, logoData.format, logoX, logoY, logoW, logoH, undefined, "FAST");
+      textLeft = cardX + cardW + 8;
     } catch {
-      // logo failed silently — text shifts back to default
+      textLeft = 14;
     }
   }
 
-  // Organisation name in the banner
+  // Organisation name in the banner (vertically centered nicely)
   doc.setFont("times", "bold");
-  doc.setFontSize(14);
+  doc.setFontSize(15);
   doc.setTextColor(...KYO.white);
-  doc.text("KAWARTHA YOUTH ORCHESTRA", textLeft, 11);
+  doc.text("KAWARTHA YOUTH ORCHESTRA", textLeft, 14);
 
   doc.setFont("times", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(200, 230, 200); // light sage
+  doc.setFontSize(9.5);
+  doc.setTextColor(210, 235, 210); // subtle light sage
   doc.text(
     `BOARD OF DIRECTORS — ${meeting.meetingType.toUpperCase()} MINUTES`,
     textLeft,
-    18
+    21.5
   );
 
-  // Date pill in top-right corner of banner
-  doc.setFontSize(8);
+  // Styled date pill in top-right corner of banner
+  const pillW = 28;
+  const pillH = 7;
+  const pillX = pageWidth - 12 - pillW;
+  const pillY = 12.5;
+
+  doc.setFillColor(18, 58, 17); // slightly darker translucent green
+  doc.roundedRect(pillX, pillY, pillW, pillH, 1.5, 1.5, "F");
+  doc.setDrawColor(...KYO.sage);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(pillX, pillY, pillW, pillH, 1.5, 1.5, "D");
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
   doc.setTextColor(...KYO.white);
-  doc.text(meeting.date, pageWidth - 12, 11, { align: "right" });
+  doc.text(meeting.date, pillX + pillW / 2, pillY + 4.8, { align: "center" });
 
   // Thin sage accent strip below banner
   doc.setFillColor(...KYO.sage);
   doc.rect(0, BAND_H, pageWidth, 1.5, "F");
 
-  return BAND_H + 1.5 + 6; // Y after header
+  return BAND_H + 1.5 + 7; // Y after header
 }
 
 /**
@@ -171,19 +190,32 @@ export async function generateBoardMeetingPdf(meeting: BoardMeeting): Promise<js
   let currentY = drawHeader(doc, meeting, pageWidth, logoData);
 
   // ── Meeting Metadata ─────────────────────────────────────────────────────
+  // Helper to format names nicely if empty or raw email
+  const formatPerson = (personStr?: string) => {
+    if (!personStr || personStr.trim() === "" || personStr.toUpperCase() === "N/A") return "—";
+    if (personStr.includes("@")) {
+      const parts = personStr.split("@")[0].split(/[._-]/);
+      return parts.map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join(" ");
+    }
+    return personStr;
+  };
+
+  const chairFormatted = formatPerson(meeting.chair);
+  const secFormatted = formatPerson(meeting.secretary);
+
   autoTable(doc, {
     startY: currentY,
     theme: "plain",
     styles: {
-      fontSize: 9,
-      cellPadding: { top: 2, bottom: 2, left: 3, right: 2 },
+      fontSize: 8.5,
+      cellPadding: { top: 2.2, bottom: 2.2, left: 3, right: 3 },
       textColor: KYO.ink,
     },
     columnStyles: {
-      0: { fontStyle: "bold", cellWidth: 32, textColor: KYO.green },
-      1: { cellWidth: 62 },
-      2: { fontStyle: "bold", cellWidth: 32, textColor: KYO.green },
-      3: { cellWidth: 62 },
+      0: { fontStyle: "bold", cellWidth: 30, textColor: KYO.green },
+      1: { cellWidth: 64 },
+      2: { fontStyle: "bold", cellWidth: 30, textColor: KYO.green },
+      3: { cellWidth: 64 },
     },
     body: [
       [
@@ -200,22 +232,20 @@ export async function generateBoardMeetingPdf(meeting: BoardMeeting): Promise<js
       ],
       [
         "Chair",
-        meeting.chair || "N/A",
+        chairFormatted,
         "Secretary",
-        meeting.secretary || "N/A",
+        secFormatted,
       ],
     ],
-    // Bottom border under the metadata block
-    didDrawPage: () => {},
   });
 
-  currentY = (doc as any).lastAutoTable.finalY + 2;
+  currentY = (doc as any).lastAutoTable.finalY + 3;
 
   // Thin green rule under metadata
   doc.setDrawColor(...KYO.border);
   doc.setLineWidth(0.4);
   doc.line(14, currentY, pageWidth - 14, currentY);
-  currentY += 6;
+  currentY += 7;
 
   // ── Attendance & Quorum ──────────────────────────────────────────────────
   const present = meeting.attendees.filter(a => a.status === "present").map(a => a.name).join(", ") || "None recorded";
@@ -223,12 +253,14 @@ export async function generateBoardMeetingPdf(meeting: BoardMeeting): Promise<js
   const guests  = meeting.attendees.filter(a => a.status === "guest").map(a => a.name).join(", ");
   const ineligible = meeting.attendees.filter(a => a.ineligibleToVote).map(a => a.name).join(", ");
 
-  // Section label
+  // Section label with small decorative accent bar
+  doc.setFillColor(...KYO.green);
+  doc.rect(14, currentY - 0.5, 2.5, 5, "F");
   doc.setFont("times", "bold");
-  doc.setFontSize(10);
+  doc.setFontSize(10.5);
   doc.setTextColor(...KYO.green);
-  doc.text("ATTENDANCE & QUORUM", 14, currentY);
-  currentY += 4;
+  doc.text("ATTENDANCE & QUORUM", 19, currentY + 3.5);
+  currentY += 7;
 
   autoTable(doc, {
     startY: currentY,
@@ -238,9 +270,10 @@ export async function generateBoardMeetingPdf(meeting: BoardMeeting): Promise<js
       textColor: KYO.white,
       fontStyle: "bold",
       fontSize: 8.5,
+      cellPadding: 3,
     },
     alternateRowStyles: { fillColor: KYO.greenLight },
-    styles: { fontSize: 8.5, cellPadding: 2.5, textColor: KYO.ink },
+    styles: { fontSize: 8.5, cellPadding: 2.8, textColor: KYO.ink },
     columnStyles: { 0: { fontStyle: "bold", cellWidth: 36, textColor: KYO.muted } },
     head: [["STATUS", "MEMBERS"]],
     body: [
@@ -251,48 +284,56 @@ export async function generateBoardMeetingPdf(meeting: BoardMeeting): Promise<js
     ],
   });
 
-  currentY = (doc as any).lastAutoTable.finalY + 10;
+  currentY = (doc as any).lastAutoTable.finalY + 11;
 
   // ── Agenda Items ─────────────────────────────────────────────────────────
   if (meeting.agendaItems.length > 0) {
+    doc.setFillColor(...KYO.green);
+    doc.rect(14, currentY - 0.5, 2.5, 5, "F");
     doc.setFont("times", "bold");
-    doc.setFontSize(10);
+    doc.setFontSize(10.5);
     doc.setTextColor(...KYO.green);
-    doc.text("AGENDA, DISCUSSION & DECISIONS", 14, currentY);
+    doc.text("AGENDA, DISCUSSION & DECISIONS", 19, currentY + 3.5);
     currentY += 10;
   }
 
   meeting.agendaItems.forEach((item, index) => {
     // Page overflow check
-    if (currentY > 258) {
+    if (currentY > 255) {
       doc.addPage();
       currentY = drawPageHeader(doc, meeting, pageWidth);
     }
 
     // ── Agenda item title bar ────────────────────────────────────────────
-    const titleBarH = 7;
+    const titleBarH = 8;
+    const barY = currentY;
+
+    // Soft sage tinted title background with rounded border
     doc.setFillColor(...KYO.sagePale);
-    doc.rect(14, currentY - 5, pageWidth - 28, titleBarH, "F");
+    doc.roundedRect(14, barY, pageWidth - 28, titleBarH, 1, 1, "F");
 
     // Green left accent bar
     doc.setFillColor(...KYO.green);
-    doc.rect(14, currentY - 5, 2, titleBarH, "F");
+    doc.rect(14, barY, 2.5, titleBarH, "F");
 
-    // Item number circle
+    // Item number circle - perfectly centered
+    const circleCenterX = 21;
+    const circleCenterY = barY + titleBarH / 2;
     doc.setFillColor(...KYO.green);
-    doc.circle(20, currentY - 1.3, 3, "F");
+    doc.circle(circleCenterX, circleCenterY, 3.2, "F");
+
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8);
+    doc.setFontSize(8.5);
     doc.setTextColor(...KYO.white);
     const numStr = String(index + 1);
-    doc.text(numStr, 20, currentY - 0.5, { align: "center" });
+    doc.text(numStr, circleCenterX, circleCenterY + 1.1, { align: "center" });
 
     // Item title text
     doc.setFont("times", "bold");
     doc.setFontSize(10.5);
     doc.setTextColor(...KYO.greenDark);
-    doc.text(item.title, 26, currentY - 0.5);
-    currentY += titleBarH - 2;
+    doc.text(item.title, 27, barY + 5.5);
+    currentY = barY + titleBarH + 3;
 
     // ── Discussion text ──────────────────────────────────────────────────
     if (item.discussion && item.discussion.trim()) {
@@ -311,7 +352,7 @@ export async function generateBoardMeetingPdf(meeting: BoardMeeting): Promise<js
           doc.text(line, 20, currentY);
           currentY += 4.5;
         }
-        currentY += 2;
+        currentY += 3;
       }
     }
 
@@ -387,7 +428,7 @@ export async function generateBoardMeetingPdf(meeting: BoardMeeting): Promise<js
       currentY = (doc as any).lastAutoTable.finalY + 5;
     }
 
-    currentY += 4;
+    currentY += 6;
   });
 
   // ── Footers (all pages) ──────────────────────────────────────────────────
