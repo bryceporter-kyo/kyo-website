@@ -12,6 +12,7 @@ export type Announcement = {
   imageUrl?: string;
   location?: string;
   link?: string;
+  linkLabel?: string;
   attachments?: { name: string; url: string }[];
   disappearsAt?: string;
   unpinsAt?: string;

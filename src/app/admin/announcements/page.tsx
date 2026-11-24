@@ -57,6 +57,7 @@ const announcementSchema = z.object({
   content: z.string().min(20, "Content must be at least 20 characters long."),
   imageUrl: z.string().url().optional().or(z.literal('')),
   link: z.string().url().optional().or(z.literal('')),
+  linkLabel: z.string().optional().or(z.literal('')),
   pinned: z.boolean().default(false),
   unpinsAt: z.date().optional(),
   disappearsAt: z.date().optional(),
@@ -100,6 +101,7 @@ export default function AnnouncementsAdminPage() {
             content: "",
             imageUrl: "",
             link: "",
+            linkLabel: "",
             pinned: false,
             popupPage: "",
         },
@@ -112,6 +114,7 @@ export default function AnnouncementsAdminPage() {
                 content: editingAnnouncement.content,
                 imageUrl: editingAnnouncement.imageUrl || "",
                 link: editingAnnouncement.link || "",
+                linkLabel: editingAnnouncement.linkLabel || "",
                 pinned: editingAnnouncement.pinned,
                 unpinsAt: editingAnnouncement.unpinsAt ? new Date(editingAnnouncement.unpinsAt) : undefined,
                 disappearsAt: editingAnnouncement.disappearsAt ? new Date(editingAnnouncement.disappearsAt) : undefined,
@@ -124,6 +127,7 @@ export default function AnnouncementsAdminPage() {
                 content: "",
                 imageUrl: "",
                 link: "",
+                linkLabel: "",
                 pinned: false,
                 popupPage: "",
                 unpinsAt: undefined,
@@ -179,6 +183,7 @@ export default function AnnouncementsAdminPage() {
                 ...values,
                 imageUrl: finalImageUrl,
                 link: values.link || undefined,
+                linkLabel: values.linkLabel || undefined,
                 attachments: attachments.length > 0 ? attachments : undefined,
                 date: editingAnnouncement?.date || format(new Date(), 'yyyy-MM-dd'),
                 excerpt: values.content.substring(0, 150) + (values.content.length > 150 ? '...' : ''),
@@ -584,23 +589,41 @@ export default function AnnouncementsAdminPage() {
                                 )}
                             </div>
 
-                            {/* Related Link Field */}
-                            <FormField
-                                control={form.control}
-                                name="link"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Related Web Link (Optional)</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="https://example.com/tickets or /programs/orchestras" {...field} />
-                                        </FormControl>
-                                        <FormDescription>
-                                            Add an external or internal link button for this announcement (e.g. registration page or ticket sales).
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                            {/* Related Link & Button Label Fields */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="link"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Related Web Link (Optional)</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="https://example.com/tickets or /programs/orchestras" {...field} />
+                                            </FormControl>
+                                            <FormDescription>
+                                                Add an external or internal link button for this announcement.
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="linkLabel"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Button Label (Optional)</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="e.g. Upbeat! Holiday Gift Catalogue" {...field} />
+                                            </FormControl>
+                                            <FormDescription>
+                                                Custom text for the button (defaults to page name or destination).
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
                             <FormField
                                 control={form.control}
                                 name="pinned"
