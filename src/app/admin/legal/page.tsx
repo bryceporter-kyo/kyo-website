@@ -30,6 +30,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { format } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const legalDocumentSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters."),
