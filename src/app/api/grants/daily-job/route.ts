@@ -10,7 +10,11 @@ import { cloneGrantForNewCycle } from "@/lib/grants/grant-actions";
 export async function POST(request: NextRequest) {
   try {
     const authHeader = request.headers.get("authorization");
-    const secret = process.env.GRANTS_JOB_SECRET || "kyo_grants_cron_secret";
+    const secret = process.env.GRANTS_JOB_SECRET;
+    if (!secret) {
+      console.error("[GrantsDailyJob] GRANTS_JOB_SECRET env var is not set.");
+      return NextResponse.json({ error: "Job endpoint is not configured" }, { status: 500 });
+    }
 
     if (!authHeader || authHeader.replace(/^Bearer\s+/i, "") !== secret) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

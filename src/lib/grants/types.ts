@@ -142,9 +142,12 @@ export interface GrantAuditLogEntry {
   userEmail: string;
   userName?: string;
   action: string;
+  grantId?: string;
+  funderId?: string;
   field?: string;
   oldValue?: any;
   newValue?: any;
+  metadata?: Record<string, any>;
   summary: string;
 }
 

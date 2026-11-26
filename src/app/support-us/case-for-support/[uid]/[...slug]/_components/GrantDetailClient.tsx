@@ -164,7 +164,7 @@ export default function GrantDetailClient({ grant, board, documents }: GrantDeta
   } = grant;
 
   const resolvedYear = grantCycleYear || new Date(startedAt || createdAt || Date.now()).getFullYear().toString();
-  const resolvedSignerName = signerName || 'Bryce Porter';
+  const resolvedSignerName = signerName || null;
   const resolvedSignerTitle = signerTitle || 'Chair, Board of Directors';
   const resolvedContactName = contactName || 'the KYO team';
 
@@ -323,10 +323,12 @@ export default function GrantDetailClient({ grant, board, documents }: GrantDeta
 
           {/* Signoff */}
           <div className="pt-6 border-t border-slate-100 flex items-center justify-between">
-            <div>
-              <p className="font-headline font-bold text-slate-900">{resolvedSignerName}</p>
-              <p className="text-xs text-slate-500 font-medium">{resolvedSignerTitle}</p>
-            </div>
+            {resolvedSignerName && (
+              <div>
+                <p className="font-headline font-bold text-slate-900">{resolvedSignerName}</p>
+                <p className="text-xs text-slate-500 font-medium">{resolvedSignerTitle}</p>
+              </div>
+            )}
             <div className="text-right text-xs text-slate-400 font-light">
               Kawartha Youth Orchestra Inc.
             </div>
@@ -372,7 +374,7 @@ export default function GrantDetailClient({ grant, board, documents }: GrantDeta
       )}
 
       {/* 5. Past Support */}
-      <PastSupportSection pastSupport={pastSupport} funderName={funderName} />
+      <PastSupportSection records={pastSupport} funderName={funderName} />
 
       {/* 6. KYO Core Values Grid */}
       <section className="py-20 px-4 bg-slate-900 text-white">
@@ -430,7 +432,7 @@ export default function GrantDetailClient({ grant, board, documents }: GrantDeta
       <GrantQASection pairs={visiblePairs} />
 
       {/* 9. Budget Breakdown */}
-      <BudgetBreakdownSection items={budgetBreakdown} amountRequested={amountFormatted} />
+      <BudgetBreakdownSection items={budgetBreakdown} amountRequested={amountRequested ?? 0} />
 
       {/* 10. Project Timeline */}
       <TimelineSection milestones={timeline} />
@@ -469,9 +471,11 @@ export default function GrantDetailClient({ grant, board, documents }: GrantDeta
             of background, has the chance to thrive through music.
           </p>
           <div className="pt-4">
-            <p className="font-headline text-lg font-bold text-slate-900">
-              {resolvedSignerName}
-            </p>
+            {resolvedSignerName && (
+              <p className="font-headline text-lg font-bold text-slate-900">
+                {resolvedSignerName}
+              </p>
+            )}
             <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mt-0.5">
               {resolvedSignerTitle}, Kawartha Youth Orchestra
             </p>

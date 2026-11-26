@@ -15,6 +15,11 @@ import {
 
 async function triggerGrantRevalidation(grant: Partial<Grant>) {
   try {
+    const secret = process.env.NEXT_PUBLIC_REVALIDATION_SECRET_TOKEN;
+    if (!secret) {
+      console.warn('[GrantService] NEXT_PUBLIC_REVALIDATION_SECRET_TOKEN is not set; skipping revalidation.');
+      return;
+    }
     const paths = ['/support-us/case-for-support'];
     if (grant.id) {
       paths.push(getGrantPublicUrl(grant));
@@ -22,10 +27,7 @@ async function triggerGrantRevalidation(grant: Partial<Grant>) {
     await fetch('/api/revalidate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        secret: 'kyo-revalidate-secret-token-2026',
-        paths,
-      }),
+      body: JSON.stringify({ secret, paths }),
     });
   } catch (err) {
     console.warn('[GrantService] Revalidation notice:', err);
@@ -301,6 +303,7 @@ export async function saveGrant(
     return { id: grant.id, ...dataToSave } as Grant;
   } else {
     const dataToSave: Omit<Grant, 'id'> = {
+      ...grant,
       funderId: grant.funderId || '',
       funderName: grant.funderName || '',
       programId: grant.programId || 'prog_default',
@@ -311,11 +314,10 @@ export async function saveGrant(
       assignedOwnerName: grant.assignedOwnerName || user?.name || '',
       kyoPrograms: grant.kyoPrograms || ['Upbeat!'],
       slug: grant.slug || sanitizeSlug(grant.funderName || 'grant'),
-      published: false,
-      amountRequested: grant.amountRequested || 0,
+      published: grant.published ?? false,
+      amountRequested: grant.amountRequested ?? 0,
       createdAt: now,
       updatedAt: now,
-      ...grant,
     };
 
     const docRef = await addDoc(collRef, dataToSave);

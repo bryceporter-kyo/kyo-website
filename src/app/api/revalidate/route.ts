@@ -10,10 +10,14 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}));
     const { secret, paths, tags } = body;
 
-    // Verify secret token (or fallback to admin bypass for authenticated operations)
-    const expectedSecret = process.env.REVALIDATION_SECRET_TOKEN || 'kyo-revalidate-secret-token-2026';
-    if (secret && secret !== expectedSecret) {
-      return NextResponse.json({ message: 'Invalid revalidation token' }, { status: 401 });
+    // Verify secret token — secret is required; missing or wrong token is rejected
+    const expectedSecret = process.env.REVALIDATION_SECRET_TOKEN;
+    if (!expectedSecret) {
+      console.error('[RevalidateAPI] REVALIDATION_SECRET_TOKEN env var is not set.');
+      return NextResponse.json({ message: 'Revalidation endpoint is not configured' }, { status: 500 });
+    }
+    if (!secret || secret !== expectedSecret) {
+      return NextResponse.json({ message: 'Invalid or missing revalidation token' }, { status: 401 });
     }
 
     const revalidatedPaths: string[] = [];
