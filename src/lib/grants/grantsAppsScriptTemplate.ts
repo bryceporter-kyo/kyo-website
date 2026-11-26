@@ -397,3 +397,183 @@ function jsonResponse(data, statusCode) {
 }
 `;
 }
+
+/**
+ * Template-Bound Google Apps Script (for Google Docs & Google Sheets templates)
+ * Copy-pasteable into Extensions > Apps Script on any template document or sheet.
+ * Adds a "KYO Grants -> Sync Back to KYO Website" menu item with zero manual edits.
+ */
+export function generateTemplateBoundAppsScriptCode(options: {
+  secret?: string;
+  websiteUrl?: string;
+} = {}): string {
+  const {
+    secret = '',
+    websiteUrl = 'https://thekyo.ca',
+  } = options;
+
+  return `/**
+ * ============================================================================
+ * KYO GRANTS - TEMPLATE SYNC SCRIPT (GOOGLE DOCS & GOOGLE SHEETS)
+ * ============================================================================
+ * Paste this into Extensions > Apps Script in your template Doc or Sheet.
+ * No edits required — your secret and website URL are already configured.
+ */
+const SYNC_CONFIG = {
+  SHARED_SECRET: "${secret}",
+  WEBSITE_URL: "${websiteUrl}",
+};
+
+/**
+ * Automatically adds the "KYO Grants" menu when the Doc or Sheet is opened.
+ */
+function onOpen() {
+  var ui = null;
+  try {
+    ui = DocumentApp.getUi();
+  } catch (e) {
+    try {
+      ui = SpreadsheetApp.getUi();
+    } catch (e2) {}
+  }
+  if (ui) {
+    ui.createMenu("KYO Grants")
+      .addItem("Sync Back to KYO Website", "syncToKyoWebsite")
+      .addToUi();
+  }
+}
+
+/**
+ * Syncs this Document (Q&A table) or Spreadsheet (Budget) back to the KYO Grants Portal.
+ */
+function syncToKyoWebsite() {
+  var isDoc = false;
+  var doc = null;
+  var ss = null;
+
+  try {
+    doc = DocumentApp.getActiveDocument();
+    if (doc) isDoc = true;
+  } catch (e) {}
+
+  if (!isDoc) {
+    try {
+      ss = SpreadsheetApp.getActiveSpreadsheet();
+    } catch (e) {}
+  }
+
+  var ui = isDoc ? DocumentApp.getUi() : SpreadsheetApp.getUi();
+
+  if (!SYNC_CONFIG.SHARED_SECRET) {
+    ui.alert("Configuration Error", "Shared secret is missing. Please re-copy this script from /grants/admin.", ui.ButtonSet.OK);
+    return;
+  }
+
+  var payload = null;
+
+  if (isDoc && doc) {
+    var tables = doc.getBody().getTables();
+    if (!tables || tables.length === 0) {
+      ui.alert("No Table Found", "Could not find a Q&A table in this document.", ui.ButtonSet.OK);
+      return;
+    }
+
+    // Use the first table with at least 2 columns
+    var qaTable = null;
+    for (var t = 0; t < tables.length; t++) {
+      if (tables[t].getNumRows() > 0 && tables[t].getRow(0).getNumCells() >= 2) {
+        qaTable = tables[t];
+        break;
+      }
+    }
+
+    if (!qaTable) {
+      ui.alert("Invalid Table", "Expected a table with at least 2 columns (Question | Answer).", ui.ButtonSet.OK);
+      return;
+    }
+
+    var questions = [];
+    for (var r = 1; r < qaTable.getNumRows(); r++) {
+      var row = qaTable.getRow(r);
+      var qText = row.getCell(0).getText().trim();
+      var aText = row.getCell(1).getText().trim();
+      if (qText) {
+        questions.push({
+          question: qText,
+          answerHtml: aText,
+        });
+      }
+    }
+
+    payload = {
+      secret: SYNC_CONFIG.SHARED_SECRET,
+      docId: doc.getId(),
+      type: "doc",
+      questions: questions,
+    };
+  } else if (ss) {
+    var sheet = ss.getActiveSheet();
+    var values = sheet.getDataRange().getDisplayValues();
+    if (!values || values.length < 2) {
+      ui.alert("No Data Found", "Expected a header row and at least one budget row.", ui.ButtonSet.OK);
+      return;
+    }
+
+    var headers = values[0].map(function (h) { return String(h).trim().toLowerCase(); });
+    var itemCol = headers.findIndex(function (h) { return h.indexOf("item") !== -1 || h.indexOf("description") !== -1 || h.indexOf("name") !== -1; });
+    var amountCol = headers.findIndex(function (h) { return h.indexOf("amount") !== -1 || h.indexOf("cost") !== -1 || h.indexOf("total") !== -1; });
+    var catCol = headers.findIndex(function (h) { return h === "category" || h.indexOf("cat") !== -1; });
+    var subCol = headers.findIndex(function (h) { return h.indexOf("sub") !== -1; });
+
+    if (itemCol === -1) itemCol = 0;
+    if (amountCol === -1) amountCol = 1;
+
+    var budgetBreakdown = [];
+    for (var i = 1; i < values.length; i++) {
+      var rowVals = values[i];
+      var itemVal = String(rowVals[itemCol] || "").trim();
+      var amountVal = String(rowVals[amountCol] || "").trim();
+      if (!itemVal && !amountVal) continue;
+
+      var entry = {
+        item: itemVal,
+        amount: amountVal,
+      };
+      if (catCol !== -1 && rowVals[catCol]) entry.category = String(rowVals[catCol]).trim();
+      if (subCol !== -1 && rowVals[subCol]) entry.subcategory = String(rowVals[subCol]).trim();
+      budgetBreakdown.push(entry);
+    }
+
+    payload = {
+      secret: SYNC_CONFIG.SHARED_SECRET,
+      docId: ss.getId(),
+      type: "sheet",
+      budgetBreakdown: budgetBreakdown,
+    };
+  } else {
+    ui.alert("Unsupported File", "Please run this script from a Google Doc or Google Sheet.", ui.ButtonSet.OK);
+    return;
+  }
+
+  try {
+    var response = UrlFetchApp.fetch(SYNC_CONFIG.WEBSITE_URL + "/api/grants/sync-from-doc", {
+      method: "post",
+      contentType: "application/json",
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true,
+    });
+
+    var status = response.getResponseCode();
+    var resJson = JSON.parse(response.getContentText() || "{}");
+
+    if (status >= 200 && status < 300 && resJson.success) {
+      ui.alert("Sync Complete", "Successfully synced " + resJson.syncedCount + " item(s) back to the KYO Grants Portal.", ui.ButtonSet.OK);
+    } else {
+      ui.alert("Sync Failed (" + status + ")", resJson.error || "Unknown error occurred.", ui.ButtonSet.OK);
+    }
+  } catch (err) {
+    ui.alert("Connection Error", "Could not reach KYO Website: " + err.toString(), ui.ButtonSet.OK);
+  }
+}
+`;
+}

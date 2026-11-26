@@ -17,7 +17,7 @@ import {
   getGrantsSettings, saveGrantsSettings, logGrantAudit 
 } from "@/lib/grants/grants-service";
 import { GrantsSettings, GrantStageConfig } from "@/lib/grants/types";
-import { generateGrantsAppsScriptCode } from "@/lib/grants/grantsAppsScriptTemplate";
+import { generateGrantsAppsScriptCode, generateTemplateBoundAppsScriptCode } from "@/lib/grants/grantsAppsScriptTemplate";
 import { useAuthContext } from "@/components/providers/AuthProvider";
 
 export default function GrantsSettingsPage() {
@@ -27,6 +27,7 @@ export default function GrantsSettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [copiedTemplateCode, setCopiedTemplateCode] = useState(false);
   const [origin, setOrigin] = useState("");
 
   const [settings, setSettings] = useState<GrantsSettings | null>(null);
@@ -114,6 +115,23 @@ export default function GrantsSettingsPage() {
       description: "Google Apps Script code copied to clipboard.",
     });
     setTimeout(() => setCopiedCode(false), 3000);
+  };
+
+  const dynamicTemplateScriptCode = useMemo(() => {
+    return generateTemplateBoundAppsScriptCode({
+      secret: settings?.appsScriptSecret || '',
+      websiteUrl: origin || 'https://thekyo.ca',
+    });
+  }, [settings?.appsScriptSecret, origin]);
+
+  const copyTemplateScriptToClipboard = () => {
+    navigator.clipboard.writeText(dynamicTemplateScriptCode);
+    setCopiedTemplateCode(true);
+    toast({
+      title: "Template Sync Script Copied!",
+      description: "Paste into Extensions > Apps Script in your Google Doc or Sheet template.",
+    });
+    setTimeout(() => setCopiedTemplateCode(false), 3000);
   };
 
   const handleTestConnection = async () => {
@@ -377,6 +395,34 @@ export default function GrantsSettingsPage() {
 
               <div className="bg-slate-900 text-slate-100 rounded-xl p-4 overflow-x-auto max-h-[420px] font-mono text-xs">
                 <pre>{dynamicAppsScriptCode}</pre>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <div>
+                <CardTitle className="text-lg">Template Sync Script (Docs &amp; Sheets)</CardTitle>
+                <CardDescription>
+                  Add this to your Google Doc or Google Sheet templates so staff can sync Q&amp;A tables or Budget sheets back to the website with one click.
+                </CardDescription>
+              </div>
+              <Button onClick={copyTemplateScriptToClipboard} size="sm" className="gap-2">
+                {copiedTemplateCode ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                <span>{copiedTemplateCode ? "Copied!" : "Copy Template Script"}</span>
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="p-3 bg-muted/40 border rounded-xl text-xs space-y-1 text-muted-foreground">
+                <div className="font-semibold text-foreground">Setup Instructions (No Code Edits Needed):</div>
+                <ol className="list-decimal pl-4 space-y-1">
+                  <li>Open your Google Doc or Google Sheet template.</li>
+                  <li>Click <strong>Extensions &rarr; Apps Script</strong>.</li>
+                  <li>Replace any existing code with the script below and click <strong>Save</strong>.</li>
+                  <li>Refresh the Doc/Sheet &mdash; a <strong>KYO Grants &rarr; Sync Back to KYO Website</strong> menu will appear automatically.</li>
+                </ol>
+              </div>
+              <div className="bg-slate-900 text-slate-100 rounded-lg p-3 font-mono text-xs overflow-x-auto max-h-64 border border-slate-800">
+                <pre>{dynamicTemplateScriptCode}</pre>
               </div>
             </CardContent>
           </Card>
