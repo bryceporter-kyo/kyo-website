@@ -19,19 +19,30 @@ export default function GrantsReportsPage() {
   const [grants, setGrants] = useState<Grant[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [yearType, setYearType] = useState<"fiscal" | "calendar">("fiscal");
-  const [selectedYear, setSelectedYear] = useState<string>("2026");
+  const [selectedYear, setSelectedYear] = useState<string>("all");
 
   useEffect(() => {
     fetchAllGrants().then(setGrants).catch(console.error).finally(() => setIsLoading(false));
   }, []);
 
-  // Performance calculations
-  const totalApplied = grants.length;
-  const wonGrants = grants.filter(g => g.stage.includes("Won"));
-  const lostGrants = grants.filter(g => g.stage.includes("Lost"));
-  const pendingGrants = grants.filter(g => !g.stage.includes("Won") && !g.stage.includes("Lost") && !g.stage.includes("Cancelled") && g.stage !== "Archived");
+  const filteredGrants = grants.filter(g => {
+    if (selectedYear === "all") return true;
+    const dateStr = g.grantCycleYear || g.dateAwarded || g.startedAt || g.createdAt;
+    if (!dateStr) return false;
+    if (g.grantCycleYear) return g.grantCycleYear === selectedYear;
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return false;
+    const yr = yearType === "fiscal" && d.getMonth() >= 6 ? d.getFullYear() + 1 : d.getFullYear();
+    return yr.toString() === selectedYear;
+  });
 
-  const totalRequested = grants.reduce((sum, g) => sum + (g.amountRequested || 0), 0);
+  // Performance calculations
+  const totalApplied = filteredGrants.length;
+  const wonGrants = filteredGrants.filter(g => g.stage.includes("Won"));
+  const lostGrants = filteredGrants.filter(g => g.stage.includes("Lost"));
+  const pendingGrants = filteredGrants.filter(g => !g.stage.includes("Won") && !g.stage.includes("Lost") && !g.stage.includes("Cancelled") && g.stage !== "Archived");
+
+  const totalRequested = filteredGrants.reduce((sum, g) => sum + (g.amountRequested || 0), 0);
   const totalAwarded = wonGrants.reduce((sum, g) => sum + (g.amountAwarded || 0), 0);
   const winRate = totalApplied > 0 ? Math.round((wonGrants.length / totalApplied) * 100) : 0;
 
@@ -87,6 +98,19 @@ export default function GrantsReportsPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Year Filter */}
+          <Select value={selectedYear} onValueChange={setSelectedYear}>
+            <SelectTrigger className="w-[120px] text-xs h-9 bg-card">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Years</SelectItem>
+              <SelectItem value="2026">2026</SelectItem>
+              <SelectItem value="2025">2025</SelectItem>
+              <SelectItem value="2024">2024</SelectItem>
+            </SelectContent>
+          </Select>
+
           {/* Calendar vs Fiscal Toggle */}
           <Select value={yearType} onValueChange={(val: any) => setYearType(val)}>
             <SelectTrigger className="w-[150px] text-xs h-9 bg-card">

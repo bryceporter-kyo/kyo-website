@@ -274,7 +274,7 @@ export async function cloneGrantForNewCycle(
     questions: clonedQuestions,
     clonedFromGrantId: oldGrant.id,
     clonedYear: currentYear,
-    slug: `${oldGrant.slug}-${currentYear}`,
+    slug: `${oldGrant.slug}-${currentYear}-${Math.random().toString(36).substring(2, 6)}`,
     published: false,
     // Drive files start empty until triggered
     driveFolderId: undefined,

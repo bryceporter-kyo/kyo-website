@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     let promotedCount = 0;
     let clonedCount = 0;
 
-    for (const grant of allGrants) {
+    await Promise.all(allGrants.map(async (grant) => {
       // 1. Return-To automation: Qualified: Timing Not Right -> Qualified: To Apply
       if (grant.returnToDate && !grant.returnToUsed) {
         const returnDateStr = grant.returnToDate.split("T")[0];
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
           clonedCount++;
         }
       }
-    }
+    }));
 
     return NextResponse.json({
       success: true,

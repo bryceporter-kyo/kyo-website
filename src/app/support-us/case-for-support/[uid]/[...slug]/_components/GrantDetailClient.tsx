@@ -97,24 +97,25 @@ interface GrantDetailClientProps {
   documents?: LegalDocument[];
 }
 
+function computeYearsOfService(): number {
+  const startDate = new Date(2002, 8, 2); // September 2, 2002
+  const today = new Date();
+  let diffYears = today.getFullYear() - startDate.getFullYear();
+  const hasReachedAnniversary =
+    today.getMonth() > startDate.getMonth() ||
+    (today.getMonth() === startDate.getMonth() && today.getDate() >= startDate.getDate());
+  if (!hasReachedAnniversary) {
+    diffYears--;
+  }
+  return diffYears;
+}
+
 export default function GrantDetailClient({ grant, board, documents }: GrantDetailClientProps) {
-  const [yearsOfService, setYearsOfService] = useState<number>(23);
+  const yearsOfService = computeYearsOfService();
   const [contactInfo, setContactInfo] = useState<{ email: string; phone: string } | null>(null);
 
   useEffect(() => {
-    // 1. Calculate years of service
-    const startDate = new Date(2002, 8, 2); // September 2, 2002
-    const today = new Date();
-    let diffYears = today.getFullYear() - startDate.getFullYear();
-    const hasReachedAnniversary = 
-      today.getMonth() > startDate.getMonth() || 
-      (today.getMonth() === startDate.getMonth() && today.getDate() >= startDate.getDate());
-    if (!hasReachedAnniversary) {
-      diffYears--;
-    }
-    setYearsOfService(diffYears);
-
-    // 2. Assemble contact info client-side so static HTML scrapers do not detect it
+    // Assemble contact info client-side so static HTML scrapers do not detect it
     const ePart1 = "contactus";
     const ePart2 = "thekyo.ca";
     const pPart1 = "705";

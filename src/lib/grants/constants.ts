@@ -97,16 +97,19 @@ export function computeSortName(name: string, leadingWords: string[] = DEFAULT_L
   const trimmed = name.trim();
 
   for (const word of leadingWords) {
-    // If the word has an apostrophe (like L'), match prefix directly
+    const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // If the word has an apostrophe (like L'), match prefix with optional space after apostrophe
     if (word.endsWith("'")) {
-      const regex = new RegExp(`^${word}\\s*`, 'i');
-      if (regex.test(trimmed)) {
+      const regex = new RegExp(`^${escapedWord}\\s*`, 'i');
+      const match = trimmed.match(regex);
+      if (match) {
         const remainder = trimmed.replace(regex, '').trim();
-        return `${remainder} (${word})`;
+        const formattedWord = word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        return `${remainder} (${formattedWord})`;
       }
     } else {
       // Normal word boundary
-      const regex = new RegExp(`^${word}\\b\\s*`, 'i');
+      const regex = new RegExp(`^${escapedWord}\\b\\s*`, 'i');
       if (regex.test(trimmed)) {
         const remainder = trimmed.replace(regex, '').trim();
         // Capitalize first letter of word in parens for clean formatting
@@ -149,10 +152,10 @@ export function getGrantPublicUrl(grant: {
   createdAt?: string;
   programSlug?: string;
 }): string {
-  const uid6 = grant.id ? grant.id.substring(0, 6) : 'grantx';
+  const uid8 = grant.id ? grant.id.substring(0, 8) : 'grantxxx';
   const funderSlug = grant.slug || sanitizeSlug(grant.funderName || 'funder');
   const year = grant.grantCycleYear || new Date(grant.startedAt || grant.createdAt || Date.now()).getFullYear().toString();
-  const base = `/support-us/case-for-support/${uid6}/${funderSlug}/${year}`;
+  const base = `/support-us/case-for-support/${uid8}/${funderSlug}/${year}`;
   if (grant.programSlug && grant.programSlug.trim()) {
     return `${base}/${sanitizeSlug(grant.programSlug)}`;
   }

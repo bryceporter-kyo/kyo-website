@@ -232,6 +232,9 @@ export default function TriagePage() {
     let skippedCount = 0;
 
     try {
+      const existingFunders = await fetchAllFunders();
+      const seenNames = new Set(existingFunders.map(f => f.name.trim().toLowerCase()));
+
       for (const row of csvPreview) {
         // Find matching name column
         const rawName = row["Funder Name"] || row["Funder"] || row["Name"] || row["Organization"] || row["Foundation"] || "";
@@ -244,12 +247,12 @@ export default function TriagePage() {
         const rawWebsite = row["Website"] || row["URL"] || row["Link"] || row["Web"] || "";
         const website = String(rawWebsite).trim();
 
-        // Check for duplicate funder
-        const dupCheck = await checkFunderDuplicate(name, website);
-        if (dupCheck.isDuplicate) {
+        // Check for duplicate funder locally (avoids N full-collection reads)
+        if (seenNames.has(name.toLowerCase())) {
           skippedCount++;
           continue;
         }
+        seenNames.add(name.toLowerCase());
 
         const type = (row["Type"] || row["Classification"] || "Private foundation").trim();
         const geoScope = (row["Geographic Scope"] || row["Scope"] || "Local").trim();

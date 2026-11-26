@@ -125,10 +125,12 @@ export async function checkFunderDuplicate(
       return { isDuplicate: true, matchType: 'domain', matchedFunder: funder };
     }
 
-    // 3. Edit distance check (threshold <= 3 for names >= 5 chars)
+    // 3. Edit distance check (scaled to <= 15% of shorter name, max 3, min 1 for names >= 5 chars)
     if (normInputName.length >= 5 && normFunderName.length >= 5) {
+      const minLen = Math.min(normInputName.length, normFunderName.length);
+      const maxDist = Math.min(3, Math.max(1, Math.floor(minLen * 0.15)));
       const dist = levenshteinDistance(normInputName, normFunderName);
-      if (dist <= 3) {
+      if (dist <= maxDist) {
         return { isDuplicate: true, matchType: 'similar_name', matchedFunder: funder };
       }
     }
