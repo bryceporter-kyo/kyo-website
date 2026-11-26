@@ -74,6 +74,8 @@ export const DEFAULT_GRANTS_SETTINGS: GrantsSettings = {
   grantsCalendarId: '',
   appsScriptWebAppUrl: '',
   appsScriptSecret: '',
+  boardMinutesFolderId: '',
+  boardMinutesSecret: '',
   fiscalYearStartMonth: 7, // July
   stages: DEFAULT_STAGES,
   kyoPrograms: PERMANENT_KYO_PROGRAMS,

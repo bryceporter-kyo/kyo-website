@@ -287,6 +287,8 @@ export interface GrantsSettings {
   grantsCalendarId: string;
   appsScriptWebAppUrl: string;
   appsScriptSecret: string;
+  boardMinutesFolderId?: string;
+  boardMinutesSecret?: string;
   fiscalYearStartMonth: number; // 7 for July
 
   // Managed Lists

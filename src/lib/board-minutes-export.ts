@@ -455,21 +455,37 @@ export async function downloadMeetingPdf(meeting: BoardMeeting): Promise<void> {
  * via the configured Google Apps Script Web App.
  */
 export async function saveMeetingPdfToDrive(meeting: BoardMeeting): Promise<{ fileId: string; fileUrl: string }> {
-  const { callGrantsAppsScript } = await import("@/lib/grants/grant-actions");
+  const { getGrantsSettings } = await import("@/lib/grants/grants-service");
+  const settings = await getGrantsSettings();
+  if (!settings.appsScriptWebAppUrl) {
+    throw new Error("Google Apps Script Web App URL is not configured in /grants/admin.");
+  }
+
   const doc = await generateBoardMeetingPdf(meeting);
   const fileName = `${meeting.date}_Board_Meeting.pdf`;
   const dataUri = doc.output("datauristring");
   const pdfBase64 = dataUri.split(",")[1] || "";
   const year = (meeting.date || "").split("-")[0] || new Date().getFullYear().toString();
 
-  const res = await callGrantsAppsScript("saveBoardMinutesPdf", {
-    fileName,
-    pdfBase64,
-    year,
-    meetingType: meeting.meetingType,
+  const res = await fetch(settings.appsScriptWebAppUrl, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify({
+      action: "saveBoardMinutesPdf",
+      secret: settings.boardMinutesSecret || settings.appsScriptSecret,
+      fileName,
+      pdfBase64,
+      year,
+      meetingType: meeting.meetingType,
+    }),
   });
 
-  return { fileId: res.fileId, fileUrl: res.fileUrl };
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.error || "Failed to save Board Minutes PDF to Google Drive.");
+  }
+
+  return { fileId: data.fileId, fileUrl: data.fileUrl };
 }
 
 /**

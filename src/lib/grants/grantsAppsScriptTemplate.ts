@@ -10,6 +10,8 @@ export interface GenerateGrantsAppsScriptOptions {
   qaTemplateDocId?: string;
   grantsCalendarId?: string;
   secret?: string;
+  boardMinutesFolderId?: string;
+  boardMinutesSecret?: string;
   websiteUrl?: string;
 }
 
@@ -20,6 +22,8 @@ export function generateGrantsAppsScriptCode(options: GenerateGrantsAppsScriptOp
     qaTemplateDocId = '',
     grantsCalendarId = '',
     secret = '',
+    boardMinutesFolderId = '',
+    boardMinutesSecret = '',
     websiteUrl = 'https://thekyo.ca',
   } = options;
 
@@ -38,6 +42,8 @@ const CONFIG = {
   LETTERHEAD_DOC_ID: "${letterheadTemplateDocId}",
   QA_DOC_ID: "${qaTemplateDocId}",
   CALENDAR_ID: "${grantsCalendarId}",
+  BOARD_MINUTES_FOLDER_ID: "${boardMinutesFolderId}",
+  BOARD_MINUTES_SECRET: "${boardMinutesSecret}",
   WEBSITE_URL: "${websiteUrl}",
 };
 
@@ -52,12 +58,15 @@ function doPost(e) {
 
     const payload = JSON.parse(e.postData.contents);
 
-    // 1. Authenticate Request
-    if (CONFIG.SHARED_SECRET && payload.secret !== CONFIG.SHARED_SECRET) {
+    const action = payload.action;
+
+    // 1. Authenticate Request (Board Minutes uses its own secret if configured)
+    const expectedSecret = action === "saveBoardMinutesPdf" && CONFIG.BOARD_MINUTES_SECRET
+      ? CONFIG.BOARD_MINUTES_SECRET
+      : CONFIG.SHARED_SECRET;
+    if (expectedSecret && payload.secret !== expectedSecret) {
       return jsonResponse({ success: false, error: "Unauthorized: Invalid secret" }, 401);
     }
-
-    const action = payload.action;
 
     // 2. Route Actions
     switch (action) {
@@ -395,12 +404,10 @@ function handleDeleteCalendarEvent(payload) {
  * Save Board Meeting Minutes PDF to Google Drive: <ROOT_FOLDER_ID>/Board Minutes/<year>/
  */
 function handleSaveBoardMinutesPdf(payload) {
-  if (!CONFIG.ROOT_FOLDER_ID) {
-    return jsonResponse({ success: false, error: "ROOT_FOLDER_ID is not configured in Apps Script." }, 400);
+  if (!CONFIG.BOARD_MINUTES_FOLDER_ID) {
+    return jsonResponse({ success: false, error: "BOARD_MINUTES_FOLDER_ID is not configured in Apps Script." }, 400);
   }
-  const root = DriveApp.getFolderById(CONFIG.ROOT_FOLDER_ID);
-  const bmFolders = root.getFoldersByName("Board Minutes");
-  const bmRoot = bmFolders.hasNext() ? bmFolders.next() : root.createFolder("Board Minutes");
+  const bmRoot = DriveApp.getFolderById(CONFIG.BOARD_MINUTES_FOLDER_ID);
 
   const yearStr = String(payload.year || new Date().getFullYear());
   const yrFolders = bmRoot.getFoldersByName(yearStr);

@@ -96,6 +96,8 @@ export default function GrantsSettingsPage() {
       qaTemplateDocId: settings?.qaTemplateDocId || '',
       grantsCalendarId: settings?.grantsCalendarId || '',
       secret: settings?.appsScriptSecret || '',
+      boardMinutesFolderId: settings?.boardMinutesFolderId || '',
+      boardMinutesSecret: settings?.boardMinutesSecret || '',
       websiteUrl: origin || 'https://thekyo.ca',
     });
   }, [
@@ -104,6 +106,8 @@ export default function GrantsSettingsPage() {
     settings?.qaTemplateDocId,
     settings?.grantsCalendarId,
     settings?.appsScriptSecret,
+    settings?.boardMinutesFolderId,
+    settings?.boardMinutesSecret,
     origin,
   ]);
 
@@ -305,6 +309,46 @@ export default function GrantsSettingsPage() {
                   onChange={(e) => handleChange("appsScriptSecret", e.target.value)}
                   className="font-mono text-xs bg-card max-w-md"
                 />
+              </div>
+
+              {/* Board Minutes Drive Folder & Secret */}
+              <div className="p-3.5 border rounded-xl bg-muted/30 space-y-3">
+                <div className="text-xs font-bold text-foreground">Board Minutes Google Drive Archive</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs font-medium text-foreground">Board Minutes Folder ID</Label>
+                    <Input
+                      value={settings.boardMinutesFolderId || ""}
+                      onChange={(e) => handleChange("boardMinutesFolderId", e.target.value)}
+                      placeholder="1ABC...xyz (separate Drive folder for Board Minutes)"
+                      className="font-mono text-xs bg-card"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs font-medium text-foreground">Board Minutes Secret</Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-6 text-[11px] px-2"
+                        onClick={() => {
+                          const newSec = "sec_board_" + Math.random().toString(36).substring(2, 12);
+                          handleChange("boardMinutesSecret", newSec);
+                          toast({ title: "New Board Minutes Secret Generated", description: "Save settings to apply." });
+                        }}
+                      >
+                        Generate New Secret
+                      </Button>
+                    </div>
+                    <Input
+                      value={settings.boardMinutesSecret || ""}
+                      onChange={(e) => handleChange("boardMinutesSecret", e.target.value)}
+                      placeholder="sec_board_..."
+                      className="font-mono text-xs bg-card"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Step 2: Auto-Configured Code Preview in Google Setup tab */}
