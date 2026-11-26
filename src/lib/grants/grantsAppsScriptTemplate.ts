@@ -88,6 +88,9 @@ function doPost(e) {
       case "deleteCalendarEvent":
         return handleDeleteCalendarEvent(payload);
 
+      case "saveBoardMinutesPdf":
+        return handleSaveBoardMinutesPdf(payload);
+
       default:
         return jsonResponse({ success: false, error: "Unknown action: " + action }, 400);
     }
@@ -386,6 +389,38 @@ function handleDeleteCalendarEvent(payload) {
   }
 
   return jsonResponse({ success: true, deleted: true });
+}
+
+/**
+ * Save Board Meeting Minutes PDF to Google Drive: <ROOT_FOLDER_ID>/Board Minutes/<year>/
+ */
+function handleSaveBoardMinutesPdf(payload) {
+  if (!CONFIG.ROOT_FOLDER_ID) {
+    return jsonResponse({ success: false, error: "ROOT_FOLDER_ID is not configured in Apps Script." }, 400);
+  }
+  const root = DriveApp.getFolderById(CONFIG.ROOT_FOLDER_ID);
+  const bmFolders = root.getFoldersByName("Board Minutes");
+  const bmRoot = bmFolders.hasNext() ? bmFolders.next() : root.createFolder("Board Minutes");
+
+  const yearStr = String(payload.year || new Date().getFullYear());
+  const yrFolders = bmRoot.getFoldersByName(yearStr);
+  const yrFolder = yrFolders.hasNext() ? yrFolders.next() : bmRoot.createFolder(yearStr);
+
+  const bytes = Utilities.base64Decode(payload.pdfBase64);
+  const blob = Utilities.newBlob(bytes, "application/pdf", payload.fileName || "Board-Minutes.pdf");
+
+  // Replace existing file with same name if present
+  const existing = yrFolder.getFilesByName(blob.getName());
+  while (existing.hasNext()) {
+    existing.next().setTrashed(true);
+  }
+
+  const file = yrFolder.createFile(blob);
+  return jsonResponse({
+    success: true,
+    fileId: file.getId(),
+    fileUrl: file.getUrl(),
+  });
 }
 
 /**

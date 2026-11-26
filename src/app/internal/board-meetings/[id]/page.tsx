@@ -35,7 +35,8 @@ import {
   VoteStatus,
   DEFAULT_AGENDA_ITEMS
 } from "@/lib/board-meetings";
-import { downloadMeetingPdf } from "@/lib/board-minutes-export";
+import { downloadMeetingPdf, saveMeetingPdfToDrive } from "@/lib/board-minutes-export";
+import { UploadCloud, ExternalLink } from "lucide-react";
 import { syncActionItemToCalendar, syncMeetingActionItemsToCalendar } from "@/lib/board-calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -503,6 +504,48 @@ export default function BoardMeetingEditorPage() {
             <CalendarCheck2 className="h-3.5 w-3.5 text-emerald-600" />
             Sync Calendar Actions
           </Button>
+
+          <Button
+            onClick={async () => {
+              try {
+                const res = await saveMeetingPdfToDrive(meeting);
+                const now = new Date().toISOString();
+                await updateBoardMeeting(meeting.id, { driveFileUrl: res.fileUrl, driveSavedAt: now });
+                setMeeting(prev => prev ? { ...prev, driveFileUrl: res.fileUrl, driveSavedAt: now } : prev);
+                toast({
+                  title: "Saved to Google Drive",
+                  description: "Minutes PDF archived to Board Minutes folder.",
+                });
+              } catch (err: any) {
+                toast({
+                  title: "Drive Upload Failed",
+                  description: err.message || "Ensure Google Apps Script is configured in /grants/admin.",
+                  variant: "destructive",
+                });
+              }
+            }}
+            variant="outline"
+            size="sm"
+            className="h-8 text-xs font-semibold gap-1.5 border-slate-300 text-slate-700 hover:bg-slate-50"
+            title="Save PDF to Google Drive (Board Minutes folder)"
+          >
+            <UploadCloud className="h-3.5 w-3.5 text-blue-600" />
+            Save to Drive
+          </Button>
+
+          {meeting.driveFileUrl && (
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="h-8 text-xs font-semibold gap-1 text-blue-600 hover:text-blue-700"
+            >
+              <a href={meeting.driveFileUrl} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="h-3.5 w-3.5" />
+                View in Drive
+              </a>
+            </Button>
+          )}
 
           <Button
             onClick={() => downloadMeetingPdf(meeting)}

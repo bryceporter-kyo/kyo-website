@@ -251,7 +251,7 @@ export async function generateBoardMeetingPdf(meeting: BoardMeeting): Promise<js
   const present = meeting.attendees.filter(a => a.status === "present").map(a => a.name).join(", ") || "None recorded";
   const regrets = meeting.attendees.filter(a => a.status === "regrets").map(a => a.name).join(", ") || "None";
   const guests  = meeting.attendees.filter(a => a.status === "guest").map(a => a.name).join(", ");
-  const ineligible = meeting.attendees.filter(a => a.ineligibleToVote).map(a => a.name).join(", ");
+  const ineligible = meeting.attendees.filter(a => a.isIneligibleToVote).map(a => a.name).join(", ");
 
   // Section label with small decorative accent bar
   doc.setFillColor(...KYO.green);
@@ -364,7 +364,7 @@ export async function generateBoardMeetingPdf(meeting: BoardMeeting): Promise<js
           currentY = drawPageHeader(doc, meeting, pageWidth);
         }
 
-        const isCarried  = motion.result === "carried";
+        const isCarried = motion.result === "approved" || motion.result === "unanimous";
         const resultColour: [number, number, number] = isCarried ? [22, 101, 52] : [153, 27, 27];
         const resultBg: [number, number, number]     = isCarried ? [220, 252, 231] : [254, 226, 226];
 
@@ -448,6 +448,28 @@ export async function downloadMeetingPdf(meeting: BoardMeeting): Promise<void> {
   const doc = await generateBoardMeetingPdf(meeting);
   const filename = `${meeting.date}_Board_Meeting`;
   doc.save(`${filename}.pdf`);
+}
+
+/**
+ * Generates the Board Meeting Minutes PDF and uploads it to Google Drive
+ * via the configured Google Apps Script Web App.
+ */
+export async function saveMeetingPdfToDrive(meeting: BoardMeeting): Promise<{ fileId: string; fileUrl: string }> {
+  const { callGrantsAppsScript } = await import("@/lib/grants/grant-actions");
+  const doc = await generateBoardMeetingPdf(meeting);
+  const fileName = `${meeting.date}_Board_Meeting.pdf`;
+  const dataUri = doc.output("datauristring");
+  const pdfBase64 = dataUri.split(",")[1] || "";
+  const year = (meeting.date || "").split("-")[0] || new Date().getFullYear().toString();
+
+  const res = await callGrantsAppsScript("saveBoardMinutesPdf", {
+    fileName,
+    pdfBase64,
+    year,
+    meetingType: meeting.meetingType,
+  });
+
+  return { fileId: res.fileId, fileUrl: res.fileUrl };
 }
 
 /**

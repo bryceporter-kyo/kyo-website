@@ -63,6 +63,8 @@ export type BoardMeeting = {
   updatedAt: string;
   callToOrderTime?: string;
   adjournmentTime?: string;
+  driveFileUrl?: string;
+  driveSavedAt?: string;
 };
 
 export const DEFAULT_AGENDA_ITEMS = [
