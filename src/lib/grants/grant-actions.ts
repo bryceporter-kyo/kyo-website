@@ -1,6 +1,6 @@
 import { db } from '@/lib/firebase';
 import { doc, getDoc, deleteDoc } from 'firebase/firestore';
-import { Grant, Funder } from './types';
+import { Grant, Funder, QuestionItem, BudgetRow, BudgetHeaders, GrantSubmission } from './types';
 import { getGrantsSettings, saveGrant, logGrantAudit } from './grants-service';
 import { sanitizeSlug } from './constants';
 
@@ -303,4 +303,187 @@ export async function cloneGrantForNewCycle(
   }
 
   return newGrant;
+}
+
+/**
+ * Step 4: Generate Google Doc + Google Sheet from imported CSV data.
+ */
+export async function generateWorkspaceFromCsvs(
+  grant: Grant,
+  questions: QuestionItem[],
+  budgetRows: BudgetRow[],
+  budgetHeaders: BudgetHeaders,
+  user?: { id: string; email: string; name?: string }
+): Promise<{ qaDocId: string; budgetSheetId: string; budgetSheetUrl: string }> {
+  let folderId = grant.driveFolderId;
+  if (!folderId) {
+    const folderRes = await callGrantsAppsScript('createGrantFolder', {
+      funderName: grant.funderName,
+      year: grant.startedAt ? new Date(grant.startedAt).getFullYear().toString() : new Date().getFullYear().toString(),
+    });
+    folderId = folderRes.folderId;
+    await saveGrant({ id: grant.id, driveFolderId: folderId, driveFolderUrl: folderRes.folderUrl }, user);
+  }
+
+  const [qaRes, sheetRes] = await Promise.all([
+    callGrantsAppsScript('createQaDocFromQuestions', {
+      folderId,
+      funderName: grant.funderName,
+      programName: grant.programName,
+      deadline: grant.applicationDeadline || 'TBD',
+      questions,
+      narrative: {
+        customLetterBody: grant.customLetterBody || [],
+        impactStatement: grant.impactStatement || '',
+        valuesAlignment: grant.valuesAlignment || '',
+        communityNeed: grant.communityNeed || '',
+        programDescription: grant.programDescription || '',
+        organizationalCapacity: grant.organizationalCapacity || '',
+        reportingPlan: grant.reportingPlan || '',
+        recognitionPlan: grant.recognitionPlan || '',
+      },
+    }),
+    callGrantsAppsScript('createBudgetSheet', {
+      folderId,
+      funderName: grant.funderName,
+      headers: budgetHeaders,
+      rows: budgetRows,
+    }),
+  ]);
+
+  await saveGrant({
+    id: grant.id,
+    questions,
+    budgetHeaders,
+    budgetBreakdown: budgetRows,
+    qaDocId: qaRes.docId,
+    budgetSheetId: sheetRes.sheetId,
+    budgetSheetUrl: sheetRes.sheetUrl,
+  }, user);
+
+  if (user) {
+    await logGrantAudit({
+      userId: user.id,
+      userEmail: user.email,
+      userName: user.name,
+      grantId: grant.id,
+      action: 'GENERATE_WORKSPACE',
+      summary: `Generated Google Doc (${questions.length} questions) and Budget Sheet (${budgetHeaders.length} columns) from CSV import.`,
+    });
+  }
+
+  return { qaDocId: qaRes.docId, budgetSheetId: sheetRes.sheetId, budgetSheetUrl: sheetRes.sheetUrl };
+}
+
+/**
+ * Step 6: Unified Sync with Portal — pulls both Google Doc (Q&A) and Google Sheet (Budget).
+ */
+export async function syncWithPortal(
+  grant: Grant,
+  user?: { id: string; email: string; name?: string }
+): Promise<{ questionsSynced: number; budgetRowsSynced: number }> {
+  const now = new Date().toISOString();
+  const updates: Partial<Grant> = {};
+  let questionsSynced = 0;
+  let budgetRowsSynced = 0;
+
+  if (grant.qaDocId) {
+    const qaResult = await callGrantsAppsScript('pullQaDoc', { docId: grant.qaDocId });
+    if (qaResult.success && qaResult.rows) {
+      updates.questions = qaResult.rows.map((r: any, idx: number) => ({
+        ...(grant.questions?.[idx] || {}),
+        id: `q_${idx + 1}`,
+        question: r.question,
+        answerHtml: r.answerText,
+        order: idx + 1,
+        publicVisible: grant.questions?.[idx]?.publicVisible ?? true,
+      }));
+      updates.qaLastSyncedAt = now;
+      questionsSynced = updates.questions?.length ?? 0;
+    }
+    if (qaResult.narrative && typeof qaResult.narrative === 'object') {
+      const n = qaResult.narrative;
+      if (n.customLetterBody !== undefined) updates.customLetterBody = n.customLetterBody;
+      if (n.impactStatement !== undefined) updates.impactStatement = n.impactStatement;
+      if (n.valuesAlignment !== undefined) updates.valuesAlignment = n.valuesAlignment;
+      if (n.communityNeed !== undefined) updates.communityNeed = n.communityNeed;
+      if (n.programDescription !== undefined) updates.programDescription = n.programDescription;
+      if (n.organizationalCapacity !== undefined) updates.organizationalCapacity = n.organizationalCapacity;
+      if (n.reportingPlan !== undefined) updates.reportingPlan = n.reportingPlan;
+      if (n.recognitionPlan !== undefined) updates.recognitionPlan = n.recognitionPlan;
+    }
+  }
+
+  if (grant.budgetSheetId) {
+    const sheetResult = await callGrantsAppsScript('pullBudgetSheet', { sheetId: grant.budgetSheetId });
+    if (sheetResult.success) {
+      updates.budgetHeaders = sheetResult.headers;
+      updates.budgetBreakdown = sheetResult.rows;
+      updates.budgetLastSyncedAt = now;
+      budgetRowsSynced = (sheetResult.rows || []).length;
+    }
+  }
+
+  await saveGrant({ id: grant.id, ...updates }, user);
+
+  if (user) {
+    await logGrantAudit({
+      userId: user.id,
+      userEmail: user.email,
+      userName: user.name,
+      grantId: grant.id,
+      action: 'SYNC_WITH_PORTAL',
+      summary: `Synced ${questionsSynced} Q&A rows and ${budgetRowsSynced} budget rows from Google Workspace.`,
+    });
+  }
+
+  return { questionsSynced, budgetRowsSynced };
+}
+
+/**
+ * Step 8: Record submission details and optionally upload evidence PDF to Drive.
+ */
+export async function recordSubmission(
+  grant: Grant,
+  submission: GrantSubmission,
+  evidencePdfBase64?: string,
+  evidenceFileName?: string,
+  user?: { id: string; email: string; name?: string }
+): Promise<Grant> {
+  const finalSubmission: GrantSubmission = { ...submission };
+
+  if (evidencePdfBase64 && evidenceFileName && grant.driveFolderId) {
+    const uploadRes = await callGrantsAppsScript('saveSubmissionEvidence', {
+      folderId: grant.driveFolderId,
+      pdfBase64: evidencePdfBase64,
+      fileName: evidenceFileName,
+    });
+    finalSubmission.evidenceFileId = uploadRes.fileId;
+    finalSubmission.evidenceFileUrl = uploadRes.fileUrl;
+    finalSubmission.evidenceFileName = evidenceFileName;
+  }
+
+  finalSubmission.recordedAt = new Date().toISOString();
+  finalSubmission.recordedBy = user?.email;
+
+  const updates: Partial<Grant> = {
+    submission: finalSubmission,
+    ...(submission.submittedOn ? { submittedOn: submission.submittedOn } : {}),
+    ...(submission.isComplete && grant.stage !== 'Submitted: Pending Decision'
+      ? { stage: 'Submitted: Pending Decision', stageEnteredAt: new Date().toISOString() }
+      : {}),
+  };
+
+  if (user) {
+    await logGrantAudit({
+      userId: user.id,
+      userEmail: user.email,
+      userName: user.name,
+      grantId: grant.id,
+      action: 'RECORD_SUBMISSION',
+      summary: `Submission recorded. Method: ${submission.submissionMethod || 'Not specified'}${evidenceFileName ? `. Evidence: ${evidenceFileName}` : ''}.`,
+    });
+  }
+
+  return saveGrant({ id: grant.id, ...updates }, user);
 }

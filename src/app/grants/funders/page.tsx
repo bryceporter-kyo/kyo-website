@@ -33,6 +33,11 @@ export default function FundersPage() {
   const [quickName, setQuickName] = useState("");
   const [quickWebsite, setQuickWebsite] = useState("");
   const [isSavingQuick, setIsSavingQuick] = useState(false);
+  const [quickPortalUrl, setQuickPortalUrl] = useState("");
+  const [isSavingFunder, setIsSavingFunder] = useState(false);
+  const [editingFunder, setEditingFunder] = useState<Funder | null>(null);
+  const [editWebsite, setEditWebsite] = useState("");
+  const [editPortalUrl, setEditPortalUrl] = useState("");
   const [duplicateWarning, setDuplicateWarning] = useState<{ isDuplicate: boolean; matchType?: string; matchedFunder?: Funder } | null>(null);
 
   useEffect(() => {
@@ -89,6 +94,7 @@ export default function FundersPage() {
         {
           name: quickName.trim(),
           website: quickWebsite.trim() || undefined,
+          grantPortalUrl: quickPortalUrl.trim() || undefined,
           triageStatus: "unreviewed", // Quick add lands in triage queue
           type: "Private foundation",
           geoScope: "Local",
@@ -311,14 +317,33 @@ export default function FundersPage() {
                         </TableCell>
 
                         <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
+                          <div className="flex items-center justify-end gap-1.5">
                             {funder.website && (
-                              <a href={funder.website} target="_blank" rel="noopener noreferrer">
+                              <a href={funder.website} target="_blank" rel="noopener noreferrer" title="Funder Website">
                                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
                                   <ExternalLink className="w-3.5 h-3.5" />
                                 </Button>
                               </a>
                             )}
+                            {funder.grantPortalUrl && (
+                              <a href={funder.grantPortalUrl} target="_blank" rel="noopener noreferrer" title="Grant Portal">
+                                <Button variant="outline" size="sm" className="h-7 px-2 text-[11px] gap-1">
+                                  Portal <ExternalLink className="w-3 h-3" />
+                                </Button>
+                              </a>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 px-2 text-[11px]"
+                              onClick={() => {
+                                setEditingFunder(funder);
+                                setEditWebsite(funder.website || "");
+                                setEditPortalUrl(funder.grantPortalUrl || "");
+                              }}
+                            >
+                              Edit Links
+                            </Button>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -330,6 +355,65 @@ export default function FundersPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Edit Funder Links Dialog */}
+      <Dialog open={Boolean(editingFunder)} onOpenChange={(open) => { if (!open) setEditingFunder(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Funder Links — {editingFunder?.name}</DialogTitle>
+            <DialogDescription>
+              Set the funder&apos;s main website and their grant application portal URL (if different).
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold">Website URL</Label>
+              <Input
+                placeholder="https://foundation.org"
+                value={editWebsite}
+                onChange={(e) => setEditWebsite(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold">Grant Portal URL (if different)</Label>
+              <Input
+                placeholder="https://portal.foundation.org"
+                value={editPortalUrl}
+                onChange={(e) => setEditPortalUrl(e.target.value)}
+              />
+            </div>
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setEditingFunder(null)}>Cancel</Button>
+              <Button
+                disabled={isSavingFunder}
+                onClick={async () => {
+                  if (!editingFunder) return;
+                  setIsSavingFunder(true);
+                  try {
+                    await saveFunder(
+                      {
+                        ...editingFunder,
+                        website: editWebsite.trim() || undefined,
+                        grantPortalUrl: editPortalUrl.trim() || undefined,
+                      },
+                      user ? { id: user.uid, email: user.email || "", name: user.displayName || "" } : undefined
+                    );
+                    toast({ title: "Funder Updated", description: "Saved website and grant portal URLs." });
+                    setEditingFunder(null);
+                    loadFunders();
+                  } catch (err: any) {
+                    toast({ title: "Save Failed", description: err.message || "Could not update funder.", variant: "destructive" });
+                  } finally {
+                    setIsSavingFunder(false);
+                  }
+                }}
+              >
+                {isSavingFunder ? "Saving..." : "Save Links"}
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

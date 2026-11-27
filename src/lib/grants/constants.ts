@@ -224,3 +224,17 @@ export function extractDomain(url?: string): string {
     return url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0].toLowerCase().trim();
   }
 }
+
+/**
+ * Canonical internal Grants Portal URL:
+ * /grants/[id]/[slug]/[grant]/[tab]
+ */
+export function getGrantPortalUrl(
+  grant: { id: string; slug?: string; funderName?: string; grantName?: string | null; programName?: string },
+  tab: string = 'overview'
+): string {
+  const funderSlug = grant.slug || sanitizeSlug(grant.funderName || 'funder') || 'funder';
+  const rawGrantName = grant.grantName || (grant.programName && grant.programName !== 'General Fund' ? grant.programName : '');
+  const grantSlug = sanitizeSlug(rawGrantName) || 'g';
+  return `/grants/${grant.id}/${funderSlug}/${grantSlug}/${tab}`;
+}

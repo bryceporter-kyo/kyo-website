@@ -115,19 +115,25 @@ export async function POST(request: NextRequest) {
       syncedCount = firestoreQuestions.length;
     } else if (type === 'sheet' && Array.isArray(budgetBreakdown)) {
       const firestoreBudget = budgetBreakdown
-        .filter((b: any) => b && (String(b.item || '').trim() || String(b.amount || '').trim()))
-        .map((b: any) => {
-          const fields: Record<string, any> = {
-            item: { stringValue: String(b.item || '').trim() },
-            amount: { stringValue: String(b.amount || '').trim() },
-          };
-          if (b.category) fields.category = { stringValue: String(b.category).trim() };
-          if (b.subcategory) fields.subcategory = { stringValue: String(b.subcategory).trim() };
-          return { mapValue: { fields } };
-        });
+        .filter((b: any) => b && Object.values(b).some(v => String(v ?? '').trim()))
+        .map((b: any) => ({
+          mapValue: {
+            fields: Object.fromEntries(
+              Object.entries(b).map(([k, v]) => [k, { stringValue: String(v ?? '').trim() }])
+            ),
+          },
+        }));
 
       updateFields.budgetBreakdown = { arrayValue: { values: firestoreBudget } };
-      updateMask.push('budgetBreakdown');
+      updateFields.budgetLastSyncedAt = { stringValue: now };
+      updateMask.push('budgetBreakdown', 'budgetLastSyncedAt');
+
+      if (Array.isArray(body.budgetHeaders)) {
+        updateFields.budgetHeaders = {
+          arrayValue: { values: body.budgetHeaders.map((h: string) => ({ stringValue: String(h) })) },
+        };
+        updateMask.push('budgetHeaders');
+      }
       syncedCount = firestoreBudget.length;
     } else {
       return NextResponse.json({ success: false, error: 'Invalid sync payload for type: ' + type }, { status: 400 });

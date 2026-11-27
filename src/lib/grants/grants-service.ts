@@ -85,12 +85,15 @@ export async function logGrantAudit(entry: Omit<GrantAuditLogEntry, 'id' | 'time
 export async function fetchGrantAuditLogs(grantId?: string): Promise<GrantAuditLogEntry[]> {
   try {
     const collRef = collection(db, AUDIT_COLL);
-    let q = query(collRef, orderBy('timestamp', 'desc'), limit(100));
-    if (grantId) {
-      q = query(collRef, where('grantId', '==', grantId), orderBy('timestamp', 'desc'), limit(100));
-    }
+    const q = grantId
+      ? query(collRef, where('grantId', '==', grantId), limit(100))
+      : query(collRef, orderBy('timestamp', 'desc'), limit(100));
     const snap = await getDocs(q);
-    return snap.docs.map(d => ({ id: d.id, ...d.data() } as GrantAuditLogEntry));
+    const logs = snap.docs.map(d => ({ id: d.id, ...d.data() } as GrantAuditLogEntry));
+    if (grantId) {
+      logs.sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || ''));
+    }
+    return logs;
   } catch (e) {
     console.error('[GrantAudit] Fetch error:', e);
     return [];
@@ -309,7 +312,7 @@ export async function saveGrant(
       funderId: grant.funderId || '',
       funderName: grant.funderName || '',
       programId: grant.programId || 'prog_default',
-      programName: grant.programName || 'General Fund',
+      programName: grant.programName || '',
       stage: grant.stage || 'Prospect',
       stageEnteredAt: now,
       assignedOwnerEmail: grant.assignedOwnerEmail || user?.email || '',

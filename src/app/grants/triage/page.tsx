@@ -75,12 +75,12 @@ export default function TriagePage() {
       );
 
       // 2. Automatically spawn a new Grant in 'Prospect' stage as required by Spec §3 & §4
-      await saveGrant(
+      const createdGrant = await saveGrant(
         {
           funderId: funder.id,
           funderName: funder.name,
           programId: funder.programs?.[0]?.id || "prog_default",
-          programName: funder.programs?.[0]?.name || "General Fund",
+          programName: funder.programs?.[0]?.name && funder.programs[0].name !== "General Fund" ? funder.programs[0].name : "",
           stage: "Prospect",
           assignedOwnerEmail: user?.email || "",
           assignedOwnerName: user?.displayName || "",
@@ -96,13 +96,14 @@ export default function TriagePage() {
           userName: user.displayName || "",
           action: "TRIAGE_PROSPECT",
           funderId: funder.id,
+          grantId: createdGrant.id,
           summary: `Promoted lead "${funder.name}" to Prospect from Triage Queue. Initial grant created.`,
         });
       }
 
       toast({
         title: "Promoted to Prospect!",
-        description: `Created initial Prospect grant record for ${funder.name}.`,
+        description: `Created initial Prospect grant for ${funder.name}. Open it from the Pipeline or configure programs in Funders & Programs.`,
       });
 
       loadTriageQueue();

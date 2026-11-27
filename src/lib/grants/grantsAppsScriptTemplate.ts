@@ -4,6 +4,8 @@
  * It manages Drive year/grant folders, doc copying from templates, and Calendar events.
  */
 
+export const EXPECTED_APPS_SCRIPT_VERSION = "2.1.0";
+
 export interface GenerateGrantsAppsScriptOptions {
   grantApplicationsFolderId?: string;
   letterheadTemplateDocId?: string;
@@ -85,11 +87,23 @@ function doPost(e) {
       case "createQaDoc":
         return handleCreateQaDoc(payload);
 
+      case "createQaDocFromQuestions":
+        return handleCreateQaDocFromQuestions(payload);
+
+      case "createBudgetSheet":
+        return handleCreateBudgetSheet(payload);
+
       case "pullQaDoc":
         return handlePullQaDoc(payload);
 
+      case "pullBudgetSheet":
+        return handlePullBudgetSheet(payload);
+
       case "pushQaDoc":
         return handlePushQaDoc(payload);
+
+      case "saveSubmissionEvidence":
+        return handleSaveSubmissionEvidence(payload);
 
       case "syncCalendarEvent":
         return handleSyncCalendarEvent(payload);
@@ -112,14 +126,22 @@ function doPost(e) {
  * Handle Ping / Handshake Verification
  */
 function handlePing(payload) {
+  let hasRootFolder = false;
+  if (CONFIG.ROOT_FOLDER_ID) {
+    try {
+      hasRootFolder = Boolean(DriveApp.getFolderById(CONFIG.ROOT_FOLDER_ID));
+    } catch (e) {}
+  }
   return jsonResponse({
     success: true,
+    version: "${EXPECTED_APPS_SCRIPT_VERSION}",
     message: "Handshake verified successfully with KYO Grants Apps Script",
     timestamp: new Date().toISOString(),
     configStatus: {
-      hasRootFolder: Boolean(CONFIG.ROOT_FOLDER_ID),
+      hasRootFolder: hasRootFolder,
       hasCalendar: Boolean(CONFIG.CALENDAR_ID),
       hasLetterhead: Boolean(CONFIG.LETTERHEAD_DOC_ID),
+      hasQaTemplate: Boolean(CONFIG.QA_DOC_ID),
     }
   });
 }
@@ -258,20 +280,186 @@ function handlePullQaDoc(payload) {
 
   for (let i = 1; i < numRows; i++) {
     const row = table.getRow(i);
-    const qText = row.getCell(0).getText().trim();
-    const aText = row.getCell(1).getText().trim();
+    const numCells = row.getNumCells();
     pulledData.push({
       rowIndex: i,
-      question: qText,
-      answerText: aText,
+      question: numCells > 0 ? row.getCell(0).getText().trim() : "",
+      description: numCells > 1 ? row.getCell(1).getText().trim() : "",
+      questionType: numCells > 2 ? row.getCell(2).getText().trim() : "",
+      answerText: numCells > 3 ? row.getCell(3).getText().trim() : (numCells > 1 ? row.getCell(1).getText().trim() : ""),
     });
+  }
+
+  // Pull optional Case for Support Narrative table (Table 1)
+  const narrative = {};
+  if (tables.length > 1) {
+    const nTable = tables[1];
+    for (let j = 1; j < nTable.getNumRows(); j++) {
+      const nRow = nTable.getRow(j);
+      if (nRow.getNumCells() < 2) continue;
+      const label = nRow.getCell(0).getText().trim().toLowerCase();
+      const val = nRow.getCell(1).getText().trim();
+      if (label.indexOf("letter") !== -1) narrative.customLetterBody = val ? val.split(/\\n\\s*\\n/).map(function(s) { return s.trim(); }).filter(Boolean) : [];
+      else if (label.indexOf("impact") !== -1) narrative.impactStatement = val;
+      else if (label.indexOf("align") !== -1) narrative.valuesAlignment = val;
+      else if (label.indexOf("community need") !== -1) narrative.communityNeed = val;
+      else if (label.indexOf("program description") !== -1) narrative.programDescription = val;
+      else if (label.indexOf("capacity") !== -1) narrative.organizationalCapacity = val;
+      else if (label.indexOf("reporting") !== -1) narrative.reportingPlan = val;
+      else if (label.indexOf("recognition") !== -1) narrative.recognitionPlan = val;
+    }
   }
 
   return jsonResponse({
     success: true,
     rowCount: pulledData.length,
     rows: pulledData,
+    narrative: narrative,
     syncedAt: new Date().toISOString(),
+  });
+}
+
+/**
+ * Create Application Q&A Doc from CSV-imported questions (4-column table)
+ */
+function handleCreateQaDocFromQuestions(payload) {
+  const folder = DriveApp.getFolderById(payload.folderId);
+  const dateStr = Utilities.formatDate(new Date(), "GMT-5", "MMddyyyy");
+  const docName = payload.funderName + ": Application Q&A: " + dateStr;
+
+  const doc = DocumentApp.create(docName);
+  DriveApp.getFileById(doc.getId()).moveTo(folder);
+  const body = doc.getBody();
+
+  body.appendParagraph("KYO Application Q&A: " + payload.funderName).setHeading(DocumentApp.ParagraphHeading.HEADING1);
+  body.appendParagraph("Deadline: " + (payload.deadline || "TBD")).setHeading(DocumentApp.ParagraphHeading.HEADING3);
+  body.appendParagraph("");
+
+  const tableData = [["Question", "Description / Notes", "Type / Options", "Draft Answer"]];
+  (payload.questions || []).forEach(function(q) {
+    const qLabel = q.charLimit ? q.question + " (Limit: " + q.charLimit + ")" : q.question;
+    tableData.push([
+      qLabel,
+      q.description || "",
+      q.questionType ? q.questionType + (q.optionSelected ? ": " + q.optionSelected : "") : "",
+      q.answerHtml || ""
+    ]);
+  });
+
+  const table = body.appendTable(tableData);
+  table.getRow(0).editAsText().setBold(true);
+
+  body.appendParagraph("");
+  body.appendParagraph("Case for Support Narrative").setHeading(DocumentApp.ParagraphHeading.HEADING2);
+  const n = payload.narrative || {};
+  const narrativeRows = [
+    ["Section", "Content"],
+    ["Letter to Organization", Array.isArray(n.customLetterBody) ? n.customLetterBody.join("\\n\\n") : (n.customLetterBody || "")],
+    ["Short Impact Statement", n.impactStatement || ""],
+    ["Why KYO Aligns with Funder", n.valuesAlignment || ""],
+    ["Community Need", n.communityNeed || ""],
+    ["Program Description", n.programDescription || ""],
+    ["Organizational Capacity", n.organizationalCapacity || ""],
+    ["Reporting Plan", n.reportingPlan || ""],
+    ["Recognition Plan", n.recognitionPlan || ""],
+  ];
+  const nTable = body.appendTable(narrativeRows);
+  nTable.getRow(0).editAsText().setBold(true);
+
+  doc.saveAndClose();
+
+  return jsonResponse({
+    success: true,
+    docId: doc.getId(),
+    docUrl: doc.getUrl(),
+    docName: docName,
+  });
+}
+
+/**
+ * Create Budget Google Sheet verbatim from CSV headers & rows (no formulas)
+ */
+function handleCreateBudgetSheet(payload) {
+  const headers = payload.headers || ["Item", "Amount"];
+  const rows = payload.rows || [];
+  const folder = DriveApp.getFolderById(payload.folderId);
+  const dateStr = Utilities.formatDate(new Date(), "GMT-5", "MMddyyyy");
+  const sheetName = payload.funderName + ": Budget: " + dateStr;
+
+  const ss = SpreadsheetApp.create(sheetName);
+  DriveApp.getFileById(ss.getId()).moveTo(folder);
+  const sheet = ss.getActiveSheet().setName("Budget");
+
+  sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight("bold");
+
+  if (rows.length > 0) {
+    const data = rows.map(function(row) {
+      return headers.map(function(h) { return row[h] || ""; });
+    });
+    sheet.getRange(2, 1, data.length, headers.length).setValues(data);
+  }
+
+  ss.setSpreadsheetTimeZone("America/Toronto");
+  return jsonResponse({
+    success: true,
+    sheetId: ss.getId(),
+    sheetUrl: ss.getUrl(),
+    sheetName: sheetName,
+  });
+}
+
+/**
+ * Pull Budget Google Sheet using getDisplayValues() (captures computed values, not formulas)
+ */
+function handlePullBudgetSheet(payload) {
+  const ss = SpreadsheetApp.openById(payload.sheetId);
+  const sheet = ss.getActiveSheet();
+  const values = sheet.getDataRange().getDisplayValues();
+
+  if (!values || values.length < 2) {
+    return jsonResponse({ success: true, headers: [], rows: [], rowCount: 0 });
+  }
+
+  const headers = values[0].map(function(h) { return String(h).trim(); });
+  const rows = [];
+  for (let i = 1; i < values.length; i++) {
+    const rowObj = {};
+    let empty = true;
+    headers.forEach(function(h, j) {
+      const v = String(values[i][j] || "").trim();
+      rowObj[h] = v;
+      if (v) empty = false;
+    });
+    if (!empty) rows.push(rowObj);
+  }
+
+  return jsonResponse({
+    success: true,
+    headers: headers,
+    rows: rows,
+    rowCount: rows.length,
+    syncedAt: new Date().toISOString(),
+  });
+}
+
+/**
+ * Save Submission Evidence PDF to the grant's Google Drive folder
+ */
+function handleSaveSubmissionEvidence(payload) {
+  const folder = DriveApp.getFolderById(payload.folderId);
+  const bytes = Utilities.base64Decode(payload.pdfBase64);
+  const blob = Utilities.newBlob(bytes, "application/pdf", payload.fileName || "Submission-Evidence.pdf");
+
+  const existing = folder.getFilesByName(blob.getName());
+  while (existing.hasNext()) {
+    existing.next().setTrashed(true);
+  }
+
+  const file = folder.createFile(blob);
+  return jsonResponse({
+    success: true,
+    fileId: file.getId(),
+    fileUrl: file.getUrl(),
   });
 }
 

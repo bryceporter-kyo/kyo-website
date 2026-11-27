@@ -6,5 +6,5 @@ export default async function GrantIdRootPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  redirect(`/grants/${id}/overview`);
+  redirect(`/grants/${id}/unknown/g/overview`);
 }

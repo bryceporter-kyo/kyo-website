@@ -61,6 +61,7 @@ export interface Funder {
   province?: string;
   country?: string;
   website?: string;
+  grantPortalUrl?: string;
   otherLinks?: FunderLink[];
   contacts?: FunderContact[];
   eligibilityNotes?: string;
@@ -84,9 +85,24 @@ export interface GrantStageConfig {
   isTerminal?: boolean; // Cancelled / Archived
 }
 
+export type QuestionType =
+  | 'short_text'
+  | 'long_text'
+  | 'multiple_choice'
+  | 'checkbox'
+  | 'dropdown'
+  | 'number'
+  | 'date'
+  | 'file_upload'
+  | 'yes_no'
+  | string;
+
 export interface QuestionItem {
   id: string;
   question: string;
+  description?: string;        // helper/context text from funder instructions
+  questionType?: QuestionType; // input type for the question
+  optionSelected?: string;     // selected option or expected answer
   answerHtml?: string;
   charLimit?: number;
   order: number;
@@ -164,10 +180,25 @@ export interface ProgramSplit {
 
 export type PrimaryProgram = 'general' | 'orchestras' | 'upbeat' | 'lessons';
 export type FundingType = 'one-time' | 'multi-year' | 'matching';
-export type BudgetLineItem = { item: string; amount: string; category?: string; subcategory?: string };
+export type BudgetRow = { [key: string]: any };
+export type BudgetHeaders = string[];
+export type BudgetLineItem = BudgetRow;
 export type TimelineMilestone = { milestone: string; date: string; description?: string };
 export type PastSupportRecord = { year: string; amount: string; note?: string };
 export type GrantQAPair = { question: string; answer: string };
+
+export interface GrantSubmission {
+  isComplete?: boolean;
+  submittedOn?: string;
+  submissionMethod?: 'Online Portal' | 'Email' | 'Mail' | 'In Person' | 'Other' | string;
+  submissionMethodNotes?: string;
+  confirmationNumber?: string;
+  evidenceFileId?: string;
+  evidenceFileUrl?: string;
+  evidenceFileName?: string;
+  recordedAt?: string;
+  recordedBy?: string;
+}
 
 export interface Grant {
   id: string;
@@ -221,6 +252,12 @@ export interface Grant {
   loiQuestionsDocId?: string;
   qaDocId?: string;
   qaLastSyncedAt?: string | null;
+  budgetHeaders?: BudgetHeaders;
+  hiddenBudgetColumns?: string[];
+  budgetSheetId?: string;
+  budgetSheetUrl?: string;
+  budgetLastSyncedAt?: string | null;
+  submission?: GrantSubmission | null;
 
   // Public portal publishing & URLs
   slug: string;

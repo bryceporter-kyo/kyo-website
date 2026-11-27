@@ -217,6 +217,10 @@ export default function Header() {
     }, 150);
   };
 
+  if (pathname?.startsWith("/grants")) {
+    return null;
+  }
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/20 bg-background/70 shadow-md backdrop-blur-md transition-all duration-300">
       <div className="container mx-auto flex h-16 items-center justify-between gap-4 px-4 sm:px-6 md:h-20 xl:h-24">

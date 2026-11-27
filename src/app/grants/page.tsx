@@ -20,6 +20,7 @@ import {
   fetchAllGrants, fetchAllFunders, saveGrant, getGrantsSettings 
 } from "@/lib/grants/grants-service";
 import { Grant, Funder, GrantsSettings } from "@/lib/grants/types";
+import { getGrantPortalUrl, getGrantPublicUrl } from "@/lib/grants/constants";
 import { useAuthContext } from "@/components/providers/AuthProvider";
 
 export default function GrantsPipelinePage() {
@@ -75,7 +76,7 @@ export default function GrantsPipelinePage() {
     const funder = funders.find(f => f.id === selectedFunderId);
     if (!funder) return;
 
-    const program = funder.programs?.find(p => p.id === selectedProgramId) || funder.programs?.[0] || { id: "prog_default", name: "General Fund" };
+    const program = funder.programs?.find(p => p.id === selectedProgramId) || funder.programs?.[0] || { id: "prog_default", name: "" };
 
     setIsSavingGrant(true);
     try {
@@ -165,7 +166,23 @@ export default function GrantsPipelinePage() {
 
         <div className="flex items-center gap-2">
           {/* New Grant Opportunity Dialog */}
-          <Dialog open={isNewGrantOpen} onOpenChange={setIsNewGrantOpen}>
+          <Dialog
+            open={isNewGrantOpen}
+            onOpenChange={(open) => {
+              setIsNewGrantOpen(open);
+              if (!open) {
+                setSelectedFunderId("");
+                setSelectedProgramId("");
+                setTargetStage("Prospect");
+                setAmountRequested("");
+                setAppDeadline("");
+                // Ensure body pointer-events are never left locked by nested Radix portals
+                if (typeof document !== "undefined") {
+                  document.body.style.pointerEvents = "";
+                }
+              }
+            }}
+          >
             <DialogTrigger asChild>
               <Button className="gap-2 shadow-sm">
                 <Plus className="w-4 h-4" />
@@ -183,57 +200,59 @@ export default function GrantsPipelinePage() {
               <form onSubmit={handleCreateGrant} className="space-y-4 pt-2">
                 <div className="space-y-1.5">
                   <Label htmlFor="grant-funder" className="text-xs font-bold">Funder *</Label>
-                  <Select value={selectedFunderId} onValueChange={(val) => {
-                    setSelectedFunderId(val);
-                    const f = funders.find(item => item.id === val);
-                    setSelectedProgramId(f?.programs?.[0]?.id || "prog_default");
-                  }}>
-                    <SelectTrigger id="grant-funder">
-                      <SelectValue placeholder="Choose a funder..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {funders.filter(f => f.triageStatus !== "rejected").map(f => (
-                        <SelectItem key={f.id} value={f.id}>
-                          {f.sortName || f.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <select
+                    id="grant-funder"
+                    value={selectedFunderId}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setSelectedFunderId(val);
+                      const f = funders.find(item => item.id === val);
+                      setSelectedProgramId(f?.programs?.[0]?.id || "prog_default");
+                    }}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  >
+                    <option value="">Choose a funder...</option>
+                    {funders.filter(f => f.triageStatus !== "rejected").map(f => (
+                      <option key={f.id} value={f.id}>
+                        {f.sortName || f.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 {selectedFunderId && (
                   <div className="space-y-1.5">
                     <Label htmlFor="grant-prog" className="text-xs font-bold">Program</Label>
-                    <Select value={selectedProgramId} onValueChange={setSelectedProgramId}>
-                      <SelectTrigger id="grant-prog">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(funders.find(f => f.id === selectedFunderId)?.programs || [{ id: "prog_default", name: "General Fund" }]).map(p => (
-                          <SelectItem key={p.id} value={p.id}>
-                            {p.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <select
+                      id="grant-prog"
+                      value={selectedProgramId}
+                      onChange={(e) => setSelectedProgramId(e.target.value)}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                    >
+                      {(funders.find(f => f.id === selectedFunderId)?.programs || [{ id: "prog_default", name: "General Fund" }]).map(p => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 )}
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label htmlFor="grant-stage" className="text-xs font-bold">Starting Stage</Label>
-                    <Select value={targetStage} onValueChange={setTargetStage}>
-                      <SelectTrigger id="grant-stage">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(settings?.stages || []).map(s => (
-                          <SelectItem key={s.id} value={s.name}>
-                            {s.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <select
+                      id="grant-stage"
+                      value={targetStage}
+                      onChange={(e) => setTargetStage(e.target.value)}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                    >
+                      {(settings?.stages || []).map(s => (
+                        <option key={s.id} value={s.name}>
+                          {s.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   <div className="space-y-1.5">
@@ -268,6 +287,11 @@ export default function GrantsPipelinePage() {
             </DialogContent>
           </Dialog>
 
+          <Button asChild variant="ghost" size="sm" className="gap-1.5 text-xs text-muted-foreground hover:text-foreground">
+            <Link href="/grants/training">
+              <span>Need a walkthrough?</span>
+            </Link>
+          </Button>
           <Button variant="outline" size="sm" onClick={loadPipelineData} className="gap-1.5">
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Refresh</span>
@@ -334,8 +358,10 @@ export default function GrantsPipelinePage() {
                     return (
                       <TableRow key={grant.id}>
                         <TableCell>
-                          <div className="font-bold text-foreground">{grant.funderName}</div>
-                          <div className="text-xs text-muted-foreground">{grant.programName}</div>
+                          <Link href={getGrantPortalUrl(grant, "overview")} className="group block">
+                            <div className="font-bold text-foreground group-hover:text-primary transition-colors">{grant.funderName}</div>
+                            <div className="text-xs text-muted-foreground">{grant.programName}</div>
+                          </Link>
                         </TableCell>
 
                         <TableCell>
@@ -374,6 +400,14 @@ export default function GrantsPipelinePage() {
 
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-1.5">
+                            {grant.published && (
+                              <a href={getGrantPublicUrl(grant)} target="_blank" rel="noopener noreferrer" title="Open Public Page">
+                                <Button variant="ghost" size="sm" className="h-8 px-2 text-xs text-emerald-700 hover:text-emerald-800 gap-1">
+                                  <span>Public Page</span>
+                                  <ExternalLink className="w-3 h-3" />
+                                </Button>
+                              </a>
+                            )}
                             {grant.driveFolderUrl && (
                               <a href={grant.driveFolderUrl} target="_blank" rel="noopener noreferrer">
                                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" title="Open Drive Folder">
@@ -381,6 +415,12 @@ export default function GrantsPipelinePage() {
                                 </Button>
                               </a>
                             )}
+                            <Button asChild variant="outline" size="sm" className="h-8 text-xs gap-1">
+                              <Link href={getGrantPortalUrl(grant, "overview")}>
+                                <span>Open</span>
+                                <ChevronRight className="w-3.5 h-3.5" />
+                              </Link>
+                            </Button>
                           </div>
                         </TableCell>
                       </TableRow>

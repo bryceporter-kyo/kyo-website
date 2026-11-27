@@ -21,7 +21,10 @@ interface CsvManagerDialogProps {
   templateSampleRow: string[];
   instructionText: string;
   existingData?: any[];
-  onUpload: (data: any[], mode: 'append' | 'overwrite') => void;
+  onUpload?: (data: any[], mode: 'append' | 'overwrite') => void;
+  onUploadWithHeaders?: (data: any[], headers: string[], mode: 'append' | 'overwrite') => void;
+  multiple?: boolean;
+  onUploadMultiple?: (files: { fileName: string; data: any[]; headers: string[] }[]) => void;
   triggerButtonText?: string;
 }
 
@@ -33,6 +36,9 @@ export function CsvManagerDialog({
   instructionText,
   existingData,
   onUpload,
+  onUploadWithHeaders,
+  multiple = false,
+  onUploadMultiple,
   triggerButtonText = "Manage CSV"
 }: CsvManagerDialogProps) {
   const { toast } = useToast();
@@ -40,12 +46,14 @@ export function CsvManagerDialog({
   const [isUploading, setIsUploading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [pendingData, setPendingData] = useState<any[] | null>(null);
+  const [pendingHeaders, setPendingHeaders] = useState<string[]>([]);
 
   // Reset state when dialog closes
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
     if (!open) {
       setPendingData(null);
+      setPendingHeaders([]);
       setIsUploading(false);
     }
   };
@@ -92,23 +100,63 @@ export function CsvManagerDialog({
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const fileList = e.target.files;
+    if (!fileList || fileList.length === 0) return;
 
     setIsUploading(true);
+
+    if (multiple && onUploadMultiple) {
+      const files = Array.from(fileList);
+      Promise.all(
+        files.map(
+          (file) =>
+            new Promise<{ fileName: string; data: any[]; headers: string[] }>((resolve, reject) => {
+              Papa.parse(file, {
+                header: true,
+                skipEmptyLines: true,
+                complete: (results) => {
+                  resolve({
+                    fileName: file.name,
+                    data: results.data as any[],
+                    headers: results.meta.fields || [],
+                  });
+                },
+                error: (error) => reject(error),
+              });
+            })
+        )
+      )
+        .then((parsedFiles) => {
+          onUploadMultiple(parsedFiles);
+          setIsUploading(false);
+          setIsOpen(false);
+          if (fileInputRef.current) fileInputRef.current.value = '';
+        })
+        .catch((error) => {
+          toast({ title: "CSV Parse Error", description: error.message, variant: "destructive" });
+          setIsUploading(false);
+          if (fileInputRef.current) fileInputRef.current.value = '';
+        });
+      return;
+    }
+
+    const file = fileList[0];
 
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
+        const headers = results.meta.fields || [];
         if (existingData && existingData.length > 0) {
           // Pause and ask the user whether to append or overwrite
           setPendingData(results.data);
+          setPendingHeaders(headers);
           setIsUploading(false);
           if (fileInputRef.current) fileInputRef.current.value = '';
         } else {
           // No existing data, just upload as 'overwrite' (which behaves the same)
-          onUpload(results.data, 'overwrite');
+          if (onUploadWithHeaders) onUploadWithHeaders(results.data, headers, 'overwrite');
+          else if (onUpload) onUpload(results.data, 'overwrite');
           setIsUploading(false);
           setIsOpen(false);
           if (fileInputRef.current) fileInputRef.current.value = '';
@@ -124,9 +172,11 @@ export function CsvManagerDialog({
 
   const confirmUpload = (mode: 'append' | 'overwrite') => {
     if (pendingData) {
-      onUpload(pendingData, mode);
+      if (onUploadWithHeaders) onUploadWithHeaders(pendingData, pendingHeaders, mode);
+      else if (onUpload) onUpload(pendingData, mode);
     }
     setPendingData(null);
+    setPendingHeaders([]);
     setIsOpen(false);
   };
 
@@ -202,6 +252,7 @@ export function CsvManagerDialog({
                 ref={fileInputRef} 
                 onChange={handleFileUpload} 
                 accept=".csv" 
+                multiple={multiple}
                 className="hidden" 
               />
             </>
